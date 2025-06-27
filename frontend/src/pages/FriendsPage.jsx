@@ -2,11 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { getFriends } from "../lib/api";
 import { UserIcon, MessageSquareIcon } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
+import { Link } from "react-router-dom";
 
 const FriendsPage = () => {
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
-    queryFn: getFriends,
+    queryFn: async () => {
+      const res = await getFriends();
+      console.log("Friends fetched:", res); // Optional debug
+      return res;
+    },
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   return (
@@ -35,8 +42,8 @@ const FriendsPage = () => {
                           className="object-cover w-full h-full"
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <UserIcon className="size-8 text-base-content opacity-40" />
+                        <div className="flex items-center justify-center h-full w-full">
+                          <UserIcon className="w-6 h-6 text-base-content opacity-40" />
                         </div>
                       )}
                     </div>
@@ -53,10 +60,13 @@ const FriendsPage = () => {
                       </div>
                     </div>
 
-                    <div className="badge badge-success gap-1">
-                      <MessageSquareIcon className="w-3 h-3" />
-                      Chat
-                    </div>
+                    <Link
+                      to={`/chat/${friend._id}`}
+                      className="btn btn-outline btn-sm flex items-center gap-1"
+                    >
+                      <MessageSquareIcon className="w-4 h-4" />
+                      Message
+                    </Link>
                   </div>
                 </div>
               </div>
