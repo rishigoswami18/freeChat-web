@@ -3,13 +3,13 @@ import FriendRequest from "../models/FriendRequest.js";
 
 // backend/src/controllers/user.controller.js
 export const getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find({}).select("-password");
-        console.log("Found users:", users.length); // Check your VS Code terminal
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const users = await User.find({}).select("-password");
+    console.log("Found users:", users.length); // Check your VS Code terminal
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export async function getRecommendedUsers(req, res) {
@@ -20,7 +20,7 @@ export async function getRecommendedUsers(req, res) {
     const recommendedUsers = await User.find({
       $and: [
         { _id: { $ne: currentUserId } },
-        { _id: { $nin: currentUser.friends } }, 
+        { _id: { $nin: currentUser.friends } },
         { isOnboarded: true },
       ],
     });
@@ -49,7 +49,6 @@ export async function sendFriendRequest(req, res) {
     const myId = req.user.id;
     const { id: recipientId } = req.params;
 
-    // prevent sending req to yourself
     if (myId === recipientId) {
       return res.status(400).json({ message: "You can't send friend request to yourself" });
     }
@@ -59,12 +58,10 @@ export async function sendFriendRequest(req, res) {
       return res.status(404).json({ message: "Recipient not found" });
     }
 
-   
     if (recipient.friends.includes(myId)) {
       return res.status(400).json({ message: "You are already friends with this user" });
     }
 
-    
     const existingRequest = await FriendRequest.findOne({
       $or: [
         { sender: myId, recipient: recipientId },
@@ -100,7 +97,6 @@ export async function acceptFriendRequest(req, res) {
       return res.status(404).json({ message: "Friend request not found" });
     }
 
-   
     if (friendRequest.recipient.toString() !== req.user.id) {
       return res.status(403).json({ message: "You are not authorized to accept this request" });
     }
@@ -108,7 +104,6 @@ export async function acceptFriendRequest(req, res) {
     friendRequest.status = "accepted";
     await friendRequest.save();
 
-    
     await User.findByIdAndUpdate(friendRequest.sender, {
       $addToSet: { friends: friendRequest.recipient },
     });
