@@ -33,6 +33,10 @@ class TextInput(BaseModel):
 def health():
     return {"status": "ok"}
 
+@app.get("/")
+def home():
+    return {"message": "Emotion Detection API is running!"}
+
 @app.post("/predict_emotion")
 def predict_emotion(input: TextInput):
     logger.info(f"Predicting emotion for: {input.text[:50]}")
