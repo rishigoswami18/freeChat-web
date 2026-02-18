@@ -2,6 +2,57 @@ import { upsertStreamUser } from "../lib/stream.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
+// --- NEW: Bridge for Android App ---
+export async function syncFirebaseUser(req, res) {
+  const { email, fullName, firebaseId, password } = req.body;
+
+  try {
+    if (!email || !fullName || !firebaseId || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check if user already exists in MongoDB via Firebase ID or Email
+    let user = await User.findOne({ 
+      $or: [{ firebaseId }, { email }] 
+    });
+
+    if (!user) {
+      const idx = Math.floor(Math.random() * 100) + 1;
+      const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
+
+      // Create MERN user linked to Firebase
+      user = await User.create({
+        email,
+        fullName,
+        firebaseId, 
+        password, 
+        profilePic: randomAvatar,
+      });
+
+      // Keep Stream integration working
+      try {
+        await upsertStreamUser({
+          id: user._id.toString(),
+          name: user.fullName,
+          image: user.profilePic || "",
+        });
+      } catch (error) {
+        console.log("Error syncing Stream user:", error);
+      }
+    }
+
+    // Generate JWT so the Android app can make authorized MERN calls
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    res.status(200).json({ success: true, user, token });
+  } catch (error) {
+    console.log("Error in firebase sync controller", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export async function signup(req, res) {
   const { email, password, fullName } = req.body;
 
@@ -15,17 +66,16 @@ export async function signup(req, res) {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists, please use a diffrent one" });
+      return res.status(400).json({ message: "Email already exists" });
     }
 
-    const idx = Math.floor(Math.random() * 100) + 1; // generate a num between 1-100
+    const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
     const newUser = await User.create({
@@ -41,7 +91,6 @@ export async function signup(req, res) {
         name: newUser.fullName,
         image: newUser.profilePic || "",
       });
-      console.log(`Stream user created for ${newUser.fullName}`);
     } catch (error) {
       console.log("Error creating Stream user:", error);
     }
@@ -52,8 +101,8 @@ export async function signup(req, res) {
 
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true, // prevent XSS attacks,
-      sameSite: "strict", // prevent CSRF attacks
+      httpOnly: true,
+      sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -84,8 +133,8 @@ export async function login(req, res) {
 
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true, // prevent XSS attacks,
-      sameSite: "strict", // prevent CSRF attacks
+      httpOnly: true,
+      sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
 
@@ -104,28 +153,15 @@ export function logout(req, res) {
 export async function onboard(req, res) {
   try {
     const userId = req.user._id;
-
     const { fullName, bio, nativeLanguage, learningLanguage, location } = req.body;
 
     if (!fullName || !bio || !nativeLanguage || !learningLanguage || !location) {
-      return res.status(400).json({
-        message: "All fields are required",
-        missingFields: [
-          !fullName && "fullName",
-          !bio && "bio",
-          !nativeLanguage && "nativeLanguage",
-          !learningLanguage && "learningLanguage",
-          !location && "location",
-        ].filter(Boolean),
-      });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      {
-        ...req.body,
-        isOnboarded: true,
-      },
+      { ...req.body, isOnboarded: true },
       { new: true }
     );
 
@@ -137,7 +173,6 @@ export async function onboard(req, res) {
         name: updatedUser.fullName,
         image: updatedUser.profilePic || "",
       });
-      console.log(`Stream user updated after onboarding for ${updatedUser.fullName}`);
     } catch (streamError) {
       console.log("Error updating Stream user during onboarding:", streamError.message);
     }

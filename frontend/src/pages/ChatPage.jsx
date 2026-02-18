@@ -3,10 +3,11 @@ import { useParams } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
 import { useQuery } from "@tanstack/react-query";
 import { getStreamToken } from "../lib/api";
+import { axiosInstance } from "../lib/axios";
+import { emotionEmojiMap } from "../lib/emotion";
 
 import {
   Channel,
-  ChannelHeader,
   Chat,
   MessageInput,
   MessageList,
@@ -17,7 +18,8 @@ import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
 
 import ChatLoader from "../components/ChatLoader";
-import CallButton from "../components/CallButton";
+import ChatHeader from "../components/ChatHeader";
+import EmotionMessage from "../components/EmotionMessage";
 
 const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
@@ -33,7 +35,7 @@ const ChatPage = () => {
   const { data: tokenData } = useQuery({
     queryKey: ["streamToken"],
     queryFn: getStreamToken,
-    enabled: !!authUser, // this will run only when authUser is available
+    enabled: !!authUser,
   });
 
   useEffect(() => {
@@ -45,21 +47,21 @@ const ChatPage = () => {
 
         const client = StreamChat.getInstance(STREAM_API_KEY);
 
-        await client.connectUser(
-          {
-            id: authUser._id,
-            name: authUser.fullName,
-            image: authUser.profilePic,
-          },
-          tokenData.token
-        );
+        if (client.userID === authUser._id) {
+          // already connected
+        } else {
+          if (client.userID) await client.disconnectUser();
+          await client.connectUser(
+            {
+              id: authUser._id,
+              name: authUser.fullName,
+              image: authUser.profilePic,
+            },
+            tokenData.token
+          );
+        }
 
-        //
         const channelId = [authUser._id, targetUserId].sort().join("-");
-
-        // you and me
-        // if i start the chat => channelId: [myId, yourId]
-        // if you start the chat => channelId: [yourId, myId]  => [myId,yourId]
 
         const currChannel = client.channel("messaging", channelId, {
           members: [authUser._id, targetUserId],
@@ -80,15 +82,26 @@ const ChatPage = () => {
     initChat();
   }, [tokenData, authUser, targetUserId]);
 
-  const handleVideoCall = () => {
-    if (channel) {
-      const callUrl = `${window.location.origin}/call/${channel.id}`;
-
-      channel.sendMessage({
-        text: `I've started a video call. Join me here: ${callUrl}`,
+  // Intercept message sends at Channel level for emotion detection
+  const doSendMessageRequest = async (channelObj, message) => {
+    try {
+      const res = await axiosInstance.post("/chat/send", {
+        text: message.text,
       });
 
-      toast.success("Video call link sent successfully!");
+      const { emotion } = res.data;
+      const emoji = emotionEmojiMap[emotion] || "😐";
+
+      const enrichedMessage = {
+        ...message,
+        text: `${emoji} ${message.text}`,
+        emotion: emotion,
+      };
+
+      return await channelObj.sendMessage(enrichedMessage);
+    } catch (error) {
+      console.error("Emotion detection failed, sending plain message:", error);
+      return await channelObj.sendMessage(message);
     }
   };
 
@@ -97,15 +110,12 @@ const ChatPage = () => {
   return (
     <div className="h-[93vh]">
       <Chat client={chatClient}>
-        <Channel channel={channel}>
-          <div className="w-full relative">
-            <CallButton handleVideoCall={handleVideoCall} />
-            <Window>
-              <ChannelHeader />
-              <MessageList />
-              <MessageInput focus />
-            </Window>
-          </div>
+        <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
+          <Window>
+            <ChatHeader />
+            <MessageList Message={EmotionMessage} />
+            <MessageInput focus />
+          </Window>
           <Thread />
         </Channel>
       </Chat>

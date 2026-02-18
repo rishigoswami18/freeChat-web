@@ -1,12 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import useAuthUser from "../hooks/useAuthUser";
-import { useQuery } from "@tanstack/react-query";
-import { getStreamToken } from "../lib/api";
+import { useVideoClient } from "../components/VideoProvider";
+import { PhoneOff } from "lucide-react";
 
 import {
-  StreamVideo,
-  StreamVideoClient,
   StreamCall,
   CallControls,
   SpeakerLayout,
@@ -15,52 +12,24 @@ import {
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
 
-import "@stream-io/video-react-sdk/dist/css/styles.css";
 import toast from "react-hot-toast";
 import PageLoader from "../components/PageLoader";
 
-const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
-
 const CallPage = () => {
   const { id: callId } = useParams();
-  const [client, setClient] = useState(null);
+  const videoClient = useVideoClient();
   const [call, setCall] = useState(null);
   const [isConnecting, setIsConnecting] = useState(true);
-
-  const { authUser, isLoading } = useAuthUser();
-
-  const { data: tokenData } = useQuery({
-    queryKey: ["streamToken"],
-    queryFn: getStreamToken,
-    enabled: !!authUser,
-  });
+  const callRef = useRef(null);
 
   useEffect(() => {
-    const initCall = async () => {
-      if (!tokenData.token || !authUser || !callId) return;
+    if (!videoClient || !callId) return;
 
+    const joinCall = async () => {
       try {
-        console.log("Initializing Stream video client...");
-
-        const user = {
-          id: authUser._id,
-          name: authUser.fullName,
-          image: authUser.profilePic,
-        };
-
-        const videoClient = new StreamVideoClient({
-          apiKey: STREAM_API_KEY,
-          user,
-          token: tokenData.token,
-        });
-
         const callInstance = videoClient.call("default", callId);
-
         await callInstance.join({ create: true });
-
-        console.log("Joined call successfully");
-
-        setClient(videoClient);
+        callRef.current = callInstance;
         setCall(callInstance);
       } catch (error) {
         console.error("Error joining call:", error);
@@ -70,43 +39,123 @@ const CallPage = () => {
       }
     };
 
-    initCall();
-  }, [tokenData, authUser, callId]);
+    joinCall();
 
-  if (isLoading || isConnecting) return <PageLoader />;
+    // Cleanup: properly leave and end the call
+    return () => {
+      const currentCall = callRef.current;
+      if (currentCall) {
+        currentCall.endCall().catch(() => {
+          // If endCall fails (e.g., not the creator), just leave
+          currentCall.leave().catch(console.error);
+        });
+        callRef.current = null;
+      }
+    };
+  }, [videoClient, callId]);
+
+  if (isConnecting || !call) return <PageLoader />;
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center">
-      <div className="relative">
-        {client && call ? (
-          <StreamVideo client={client}>
-            <StreamCall call={call}>
-              <CallContent />
-            </StreamCall>
-          </StreamVideo>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p>Could not initialize call. Please refresh or try again later.</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <StreamCall call={call}>
+      <CallContent />
+    </StreamCall>
   );
 };
 
 const CallContent = () => {
-  const { useCallCallingState } = useCallStateHooks();
+  const { useCallCallingState, useParticipantCount } = useCallStateHooks();
   const callingState = useCallCallingState();
-
+  const participantCount = useParticipantCount();
   const navigate = useNavigate();
 
-  if (callingState === CallingState.LEFT) return navigate("/");
+  useEffect(() => {
+    if (callingState === CallingState.LEFT) {
+      navigate("/");
+    }
+  }, [callingState, navigate]);
+
+  if (callingState === CallingState.LEFT) return null;
+
+  // Show ringing screen while waiting for the other person
+  if (
+    callingState === CallingState.RINGING ||
+    callingState === CallingState.JOINING
+  ) {
+    return <OutgoingCallScreen />;
+  }
+
+  // Active call — full screen
+  return (
+    <StreamTheme className="call-page-theme">
+      <div className="call-page">
+        {/* Header */}
+        <div className="call-header">
+          <div className="call-header-info">
+            <div className="call-status-dot" />
+            <span className="call-status-text">
+              {participantCount} participant{participantCount !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+
+        {/* Video Area */}
+        <div className="call-video-area">
+          <SpeakerLayout participantsBarPosition="bottom" />
+        </div>
+
+        {/* Controls */}
+        <div className="call-controls-bar">
+          <CallControls />
+        </div>
+      </div>
+    </StreamTheme>
+  );
+};
+
+const OutgoingCallScreen = () => {
+  const navigate = useNavigate();
+  const { useCallMembers } = useCallStateHooks();
+  const members = useCallMembers();
+
+  const otherMember = members?.find((m) => !m.isLocalParticipant);
+  const callee = otherMember?.user;
+
+  const handleCancel = async () => {
+    navigate("/");
+  };
 
   return (
-    <StreamTheme>
-      <SpeakerLayout />
-      <CallControls />
-    </StreamTheme>
+    <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-b from-neutral to-base-300">
+      <div className="relative mb-8">
+        <div className="absolute -inset-4 rounded-full bg-primary/10 animate-ping" />
+        <div className="absolute -inset-2 rounded-full bg-primary/20 animate-pulse" />
+        <div className="relative w-28 h-28 rounded-full overflow-hidden ring-4 ring-primary/40 shadow-2xl">
+          <img
+            src={callee?.image || "/avatar.png"}
+            alt={callee?.name || "User"}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+
+      <h2 className="text-2xl font-bold text-base-content mb-1">
+        {callee?.name || "Connecting..."}
+      </h2>
+
+      <div className="flex items-center gap-2 mb-14">
+        <span className="text-base-content/50 text-lg">Ringing</span>
+        <span className="loading loading-dots loading-sm text-primary" />
+      </div>
+
+      <button
+        onClick={handleCancel}
+        className="btn btn-circle btn-lg bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/30 transition-transform hover:scale-110"
+      >
+        <PhoneOff className="size-6" />
+      </button>
+      <p className="text-sm text-base-content/40 mt-3">Cancel</p>
+    </div>
   );
 };
 

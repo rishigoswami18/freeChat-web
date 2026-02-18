@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, LogOutIcon, ShipWheelIcon } from "lucide-react";
+import { BellIcon, LogOutIcon, ShipWheelIcon ,PencilIcon } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
+
 
 const Navbar = () => {
   const { authUser } = useAuthUser();
@@ -43,6 +44,12 @@ const Navbar = () => {
 
           {/* TODO */}
           <ThemeSelector />
+          
+          <Link to="/posts">
+    <button className="btn btn-ghost btn-circle">
+      <PencilIcon className="font-semibold text-base text-base-content">Posts</PencilIcon>
+    </button>
+  </Link>
 
           <div className="avatar">
             <div className="w-9 rounded-full">
@@ -54,6 +61,8 @@ const Navbar = () => {
           <button className="btn btn-ghost btn-circle" onClick={logoutMutation}>
             <LogOutIcon className="h-6 w-6 text-base-content opacity-70" />
           </button>
+
+           
         </div>
       </div>
     </nav>
