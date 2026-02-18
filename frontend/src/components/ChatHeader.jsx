@@ -8,6 +8,7 @@ function ChatHeader() {
     const { channel } = useChannelStateContext();
     const navigate = useNavigate();
     const videoClient = useVideoClient();
+    console.log("ChatHeader: videoClient available?", !!videoClient);
 
     // Get the other member's info
     const members = Object.values(channel.state.members);
