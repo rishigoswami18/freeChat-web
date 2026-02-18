@@ -12,6 +12,7 @@ router.use(protectRoute);
 router.post("/", async (req, res) => {
   try {
     const { content, media, mediaType } = req.body;
+    console.log("Create post request received. Content length:", content?.length, "Media type:", mediaType, "Media present:", !!media);
 
     if (!content && !media) {
       return res.status(400).json({ message: "Post must have content or media" });
@@ -39,8 +40,8 @@ router.post("/", async (req, res) => {
 
     res.status(201).json(newPost);
   } catch (err) {
-    console.error("Error creating post:", err.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Error creating post:", err);
+    res.status(500).json({ message: err.message || "Internal Server Error" });
   }
 });
 
