@@ -108,7 +108,7 @@ const ChatPage = () => {
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (
-    <div className="h-[85vh] lg:h-[100dvh] pb-4 flex flex-col mb-16 lg:mb-0">
+    <div className="h-[100dvh] flex flex-col">
       <Chat client={chatClient}>
         <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
           <Window>
