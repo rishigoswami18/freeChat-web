@@ -13,8 +13,8 @@ const Layout = ({ children, showSidebar = false }) => {
           <Navbar />
 
           {/* pt-14 on mobile for MobileDrawer top bar, pt-16 on desktop for Navbar */}
-          {/* pb-16 on mobile for bottom tab bar */}
-          <main className="pt-14 pb-16 lg:pt-16 lg:pb-0">{children}</main>
+          {/* pb-20 on mobile to clear bottom tab bar + safe area */}
+          <main className="pt-14 pb-20 lg:pt-16 lg:pb-0">{children}</main>
         </div>
       </div>
     </div>
