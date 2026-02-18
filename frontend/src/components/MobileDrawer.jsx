@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
+import ThemeSelector from "./ThemeSelector";
 
 const MobileDrawer = () => {
   const { authUser } = useAuthUser();
@@ -45,6 +46,7 @@ const MobileDrawer = () => {
         </div>
 
         <div className="flex items-center gap-1">
+          <ThemeSelector size="btn-sm" />
           <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
             <BellIcon className="size-4" />
           </Link>
@@ -80,8 +82,8 @@ const MobileDrawer = () => {
               to={to}
               onClick={toggleDrawer}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${location.pathname === to
-                  ? "bg-primary text-primary-content"
-                  : "hover:bg-base-200"
+                ? "bg-primary text-primary-content"
+                : "hover:bg-base-200"
                 }`}
             >
               <Icon className="size-5" />
@@ -132,8 +134,8 @@ const MobileDrawer = () => {
               key={to}
               to={to}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${location.pathname === to
-                  ? "text-primary"
-                  : "text-base-content/50"
+                ? "text-primary"
+                : "text-base-content/50"
                 }`}
             >
               <Icon className="size-5" />
