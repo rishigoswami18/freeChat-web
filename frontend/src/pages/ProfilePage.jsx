@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuthUser from "../hooks/useAuthUser";
 import { updateProfile } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save } from "lucide-react";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard } from "lucide-react";
 import toast from "react-hot-toast";
+import { useStealthStore } from "../store/useStealthStore";
 
 const ProfilePage = () => {
     const { authUser } = useAuthUser();
     const queryClient = useQueryClient();
+    const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
 
     const [formData, setFormData] = useState({
         fullName: authUser?.fullName || "",
@@ -52,7 +54,9 @@ const ProfilePage = () => {
         e.preventDefault();
         doUpdate({
             ...formData,
-            profilePic: selectedImg || undefined
+            profilePic: selectedImg || undefined,
+            isStealthMode,
+            panicShortcut,
         });
     };
 
@@ -195,11 +199,69 @@ const ProfilePage = () => {
                         )}
                         Save Changes
                     </button>
-                    <p className="text-center text-xs opacity-40 mt-4 italic">
-                        All changes are saved instantly to your global profile.
-                    </p>
                 </div>
             </form>
+
+            <div className="mt-12 pt-8 border-t">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Shield className="text-secondary" />
+                    Stealth Mode Settings
+                </h2>
+                <div className="bg-base-200 p-6 rounded-2xl space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold">Privacy Pro (Stealth Mode)</h3>
+                            <p className="text-sm opacity-60">Instantly switch to a dummy educational view.</p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-primary"
+                            checked={isStealthMode}
+                            onChange={(e) => setStealthMode(e.target.checked)}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text font-semibold flex items-center gap-2">
+                                    <Keyboard className="size-4 opacity-50" /> Panic Shortcut
+                                </span>
+                            </label>
+                            <select
+                                className="select select-bordered rounded-xl"
+                                value={panicShortcut}
+                                onChange={(e) => setPanicShortcut(e.target.value)}
+                            >
+                                <option value="Escape">Escape Key</option>
+                                <option value="F2">F2 Key</option>
+                                <option value="q">'q' Key</option>
+                            </select>
+                        </div>
+
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text font-semibold flex items-center gap-2">
+                                    <Globe className="size-4 opacity-50" /> Dummy View
+                                </span>
+                            </label>
+                            <select className="select select-bordered rounded-xl" disabled>
+                                <option>LexiLearn Dictionary (Default)</option>
+                                <option>Science Lab Reports (Coming Soon)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-info/10 text-info text-sm rounded-xl flex gap-3">
+                        <div className="size-5 shrink-0"><Shield className="size-5" /></div>
+                        <p><strong>Tip:</strong> You can quickly exit Stealth Mode by <strong>double-clicking</strong> the menu icon in the top right corner of the dummy view, or by pressing your shortcut key again.</p>
+                    </div>
+                </div>
+            </div>
+
+            <p className="text-center text-xs opacity-40 mt-8 italic pb-10">
+                All changes are saved instantly to your global profile.
+            </p>
         </div>
     );
 };

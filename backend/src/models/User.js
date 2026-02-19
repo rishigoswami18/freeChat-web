@@ -80,6 +80,15 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
+  // Stealth Mode fields
+  isStealthMode: {
+    type: Boolean,
+    default: false,
+  },
+  panicShortcut: {
+    type: String,
+    default: "Escape",
+  },
 }
   , { timestamps: true });
 

@@ -158,9 +158,12 @@ export async function getOutgoingFriendReqs(req, res) {
 export async function updateProfile(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth } = req.body;
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut } = req.body;
 
     const updateData = { fullName, bio, nativeLanguage, learningLanguage, location };
+
+    if (isStealthMode !== undefined) updateData.isStealthMode = isStealthMode;
+    if (panicShortcut) updateData.panicShortcut = panicShortcut;
 
     if (dateOfBirth) {
       updateData.dateOfBirth = new Date(dateOfBirth);
