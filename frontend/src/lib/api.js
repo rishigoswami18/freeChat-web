@@ -182,3 +182,8 @@ export const submitGameAnswers = async (sessionId, quizAnswers) => {
   const response = await axiosInstance.post("/games/submit", { sessionId, quizAnswers });
   return response.data;
 };
+
+export const updateProfile = async (profileData) => {
+  const response = await axiosInstance.put("/users/profile", profileData);
+  return response.data;
+};

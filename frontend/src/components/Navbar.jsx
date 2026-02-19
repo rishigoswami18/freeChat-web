@@ -43,11 +43,11 @@ const Navbar = () => {
             </button>
           </Link>
 
-          <div className="avatar">
-            <div className="w-9 rounded-full">
+          <Link to="/profile" className="avatar">
+            <div className="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1 hover:scale-110 transition-transform">
               <img src={authUser?.profilePic} alt="User Avatar" rel="noreferrer" />
             </div>
-          </div>
+          </Link>
 
           {/* Logout button */}
           <button className="btn btn-ghost btn-circle" onClick={logoutMutation}>

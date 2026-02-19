@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
+import cloudinary from "../lib/cloudinary.js";
+import { upsertStreamUser } from "../lib/stream.js";
 
 // backend/src/controllers/user.controller.js
 export const getAllUsers = async (req, res) => {
@@ -138,16 +140,42 @@ export async function getFriendRequests(req, res) {
   }
 }
 
-export async function getOutgoingFriendReqs(req, res) {
-  try {
-    const outgoingRequests = await FriendRequest.find({
-      sender: req.user.id,
-      status: "pending",
-    }).populate("recipient", "fullName profilePic nativeLanguage learningLanguage");
 
-    res.status(200).json(outgoingRequests);
+export async function updateProfile(req, res) {
+  try {
+    const userId = req.user._id;
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic } = req.body;
+
+    const updateData = { fullName, bio, nativeLanguage, learningLanguage, location };
+
+    if (profilePic && profilePic.startsWith("data:image")) {
+      // Upload new profile pic to Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+        folder: "freechat_profiles",
+      });
+      updateData.profilePic = uploadResponse.secure_url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Sync with Stream
+    try {
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePic || "",
+      });
+    } catch (error) {
+      console.log("Error syncing Stream user during profile update:", error.message);
+    }
+
+    res.status(200).json({ success: true, user: updatedUser });
   } catch (error) {
-    console.log("Error in getOutgoingFriendReqs controller", error.message);
+    console.error("Error in updateProfile controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
