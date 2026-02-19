@@ -21,11 +21,16 @@ const CallPage = () => {
   const [call, setCall] = useState(null);
   const [isConnecting, setIsConnecting] = useState(true);
   const callRef = useRef(null);
+  const joiningRef = useRef(false);
 
   useEffect(() => {
     if (!videoClient || !callId) return;
 
     const joinCall = async () => {
+      // Prevent multiple concurrent join attempts
+      if (joiningRef.current) return;
+      joiningRef.current = true;
+
       try {
         const callInstance = videoClient.call("default", callId);
 
@@ -41,20 +46,19 @@ const CallPage = () => {
         console.error("Error joining call:", error);
         toast.error("Could not join the call. Please try again.");
       } finally {
+        joiningRef.current = false;
         setIsConnecting(false);
       }
     };
 
     joinCall();
 
-    // Cleanup: properly leave and end the call
+    // Cleanup: properly leave the call session
+    // DO NOT use endCall() here as it terminates the call for everyone
     return () => {
       const currentCall = callRef.current;
       if (currentCall) {
-        currentCall.endCall().catch(() => {
-          // If endCall fails (e.g., not the creator), just leave
-          currentCall.leave().catch(console.error);
-        });
+        currentCall.leave().catch(console.error);
         callRef.current = null;
       }
     };

@@ -47,10 +47,8 @@ const IncomingCallUI = ({ call, navigate }) => {
 
     const handleAccept = async () => {
         try {
-            const state = call.state.callingState;
-            if (state !== CallingState.JOINED && state !== CallingState.JOINING) {
-                await call.join();
-            }
+            // Just navigate to the call page. 
+            // The CallPage component handles the joining logic reliably.
             navigate(`/call/${call.id}`);
         } catch (error) {
             console.error("Failed to accept call:", error);

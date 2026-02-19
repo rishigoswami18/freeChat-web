@@ -30,9 +30,9 @@ router.post("/", async (req, res) => {
       mediaUrl = uploaded.secure_url;
     }
 
-    // Detect emotion from post content using ML service
+    // Detect emotion from post content using ML service if user is premium
     let caption = "";
-    if (content) {
+    if (content && (req.user.isMember || req.user.role === "admin")) {
       caption = await detectEmotion(content);
     }
 
@@ -104,8 +104,11 @@ router.post("/:id/comment", async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // Detect emotion from comment text using ML service
-    const caption = await detectEmotion(text.trim());
+    // Detect emotion from comment text using ML service if user is premium
+    let caption = "";
+    if (req.user.isMember || req.user.role === "admin") {
+      caption = await detectEmotion(text.trim());
+    }
 
     const comment = {
       userId: req.user._id,

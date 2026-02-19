@@ -161,9 +161,21 @@ export async function updateProfile(req, res) {
     const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut } = req.body;
 
     const updateData = { fullName, bio, nativeLanguage, learningLanguage, location };
+    const isPremium = req.user.isMember || req.user.role === "admin";
 
-    if (isStealthMode !== undefined) updateData.isStealthMode = isStealthMode;
-    if (panicShortcut) updateData.panicShortcut = panicShortcut;
+    if (isStealthMode !== undefined) {
+      if (!isPremium && isStealthMode === true) {
+        return res.status(403).json({ message: "Stealth Mode is a premium feature. Please upgrade to use it." });
+      }
+      updateData.isStealthMode = isStealthMode;
+    }
+
+    if (panicShortcut) {
+      if (!isPremium) {
+        return res.status(403).json({ message: "Custom Panic Shortcuts are a premium feature." });
+      }
+      updateData.panicShortcut = panicShortcut;
+    }
 
     if (dateOfBirth) {
       updateData.dateOfBirth = new Date(dateOfBirth);

@@ -10,6 +10,7 @@ const ProfilePage = () => {
     const { authUser } = useAuthUser();
     const queryClient = useQueryClient();
     const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
+    const isPremium = authUser?.isMember || authUser?.role === "admin";
 
     const [formData, setFormData] = useState({
         fullName: authUser?.fullName || "",
@@ -207,17 +208,40 @@ const ProfilePage = () => {
                     <Shield className="text-secondary" />
                     Stealth Mode Settings
                 </h2>
-                <div className="bg-base-200 p-6 rounded-2xl space-y-6">
+
+                <div className="bg-base-200 p-6 rounded-2xl space-y-6 relative overflow-hidden">
+                    {!isPremium && (
+                        <div className="absolute inset-0 bg-base-200/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-6 text-center">
+                            <div className="bg-primary/20 p-3 rounded-full mb-4">
+                                <Shield className="size-8 text-primary" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Privacy Pro Required</h3>
+                            <p className="max-w-xs text-sm opacity-80 mb-6">
+                                Stealth Mode and custom panic shortcuts are exclusive to Premium members.
+                            </p>
+                            <a href="/membership" className="btn btn-primary rounded-xl gap-2 shadow-lg shadow-primary/20">
+                                <Star className="size-4" />
+                                Upgrade to Premium
+                            </a>
+                        </div>
+                    )}
+
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="font-semibold">Privacy Pro (Stealth Mode)</h3>
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <h3 className="font-semibold">Privacy Pro (Stealth Mode)</h3>
+                                <span className="badge badge-primary badge-sm gap-1">
+                                    <Star className="size-3" /> Premium
+                                </span>
+                            </div>
                             <p className="text-sm opacity-60">Instantly switch to a dummy educational view.</p>
                         </div>
                         <input
                             type="checkbox"
                             className="toggle toggle-primary"
                             checked={isStealthMode}
-                            onChange={(e) => setStealthMode(e.target.checked)}
+                            onChange={(e) => isPremium && setStealthMode(e.target.checked)}
+                            disabled={!isPremium}
                         />
                     </div>
 
@@ -232,6 +256,7 @@ const ProfilePage = () => {
                                 className="select select-bordered rounded-xl"
                                 value={panicShortcut}
                                 onChange={(e) => setPanicShortcut(e.target.value)}
+                                disabled={!isPremium}
                             >
                                 <option value="Escape">Escape Key</option>
                                 <option value="F2">F2 Key</option>

@@ -36,7 +36,10 @@ export const sendMessage = async (req, res) => {
     if (!text || !text.trim()) {
       return res.status(400).json({ message: "Text is required" });
     }
-    const emotion = await detectEmotion(text);
+    let emotion = "neutral";
+    if (req.user.isMember || req.user.role === "admin") {
+      emotion = await detectEmotion(text);
+    }
     res.status(200).json({ text, emotion });
   } catch (error) {
     console.error("Error in sendMessage controller:", error.message);
