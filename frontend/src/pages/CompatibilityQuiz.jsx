@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGameSession, submitGameAnswers } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
-import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart } from "lucide-react";
+import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart, Gamepad2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 const CompatibilityQuiz = () => {
