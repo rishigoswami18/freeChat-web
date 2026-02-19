@@ -137,8 +137,18 @@ export const getMembershipStatus = async () => {
   return response.data;
 };
 
-export const subscribeMembership = async () => {
-  const response = await axiosInstance.post("/membership/subscribe");
+export const getRazorpayKey = async () => {
+  const response = await axiosInstance.get("/membership/key");
+  return response.data;
+};
+
+export const createMembershipOrder = async () => {
+  const response = await axiosInstance.post("/membership/create-order");
+  return response.data;
+};
+
+export const verifyMembershipPayment = async (paymentData) => {
+  const response = await axiosInstance.post("/membership/verify-payment", paymentData);
   return response.data;
 };
 

@@ -1,5 +1,12 @@
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMembershipStatus, subscribeMembership, cancelMembership } from "../lib/api";
+import {
+    getMembershipStatus,
+    getRazorpayKey,
+    createMembershipOrder,
+    verifyMembershipPayment,
+    cancelMembership,
+} from "../lib/api";
 import {
     Crown,
     Heart,
@@ -13,23 +20,24 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import useAuthUser from "../hooks/useAuthUser";
 
 const MembershipPage = () => {
     const queryClient = useQueryClient();
+    const { authUser } = useAuthUser();
+
+    // Load Razorpay script
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => document.body.removeChild(script);
+    }, []);
 
     const { data, isLoading } = useQuery({
         queryKey: ["membershipStatus"],
         queryFn: getMembershipStatus,
-    });
-
-    const { mutate: subscribe, isPending: isSubscribing } = useMutation({
-        mutationFn: subscribeMembership,
-        onSuccess: () => {
-            toast.success("Welcome to freeChat Premium! 🎉");
-            queryClient.invalidateQueries({ queryKey: ["membershipStatus"] });
-            queryClient.invalidateQueries({ queryKey: ["authUser"] });
-        },
-        onError: (err) => toast.error(err.response?.data?.message || "Subscription failed"),
     });
 
     const { mutate: cancel, isPending: isCancelling } = useMutation({
@@ -41,6 +49,61 @@ const MembershipPage = () => {
         },
         onError: (err) => toast.error(err.response?.data?.message || "Cancellation failed"),
     });
+
+    const handlePayment = async () => {
+        try {
+            // 1. Get Razorpay key
+            const { key } = await getRazorpayKey();
+
+            // 2. Create order on backend
+            const { order } = await createMembershipOrder();
+
+            // 3. Open Razorpay checkout
+            const options = {
+                key,
+                amount: order.amount,
+                currency: order.currency,
+                name: "freeChat Premium",
+                description: "Monthly Premium Membership — ₹49/month",
+                order_id: order.id,
+                handler: async (response) => {
+                    try {
+                        // 4. Verify payment on backend
+                        await verifyMembershipPayment({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                        });
+                        toast.success("Payment successful! Welcome to Premium! 🎉");
+                        queryClient.invalidateQueries({ queryKey: ["membershipStatus"] });
+                        queryClient.invalidateQueries({ queryKey: ["authUser"] });
+                    } catch (err) {
+                        toast.error("Payment verification failed. Contact support.");
+                    }
+                },
+                prefill: {
+                    name: authUser?.fullName || "",
+                    email: authUser?.email || "",
+                },
+                theme: {
+                    color: "#6366f1",
+                },
+                modal: {
+                    ondismiss: () => {
+                        toast.error("Payment cancelled");
+                    },
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on("payment.failed", (response) => {
+                toast.error(`Payment failed: ${response.error.description}`);
+            });
+            rzp.open();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to initiate payment");
+        }
+    };
 
     if (isLoading) {
         return (
@@ -74,7 +137,6 @@ const MembershipPage = () => {
             {/* ===== ACTIVE MEMBER ===== */}
             {isMember ? (
                 <div className="space-y-6">
-                    {/* Active badge card */}
                     <div className="card bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 shadow-xl">
                         <div className="card-body items-center text-center">
                             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-2">
@@ -112,7 +174,6 @@ const MembershipPage = () => {
             ) : (
                 /* ===== NON-MEMBER / SUBSCRIBE ===== */
                 <div className="space-y-6">
-                    {/* Pricing card */}
                     <div className="card bg-base-200 border border-primary/20 shadow-xl relative overflow-hidden">
                         {/* Glow effect */}
                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
@@ -146,30 +207,20 @@ const MembershipPage = () => {
                                 ))}
                             </div>
 
-                            {/* Subscribe button */}
+                            {/* Real Razorpay Payment Button */}
                             <button
-                                onClick={() => subscribe()}
-                                disabled={isSubscribing}
+                                onClick={handlePayment}
                                 className="btn btn-primary btn-wide gap-2 shadow-lg shadow-primary/25"
                             >
-                                {isSubscribing ? (
-                                    <>
-                                        <Loader2 className="size-4 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <CreditCard className="size-4" />
-                                        Subscribe — ₹49/month
-                                    </>
-                                )}
+                                <CreditCard className="size-4" />
+                                Pay ₹49 — Subscribe Now
                             </button>
 
                             {/* Trust badges */}
                             <div className="flex items-center gap-4 mt-4 text-xs opacity-40">
                                 <div className="flex items-center gap-1">
                                     <Shield className="size-3" />
-                                    <span>Secure</span>
+                                    <span>Razorpay Secure</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Check className="size-3" />
