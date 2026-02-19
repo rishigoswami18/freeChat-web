@@ -156,3 +156,29 @@ export const cancelMembership = async () => {
   const response = await axiosInstance.post("/membership/cancel");
   return response.data;
 };
+// ----------------- GAMES -----------------
+
+export const getGameTemplates = async () => {
+  const response = await axiosInstance.get("/games/templates");
+  return response.data;
+};
+
+export const startGame = async (gameType) => {
+  const response = await axiosInstance.post("/games/start", { gameType });
+  return response.data;
+};
+
+export const getGameSession = async (sessionId) => {
+  const response = await axiosInstance.get(`/games/session/${sessionId}`);
+  return response.data;
+};
+
+export const getActiveGameSessions = async () => {
+  const response = await axiosInstance.get("/games/active");
+  return response.data;
+};
+
+export const submitGameAnswers = async (sessionId, quizAnswers) => {
+  const response = await axiosInstance.post("/games/submit", { sessionId, quizAnswers });
+  return response.data;
+};

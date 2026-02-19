@@ -10,6 +10,7 @@ import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
 import coupleRoutes from "./routes/couple.route.js";
 import membershipRoutes from "./routes/membership.route.js";
+import gameRoutes from "./routes/game.route.js";
 import { connectDB } from "./lib/db.js";
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api/chat", chatRoutes)
 app.use("/api/posts", postsRoutes);
 app.use("/api/couple", coupleRoutes);
 app.use("/api/membership", membershipRoutes);
+app.use("/api/games", gameRoutes);
 
 
 if (process.env.NODE_ENV === "production") {

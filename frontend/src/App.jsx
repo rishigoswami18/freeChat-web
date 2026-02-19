@@ -11,6 +11,8 @@ import FriendsPage from "./pages/FriendsPage.jsx";
 import PostsPage from "./pages/PostsPage.jsx";
 import CoupleProfilePage from "./pages/CoupleProfilePage.jsx";
 import MembershipPage from "./pages/MembershipPage.jsx";
+import GameDashboard from "./pages/GameDashboard.jsx";
+import CompatibilityQuiz from "./pages/CompatibilityQuiz.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -159,6 +161,32 @@ const App = () => {
               isAuthenticated && isOnboarded ? (
                 <Layout showSidebar={true}>
                   <MembershipPage />
+                </Layout>
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
+            }
+          />
+
+          <Route
+            path="/games"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <Layout showSidebar={true}>
+                  <GameDashboard />
+                </Layout>
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
+            }
+          />
+
+          <Route
+            path="/game/:sessionId"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <Layout showSidebar={true}>
+                  <CompatibilityQuiz />
                 </Layout>
               ) : (
                 <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

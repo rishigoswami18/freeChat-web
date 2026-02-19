@@ -211,6 +211,23 @@ const CoupleProfilePage = () => {
                             </span>
                         </div>
 
+                        {/* Games Section */}
+                        <div className="mt-8 w-full">
+                            <h3 className="text-sm font-bold opacity-60 uppercase tracking-widest mb-3 text-left">Fun & Games</h3>
+                            <Link to="/games" className="card bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all group">
+                                <div className="card-body p-4 flex-row items-center gap-4">
+                                    <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                                        <Gamepad2 className="size-6" />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <h4 className="font-bold text-primary italic">Couple Games</h4>
+                                        <p className="text-xs opacity-70">Play Compatibility Quiz and more!</p>
+                                    </div>
+                                    <ArrowRight className="size-5 text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                </div>
+                            </Link>
+                        </div>
+
                         {/* Unlink Button */}
                         <button
                             onClick={() => doUnlink()}
