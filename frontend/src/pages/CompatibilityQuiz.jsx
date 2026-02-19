@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGameSession, submitGameAnswers, getAuthUser } from "../lib/api";
+import { getGameSession, submitGameAnswers } from "../lib/api";
+import useAuthUser from "../hooks/useAuthUser";
 import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -13,10 +14,7 @@ const CompatibilityQuiz = () => {
     const [answers, setAnswers] = useState([]); // [{ questionIndex: 0, answer: "Red" }, ...]
     const [selectedOption, setSelectedOption] = useState(null);
 
-    const { data: authUser } = useQuery({
-        queryKey: ["authUser"],
-        queryFn: getAuthUser,
-    });
+    const { authUser } = useAuthUser();
 
     const { data: session, isLoading, isError } = useQuery({
         queryKey: ["gameSession", sessionId],
@@ -71,9 +69,9 @@ const CompatibilityQuiz = () => {
         );
     }
 
-    const myId = authUser?._id.toString();
-    const hasAnswered = session.answers && session.answers[myId];
-    const partner = session.participants.find(p => p._id.toString() !== myId);
+    const myId = authUser?._id?.toString();
+    const hasAnswered = session.answers && myId && session.answers[myId];
+    const partner = session.participants?.find(p => p._id?.toString() !== myId);
     const isCompleted = session.status === "completed";
 
     // Quiz UI render
