@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, HeartIcon, CrownIcon, Gamepad2, UserIcon } from "lucide-react";
+import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User } from "lucide-react";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
@@ -24,7 +24,7 @@ const Sidebar = () => {
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/" ? "btn-active" : ""
             }`}
         >
-          <HomeIcon className="size-5 text-base-content opacity-70" />
+          <Home className="size-5 text-base-content opacity-70" />
           <span>Home</span>
         </Link>
 
@@ -33,7 +33,7 @@ const Sidebar = () => {
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/profile" ? "btn-active" : ""
             }`}
         >
-          <UserIcon className="size-5 text-primary opacity-70" />
+          <User className="size-5 text-primary opacity-70" />
           <span>Profile</span>
         </Link>
 
@@ -42,7 +42,7 @@ const Sidebar = () => {
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/friends" ? "btn-active" : ""
             }`}
         >
-          <UsersIcon className="size-5 text-base-content opacity-70" />
+          <Users className="size-5 text-base-content opacity-70" />
           <span>Friends</span>
         </Link>
 
@@ -51,7 +51,7 @@ const Sidebar = () => {
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/notifications" ? "btn-active" : ""
             }`}
         >
-          <BellIcon className="size-5 text-base-content opacity-70" />
+          <Bell className="size-5 text-base-content opacity-70" />
           <span>Notifications</span>
         </Link>
 
@@ -60,7 +60,7 @@ const Sidebar = () => {
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/couple" ? "btn-active" : ""
             }`}
         >
-          <HeartIcon className="size-5 text-pink-500 opacity-70" />
+          <Heart className="size-5 text-pink-500 opacity-70" />
           <span>Couple</span>
         </Link>
 
@@ -78,7 +78,7 @@ const Sidebar = () => {
           className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/membership" ? "btn-active" : ""
             }`}
         >
-          <CrownIcon className="size-5 text-amber-500 opacity-70" />
+          <Crown className="size-5 text-amber-500 opacity-70" />
           <span>Premium</span>
         </Link>
       </nav>

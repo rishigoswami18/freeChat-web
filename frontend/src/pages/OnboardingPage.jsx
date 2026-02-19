@@ -17,6 +17,7 @@ const OnboardingPage = () => {
     learningLanguage: authUser?.learningLanguage || "",
     location: authUser?.location || "",
     profilePic: authUser?.profilePic || "",
+    dateOfBirth: authUser?.dateOfBirth ? new Date(authUser.dateOfBirth).toISOString().split("T")[0] : "",
   });
 
   const { mutate: onboardingMutation, isPending } = useMutation({
@@ -46,12 +47,12 @@ const OnboardingPage = () => {
   // };
 
   const handleRandomAvatar = () => {
-  const randomSeed = Math.random().toString(36).substring(2, 10); // random 8-char string
-  const randomAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${randomSeed}`;
+    const randomSeed = Math.random().toString(36).substring(2, 10); // random 8-char string
+    const randomAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${randomSeed}`;
 
-  setFormState({ ...formState, profilePic: randomAvatar });
-  toast.success("Random profile picture generated!");
-};
+    setFormState({ ...formState, profilePic: randomAvatar });
+    toast.success("Random profile picture generated!");
+  };
 
 
   return (
@@ -160,19 +161,36 @@ const OnboardingPage = () => {
             </div>
 
             {/* LOCATION */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Location</span>
-              </label>
-              <div className="relative">
-                <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Location</span>
+                </label>
+                <div className="relative">
+                  <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
+                  <input
+                    type="text"
+                    name="location"
+                    value={formState.location}
+                    onChange={(e) => setFormState({ ...formState, location: e.target.value })}
+                    className="input input-bordered w-full pl-10"
+                    placeholder="City, Country"
+                  />
+                </div>
+              </div>
+
+              {/* DATE OF BIRTH */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Date of Birth</span>
+                </label>
                 <input
-                  type="text"
-                  name="location"
-                  value={formState.location}
-                  onChange={(e) => setFormState({ ...formState, location: e.target.value })}
-                  className="input input-bordered w-full pl-10"
-                  placeholder="City, Country"
+                  type="date"
+                  name="dateOfBirth"
+                  value={formState.dateOfBirth}
+                  onChange={(e) => setFormState({ ...formState, dateOfBirth: e.target.value })}
+                  className="input input-bordered w-full"
+                  required
                 />
               </div>
             </div>

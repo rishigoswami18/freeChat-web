@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  HomeIcon,
-  UsersIcon,
-  BellIcon,
-  MenuIcon,
-  XIcon,
-  ShipWheelIcon,
-  LogOutIcon,
-  PencilIcon,
-  HeartIcon,
-  CrownIcon,
+  Home,
+  Users,
+  Bell,
+  Menu,
+  X,
+  ShipWheel,
+  LogOut,
+  Pencil,
+  Heart,
+  Crown,
   Gamepad2,
-  UserIcon,
+  User,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -27,14 +27,14 @@ const MobileDrawer = () => {
   const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
-    { to: "/", icon: HomeIcon, label: "Feed" },
-    { to: "/friends", icon: UsersIcon, label: "Friends" },
-    { to: "/notifications", icon: BellIcon, label: "Notifications" },
-    { to: "/posts", icon: PencilIcon, label: "Posts" },
-    { to: "/couple", icon: HeartIcon, label: "Couple" },
+    { to: "/", icon: Home, label: "Feed" },
+    { to: "/friends", icon: Users, label: "Friends" },
+    { to: "/notifications", icon: Bell, label: "Notifications" },
+    { to: "/posts", icon: Pencil, label: "Posts" },
+    { to: "/couple", icon: Heart, label: "Couple" },
     { to: "/games", icon: Gamepad2, label: "Games" },
-    { to: "/premium", icon: CrownIcon, label: "Premium" },
-    { to: "/profile", icon: UserIcon, label: "Profile" },
+    { to: "/premium", icon: Crown, label: "Premium" },
+    { to: "/profile", icon: User, label: "Profile" },
   ];
 
   return (
@@ -43,10 +43,10 @@ const MobileDrawer = () => {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-base-200/95 backdrop-blur-sm border-b border-base-300 px-4 py-3 flex items-center justify-between safe-area-top">
         <div className="flex items-center gap-3">
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
-            <MenuIcon className="size-5" />
+            <Menu className="size-5" />
           </button>
           <Link to="/" className="flex items-center gap-2">
-            <ShipWheelIcon className="size-6 text-primary" />
+            <ShipWheel className="size-6 text-primary" />
             <span className="text-lg font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
               freeChat
             </span>
@@ -56,7 +56,7 @@ const MobileDrawer = () => {
         <div className="flex items-center gap-1">
           <ThemeSelector size="btn-sm" />
           <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
-            <BellIcon className="size-4" />
+            <Bell className="size-4" />
           </Link>
           <div className="avatar">
             <div className="w-8 rounded-full">
@@ -74,11 +74,11 @@ const MobileDrawer = () => {
         {/* Drawer Header */}
         <div className="p-4 flex justify-between items-center border-b border-base-300">
           <div className="flex items-center gap-2">
-            <ShipWheelIcon className="size-6 text-primary" />
+            <ShipWheel className="size-6 text-primary" />
             <h2 className="text-lg font-bold">freeChat</h2>
           </div>
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
-            <XIcon className="size-5" />
+            <X className="size-5" />
           </button>
         </div>
 
@@ -120,7 +120,7 @@ const MobileDrawer = () => {
             onClick={() => { toggleDrawer(); logoutMutation(); }}
             className="btn btn-ghost btn-sm w-full justify-start gap-2 text-error"
           >
-            <LogOutIcon className="size-4" />
+            <LogOut className="size-4" />
             Logout
           </button>
         </div>

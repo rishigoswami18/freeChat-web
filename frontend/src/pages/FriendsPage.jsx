@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getFriends } from "../lib/api";
-import { UserIcon, MessageSquareIcon } from "lucide-react";
+import { User, MessageSquare } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import { Link } from "react-router-dom";
 
@@ -43,7 +43,7 @@ const FriendsPage = () => {
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full w-full">
-                          <UserIcon className="w-6 h-6 text-base-content opacity-40" />
+                          <User className="w-6 h-6 text-base-content opacity-40" />
                         </div>
                       )}
                     </div>
@@ -64,7 +64,7 @@ const FriendsPage = () => {
                       to={`/chat/${friend._id}`}
                       className="btn btn-outline btn-sm flex items-center gap-1"
                     >
-                      <MessageSquareIcon className="w-4 h-4" />
+                      <MessageSquare className="w-4 h-4" />
                       Message
                     </Link>
                   </div>

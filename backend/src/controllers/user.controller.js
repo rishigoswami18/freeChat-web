@@ -140,13 +140,31 @@ export async function getFriendRequests(req, res) {
   }
 }
 
+export async function getOutgoingFriendReqs(req, res) {
+  try {
+    const outgoingReqs = await FriendRequest.find({
+      sender: req.user.id,
+      status: "pending",
+    }).populate("recipient", "fullName profilePic nativeLanguage learningLanguage");
+
+    res.status(200).json(outgoingReqs);
+  } catch (error) {
+    console.log("Error in getOutgoingFriendReqs controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 
 export async function updateProfile(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic } = req.body;
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth } = req.body;
 
     const updateData = { fullName, bio, nativeLanguage, learningLanguage, location };
+
+    if (dateOfBirth) {
+      updateData.dateOfBirth = new Date(dateOfBirth);
+    }
 
     if (profilePic && profilePic.startsWith("data:image")) {
       // Upload new profile pic to Cloudinary
