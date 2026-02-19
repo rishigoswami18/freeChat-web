@@ -28,7 +28,13 @@ const CallPage = () => {
     const joinCall = async () => {
       try {
         const callInstance = videoClient.call("default", callId);
-        await callInstance.join({ create: true });
+
+        // Only join if not already in the process of joining or already joined
+        const state = callInstance.state.callingState;
+        if (state !== CallingState.JOINED && state !== CallingState.JOINING) {
+          await callInstance.join({ create: true });
+        }
+
         callRef.current = callInstance;
         setCall(callInstance);
       } catch (error) {

@@ -3,7 +3,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
-import { LoaderIcon, MapPinIcon, ShipWheelIcon, ShuffleIcon } from "lucide-react";
+import { Loader2, MapPin, ShipWheel, Shuffle, Camera } from "lucide-react";
 import { LANGUAGES } from "../constants";
 
 const OnboardingPage = () => {
@@ -76,7 +76,7 @@ const OnboardingPage = () => {
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <CameraIcon className="size-12 text-base-content opacity-40" />
+                    <Camera className="size-12 text-base-content opacity-40" />
                   </div>
                 )}
               </div>
@@ -84,7 +84,7 @@ const OnboardingPage = () => {
               {/* Generate Random Avatar BTN */}
               <div className="flex items-center gap-2">
                 <button type="button" onClick={handleRandomAvatar} className="btn btn-accent">
-                  <ShuffleIcon className="size-4 mr-2" />
+                  <Shuffle className="size-4 mr-2" />
                   Generate Random Avatar
                 </button>
               </div>
@@ -169,7 +169,7 @@ const OnboardingPage = () => {
                   <span className="label-text">Location</span>
                 </label>
                 <div className="relative">
-                  <MapPinIcon className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
+                  <MapPin className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
                   <input
                     type="text"
                     name="location"
@@ -202,12 +202,12 @@ const OnboardingPage = () => {
             <button className="btn btn-primary w-full" disabled={isPending} type="submit">
               {!isPending ? (
                 <>
-                  <ShipWheelIcon className="size-5 mr-2" />
+                  <ShipWheel className="size-5 mr-2" />
                   Complete Onboarding
                 </>
               ) : (
                 <>
-                  <LoaderIcon className="animate-spin size-5 mr-2" />
+                  <Loader2 className="animate-spin size-5 mr-2" />
                   Onboarding...
                 </>
               )}

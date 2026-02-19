@@ -47,7 +47,10 @@ const IncomingCallUI = ({ call, navigate }) => {
 
     const handleAccept = async () => {
         try {
-            await call.join();
+            const state = call.state.callingState;
+            if (state !== CallingState.JOINED && state !== CallingState.JOINING) {
+                await call.join();
+            }
             navigate(`/call/${call.id}`);
         } catch (error) {
             console.error("Failed to accept call:", error);
