@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://freechat-web-1.onrender.com/sitemap.xml
