@@ -17,7 +17,9 @@ const OnboardingPage = () => {
     learningLanguage: authUser?.learningLanguage || "",
     location: authUser?.location || "",
     profilePic: authUser?.profilePic || "",
-    dateOfBirth: authUser?.dateOfBirth ? new Date(authUser.dateOfBirth).toISOString().split("T")[0] : "",
+    dateOfBirth: (authUser?.dateOfBirth && !isNaN(new Date(authUser.dateOfBirth).getTime()))
+      ? new Date(authUser.dateOfBirth).toISOString().split("T")[0]
+      : "",
   });
 
   const { mutate: onboardingMutation, isPending } = useMutation({
