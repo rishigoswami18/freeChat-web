@@ -12,9 +12,8 @@ const SignUpPage = () => {
     dateOfBirth: "",
   });
 
-  // Calculate max date (14 years ago) for age verification
+  // Calculate max date (today) for date picker
   const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() - 14);
   const maxDateStr = maxDate.toISOString().split("T")[0];
 
   // This is how we did it at first, without using our custom hook
@@ -129,9 +128,6 @@ const SignUpPage = () => {
                       max={maxDateStr}
                       required
                     />
-                    <p className="text-xs opacity-70 mt-1">
-                      🔞 You must be at least 14 years old to use freeChat
-                    </p>
                   </div>
 
                   <div className="form-control">

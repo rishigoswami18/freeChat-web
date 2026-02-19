@@ -62,17 +62,9 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Age verification: must be 18+
+    // Age verification: move requirement to Couple feature
     const dob = new Date(dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-      age--;
-    }
-    if (age < 14) {
-      return res.status(400).json({ message: "You must be at least 14 years old to sign up" });
-    }
+
 
     if (password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });

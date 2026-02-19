@@ -4,6 +4,16 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+const calculateAge = (dob) => {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    return age;
+};
+
 // All couple routes require auth
 router.use(protectRoute);
 
@@ -40,6 +50,15 @@ router.post("/request/:id", async (req, res) => {
 
         if (!partner) {
             return res.status(404).json({ message: "User not found" });
+        }
+
+        // Age verification: must be 14+ for Couple feature
+        if (calculateAge(new Date(me.dateOfBirth)) < 14) {
+            return res.status(400).json({ message: "You must be at least 14 years old to use the Couple feature" });
+        }
+
+        if (calculateAge(new Date(partner.dateOfBirth)) < 14) {
+            return res.status(400).json({ message: "The partner must be at least 14 years old" });
         }
 
         if (me.coupleStatus === "coupled") {
@@ -86,6 +105,11 @@ router.put("/accept/:id", async (req, res) => {
 
         if (!partner) {
             return res.status(404).json({ message: "User not found" });
+        }
+
+        // Age verification check (extra safety)
+        if (calculateAge(new Date(me.dateOfBirth)) < 14 || calculateAge(new Date(partner.dateOfBirth)) < 14) {
+            return res.status(400).json({ message: "Both users must be at least 14 years old to link accounts" });
         }
 
         // Verify both are in pending state and linked to each other

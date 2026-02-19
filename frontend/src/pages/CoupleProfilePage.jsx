@@ -85,6 +85,46 @@ const CoupleProfilePage = () => {
         );
     }
 
+    const calculateAge = (dobString) => {
+        if (!dobString) return 0;
+        const dob = new Date(dobString);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    const userAge = calculateAge(authUser?.dateOfBirth);
+
+    // Age gate
+    if (userAge < 14) {
+        return (
+            <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-2">
+                    <HeartHandshake className="text-pink-500" />
+                    Couple Profile
+                </h1>
+                <div className="card bg-base-200 border border-error/20 shadow-xl">
+                    <div className="card-body items-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-base-300 flex items-center justify-center mb-2">
+                            <Lock className="size-8 text-error opacity-50" />
+                        </div>
+                        <h2 className="text-lg font-bold">Age Restricted</h2>
+                        <p className="text-sm opacity-60 max-w-xs">
+                            The Couple Profile feature is only available for users aged 14 and above.
+                        </p>
+                        <div className="alert alert-warning mt-4 text-xs font-semibold py-2">
+                            🔞 Age Verification Required
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Membership gate
     if (!memberData?.isMember) {
         return (
