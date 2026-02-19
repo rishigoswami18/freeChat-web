@@ -182,14 +182,14 @@ const CompatibilityQuiz = () => {
                         <div className="flex justify-center items-center gap-6 mt-6">
                             <div className="flex flex-col items-center">
                                 <img src={authUser?.profilePic} className="size-16 rounded-full border-4 border-white shadow-lg" />
-                                <span className="text-xs font-bold mt-2 truncate w-20">{authUser?.fullName.split(" ")[0]}</span>
+                                <span className="text-xs font-bold mt-2 truncate w-20">{authUser?.fullName?.split(" ")[0] || "You"}</span>
                             </div>
                             <div className="flex flex-col items-center justify-center">
                                 <Heart className="size-8 fill-current text-white animate-pulse" />
                             </div>
                             <div className="flex flex-col items-center">
                                 <img src={partner?.profilePic} className="size-16 rounded-full border-4 border-white shadow-lg" />
-                                <span className="text-xs font-bold mt-2 truncate w-20">{partner?.fullName.split(" ")[0]}</span>
+                                <span className="text-xs font-bold mt-2 truncate w-20">{partner?.fullName?.split(" ")[0] || "Partner"}</span>
                             </div>
                         </div>
                     </div>
@@ -221,8 +221,9 @@ const CompatibilityQuiz = () => {
                         <div className="w-full space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                             {session.questions.map((q, idx) => {
                                 const myAns = session.answers[myId]?.find(a => a.questionIndex === idx)?.answer;
-                                const pAns = session.answers[partner?._id]?.find(a => a.questionIndex === idx)?.answer;
-                                const isMatch = myAns === pAns;
+                                const pId = partner?._id?.toString();
+                                const pAns = pId ? session.answers[pId]?.find(a => a.questionIndex === idx)?.answer : null;
+                                const isMatch = myAns && pAns && myAns === pAns;
 
                                 return (
                                     <div key={idx} className={`p-4 rounded-xl border ${isMatch ? "bg-success/5 border-success/20" : "bg-base-300/50 border-base-100"}`}>
@@ -231,12 +232,12 @@ const CompatibilityQuiz = () => {
                                         <div className="flex justify-between items-center text-xs">
                                             <div className="flex flex-col items-center gap-1">
                                                 <span className="opacity-50">You chose</span>
-                                                <span className={`font-bold ${isMatch ? "text-success" : ""}`}>{myAns}</span>
+                                                <span className={`font-bold ${isMatch ? "text-success" : ""}`}>{myAns || "No answer"}</span>
                                             </div>
                                             <div className="divider divider-horizontal"></div>
                                             <div className="flex flex-col items-center gap-1">
-                                                <span className="opacity-50">{partner?.fullName.split(" ")[0]} chose</span>
-                                                <span className={`font-bold ${isMatch ? "text-success" : ""}`}>{pAns}</span>
+                                                <span className="opacity-50">{partner?.fullName?.split(" ")[0] || "Partner"} chose</span>
+                                                <span className={`font-bold ${isMatch ? "text-success" : ""}`}>{pAns || "No answer"}</span>
                                             </div>
                                         </div>
                                     </div>
