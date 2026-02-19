@@ -11,14 +11,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-
   },
   password: {
     type: String,
     required: true,
     minlength: 6
   },
-
+  dateOfBirth: {
+    type: Date,
+    required: true,
+  },
   bio: {
     type: String,
     default: "",
@@ -49,6 +51,21 @@ const userSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  // Couple profile fields
+  partnerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  coupleStatus: {
+    type: String,
+    enum: ["none", "pending", "coupled"],
+    default: "none",
+  },
+  anniversary: {
+    type: Date,
+    default: null,
+  },
 }
   , { timestamps: true });
 

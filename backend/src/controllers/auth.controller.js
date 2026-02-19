@@ -12,8 +12,8 @@ export async function syncFirebaseUser(req, res) {
     }
 
     // Check if user already exists in MongoDB via Firebase ID or Email
-    let user = await User.findOne({ 
-      $or: [{ firebaseId }, { email }] 
+    let user = await User.findOne({
+      $or: [{ firebaseId }, { email }]
     });
 
     if (!user) {
@@ -24,8 +24,9 @@ export async function syncFirebaseUser(req, res) {
       user = await User.create({
         email,
         fullName,
-        firebaseId, 
-        password, 
+        firebaseId,
+        password,
+        dateOfBirth: req.body.dateOfBirth || new Date("2000-01-01"),
         profilePic: randomAvatar,
       });
 
@@ -54,11 +55,23 @@ export async function syncFirebaseUser(req, res) {
 }
 
 export async function signup(req, res) {
-  const { email, password, fullName } = req.body;
+  const { email, password, fullName, dateOfBirth } = req.body;
 
   try {
-    if (!email || !password || !fullName) {
+    if (!email || !password || !fullName || !dateOfBirth) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Age verification: must be 18+
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    if (age < 18) {
+      return res.status(400).json({ message: "You must be at least 18 years old to sign up" });
     }
 
     if (password.length < 6) {
@@ -82,6 +95,7 @@ export async function signup(req, res) {
       email,
       fullName,
       password,
+      dateOfBirth: dob,
       profilePic: randomAvatar,
     });
 

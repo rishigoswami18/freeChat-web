@@ -9,6 +9,7 @@ import ChatPage from "./pages/ChatPage.jsx";
 import OnboardingPage from "./pages/OnboardingPage.jsx";
 import FriendsPage from "./pages/FriendsPage.jsx";
 import PostsPage from "./pages/PostsPage.jsx";
+import CoupleProfilePage from "./pages/CoupleProfilePage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -134,6 +135,19 @@ const App = () => {
                 )
               ) : (
                 <Navigate to="/login" />
+              )
+            }
+          />
+
+          <Route
+            path="/couple"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <Layout showSidebar={true}>
+                  <CoupleProfilePage />
+                </Layout>
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
               )
             }
           />

@@ -9,7 +9,13 @@ const SignUpPage = () => {
     fullName: "",
     email: "",
     password: "",
+    dateOfBirth: "",
   });
+
+  // Calculate max date (18 years ago) for age verification
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() - 18);
+  const maxDateStr = maxDate.toISOString().split("T")[0];
 
   // This is how we did it at first, without using our custom hook
   // const queryClient = useQueryClient();
@@ -107,6 +113,24 @@ const SignUpPage = () => {
                     />
                     <p className="text-xs opacity-70 mt-1">
                       Password must be at least 6 characters long
+                    </p>
+                  </div>
+
+                  {/* DATE OF BIRTH - 18+ Verification */}
+                  <div className="form-control w-full">
+                    <label className="label">
+                      <span className="label-text">Date of Birth</span>
+                    </label>
+                    <input
+                      type="date"
+                      className="input input-bordered w-full"
+                      value={signupData.dateOfBirth}
+                      onChange={(e) => setSignupData({ ...signupData, dateOfBirth: e.target.value })}
+                      max={maxDateStr}
+                      required
+                    />
+                    <p className="text-xs opacity-70 mt-1">
+                      🔞 You must be at least 18 years old to use freeChat
                     </p>
                   </div>
 

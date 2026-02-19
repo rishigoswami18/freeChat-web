@@ -107,3 +107,25 @@ export const getStreamToken = async () => {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
 };
+
+// ----------------- COUPLE -----------------
+
+export const getCoupleStatus = async () => {
+  const response = await axiosInstance.get("/couple/status");
+  return response.data;
+};
+
+export const sendCoupleRequest = async (userId) => {
+  const response = await axiosInstance.post(`/couple/request/${userId}`);
+  return response.data;
+};
+
+export const acceptCoupleRequest = async (userId) => {
+  const response = await axiosInstance.put(`/couple/accept/${userId}`);
+  return response.data;
+};
+
+export const unlinkCouple = async () => {
+  const response = await axiosInstance.delete("/couple/unlink");
+  return response.data;
+};
