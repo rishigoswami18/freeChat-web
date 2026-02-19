@@ -254,7 +254,11 @@ const ProfilePage = () => {
 
                     <div className="p-4 bg-info/10 text-info text-sm rounded-xl flex gap-3">
                         <div className="size-5 shrink-0"><Shield className="size-5" /></div>
-                        <p><strong>Tip:</strong> You can quickly exit Stealth Mode by <strong>double-clicking</strong> the menu icon in the top right corner of the dummy view, or by pressing your shortcut key again.</p>
+                        <div>
+                            <p><strong>PC:</strong> Use your shortcut key (Default: <code>Esc</code>) to hide.</p>
+                            <p className="mt-1"><strong>Mobile:</strong> 📱 <strong>Triple-tap</strong> anywhere on the screen to hide instantly!</p>
+                            <p className="mt-2 opacity-70"><strong>To Exit:</strong> Double-click the menu icon in the top right of the mask, or repeat your trigger.</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -18,6 +18,29 @@ const StealthOverlay = ({ children }) => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [panicShortcut, toggleStealthMode]);
 
+    useEffect(() => {
+        let lastTap = 0;
+        let tapCount = 0;
+
+        const handleTouchStart = (e) => {
+            const now = Date.now();
+            if (now - lastTap < 400) {
+                tapCount++;
+            } else {
+                tapCount = 1;
+            }
+            lastTap = now;
+
+            if (tapCount === 3) {
+                toggleStealthMode();
+                tapCount = 0;
+            }
+        };
+
+        window.addEventListener("touchstart", handleTouchStart);
+        return () => window.removeEventListener("touchstart", handleTouchStart);
+    }, [toggleStealthMode]);
+
     if (!isStealthMode) return children;
 
     const dictionaryEntries = [
