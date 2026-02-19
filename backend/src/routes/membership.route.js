@@ -42,7 +42,7 @@ router.post("/create-order", async (req, res) => {
         const options = {
             amount: 4900, // ₹49 in paise
             currency: "INR",
-            receipt: `membership_${req.user._id}_${Date.now()}`,
+            receipt: `rcpt_${req.user._id.toString().slice(-10)}_${Date.now()}`,
             notes: {
                 userId: req.user._id.toString(),
                 plan: "premium_monthly",
