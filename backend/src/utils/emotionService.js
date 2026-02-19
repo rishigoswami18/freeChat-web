@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const detectEmotion = async (text) => {
   try {
-    const ML_API_URL = process.env.ML_API_URL || "http://127.0.0.1:8001";
+    const ML_API_URL = process.env.ML_API_URL || "https://freechat-ml.onrender.com";
     const targetUrl = `${ML_API_URL}/predict_emotion`;
 
     console.log(`Sending text to ML service at: ${targetUrl}`);
