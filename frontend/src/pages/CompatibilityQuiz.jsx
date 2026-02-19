@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGameSession, submitGameAnswers, getAuthUser } from "../lib/api";
 import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart } from "lucide-react";

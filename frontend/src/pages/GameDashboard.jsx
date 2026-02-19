@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGameTemplates, getActiveGameSessions, startGame } from "../lib/api";
 import { Gamepad2, Play, Users, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const GameDashboard = () => {

@@ -207,6 +207,23 @@ const App = () => {
               )
             }
           />
+
+          {/* Fallback Game Route for multi-segment IDs (e.g. /game/userId/sessionId) */}
+          <Route
+            path="/game/:param1/:sessionId"
+            element={
+              isAuthenticated && isOnboarded ? (
+                <Layout showSidebar={true}>
+                  <CompatibilityQuiz />
+                </Layout>
+              ) : (
+                <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+              )
+            }
+          />
+
+          {/* Catch-all route to prevent blank screens */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
         <Toaster />
