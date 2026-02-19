@@ -21,6 +21,8 @@ import {
     Clock,
     Crown,
     Lock,
+    Gamepad2,
+    ArrowRight,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -366,6 +368,24 @@ const CoupleProfilePage = () => {
                                 </div>
                             ))
                         )}
+                    </div>
+
+                    {/* Games Reveal Preview */}
+                    <div className="mt-12 opacity-80 group">
+                        <div className="flex items-center gap-2 mb-4 text-primary font-bold">
+                            <Gamepad2 className="size-5" />
+                            <h3 className="text-sm font-bold uppercase tracking-widest">Premium Games Preview</h3>
+                        </div>
+                        <div className="card bg-base-300/30 border border-base-300 relative overflow-hidden h-32 flex items-center justify-center text-center p-6 rounded-2xl">
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5"></div>
+                            <div className="relative z-10">
+                                <p className="text-sm font-semibold mb-1 italic text-primary">Unlock Togetherness Games! 🎮</p>
+                                <p className="text-xs opacity-60">Couple quizzes and challenges await you once you find your partner.</p>
+                                <Link to="/games" className="btn btn-ghost btn-xs mt-3 text-primary gap-1">
+                                    Explore Games Dashboard <ArrowRight className="size-3" />
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

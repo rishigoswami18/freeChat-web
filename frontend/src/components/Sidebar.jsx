@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, HeartIcon, CrownIcon } from "lucide-react";
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, HeartIcon, CrownIcon, Gamepad2 } from "lucide-react";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
@@ -53,6 +53,15 @@ const Sidebar = () => {
         >
           <HeartIcon className="size-5 text-pink-500 opacity-70" />
           <span>Couple</span>
+        </Link>
+
+        <Link
+          to="/games"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/games" ? "btn-active" : ""
+            }`}
+        >
+          <Gamepad2 className="size-5 text-primary opacity-70" />
+          <span>Games</span>
         </Link>
 
         <Link

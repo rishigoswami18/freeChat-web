@@ -11,6 +11,7 @@ import {
   PencilIcon,
   HeartIcon,
   CrownIcon,
+  Gamepad2,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -30,6 +31,7 @@ const MobileDrawer = () => {
     { to: "/notifications", icon: BellIcon, label: "Notifications" },
     { to: "/posts", icon: PencilIcon, label: "Posts" },
     { to: "/couple", icon: HeartIcon, label: "Couple" },
+    { to: "/games", icon: Gamepad2, label: "Games" },
     { to: "/membership", icon: CrownIcon, label: "Premium" },
   ];
 
