@@ -9,6 +9,7 @@ import postsRoutes from "./routes/posts.route.js";
 import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
 import coupleRoutes from "./routes/couple.route.js";
+import membershipRoutes from "./routes/membership.route.js";
 import { connectDB } from "./lib/db.js";
 
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/posts", postsRoutes);
 app.use("/api/couple", coupleRoutes);
+app.use("/api/membership", membershipRoutes);
 
 
 if (process.env.NODE_ENV === "production") {

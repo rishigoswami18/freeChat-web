@@ -66,6 +66,15 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  // Membership fields
+  isMember: {
+    type: Boolean,
+    default: false,
+  },
+  memberSince: {
+    type: Date,
+    default: null,
+  },
 }
   , { timestamps: true });
 

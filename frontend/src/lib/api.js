@@ -129,3 +129,20 @@ export const unlinkCouple = async () => {
   const response = await axiosInstance.delete("/couple/unlink");
   return response.data;
 };
+
+// ----------------- MEMBERSHIP -----------------
+
+export const getMembershipStatus = async () => {
+  const response = await axiosInstance.get("/membership/status");
+  return response.data;
+};
+
+export const subscribeMembership = async () => {
+  const response = await axiosInstance.post("/membership/subscribe");
+  return response.data;
+};
+
+export const cancelMembership = async () => {
+  const response = await axiosInstance.post("/membership/cancel");
+  return response.data;
+};

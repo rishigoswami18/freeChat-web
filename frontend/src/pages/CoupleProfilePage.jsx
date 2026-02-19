@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import {
     getCoupleStatus,
@@ -7,6 +8,7 @@ import {
     acceptCoupleRequest,
     unlinkCouple,
     getFriends,
+    getMembershipStatus,
 } from "../lib/api";
 import {
     Heart,
@@ -17,6 +19,8 @@ import {
     User,
     HeartHandshake,
     Clock,
+    Crown,
+    Lock,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -35,6 +39,12 @@ const CoupleProfilePage = () => {
     const { data: friends = [] } = useQuery({
         queryKey: ["friends"],
         queryFn: getFriends,
+    });
+
+    // Check membership
+    const { data: memberData, isLoading: memberLoading } = useQuery({
+        queryKey: ["membershipStatus"],
+        queryFn: getMembershipStatus,
     });
 
     // Send couple request
@@ -67,10 +77,37 @@ const CoupleProfilePage = () => {
         onError: (err) => toast.error(err.response?.data?.message || "Failed to unlink"),
     });
 
-    if (coupleLoading) {
+    if (coupleLoading || memberLoading) {
         return (
             <div className="flex justify-center py-20">
                 <Loader2 className="size-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    // Membership gate
+    if (!memberData?.isMember) {
+        return (
+            <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-2">
+                    <HeartHandshake className="text-pink-500" />
+                    Couple Profile
+                </h1>
+                <div className="card bg-base-200 border border-amber-500/20 shadow-xl">
+                    <div className="card-body items-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-base-300 flex items-center justify-center mb-2">
+                            <Lock className="size-8 opacity-40" />
+                        </div>
+                        <h2 className="text-lg font-bold">Premium Feature</h2>
+                        <p className="text-sm opacity-60 max-w-xs">
+                            Couple Profiles is a premium feature. Subscribe to freeChat Premium to link your profile with your partner.
+                        </p>
+                        <Link to="/membership" className="btn btn-primary gap-2 mt-4">
+                            <Crown className="size-4" />
+                            Subscribe — ₹49/month
+                        </Link>
+                    </div>
+                </div>
             </div>
         );
     }
