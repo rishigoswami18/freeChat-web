@@ -2,6 +2,7 @@ import express from "express";
 import Post from "../models/Post.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import cloudinary from "../lib/cloudinary.js";
+import { detectEmotion } from "../utils/emotionService.js";
 
 const router = express.Router();
 
@@ -29,11 +30,18 @@ router.post("/", async (req, res) => {
       mediaUrl = uploaded.secure_url;
     }
 
+    // Detect emotion from post content using ML service
+    let caption = "";
+    if (content) {
+      caption = await detectEmotion(content);
+    }
+
     const newPost = await Post.create({
       userId: req.user._id,
       fullName: req.user.fullName,
       profilePic: req.user.profilePic || "",
       content: content || "",
+      caption,
       mediaUrl,
       mediaType: mediaType || "",
     });
@@ -96,11 +104,15 @@ router.post("/:id/comment", async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
+    // Detect emotion from comment text using ML service
+    const caption = await detectEmotion(text.trim());
+
     const comment = {
       userId: req.user._id,
       fullName: req.user.fullName,
       profilePic: req.user.profilePic || "",
       text: text.trim(),
+      caption,
     };
 
     post.comments.push(comment);

@@ -31,6 +31,19 @@ const PostsFeed = ({ posts, setPosts }) => {
   );
 };
 
+const emotionEmoji = {
+  happy: "😊",
+  joy: "😄",
+  love: "❤️",
+  sad: "😢",
+  sadness: "😢",
+  angry: "😠",
+  anger: "😠",
+  fear: "😨",
+  surprise: "😲",
+  neutral: "😐",
+};
+
 const PostCard = ({ post, setPosts }) => {
   const { authUser } = useAuthUser();
   const [showComments, setShowComments] = useState(false);
@@ -132,9 +145,16 @@ const PostCard = ({ post, setPosts }) => {
             <h3 className="font-semibold text-sm">
               {post.fullName || "Unknown User"}
             </h3>
-            <span className="text-xs text-base-content/50">
-              {timeAgo(post.createdAt)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-base-content/50">
+                {timeAgo(post.createdAt)}
+              </span>
+              {post.caption && (
+                <span className="badge badge-sm badge-outline gap-1 capitalize">
+                  {emotionEmoji[post.caption.toLowerCase()] || "💬"} {post.caption}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -240,7 +260,14 @@ const PostCard = ({ post, setPosts }) => {
                   )}
                 </div>
                 <div className="bg-base-300 rounded-2xl px-3 py-2 flex-1">
-                  <p className="font-semibold text-xs">{comment.fullName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-xs">{comment.fullName}</p>
+                    {comment.caption && (
+                      <span className="badge badge-xs badge-outline gap-0.5 capitalize">
+                        {emotionEmoji[comment.caption.toLowerCase()] || "💬"} {comment.caption}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm">{comment.text}</p>
                 </div>
               </div>

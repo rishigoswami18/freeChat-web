@@ -5,6 +5,7 @@ const commentSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   profilePic: { type: String, default: "" },
   text: { type: String, required: true },
+  caption: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -14,6 +15,7 @@ const postSchema = new mongoose.Schema(
     fullName: { type: String, required: true },
     profilePic: { type: String, default: "" },
     content: { type: String, default: "" },
+    caption: { type: String, default: "" },
     mediaUrl: { type: String, default: "" },
     mediaType: { type: String, enum: ["image", "video", ""], default: "" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
