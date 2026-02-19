@@ -70,8 +70,8 @@ export async function signup(req, res) {
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
       age--;
     }
-    if (age < 18) {
-      return res.status(400).json({ message: "You must be at least 18 years old to sign up" });
+    if (age < 14) {
+      return res.status(400).json({ message: "You must be at least 14 years old to sign up" });
     }
 
     if (password.length < 6) {
