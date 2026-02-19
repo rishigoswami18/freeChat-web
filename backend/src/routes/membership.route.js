@@ -17,8 +17,12 @@ router.use(protectRoute);
 // Get membership status
 router.get("/status", async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select("isMember memberSince");
-        res.json({ isMember: user.isMember, memberSince: user.memberSince });
+        const user = await User.findById(req.user._id).select("isMember memberSince role");
+        res.json({
+            isMember: user.role === "admin" ? true : user.isMember,
+            memberSince: user.memberSince,
+            role: user.role
+        });
     } catch (err) {
         console.error("Error getting membership status:", err.message);
         res.status(500).json({ message: "Internal Server Error" });

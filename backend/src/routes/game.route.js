@@ -10,7 +10,7 @@ router.use(protectRoute);
 // Helper middleware to check if user is a premium member
 const checkMembership = async (req, res, next) => {
     const user = await User.findById(req.user._id);
-    if (!user.isMember) {
+    if (user.role !== "admin" && !user.isMember) {
         return res.status(403).json({ message: "Premium membership required to play games" });
     }
     next();

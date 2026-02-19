@@ -140,9 +140,11 @@ const MembershipPage = () => {
                     <div className="card bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 shadow-xl">
                         <div className="card-body items-center text-center">
                             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-2">
-                                <Crown className="size-8 text-white" />
+                                {data?.role === "admin" ? <Shield className="size-8 text-white" /> : <Crown className="size-8 text-white" />}
                             </div>
-                            <h2 className="text-lg font-bold">You're a Premium Member!</h2>
+                            <h2 className="text-lg font-bold">
+                                {data?.role === "admin" ? "Admin Access Granted!" : "You're a Premium Member!"}
+                            </h2>
                             {memberSince && (
                                 <div className="flex items-center gap-2 text-sm opacity-70">
                                     <CalendarCheck className="size-4" />
