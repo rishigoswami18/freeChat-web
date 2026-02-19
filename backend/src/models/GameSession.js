@@ -8,7 +8,7 @@ const gameSessionSchema = new mongoose.Schema({
     }],
     gameType: {
         type: String,
-        enum: ["compatibility_quiz"],
+        enum: ["compatibility_quiz", "role_play"],
         default: "compatibility_quiz"
     },
     questions: [{

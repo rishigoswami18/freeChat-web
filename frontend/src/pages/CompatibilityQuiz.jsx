@@ -93,7 +93,9 @@ const CompatibilityQuiz = () => {
                     <div className="card-body">
                         <div className="flex justify-between items-center mb-4">
                             <span className="badge badge-primary font-bold">Question {currentQuestionIndex + 1} of {session.questions.length}</span>
-                            <span className="text-xs opacity-60">Compatibility Quiz</span>
+                            <span className="text-xs opacity-60">
+                                {session.gameType === "compatibility_quiz" ? "Compatibility Quiz" : "Role Play Scenario"}
+                            </span>
                         </div>
 
                         <h2 className="card-title text-xl mb-6">{currentQuestion.question}</h2>
@@ -193,16 +195,24 @@ const CompatibilityQuiz = () => {
                     </div>
 
                     <div className="card-body items-center py-10">
-                        <span className="text-sm uppercase tracking-widest opacity-60 font-black">Compatibility Score</span>
+                        <span className="text-sm uppercase tracking-widest opacity-60 font-black">
+                            {session.gameType === "compatibility_quiz" ? "Compatibility Score" : "Relationship Synergy"}
+                        </span>
                         <div className="text-7xl sm:text-8xl font-black text-primary mb-2 flex items-baseline">
                             {session.score}<span className="text-2xl ml-1">%</span>
                         </div>
 
                         <div className="max-w-xs mx-auto text-center mb-8">
                             <p className="text-lg font-medium">
-                                {session.score >= 80 ? "Wow! You're perfect for each other! ❤️" :
-                                    session.score >= 50 ? "Doing great! A solid connection! 😊" :
-                                        "Room to grow! Time for more dates! 🌱"}
+                                {session.gameType === "compatibility_quiz" ? (
+                                    session.score >= 80 ? "Wow! You're perfect for each other! ❤️" :
+                                        session.score >= 50 ? "Doing great! A solid connection! 😊" :
+                                            "Room to grow! Time for more dates! 🌱"
+                                ) : (
+                                    session.score >= 80 ? "Your styles match perfectly! A true power couple! 🔥" :
+                                        session.score >= 50 ? "Great teamwork! You handle situations well together! ✨" :
+                                            "Different approaches! But that's what makes you unique! 🌈"
+                                )}
                             </p>
                         </div>
 

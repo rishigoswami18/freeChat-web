@@ -42,6 +42,48 @@ const QUIZ_TEMPLATES = {
                 options: ["Reading", "Gaming", "Cooking", "Traveling", "Sports"],
             }
         ]
+    },
+    role_play: {
+        title: "Role Play: Romantic Scenarios",
+        description: "React to romantic scenarios together and see how your styles match!",
+        questions: [
+            {
+                question: "Scenario: You're lost in a beautiful foreign city at night. What do you do?",
+                options: [
+                    "Check maps and find the way back quickly.",
+                    "Embrace the adventure and explore the surroundings.",
+                    "Find a cozy café and ask for directions while enjoying a drink.",
+                    "Call a taxi and head straight to the hotel."
+                ],
+            },
+            {
+                question: "Scenario: You have a free weekend and no plans. How do you spend it?",
+                options: [
+                    "A quiet weekend at home with movies and takeout.",
+                    "A spontaneous road trip to a nearby town.",
+                    "A packed weekend visiting museums and art galleries.",
+                    "Inviting friends over for a big dinner party."
+                ],
+            },
+            {
+                question: "Scenario: Your partner is having a stressful week. What's your go-to way to help?",
+                options: [
+                    "Prepare their favorite meal and a relaxing bath.",
+                    "Give them space and handle all house chores.",
+                    "Plan a fun surprise to take their mind off things.",
+                    "Sit down and let them vent for as long as they need."
+                ],
+            },
+            {
+                question: "Scenario: You win a luxury cruise for two. What's the best part?",
+                options: [
+                    "Dressing up for fancy dinners and shows.",
+                    "Exploring exotic ports of call together.",
+                    "Relaxing by the pool with endless cocktails.",
+                    "Waking up to the sound of the ocean every day."
+                ],
+            }
+        ]
     }
 };
 
@@ -157,7 +199,7 @@ router.post("/submit", checkMembership, async (req, res) => {
         if (session.answers.size === session.participants.length) {
             session.status = "completed";
 
-            // Calculate compatibility score (simplified: how many answers match)
+            // Calculate score (how many answers match)
             let matches = 0;
             const userIds = Array.from(session.answers.keys());
             const user1Answers = session.answers.get(userIds[0]);
