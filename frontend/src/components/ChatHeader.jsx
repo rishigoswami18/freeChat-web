@@ -53,9 +53,9 @@ function ChatHeader() {
     };
 
     return (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-base-300 bg-base-100/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-base-300 bg-base-100 shadow-sm sticky top-0 z-50">
             {/* Left: Back + Avatar + Info */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
                 <button
                     onClick={() => navigate("/")}
                     className="btn btn-ghost btn-sm btn-circle"
@@ -87,20 +87,20 @@ function ChatHeader() {
             </div>
 
             {/* Right: Call Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
                 <button
                     onClick={handleCall}
-                    className="btn btn-ghost btn-sm btn-circle hover:bg-success/20 hover:text-success transition-colors"
+                    className="btn btn-ghost btn-md btn-circle text-primary hover:bg-primary/10 transition-colors"
                     aria-label="Video call"
                 >
-                    <VideoIcon className="size-5" />
+                    <VideoIcon className="size-6" />
                 </button>
                 <button
                     onClick={handleCall}
-                    className="btn btn-ghost btn-sm btn-circle hover:bg-primary/20 hover:text-primary transition-colors"
+                    className="btn btn-ghost btn-md btn-circle text-success hover:bg-success/10 transition-colors"
                     aria-label="Voice call"
                 >
-                    <PhoneIcon className="size-5" />
+                    <PhoneIcon className="size-6" />
                 </button>
             </div>
         </div>

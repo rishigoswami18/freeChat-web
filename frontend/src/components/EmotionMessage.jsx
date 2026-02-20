@@ -60,16 +60,21 @@ const EmotionMessage = (props) => {
 
   const { groupStyles = [] } = messageContext || {};
   const isFirstInGroup = groupStyles.includes("top") || groupStyles.includes("single");
+  const isLastInGroup = groupStyles.includes("bottom") || groupStyles.includes("single");
   // isMyMessage is already declared above, just use it.
 
   return (
-    <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-6" : "mt-0.5"}`}>
+    <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}>
       <MessageSimple
         {...props}
         // Only show avatar on the FIRST message of a group, and never for my own messages
         hideAvatar={!isFirstInGroup || isMyMessage}
-        MessageHeader={() => null} // Hide redundant sender name
-        MessageFooter={() => null} // Hide default footer to manual control below
+        // Customizing components to keep it professional but functional
+        MessageFooter={() => (isLastInGroup && !isMyMessage) ? (
+          <div className="text-[9px] opacity-40 ml-12 mt-1">
+            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        ) : null}
       />
 
       <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} -mt-1.5 mb-1`}>
