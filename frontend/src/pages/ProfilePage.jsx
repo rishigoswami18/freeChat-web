@@ -68,12 +68,16 @@ const ProfilePage = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        doUpdate({
-            ...formData,
-            profilePic: selectedImg || undefined,
-            isStealthMode,
-            panicShortcut,
-        });
+        const payload = { ...formData };
+        if (selectedImg) payload.profilePic = selectedImg;
+
+        // Only send premium fields if the user is actually premium
+        if (isPremium) {
+            payload.isStealthMode = isStealthMode;
+            payload.panicShortcut = panicShortcut;
+        }
+
+        doUpdate(payload);
     };
 
     if (isLoading) {

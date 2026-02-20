@@ -164,6 +164,7 @@ export async function updateProfile(req, res) {
     const isPremium = req.user.isMember || req.user.role === "admin";
 
     if (isStealthMode !== undefined) {
+      // Only error if trying to turn it ON while not premium
       if (!isPremium && isStealthMode === true) {
         return res.status(403).json({ message: "Stealth Mode is a premium feature. Please upgrade to use it." });
       }
@@ -171,7 +172,8 @@ export async function updateProfile(req, res) {
     }
 
     if (panicShortcut) {
-      if (!isPremium) {
+      // Only error if trying to set a CUSTOM shortcut (not "Escape") while not premium
+      if (!isPremium && panicShortcut !== "Escape") {
         return res.status(403).json({ message: "Custom Panic Shortcuts are a premium feature." });
       }
       updateData.panicShortcut = panicShortcut;
