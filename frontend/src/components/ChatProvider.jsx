@@ -33,6 +33,7 @@ export const ChatProvider = ({ children }) => {
                 const client = StreamChat.getInstance(STREAM_API_KEY);
 
                 if (client.userID !== authUser._id) {
+                    console.log("ChatProvider: Connecting user...", authUser._id);
                     if (client.userID) await client.disconnectUser();
                     await client.connectUser(
                         {
@@ -44,18 +45,23 @@ export const ChatProvider = ({ children }) => {
                     );
                 }
 
+                console.log("ChatProvider: Client connected and ready.");
                 setChatClient(client);
 
                 // Listen for new messages globally
                 const handleNewMessage = (event) => {
+                    console.log("ChatProvider: New message event received:", event);
+
                     // Don't show notification if it's our own message
                     if (event.user.id === authUser._id) return;
 
                     // Don't show notification if we are currently chatting with this person
                     // Path check: /chat/targetUserId
-                    const isChattingWithSender = window.location.pathname.includes(`/chat/${event.user.id}`);
+                    const isOnChatPage = window.location.pathname.includes(`/chat/${event.user.id}`);
+                    console.log(`ChatProvider: isOnChatPage for ${event.user.id}? ${isOnChatPage}`);
 
-                    if (!isChattingWithSender) {
+                    if (!isOnChatPage) {
+                        console.log("ChatProvider: Triggering notification for", event.user.name);
                         // Play sound
                         messageSound.play().catch(e => console.log("Sound play blocked:", e));
 
@@ -68,33 +74,45 @@ export const ChatProvider = ({ children }) => {
                                     toast.dismiss(t.id);
                                 }}
                             >
-                                <div className="avatar w-10 h-10 rounded-full overflow-hidden">
-                                    <img src={event.user.image} alt={event.user.name} />
+                                <div className="avatar w-10 h-10 rounded-full overflow-hidden shrink-0">
+                                    <img
+                                        src={event.user.image || "/avatar.png"}
+                                        alt={event.user.name}
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
-                                <div>
-                                    <p className="font-bold text-sm">{event.user.name}</p>
+                                <div className="min-w-0">
+                                    <p className="font-bold text-sm truncate">{event.user.name}</p>
                                     <p className="text-xs opacity-80 truncate max-w-[150px]">{event.message.text}</p>
                                 </div>
                             </div>
                         ), {
-                            duration: 4000,
+                            duration: 5000,
                             position: "top-right",
                             style: {
                                 borderRadius: '12px',
-                                background: '#333',
+                                background: '#1c1c1c',
                                 color: '#fff',
+                                border: '1px solid #333',
+                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4)',
+                                padding: '12px',
                             },
                         });
                     }
                 };
 
+                // 'message.new' is for messages in channels we are watching
+                // 'notification.message_new' is for global notifications on messages
                 client.on("message.new", handleNewMessage);
+                client.on("notification.message_new", handleNewMessage);
 
                 return () => {
+                    console.log("ChatProvider: Cleaning up listeners.");
                     client.off("message.new", handleNewMessage);
+                    client.off("notification.message_new", handleNewMessage);
                 };
             } catch (error) {
-                console.error("Error connecting to chat globally:", error);
+                console.error("ChatProvider: Error connecting to chat globally:", error);
             }
         };
 
