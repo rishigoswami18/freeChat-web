@@ -16,7 +16,8 @@ const IncomingCallNotification = () => {
     const incomingCalls = calls.filter((call) => {
         const isRinging = call.state.callingState === CallingState.RINGING;
         const isOurCall = outgoingCallIds.has(call.id);
-        return isRinging && !isOurCall;
+        const isOnCallPage = window.location.pathname.includes(`/call/${call.id}`);
+        return isRinging && !isOurCall && !isOnCallPage;
     });
 
     if (incomingCalls.length === 0) return null;
@@ -59,8 +60,11 @@ const IncomingCallUI = ({ call, navigate }) => {
 
     const handleAccept = async () => {
         try {
+            // Stop ringtone immediately
+            ringtone.pause();
+            ringtone.currentTime = 0;
+
             // Just navigate to the call page. 
-            // The CallPage component handles the joining logic reliably.
             navigate(`/call/${call.id}`);
         } catch (error) {
             console.error("Failed to accept call:", error);
