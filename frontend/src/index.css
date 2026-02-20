@@ -58,16 +58,21 @@
   border-top: 1px solid oklch(var(--b3));
   padding: 8px 12px;
   background: oklch(var(--b1));
+  color: oklch(var(--bc)) !important;
+  /* Force theme-aware text color */
 }
 
-@media (min-width: 640px) {
-  .str-chat__message-input {
-    padding: 12px 16px;
-  }
+/* Ensure the actual textarea/input inside is readable */
+.str-chat__message-input-textarea,
+.str-chat__message-input input,
+.str-chat__message-input textarea {
+  color: oklch(var(--bc)) !important;
+  background: transparent !important;
 }
 
-.str-chat__input-flat {
-  border-radius: 24px;
+/* Placeholder visibility */
+.str-chat__message-input-textarea::placeholder {
+  color: oklch(var(--bc) / 0.4) !important;
 }
 
 /* ===== Message Bubble Styling ===== */
