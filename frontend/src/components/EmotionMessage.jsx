@@ -58,16 +58,26 @@ const EmotionMessage = (props) => {
     }
   };
 
-  return (
-    <div className="stream-message-wrapper relative group">
-      <MessageSimple {...props} />
+  const { groupStyles = [] } = messageContext || {};
+  const isFirstInGroup = groupStyles.includes("top") || groupStyles.includes("single");
+  // isMyMessage is already declared above, just use it.
 
-      <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} -mt-2 mb-1`}>
-        {/* Emotion Badge */}
+  return (
+    <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-6" : "mt-0.5"}`}>
+      <MessageSimple
+        {...props}
+        // Only show avatar on the FIRST message of a group, and never for my own messages
+        hideAvatar={!isFirstInGroup || isMyMessage}
+        MessageHeader={() => null} // Hide redundant sender name
+        MessageFooter={() => null} // Hide default footer to manual control below
+      />
+
+      <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} -mt-1.5 mb-1`}>
+        {/* Emotion Badge - Subtle and only when needed */}
         {emotion && emotionColors[emotion] && (
-          <div className="z-10 mb-1">
+          <div className="z-10 mb-0.5">
             <span
-              className={`inline-block text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md border ${emotionColors[emotion]}`}
+              className={`inline-block text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-sm border ${emotionColors[emotion]}`}
             >
               {emotion}
             </span>
@@ -80,30 +90,30 @@ const EmotionMessage = (props) => {
             {!translatedText ? (
               <button
                 onClick={handleTranslate}
-                className="text-[10px] flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity text-primary font-medium"
+                className="text-[9px] flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity text-primary font-medium"
                 disabled={isTranslating}
               >
                 {isTranslating ? (
-                  <Loader2 className="size-3 animate-spin" />
+                  <Loader2 className="size-2.5 animate-spin" />
                 ) : (
                   <>
-                    <Languages className="size-3" />
-                    Translate to {authUser?.nativeLanguage || "English"}
-                    {!isPremium && <Star className="size-2 text-warning fill-warning" />}
+                    <Languages className="size-2.5" />
+                    Translate
+                    {!isPremium && <Star className="size-2 text-warning fill-warning opacity-70" />}
                   </>
                 )}
               </button>
             ) : (
-              <div className="bg-base-200/50 p-2 rounded-lg border border-base-300 max-w-[250px] animate-in fade-in slide-in-from-top-1 duration-300">
-                <p className="text-[11px] italic text-base-content/80 leading-tight">
-                  <Languages className="size-3 inline mr-1 mb-0.5" />
+              <div className="bg-base-200/50 px-2 py-1 rounded-md border border-base-300 max-w-[200px] animate-in fade-in slide-in-from-top-1 duration-300 text-left">
+                <p className="text-[10px] italic text-base-content/80 leading-tight">
+                  <Languages className="size-2 inline mr-1" />
                   {translatedText}
                 </p>
                 <button
                   onClick={() => setTranslatedText("")}
-                  className="text-[9px] text-primary hover:underline mt-1"
+                  className="text-[8px] text-primary hover:underline mt-0.5"
                 >
-                  Hide Original
+                  Hide
                 </button>
               </div>
             )}

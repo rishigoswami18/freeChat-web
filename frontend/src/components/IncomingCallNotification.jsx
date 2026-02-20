@@ -1,8 +1,12 @@
 import { useCalls, CallingState } from "@stream-io/video-react-sdk";
 import { PhoneOff, PhoneIncoming } from "lucide-react";
 import { useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { outgoingCallIds } from "./VideoProvider";
+
+// Professional ringtone
+const ringtone = new Audio("https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3");
+ringtone.loop = true;
 
 const IncomingCallNotification = () => {
     const calls = useCalls();
@@ -30,6 +34,9 @@ const IncomingCallUI = ({ call, navigate }) => {
     const [caller, setCaller] = useState(null);
 
     useEffect(() => {
+        // Start ringtone
+        ringtone.play().catch(e => console.log("Ringtone blocked:", e));
+
         // Get the caller info — the person who created the call
         const createdBy = call.state.createdBy;
         if (createdBy) {
@@ -43,6 +50,11 @@ const IncomingCallUI = ({ call, navigate }) => {
                 if (callerMember) setCaller(callerMember.user);
             }
         }
+
+        return () => {
+            ringtone.pause();
+            ringtone.currentTime = 0;
+        };
     }, [call]);
 
     const handleAccept = async () => {

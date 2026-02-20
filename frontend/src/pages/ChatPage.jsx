@@ -16,6 +16,7 @@ import {
 } from "stream-chat-react";
 import { StreamChat } from "stream-chat";
 import toast from "react-hot-toast";
+import { useChatClient } from "../components/ChatProvider";
 
 import ChatLoader from "../components/ChatLoader";
 import ChatHeader from "../components/ChatHeader";
@@ -26,61 +27,38 @@ const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 const ChatPage = () => {
   const { id: targetUserId } = useParams();
 
-  const [chatClient, setChatClient] = useState(null);
+  const chatClient = useChatClient();
   const [channel, setChannel] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!chatClient);
 
   const { authUser } = useAuthUser();
 
-  const { data: tokenData } = useQuery({
-    queryKey: ["streamToken"],
-    queryFn: getStreamToken,
-    enabled: !!authUser,
-  });
-
   useEffect(() => {
-    const initChat = async () => {
-      if (!tokenData?.token || !authUser) return;
+    const initChannel = async () => {
+      if (!chatClient || !targetUserId || !authUser) {
+        if (chatClient) setLoading(false);
+        return;
+      }
 
+      setLoading(true);
       try {
-        console.log("Initializing stream chat client...");
-
-        const client = StreamChat.getInstance(STREAM_API_KEY);
-
-        if (client.userID === authUser._id) {
-          // already connected
-        } else {
-          if (client.userID) await client.disconnectUser();
-          await client.connectUser(
-            {
-              id: authUser._id,
-              name: authUser.fullName,
-              image: authUser.profilePic,
-            },
-            tokenData.token
-          );
-        }
-
         const channelId = [authUser._id, targetUserId].sort().join("-");
-
-        const currChannel = client.channel("messaging", channelId, {
+        const currChannel = chatClient.channel("messaging", channelId, {
           members: [authUser._id, targetUserId],
         });
 
         await currChannel.watch();
-
-        setChatClient(client);
         setChannel(currChannel);
       } catch (error) {
-        console.error("Error initializing chat:", error);
-        toast.error("Could not connect to chat. Please try again.");
+        console.error("Error initializing channel:", error);
+        toast.error("Could not load chat channel.");
       } finally {
         setLoading(false);
       }
     };
 
-    initChat();
-  }, [tokenData, authUser, targetUserId]);
+    initChannel();
+  }, [chatClient, targetUserId, authUser]);
 
   // Intercept message sends at Channel level for emotion detection
   const doSendMessageRequest = async (channelObj, message) => {
