@@ -1,24 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuthUser from "../hooks/useAuthUser";
 import { updateProfile } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard } from "lucide-react";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star } from "lucide-react";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 
 const ProfilePage = () => {
-    const { authUser } = useAuthUser();
+    const { authUser, isLoading } = useAuthUser();
     const queryClient = useQueryClient();
     const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
     const isPremium = authUser?.isMember || authUser?.role === "admin";
 
     const [formData, setFormData] = useState({
-        fullName: authUser?.fullName || "",
-        bio: authUser?.bio || "",
-        location: authUser?.location || "",
-        nativeLanguage: authUser?.nativeLanguage || "",
-        learningLanguage: authUser?.learningLanguage || "",
+        fullName: "",
+        bio: "",
+        location: "",
+        nativeLanguage: "",
+        learningLanguage: "",
     });
+
+    // Initialize/Update form data when authUser loads
+    useEffect(() => {
+        if (authUser) {
+            setFormData({
+                fullName: authUser.fullName || "",
+                bio: authUser.bio || "",
+                location: authUser.location || "",
+                nativeLanguage: authUser.nativeLanguage || "",
+                learningLanguage: authUser.learningLanguage || "",
+            });
+        }
+    }, [authUser]);
 
     const [selectedImg, setSelectedImg] = useState(null);
 
@@ -60,6 +73,14 @@ const ProfilePage = () => {
             panicShortcut,
         });
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="size-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
