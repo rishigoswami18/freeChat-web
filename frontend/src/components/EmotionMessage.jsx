@@ -80,7 +80,7 @@ const EmotionMessage = (props) => {
             {!translatedText ? (
               <button
                 onClick={handleTranslate}
-                className="text-[10px] flex items-center gap-1 opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity text-primary font-medium"
+                className="text-[10px] flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity text-primary font-medium"
                 disabled={isTranslating}
               >
                 {isTranslating ? (
