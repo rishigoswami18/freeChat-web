@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuthUser from "../hooks/useAuthUser";
 import { updateProfile } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star } from "lucide-react";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 
@@ -18,6 +18,7 @@ const ProfilePage = () => {
         location: "",
         nativeLanguage: "",
         learningLanguage: "",
+        dateOfBirth: "",
     });
 
     // Initialize/Update form data when authUser loads
@@ -29,6 +30,7 @@ const ProfilePage = () => {
                 location: authUser.location || "",
                 nativeLanguage: authUser.nativeLanguage || "",
                 learningLanguage: authUser.learningLanguage || "",
+                dateOfBirth: authUser.dateOfBirth ? authUser.dateOfBirth.split("T")[0] : "",
             });
         }
     }, [authUser]);
@@ -202,6 +204,23 @@ const ProfilePage = () => {
                             value={formData.learningLanguage}
                             onChange={handleInputChange}
                             placeholder="e.g. Spanish"
+                            className="input input-bordered focus:input-primary transition-all rounded-xl"
+                            required
+                        />
+                    </div>
+
+                    {/* Date of Birth */}
+                    <div className="form-control">
+                        <label className="label">
+                            <span className="label-text font-semibold flex items-center gap-2">
+                                <Calendar className="size-4 opacity-50" /> Date of Birth
+                            </span>
+                        </label>
+                        <input
+                            type="date"
+                            name="dateOfBirth"
+                            value={formData.dateOfBirth}
+                            onChange={handleInputChange}
                             className="input input-bordered focus:input-primary transition-all rounded-xl"
                             required
                         />

@@ -118,9 +118,15 @@ const CoupleProfilePage = () => {
                         <p className="text-sm opacity-60 max-w-xs">
                             The Couple Profile feature is only available for users aged 14 and above.
                         </p>
-                        <div className="alert alert-warning mt-4 text-xs font-semibold py-2">
-                            🔞 Age Verification Required
-                        </div>
+                        <Link
+                            to="/profile"
+                            className="alert alert-warning mt-4 text-xs font-semibold py-2 hover:bg-warning/80 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md"
+                        >
+                            <span className="flex items-center gap-1.5">
+                                🔞 Age Verification Required
+                                <ArrowRight className="size-3" />
+                            </span>
+                        </Link>
                     </div>
                 </div>
             </div>
