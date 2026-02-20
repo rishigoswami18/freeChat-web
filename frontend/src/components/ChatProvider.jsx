@@ -1,4 +1,3 @@
-```javascript
 import { createContext, useContext, useEffect, useState } from "react";
 import { StreamChat } from "stream-chat";
 import useAuthUser from "../hooks/useAuthUser";
@@ -54,25 +53,25 @@ export const ChatProvider = ({ children }) => {
                     if (event.user.id === authUser._id) return;
 
                     // Only show if not on the specific chat page
-                    const isOnChatPage = window.location.pathname.includes(`/ chat / ${ event.user.id } `);
-                    
+                    const isOnChatPage = window.location.pathname.includes(`/chat/${event.user.id}`);
+
                     if (!isOnChatPage) {
                         // Play sound
-                        messageSound.play().catch(() => {}); // Catch and ignore play errors
+                        messageSound.play().catch(() => { }); // Catch and ignore play errors
 
                         // Show toast
                         toast((t) => (
                             <div
                                 className="flex items-center gap-3 cursor-pointer"
                                 onClick={() => {
-                                    navigate(`/ chat / ${ event.user.id } `);
+                                    navigate(`/chat/${event.user.id}`);
                                     toast.dismiss(t.id);
                                 }}
                             >
                                 <div className="avatar w-10 h-10 rounded-full overflow-hidden shrink-0">
-                                    <img 
-                                        src={event.user.image || "/avatar.png"} 
-                                        alt={event.user.name} 
+                                    <img
+                                        src={event.user.image || "/avatar.png"}
+                                        alt={event.user.name}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
@@ -110,7 +109,7 @@ export const ChatProvider = ({ children }) => {
         };
 
         initChat();
-    }, [tokenData, authUser, navigate]); // Added navigate to dependency array
+    }, [tokenData, authUser, navigate]);
 
     return (
         <ChatContext.Provider value={chatClient}>
