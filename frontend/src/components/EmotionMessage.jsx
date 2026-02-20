@@ -6,13 +6,13 @@ import { translateText } from "../lib/api";
 import toast from "react-hot-toast";
 
 const emotionColors = {
-  joy: "bg-yellow-200 text-yellow-900 border-yellow-400",
-  love: "bg-pink-200 text-pink-900 border-pink-400",
-  sadness: "bg-blue-200 text-blue-900 border-blue-400",
-  anger: "bg-red-200 text-red-900 border-red-400",
-  fear: "bg-purple-200 text-purple-900 border-purple-400",
-  surprise: "bg-orange-200 text-orange-900 border-orange-400",
-  neutral: "bg-gray-200 text-gray-900 border-gray-400",
+  joy: "bg-yellow-400 text-yellow-950 border-yellow-500",
+  love: "bg-pink-400 text-pink-950 border-pink-500",
+  sadness: "bg-blue-500 text-white border-blue-600",
+  anger: "bg-red-500 text-white border-red-600",
+  fear: "bg-purple-500 text-white border-purple-600",
+  surprise: "bg-orange-400 text-orange-950 border-orange-500",
+  neutral: "bg-slate-300 text-slate-900 border-slate-400",
 };
 
 const EmotionMessage = (props) => {

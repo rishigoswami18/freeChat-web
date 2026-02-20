@@ -73,6 +73,18 @@
 /* ===== Message Bubble Styling ===== */
 .str-chat__message-simple-text-inner {
   border-radius: 18px !important;
+  font-size: 15px !important;
+}
+
+/* Ensure received messages (dark bubbles) have light text in dark mode */
+.str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  color: #ffffff !important;
+}
+
+/* Ensure sent messages (usually light blue) have readable dark text */
+.str-chat__message-simple--me .str-chat__message-simple-text-inner {
+  color: #1a1a1a !important;
+  /* Force black text for the blue bubbles */
 }
 
 /* ===== Hide default channel header (we use custom) ===== */
