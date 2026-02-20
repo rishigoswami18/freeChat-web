@@ -108,6 +108,11 @@ export const getStreamToken = async () => {
   return response.data;
 };
 
+export const translateText = async (text, targetLang) => {
+  const response = await axiosInstance.post("/translate", { text, targetLang });
+  return response.data;
+};
+
 // ----------------- COUPLE -----------------
 
 export const getCoupleStatus = async () => {
