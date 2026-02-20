@@ -40,7 +40,7 @@
 /* ===== Message List ===== */
 .str-chat__list {
   padding: 12px;
-  background: transparent;
+  background: oklch(var(--b1));
 }
 
 @media (min-width: 640px) {
