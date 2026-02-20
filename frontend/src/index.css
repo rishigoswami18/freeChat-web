@@ -65,14 +65,18 @@
 /* Ensure the actual textarea/input inside is readable */
 .str-chat__message-input-textarea,
 .str-chat__message-input input,
-.str-chat__message-input textarea {
-  color: oklch(var(--bc)) !important;
+.str-chat__message-input textarea,
+.str-chat__input-flat-textarea {
+  color: #ffffff !important;
   background: transparent !important;
+  -webkit-text-fill-color: #ffffff !important;
+  /* Fix for some mobile browsers */
 }
 
 /* Placeholder visibility */
-.str-chat__message-input-textarea::placeholder {
-  color: oklch(var(--bc) / 0.4) !important;
+.str-chat__message-input-textarea::placeholder,
+.str-chat__message-input textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* ===== Message Bubble Styling ===== */
