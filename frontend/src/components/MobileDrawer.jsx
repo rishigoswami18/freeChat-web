@@ -158,8 +158,6 @@ const MobileDrawer = () => {
       </div>
     </>
   );
-    </>
-  );
 };
 
 export default MobileDrawer;
