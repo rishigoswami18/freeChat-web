@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRecommendedUsers, sendFriendRequest } from "../lib/api";
 import { Search, UserPlus, Check, X, Loader2, Star } from "lucide-react";
@@ -39,7 +40,7 @@ const SearchPage = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" />
                 <input
                     type="text"
-                    placeholder="Search for friends by name..."
+                    placeholder="Search by name or @username..."
                     className="input input-bordered w-full pl-12 h-14 bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all rounded-2xl text-lg shadow-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -115,8 +116,9 @@ const SearchPage = () => {
                             <Search className="size-10 text-base-content/40" />
                         </div>
                         <div className="space-y-1">
-                            <p className="text-lg font-bold text-base-content/60">No new users found</p>
-                            <p className="text-sm text-base-content/40">Try searching for a different name!</p>
+                            <p className="text-lg font-bold text-base-content/60">No users found</p>
+                            <p className="text-sm text-base-content/40">Try searching for a name or username!</p>
+                            <p className="text-xs text-base-content/30 mt-2 italic">Note: Only new people show up here. Check your <Link to="/friends" className="link link-primary">Friends</Link> page for existing connections.</p>
                         </div>
                     </div>
                 )}

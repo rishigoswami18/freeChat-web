@@ -30,10 +30,17 @@ export async function getRecommendedUsers(req, res) {
     };
 
     if (q) {
-      query.$and.push({ fullName: { $regex: q, $options: "i" } });
+      console.log(`Searching users with query: "${q}"`);
+      query.$and.push({
+        $or: [
+          { fullName: { $regex: q, $options: "i" } },
+          { username: { $regex: q, $options: "i" } }
+        ]
+      });
     }
 
     let recommendedUsers = await User.find(query);
+    console.log(`Found ${recommendedUsers.length} users for query: "${q || 'none'}"`);
 
     // Calculate match scores
     recommendedUsers = recommendedUsers.map(user => {
@@ -41,17 +48,22 @@ export async function getRecommendedUsers(req, res) {
       let matchScore = 0;
       let isTandemMatch = false;
 
+      const userNative = (user.nativeLanguage || "").toLowerCase();
+      const userLearning = (user.learningLanguage || "").toLowerCase();
+      const currentNative = (currentUser.nativeLanguage || "").toLowerCase();
+      const currentLearning = (currentUser.learningLanguage || "").toLowerCase();
+
       // Perfect Match: B speaks L (what A learns) AND B learns N (what A speaks)
-      if (user.nativeLanguage === currentUser.learningLanguage && user.learningLanguage === currentUser.nativeLanguage) {
+      if (userNative === currentLearning && userLearning === currentNative && currentLearning !== "") {
         matchScore = 100;
         isTandemMatch = true;
       }
       // High Match: B speaks L (what A learns)
-      else if (user.nativeLanguage === currentUser.learningLanguage) {
+      else if (userNative === currentLearning && currentLearning !== "") {
         matchScore = 50;
       }
       // Medium Match: B learns N (what A speaks)
-      else if (user.learningLanguage === currentUser.nativeLanguage) {
+      else if (userLearning === currentNative && currentNative !== "") {
         matchScore = 25;
       }
 
