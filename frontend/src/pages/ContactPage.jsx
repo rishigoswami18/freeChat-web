@@ -26,35 +26,35 @@ const ContactPage = () => {
                         <div>
                             <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
                             <div className="space-y-6">
-                                <div className="flex items-center gap-4">
+                                <a href="mailto:rishigoswamisl99@gmail.com" className="flex items-center gap-4 hover:bg-base-200 p-2 -m-2 rounded-xl transition-colors">
                                     <div className="p-3 bg-primary/10 rounded-xl text-primary">
                                         <Mail className="size-6" />
                                     </div>
                                     <div>
                                         <p className="text-sm opacity-60">Email Address</p>
-                                        <p className="font-medium">support@freechat.com</p>
+                                        <p className="font-medium">rishigoswamisl99@gmail.com</p>
                                     </div>
-                                </div>
+                                </a>
 
-                                <div className="flex items-center gap-4">
+                                <a href="tel:+919905755603" className="flex items-center gap-4 hover:bg-base-200 p-2 -m-2 rounded-xl transition-colors">
                                     <div className="p-3 bg-secondary/10 rounded-xl text-secondary">
                                         <Phone className="size-6" />
                                     </div>
                                     <div>
                                         <p className="text-sm opacity-60">Phone Number</p>
-                                        <p className="font-medium">+91 999 000 1111</p>
+                                        <p className="font-medium">+91 9905755603</p>
                                     </div>
-                                </div>
+                                </a>
 
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-4 p-2 -m-2">
                                     <div className="p-3 bg-accent/10 rounded-xl text-accent">
                                         <MapPin className="size-6" />
                                     </div>
                                     <div>
                                         <p className="text-sm opacity-60">Office Address</p>
                                         <p className="font-medium text-sm">
-                                            123 Tech Park, Sector 45, <br />
-                                            Gurugram, Haryana, India 122003
+                                            LPU University, <br />
+                                            Phagwara, Punjab, India 144001
                                         </p>
                                     </div>
                                 </div>

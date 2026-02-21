@@ -12,7 +12,7 @@ const RefundPolicyPage = () => {
 
                 <section className="mb-8">
                     <h2 className="text-xl font-bold mb-4">2. Refunds</h2>
-                    <p>Since freeChat Premium provides immediate access to digital features (including Couple Profiles), we generally do not offer refunds once a payment has been processed. However, if you believe there has been a billing error, please contact us at support@freechat.com within 7 days of the charge.</p>
+                    <p>Since freeChat Premium provides immediate access to digital features (including Couple Profiles), we generally do not offer refunds once a payment has been processed. However, if you believe there has been a billing error, please contact us at rishigoswamisl99@gmail.com within 7 days of the charge.</p>
                 </section>
 
                 <section className="mb-8">
