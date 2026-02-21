@@ -44,7 +44,7 @@ const StoryTray = () => {
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="relative size-16 rounded-full border-2 border-dashed border-primary/50 flex items-center justify-center hover:bg-primary/5 transition-all group overflow-hidden bg-base-200"
+                    className="relative size-16 rounded-full border-2 border-dashed border-primary/40 flex items-center justify-center hover:border-primary hover:bg-primary/10 transition-all duration-300 group overflow-hidden bg-base-200 active:scale-95 shadow-inner"
                 >
                     {isUploading ? (
                         <Loader2 className="size-6 animate-spin text-primary" />
@@ -53,15 +53,17 @@ const StoryTray = () => {
                             <img
                                 src={authUser?.profilePic || "/avatar.png"}
                                 alt="Me"
-                                className="size-full object-cover opacity-50 group-hover:scale-110 transition-transform"
+                                className="size-full object-cover opacity-60 group-hover:scale-110 group-hover:opacity-80 transition-all duration-500"
                             />
-                            <div className="absolute inset-0 flex items-center justify-center bg-base-100/30">
-                                <Plus className="size-6 text-primary" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-base-100/20 group-hover:bg-transparent transition-colors">
+                                <div className="p-1.5 rounded-full bg-primary text-primary-content shadow-lg scale-90 group-hover:scale-110 transition-transform duration-300">
+                                    <Plus className="size-5" strokeWidth={3} />
+                                </div>
                             </div>
                         </>
                     )}
                 </button>
-                <span className="text-[10px] font-medium opacity-70">Your Story</span>
+                <span className="text-[10px] font-bold opacity-60 group-hover:opacity-100 transition-opacity mt-1">Your Story</span>
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -75,26 +77,29 @@ const StoryTray = () => {
             {isLoading ? (
                 <div className="flex gap-4">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="size-16 rounded-full bg-base-300 animate-pulse" />
+                        <div key={i} className="flex flex-col items-center gap-1">
+                            <div className="size-16 rounded-full bg-base-300 animate-pulse border-2 border-base-200" />
+                            <div className="h-2 w-10 bg-base-300 animate-pulse rounded" />
+                        </div>
                     ))}
                 </div>
             ) : (
                 storiesGrouped.map((group) => (
                     <div
                         key={group.userId}
-                        className="flex flex-col items-center gap-1 cursor-pointer min-w-[70px]"
+                        className="flex flex-col items-center gap-1 cursor-pointer min-w-[70px] group/story"
                         onClick={() => setSelectedUserStories(group)}
                     >
-                        <div className="size-16 rounded-full p-1 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
-                            <div className="size-full rounded-full border-2 border-base-100 overflow-hidden bg-base-300">
+                        <div className="relative size-16 rounded-full p-[3px] bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] hover:rotate-12 transition-transform duration-500">
+                            <div className="size-full rounded-full border-[3px] border-base-100 overflow-hidden bg-base-300 shadow-sm">
                                 <img
                                     src={group.profilePic || "/avatar.png"}
                                     alt={group.fullName}
-                                    className="size-full object-cover"
+                                    className="size-full object-cover group-hover/story:scale-110 transition-transform duration-500"
                                 />
                             </div>
                         </div>
-                        <span className="text-[10px] font-medium truncate w-full text-center">
+                        <span className="text-[10px] font-bold truncate w-full text-center opacity-80 group-hover/story:opacity-100 transition-opacity">
                             {group.userId === authUser?._id ? "You" : group.fullName.split(" ")[0]}
                         </span>
                     </div>

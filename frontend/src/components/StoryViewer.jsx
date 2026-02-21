@@ -38,15 +38,15 @@ const StoryViewer = ({ group, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center sm:p-4">
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center sm:p-4 backdrop-blur-sm">
             {/* Header / Info */}
-            <div className="absolute top-0 inset-x-0 p-4 z-10 bg-gradient-to-b from-black/60 to-transparent">
+            <div className="absolute top-0 inset-x-0 p-4 z-50 bg-gradient-to-b from-black/80 via-black/40 to-transparent pt-8 sm:pt-4">
                 {/* Progress Bars */}
-                <div className="flex gap-1 mb-4">
+                <div className="flex gap-1.5 mb-4 px-1">
                     {group.stories.map((_, idx) => (
-                        <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
+                        <div key={idx} className="h-0.5 flex-1 bg-white/20 rounded-full overflow-hidden shadow-sm">
                             <div
-                                className="h-full bg-white transition-all duration-100 ease-linear"
+                                className="h-full bg-white transition-all duration-100 ease-linear shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                                 style={{
                                     width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? "100%" : "0%",
                                 }}
@@ -57,33 +57,42 @@ const StoryViewer = ({ group, onClose }) => {
 
                 <div className="flex items-center justify-between text-white">
                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full overflow-hidden border border-white/20">
-                            <img src={group.profilePic || "/avatar.png"} alt="" className="size-full object-cover" />
+                        <div className="size-11 rounded-full p-0.5 bg-white/10 backdrop-blur-md overflow-hidden border border-white/20 shadow-lg">
+                            <img src={group.profilePic || "/avatar.png"} alt="" className="size-full rounded-full object-cover" />
                         </div>
                         <div>
-                            <p className="font-bold text-sm">{group.fullName}</p>
-                            <p className="text-[10px] opacity-70">
+                            <p className="font-bold text-sm tracking-tight drop-shadow-md">{group.fullName}</p>
+                            <p className="text-[10px] font-medium opacity-80 drop-shadow-sm flex items-center gap-1">
                                 {new Date(story.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X className="size-6" />
+                    <button
+                        onClick={onClose}
+                        className="p-2.5 hover:bg-white/10 active:scale-90 rounded-full transition-all bg-white/5 backdrop-blur-sm border border-white/10"
+                    >
+                        <X className="size-6 text-white" />
                     </button>
                 </div>
             </div>
 
-            {/* Story Image */}
-            <div className="relative w-full max-w-md aspect-[9/16] bg-neutral-900 rounded-lg overflow-hidden flex items-center justify-center">
+            {/* Story Image container */}
+            <div className="relative w-full h-full sm:h-auto sm:max-w-md sm:aspect-[9/16] bg-black sm:rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 ease-in-out">
+                {/* Background Blur for non-filling images */}
+                <div className="absolute inset-0 z-0">
+                    <img src={story.imageUrl} alt="" className="w-full h-full object-cover blur-3xl opacity-30 scale-150" />
+                </div>
+
                 <img
                     src={story.imageUrl}
                     alt=""
-                    className="w-full h-full object-contain"
+                    className="relative z-10 w-full h-full object-contain select-none"
+                    onContextMenu={(e) => e.preventDefault()}
                 />
 
-                {/* Interaction Areas */}
-                <div className="absolute inset-y-0 left-0 w-1/3 cursor-pointer" onClick={handlePrev} />
-                <div className="absolute inset-y-0 right-0 w-1/3 cursor-pointer" onClick={handleNext} />
+                {/* Interaction Areas (Full screen touch) */}
+                <div className="absolute inset-y-20 left-0 w-1/4 z-20" onClick={handlePrev} />
+                <div className="absolute inset-y-20 right-0 w-1/4 z-20" onClick={handleNext} />
 
                 {/* Caption */}
                 {story.caption && (
