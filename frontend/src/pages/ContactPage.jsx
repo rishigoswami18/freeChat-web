@@ -1,11 +1,35 @@
+import { useState } from "react";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const ContactPage = () => {
-    const handleSubmit = (e) => {
+    const [formData, setFormData] = useState({
+        fullName: "",
+        email: "",
+        message: "",
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        toast.success("Message sent! We'll get back to you soon.");
-        e.target.reset();
+        setIsSubmitting(true);
+
+        try {
+            await axios.post("/api/support", formData);
+            toast.success("Message sent! We'll get back to you soon.");
+            setFormData({ fullName: "", email: "", message: "" });
+        } catch (error) {
+            console.error("Error submitting contact form:", error);
+            toast.error(error.response?.data?.message || "Something went wrong. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     return (
@@ -94,9 +118,13 @@ const ContactPage = () => {
                                     </label>
                                     <input
                                         type="text"
+                                        name="fullName"
+                                        value={formData.fullName}
+                                        onChange={handleChange}
                                         placeholder="Jane Doe"
-                                        className="input input-bordered focus:border-primary"
+                                        className="input input-bordered focus:border-primary w-full"
                                         required
+                                        disabled={isSubmitting}
                                     />
                                 </div>
 
@@ -106,9 +134,13 @@ const ContactPage = () => {
                                     </label>
                                     <input
                                         type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
                                         placeholder="jane@example.com"
-                                        className="input input-bordered focus:border-primary"
+                                        className="input input-bordered focus:border-primary w-full"
                                         required
+                                        disabled={isSubmitting}
                                     />
                                 </div>
 
@@ -117,15 +149,23 @@ const ContactPage = () => {
                                         <span className="label-text">Message</span>
                                     </label>
                                     <textarea
+                                        name="message"
+                                        value={formData.message}
+                                        onChange={handleChange}
                                         placeholder="How can we help you?"
-                                        className="textarea textarea-bordered h-32 focus:border-primary"
+                                        className="textarea textarea-bordered h-32 focus:border-primary w-full"
                                         required
+                                        disabled={isSubmitting}
                                     ></textarea>
                                 </div>
 
-                                <button type="submit" className="btn btn-primary w-full gap-2">
-                                    <Send className="size-4" />
-                                    Send Message
+                                <button
+                                    type="submit"
+                                    className={`btn btn-primary w-full gap-2 ${isSubmitting ? "loading" : ""}`}
+                                    disabled={isSubmitting}
+                                >
+                                    {!isSubmitting && <Send className="size-4" />}
+                                    {isSubmitting ? "Sending..." : "Send Message"}
                                 </button>
                             </form>
                         </div>

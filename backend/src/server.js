@@ -14,6 +14,7 @@ import membershipRoutes from "./routes/membership.route.js";
 import gameRoutes from "./routes/game.route.js";
 import storyRoutes from "./routes/story.route.js"; // Added import
 import translationRoutes from "./routes/translation.route.js";
+import supportRoutes from "./routes/support.route.js";
 import { connectDB } from "./lib/db.js";
 
 const app = express();
@@ -41,6 +42,7 @@ app.use("/api/couple", coupleRoutes);
 app.use("/api/membership", membershipRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/translate", translationRoutes);
+app.use("/api/support", supportRoutes);
 
 
 if (process.env.NODE_ENV === "production") {
