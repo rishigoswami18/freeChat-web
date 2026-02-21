@@ -135,6 +135,18 @@ export const unlinkCouple = async () => {
   return response.data;
 };
 
+// ----------------- STORIES -----------------
+
+export const getStories = async () => {
+  const response = await axiosInstance.get("/stories");
+  return response.data;
+};
+
+export const createStory = async (storyData) => {
+  const response = await axiosInstance.post("/stories", storyData);
+  return response.data;
+};
+
 // ----------------- MEMBERSHIP -----------------
 
 export const getMembershipStatus = async () => {

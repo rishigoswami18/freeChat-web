@@ -12,6 +12,7 @@ import chatRoutes from "./routes/chat.route.js";
 import coupleRoutes from "./routes/couple.route.js";
 import membershipRoutes from "./routes/membership.route.js";
 import gameRoutes from "./routes/game.route.js";
+import storyRoutes from "./routes/story.route.js"; // Added import
 import translationRoutes from "./routes/translation.route.js";
 import { connectDB } from "./lib/db.js";
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/posts", postsRoutes);
+app.use("/api/stories", storyRoutes); // Added usage
 app.use("/api/couple", coupleRoutes);
 app.use("/api/membership", membershipRoutes);
 app.use("/api/games", gameRoutes);
