@@ -9,6 +9,7 @@ import {
   getRecommendedUsers,
   sendFriendRequest,
   updateProfile,
+  unfriend,
 } from "../controllers/user.controller.js";
 import { migrateUsernames } from "../controllers/migration.controller.js";
 
@@ -29,6 +30,8 @@ router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.put("/profile", updateProfile);
+
+router.delete("/unfriend/:id", unfriend);
 
 // Migration route (Temporary)
 router.post("/migrate-usernames", migrateUsernames);

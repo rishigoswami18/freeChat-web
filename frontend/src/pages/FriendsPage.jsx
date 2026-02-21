@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import { getFriends } from "../lib/api";
-import { User, MessageSquare } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getFriends, unfriend } from "../lib/api";
+import { User, MessageSquare, UserMinus, Loader2 } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const FriendsPage = () => {
+  const queryClient = useQueryClient();
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
     queryFn: async () => {
@@ -14,6 +16,17 @@ const FriendsPage = () => {
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
+  });
+
+  const { mutate: doUnfriend, variables: pendingId } = useMutation({
+    mutationFn: unfriend,
+    onSuccess: () => {
+      toast.success("Friend removed");
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to unfriend");
+    }
   });
 
   return (
@@ -60,13 +73,31 @@ const FriendsPage = () => {
                       </div>
                     </div>
 
-                    <Link
-                      to={`/chat/${friend._id}`}
-                      className="btn btn-outline btn-sm flex items-center gap-1"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      Message
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/chat/${friend._id}`}
+                        className="btn btn-outline btn-sm flex items-center gap-1"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        Message
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Unfriend ${friend.fullName}?`)) {
+                            doUnfriend(friend._id);
+                          }
+                        }}
+                        disabled={pendingId === friend._id}
+                        className="btn btn-ghost btn-sm text-error hover:bg-error/10"
+                      >
+                        {pendingId === friend._id ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <UserMinus className="size-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

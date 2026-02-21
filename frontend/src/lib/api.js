@@ -69,6 +69,11 @@ export const acceptFriendRequest = async (requestId) => {
   return response.data;
 };
 
+export const unfriend = async (friendId) => {
+  const response = await axiosInstance.delete(`/users/unfriend/${friendId}`);
+  return response.data;
+};
+
 // ----------------- POSTS -----------------
 
 export const createPost = async (postData) => {
