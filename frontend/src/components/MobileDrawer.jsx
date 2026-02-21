@@ -50,7 +50,7 @@ const MobileDrawer = () => {
             <Menu className="size-5" />
           </button>
           <Link to="/" className="flex items-center gap-2">
-            <ShipWheel className="size-6 text-primary" />
+            <img src="/logo.png" alt="freeChat" className="size-6 object-contain" />
             <span className="text-lg font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
               freeChat
             </span>
@@ -78,7 +78,7 @@ const MobileDrawer = () => {
         {/* Drawer Header */}
         <div className="p-4 flex justify-between items-center border-b border-base-300">
           <div className="flex items-center gap-2">
-            <ShipWheel className="size-6 text-primary" />
+            <img src="/logo.png" alt="freeChat" className="size-6 object-contain" />
             <h2 className="text-lg font-bold">freeChat</h2>
           </div>
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
@@ -156,6 +156,8 @@ const MobileDrawer = () => {
           ))}
         </div>
       </div>
+    </>
+  );
     </>
   );
 };
