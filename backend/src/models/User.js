@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true, // Allows nulls for now during migration
+  },
   password: {
     type: String,
     required: true,

@@ -97,6 +97,15 @@ const ProfilePage = () => {
                 Update Profile
             </h1>
 
+            {authUser?.username && (
+                <div className="mb-8 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase tracking-wider text-primary opacity-70">Your Handle</span>
+                        <span className="text-xl font-mono font-bold">@{authUser.username}</span>
+                    </div>
+                </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Profile Picture Section */}
                 <div className="flex flex-col items-center gap-4 mb-8">

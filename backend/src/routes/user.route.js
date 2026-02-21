@@ -10,6 +10,7 @@ import {
   sendFriendRequest,
   updateProfile,
 } from "../controllers/user.controller.js";
+import { migrateUsernames } from "../controllers/migration.controller.js";
 
 const router = express.Router();
 router.get("/all", getAllUsers);
@@ -28,5 +29,8 @@ router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.put("/profile", updateProfile);
+
+// Migration route (Temporary)
+router.post("/migrate-usernames", migrateUsernames);
 
 export default router;

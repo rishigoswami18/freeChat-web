@@ -1,6 +1,7 @@
 import { upsertStreamUser } from "../lib/stream.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import { generateUniqueUsername } from "../utils/usernameUtils.js";
 
 // --- NEW: Bridge for Android App ---
 export async function syncFirebaseUser(req, res) {
@@ -20,10 +21,13 @@ export async function syncFirebaseUser(req, res) {
       const idx = Math.floor(Math.random() * 100) + 1;
       const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
+      const username = await generateUniqueUsername(fullName);
+
       // Create MERN user linked to Firebase
       user = await User.create({
         email,
         fullName,
+        username,
         firebaseId,
         password,
         dateOfBirth: req.body.dateOfBirth || new Date("2000-01-01"),
@@ -83,9 +87,12 @@ export async function signup(req, res) {
     const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
+    const username = await generateUniqueUsername(fullName);
+
     const newUser = await User.create({
       email,
       fullName,
+      username,
       password,
       dateOfBirth: dob,
       profilePic: randomAvatar,

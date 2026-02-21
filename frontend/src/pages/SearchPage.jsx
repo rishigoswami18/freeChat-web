@@ -65,8 +65,8 @@ const SearchPage = () => {
                         <div
                             key={user._id}
                             className={`group p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border shadow-sm ${user.isTandemMatch
-                                    ? "bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 hover:border-primary/40 shadow-md ring-1 ring-primary/5"
-                                    : "bg-base-200/50 hover:bg-base-200 border-transparent hover:border-primary/10"
+                                ? "bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 hover:border-primary/40 shadow-md ring-1 ring-primary/5"
+                                : "bg-base-200/50 hover:bg-base-200 border-transparent hover:border-primary/10"
                                 }`}
                         >
                             <div className="avatar">
@@ -85,6 +85,9 @@ const SearchPage = () => {
                                         </span>
                                     )}
                                 </div>
+                                {user.username && (
+                                    <p className="text-xs font-mono font-semibold text-primary/70">@{user.username}</p>
+                                )}
                                 <p className="text-xs text-base-content/50 font-medium truncate">
                                     {user.nativeLanguage} • Learning {user.learningLanguage}
                                 </p>
