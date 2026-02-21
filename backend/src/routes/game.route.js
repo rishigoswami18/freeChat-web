@@ -324,6 +324,17 @@ router.post("/submit", checkMembership, async (req, res) => {
             });
 
             session.score = Math.round((matches / session.questions.length) * 100);
+
+            // --- Award Badges ---
+            try {
+                const badgeName = "Quiz Master";
+                await User.updateMany(
+                    { _id: { $in: session.participants } },
+                    { $addToSet: { badges: badgeName } }
+                );
+            } catch (badgeError) {
+                console.error("Error awarding badges:", badgeError);
+            }
         }
 
         await session.save();

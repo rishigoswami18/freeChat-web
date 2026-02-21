@@ -51,6 +51,26 @@ export async function syncFirebaseUser(req, res) {
       expiresIn: "7d",
     });
 
+    // --- Streak Logic ---
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+    if (!user.lastLoginDate) {
+      user.streak = 1;
+    } else {
+      const lastLogin = new Date(user.lastLoginDate);
+      const lastLoginDay = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate()).getTime();
+      const diffDays = (today - lastLoginDay) / (1000 * 60 * 60 * 24);
+
+      if (diffDays === 1) {
+        user.streak += 1;
+      } else if (diffDays > 1) {
+        user.streak = 1;
+      }
+    }
+    user.lastLoginDate = now;
+    await user.save();
+
     res.status(200).json({ success: true, user, token });
   } catch (error) {
     console.log("Error in firebase sync controller", error);
@@ -96,6 +116,8 @@ export async function signup(req, res) {
       password,
       dateOfBirth: dob,
       profilePic: randomAvatar,
+      streak: 1,
+      lastLoginDate: new Date(),
     });
 
     try {
@@ -150,6 +172,26 @@ export async function login(req, res) {
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
     });
+
+    // --- Streak Logic ---
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+    if (!user.lastLoginDate) {
+      user.streak = 1;
+    } else {
+      const lastLogin = new Date(user.lastLoginDate);
+      const lastLoginDay = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate()).getTime();
+      const diffDays = (today - lastLoginDay) / (1000 * 60 * 60 * 24);
+
+      if (diffDays === 1) {
+        user.streak += 1;
+      } else if (diffDays > 1) {
+        user.streak = 1;
+      }
+    }
+    user.lastLoginDate = now;
+    await user.save();
 
     res.status(200).json({ success: true, user });
   } catch (error) {

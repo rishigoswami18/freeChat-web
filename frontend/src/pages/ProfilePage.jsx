@@ -5,6 +5,8 @@ import { updateProfile } from "../lib/api";
 import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
+import BadgeIcon from "../components/BadgeIcon";
+import { Flame } from "lucide-react";
 
 const ProfilePage = () => {
     const { authUser, isLoading } = useAuthUser();
@@ -98,11 +100,33 @@ const ProfilePage = () => {
             </h1>
 
             {authUser?.username && (
-                <div className="mb-8 p-3 bg-primary/5 rounded-xl border border-primary/10 flex items-center justify-between">
-                    <div className="flex flex-col">
-                        <span className="text-xs font-bold uppercase tracking-wider text-primary opacity-70">Your Handle</span>
-                        <span className="text-xl font-mono font-bold">@{authUser.username}</span>
+                <div className="mb-8 p-4 bg-base-200 rounded-2xl border border-primary/10 flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <span className="text-xs font-bold uppercase tracking-wider text-primary opacity-70">Your Handle</span>
+                            <span className="text-xl font-mono font-bold">@{authUser.username}</span>
+                        </div>
+                        {authUser.streak > 0 && (
+                            <div className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 rounded-xl border border-orange-500/20 text-orange-500">
+                                <Flame className="size-6 fill-current" />
+                                <div className="flex flex-col leading-none">
+                                    <span className="text-xl font-black">{authUser.streak}</span>
+                                    <span className="text-[10px] uppercase font-bold opacity-70">Day Streak</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
+
+                    {authUser.badges?.length > 0 && (
+                        <div className="pt-3 border-t border-base-300">
+                            <p className="text-xs font-bold uppercase tracking-wider opacity-50 mb-2">Earned Badges</p>
+                            <div className="flex flex-wrap gap-2">
+                                {authUser.badges.map((badge, idx) => (
+                                    <BadgeIcon key={idx} name={badge} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

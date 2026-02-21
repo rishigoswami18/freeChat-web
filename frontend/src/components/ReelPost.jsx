@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Share2, User, Play, Pause, Music, Send, X } from "lucide-react";
+import { Heart, MessageCircle, Share2, User, Play, Pause, Music, Send, X, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { likePost, commentOnPost, sharePost } from "../lib/api";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ReelPost = ({ post, isActive }) => {
     const videoRef = useRef(null);
@@ -105,7 +106,13 @@ const ReelPost = ({ post, isActive }) => {
                         onClick={() => toggleLike()}
                         className={`btn btn-circle btn-ghost bg-black/20 hover:bg-black/40 ${liked ? 'text-red-500' : 'text-white'}`}
                     >
-                        <Heart className={`size-7 ${liked ? 'fill-current' : ''}`} />
+                        <motion.div
+                            whileTap={{ scale: 0.8 }}
+                            animate={{ scale: liked ? [1, 1.4, 1] : 1 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <Heart className={`size-7 ${liked ? 'fill-current' : ''}`} />
+                        </motion.div>
                     </button>
                     <span className="text-white text-xs font-bold">{likesCount}</span>
                 </div>

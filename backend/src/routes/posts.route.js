@@ -54,14 +54,29 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get video posts only (for Reels)
+// Get video posts with prioritization (for Reels)
 router.get("/videos", async (req, res) => {
   try {
+    // Return videos sorted by a score of (likes + shares) and date
+    // For simplicity, we'll fetch more than needed and sort them or just use a weighted sort if possible.
+    // Here we'll just get all videos and sort by popular + recent.
     const posts = await Post.find({
       mediaType: "video",
-    }).sort({ createdAt: -1 });
+    });
 
-    res.json(posts);
+    // Sort logic: Popularity (likes + shares) weighted with recency
+    const sortedPosts = posts.sort((a, b) => {
+      const scoreA = (a.likes.length * 2) + (a.shareCount * 5);
+      const scoreB = (b.likes.length * 2) + (b.shareCount * 5);
+
+      // If scores are equal, sort by date
+      if (scoreA === scoreB) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return scoreB - scoreA;
+    });
+
+    res.json(sortedPosts);
   } catch (err) {
     console.error("Error fetching video posts:", err.message);
     res.status(500).json({ message: "Internal Server Error" });
