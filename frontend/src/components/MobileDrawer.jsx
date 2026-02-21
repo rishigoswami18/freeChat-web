@@ -15,6 +15,7 @@ import {
   User,
   Search,
   Film,
+  Flame,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -59,6 +60,12 @@ const MobileDrawer = () => {
 
         <div className="flex items-center gap-1">
           <ThemeSelector size="btn-sm" />
+          {authUser?.streak > 0 && (
+            <div className="flex items-center gap-1 px-2 py-1 bg-orange-500/10 rounded-full border border-orange-500/20 text-orange-500 mr-1 animate-pulse">
+              <Flame className="size-4 fill-current" />
+              <span className="font-bold text-xs">{authUser.streak}</span>
+            </div>
+          )}
           <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
             <Bell className="size-4" />
           </Link>
@@ -80,6 +87,12 @@ const MobileDrawer = () => {
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="freeChat" className="size-6 object-contain" />
             <h2 className="text-lg font-bold">freeChat</h2>
+            {authUser?.streak > 0 && (
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/10 rounded-lg border border-orange-500/20 text-orange-500 animate-pulse ml-1">
+                <Flame className="size-3.5 fill-current" />
+                <span className="font-bold text-xs">{authUser.streak}</span>
+              </div>
+            )}
           </div>
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
             <X className="size-5" />
