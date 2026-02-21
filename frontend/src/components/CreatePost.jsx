@@ -3,6 +3,15 @@ import { createPost } from "../lib/api";
 import { ImageIcon, VideoIcon, X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
+const TRENDING_SONGS = [
+  "Blinding Lights - The Weeknd",
+  "Stay - The Kid LAROI & Justin Bieber",
+  "Flowers - Miley Cyrus",
+  "As It Was - Harry Styles",
+  "Heat Waves - Glass Animals",
+  "Original Audio",
+];
+
 const CreatePost = ({ onPost, authUser }) => {
   const [content, setContent] = useState("");
   const [media, setMedia] = useState(null); // base64 string
@@ -121,14 +130,28 @@ const CreatePost = ({ onPost, authUser }) => {
 
         {/* Song Name Input (Only for Videos) */}
         {mediaType === "video" && (
-          <div className="mt-3 relative">
-            <input
-              type="text"
-              placeholder="Song Name (e.g. Blinding Lights - The Weeknd)"
-              className="input input-bordered input-sm w-full bg-base-100 focus:border-primary"
-              value={songName}
-              onChange={(e) => setSongName(e.target.value)}
-            />
+          <div className="mt-3 space-y-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Song Name (e.g. Blinding Lights - The Weeknd)"
+                className="input input-bordered input-sm w-full bg-base-100 focus:border-primary"
+                value={songName}
+                onChange={(e) => setSongName(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-[10px] font-bold opacity-40 w-full uppercase tracking-wider">Suggested Songs</span>
+              {TRENDING_SONGS.map((song) => (
+                <button
+                  key={song}
+                  onClick={() => setSongName(song)}
+                  className={`badge badge-sm cursor-pointer hover:bg-primary hover:text-primary-content transition-colors ${songName === song ? 'badge-primary' : 'badge-outline opacity-60'}`}
+                >
+                  {song}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

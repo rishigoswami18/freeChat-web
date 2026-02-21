@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Share2, User, Play, Pause, Music } from "lucide-react";
+import { Heart, MessageCircle, Share2, User, Play, Pause, Music, Send, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { likePost } from "../lib/api";
+import { likePost, commentOnPost, sharePost } from "../lib/api";
 import toast from "react-hot-toast";
 
 const ReelPost = ({ post, isActive }) => {
     const videoRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [liked, setLiked] = useState(post.likes.includes(post.userId)); // Simplified
+    const [liked, setLiked] = useState(post.likes.includes(post.userId));
     const [likesCount, setLikesCount] = useState(post.likes.length);
+    const [showComments, setShowComments] = useState(false);
+    const [commentText, setCommentText] = useState("");
+    const [isCommenting, setIsCommenting] = useState(false);
     const queryClient = useQueryClient();
 
     const { mutate: toggleLike } = useMutation({
@@ -18,6 +21,34 @@ const ReelPost = ({ post, isActive }) => {
             setLikesCount(data.likes.length);
         }
     });
+
+    const handleComment = async () => {
+        if (!commentText.trim() || isCommenting) return;
+        setIsCommenting(true);
+        try {
+            const newComment = await commentOnPost(post._id, commentText.trim());
+            // local update for immediate feedback
+            post.comments.push(newComment);
+            setCommentText("");
+            toast.success("Comment added!");
+        } catch {
+            toast.error("Failed to add comment");
+        } finally {
+            setIsCommenting(false);
+        }
+    };
+
+    const handleShare = async () => {
+        try {
+            const url = `${window.location.origin}/reels?id=${post._id}`;
+            await navigator.clipboard.writeText(url);
+            await sharePost(post._id);
+            post.shareCount = (post.shareCount || 0) + 1;
+            toast.success("Link copied to clipboard!");
+        } catch {
+            toast.error("Failed to share");
+        }
+    };
 
     useEffect(() => {
         const video = videoRef.current;
@@ -80,19 +111,82 @@ const ReelPost = ({ post, isActive }) => {
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
-                    <button className="btn btn-circle btn-ghost bg-black/20 hover:bg-black/40 text-white">
+                    <button
+                        onClick={() => setShowComments(true)}
+                        className="btn btn-circle btn-ghost bg-black/20 hover:bg-black/40 text-white"
+                    >
                         <MessageCircle className="size-7" />
                     </button>
                     <span className="text-white text-xs font-bold">{post.comments.length}</span>
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
-                    <button className="btn btn-circle btn-ghost bg-black/20 hover:bg-black/40 text-white">
+                    <button
+                        onClick={handleShare}
+                        className="btn btn-circle btn-ghost bg-black/20 hover:bg-black/40 text-white"
+                    >
                         <Share2 className="size-7" />
                     </button>
                     <span className="text-white text-xs font-bold">{post.shareCount}</span>
                 </div>
             </div>
+
+            {/* COMMENTS DRAWER */}
+            {showComments && (
+                <div className="absolute inset-0 z-[100] bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="absolute bottom-0 inset-x-0 bg-base-100 rounded-t-3xl h-[60%] flex flex-col animate-in slide-in-from-bottom duration-300">
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h3 className="font-bold">Comments ({post.comments.length})</h3>
+                            <button onClick={() => setShowComments(false)} className="btn btn-ghost btn-circle btn-sm">
+                                <X className="size-5" />
+                            </button>
+                        </div>
+
+                        {/* Comments List */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {post.comments.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center opacity-30">
+                                    <MessageCircle className="size-12 mb-2" />
+                                    <p>No comments yet</p>
+                                </div>
+                            ) : (
+                                post.comments.map((comment, i) => (
+                                    <div key={i} className="flex gap-3">
+                                        <div className="avatar size-8 rounded-full overflow-hidden bg-base-300 flex-shrink-0">
+                                            <img src={comment.profilePic || "/avatar.png"} alt="" />
+                                        </div>
+                                        <div className="bg-base-200 rounded-2xl p-3 flex-1">
+                                            <p className="font-bold text-xs">{comment.fullName}</p>
+                                            <p className="text-sm">{comment.text}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="p-4 border-t bg-base-200/50">
+                            <div className="flex items-center gap-2 bg-base-100 rounded-full px-4 py-1 border focus-within:border-primary transition-colors">
+                                <input
+                                    type="text"
+                                    placeholder="Add a comment..."
+                                    className="input input-ghost input-sm flex-1 bg-transparent focus:outline-none"
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleComment()}
+                                />
+                                <button
+                                    onClick={handleComment}
+                                    disabled={!commentText.trim() || isCommenting}
+                                    className="btn btn-ghost btn-circle btn-sm text-primary"
+                                >
+                                    {isCommenting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom Info */}
             <div className="absolute left-4 bottom-8 right-16 z-10 text-white">

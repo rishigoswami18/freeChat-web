@@ -6,6 +6,15 @@ import toast from "react-hot-toast";
 import StoryViewer from "./StoryViewer";
 import useAuthUser from "../hooks/useAuthUser";
 
+const TRENDING_SONGS = [
+    "Blinding Lights - The Weeknd",
+    "Stay - The Kid LAROI & Justin Bieber",
+    "Flowers - Miley Cyrus",
+    "As It Was - Harry Styles",
+    "Heat Waves - Glass Animals",
+    "Original Audio",
+];
+
 const StoryTray = () => {
     const { authUser } = useAuthUser();
     const [selectedUserStories, setSelectedUserStories] = useState(null);
@@ -152,15 +161,28 @@ const StoryTray = () => {
                                     value={caption}
                                     onChange={(e) => setCaption(e.target.value)}
                                 />
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Song Name (Optional)"
-                                        className="input input-bordered w-full bg-base-200 focus:border-primary border-none rounded-xl pl-10"
-                                        value={songName}
-                                        onChange={(e) => setSongName(e.target.value)}
-                                    />
-                                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-50 rotate-45" />
+                                <div className="space-y-2">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Song Name (Optional)"
+                                            className="input input-bordered w-full bg-base-200 focus:border-primary border-none rounded-xl pl-10"
+                                            value={songName}
+                                            onChange={(e) => setSongName(e.target.value)}
+                                        />
+                                        <Plus className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-50 rotate-45" />
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5 px-1 font-sans">
+                                        {TRENDING_SONGS.map((song) => (
+                                            <button
+                                                key={song}
+                                                onClick={() => setSongName(song)}
+                                                className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${songName === song ? 'bg-primary text-primary-content border-primary' : 'bg-base-200 text-base-content/60 border-base-300 hover:border-primary/40'}`}
+                                            >
+                                                {song}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
