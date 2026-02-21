@@ -106,6 +106,11 @@ export const sharePost = async (postId) => {
   return response.data;
 };
 
+export const getVideoPosts = async () => {
+  const response = await axiosInstance.get("/posts/videos");
+  return response.data;
+};
+
 // ----------------- CHAT / STREAM -----------------
 
 export const getStreamToken = async () => {

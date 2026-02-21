@@ -8,6 +8,7 @@ const CreatePost = ({ onPost, authUser }) => {
   const [media, setMedia] = useState(null); // base64 string
   const [mediaType, setMediaType] = useState(""); // "image" or "video"
   const [mediaPreview, setMediaPreview] = useState(null); // preview URL
+  const [songName, setSongName] = useState("");
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -34,6 +35,7 @@ const CreatePost = ({ onPost, authUser }) => {
     setMedia(null);
     setMediaType("");
     setMediaPreview(null);
+    setSongName("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -49,6 +51,7 @@ const CreatePost = ({ onPost, authUser }) => {
         content: content.trim(),
         media,
         mediaType,
+        songName: songName.trim(),
       };
       const saved = await createPost(postData);
       onPost(saved);
@@ -113,6 +116,19 @@ const CreatePost = ({ onPost, authUser }) => {
                 className="w-full max-h-80"
               />
             )}
+          </div>
+        )}
+
+        {/* Song Name Input (Only for Videos) */}
+        {mediaType === "video" && (
+          <div className="mt-3 relative">
+            <input
+              type="text"
+              placeholder="Song Name (e.g. Blinding Lights - The Weeknd)"
+              className="input input-bordered input-sm w-full bg-base-100 focus:border-primary"
+              value={songName}
+              onChange={(e) => setSongName(e.target.value)}
+            />
           </div>
         )}
 

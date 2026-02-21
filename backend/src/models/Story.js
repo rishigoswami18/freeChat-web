@@ -7,6 +7,7 @@ const storySchema = new mongoose.Schema(
         profilePic: { type: String, default: "" },
         imageUrl: { type: String, required: true },
         caption: { type: String, default: "" },
+        songName: { type: String, default: "Original Audio" },
         createdAt: { type: Date, default: Date.now, index: { expires: "24h" } },
     },
     { timestamps: true }

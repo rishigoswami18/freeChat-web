@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Music } from "lucide-react";
 
 const StoryViewer = ({ group, onClose }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -94,13 +94,33 @@ const StoryViewer = ({ group, onClose }) => {
                 <div className="absolute inset-y-20 left-0 w-1/4 z-20" onClick={handlePrev} />
                 <div className="absolute inset-y-20 right-0 w-1/4 z-20" onClick={handleNext} />
 
+                {/* Song Info */}
+                <div className="absolute bottom-6 left-6 z-30 flex items-center gap-2 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 group/song">
+                    <Music className="size-3.5 text-white animate-pulse" />
+                    <div className="overflow-hidden w-24 sm:w-32">
+                        <p className="text-white text-[10px] font-bold whitespace-nowrap animate-marquee-story">
+                            {story.songName || "Original Audio"}
+                        </p>
+                    </div>
+                </div>
+
                 {/* Caption */}
                 {story.caption && (
-                    <div className="absolute bottom-10 inset-x-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-center">
-                        <p className="text-white text-sm font-medium">{story.caption}</p>
+                    <div className="absolute bottom-14 inset-x-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-center z-20">
+                        <p className="text-white text-sm font-medium drop-shadow-md">{story.caption}</p>
                     </div>
                 )}
             </div>
+
+            <style>{`
+                @keyframes marquee-story {
+                    0% { transform: translateX(120%); }
+                    100% { transform: translateX(-120%); }
+                }
+                .animate-marquee-story {
+                    animation: marquee-story 8s linear infinite;
+                }
+            `}</style>
 
             {/* Desktop Controls */}
             <button

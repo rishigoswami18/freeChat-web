@@ -10,7 +10,7 @@ router.use(protectRoute);
 // Create story
 router.post("/", async (req, res) => {
     try {
-        const { image, caption } = req.body;
+        const { image, caption, songName } = req.body;
 
         if (!image) {
             return res.status(400).json({ message: "Image is required for a story" });
@@ -27,6 +27,7 @@ router.post("/", async (req, res) => {
             profilePic: req.user.profilePic || "",
             imageUrl: uploaded.secure_url,
             caption: caption || "",
+            songName: songName || "Original Audio",
         });
 
         res.status(201).json(newStory);

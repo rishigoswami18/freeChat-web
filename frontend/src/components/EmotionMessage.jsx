@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
-import { Languages, Loader2, Star } from "lucide-react";
+import { Languages, Loader2, Star, Camera, CheckCircle } from "lucide-react";
+import SnapViewer from "./SnapViewer";
 import useAuthUser from "../hooks/useAuthUser";
 import { translateText } from "../lib/api";
 import toast from "react-hot-toast";
@@ -29,6 +30,27 @@ const EmotionMessage = (props) => {
 
   const [translatedText, setTranslatedText] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isViewingSnap, setIsViewingSnap] = useState(false);
+
+  const isSnap = message?.extra_data?.isSnap || message?.isSnap;
+  const isViewed = message?.extra_data?.isViewed || message?.isViewed;
+
+  const handleMarkViewed = async () => {
+    setIsViewingSnap(false);
+    if (isViewed || isMyMessage) return;
+
+    try {
+      // Update message on Stream
+      const client = messageContext?.client;
+      if (client) {
+        await client.partialUpdateMessage(message.id, {
+          set: { isViewed: true, extra_data: { ...message.extra_data, isViewed: true } }
+        });
+      }
+    } catch (error) {
+      console.error("Error marking snap as viewed:", error);
+    }
+  };
 
   const emotion =
     message?.emotion ||
@@ -65,17 +87,45 @@ const EmotionMessage = (props) => {
 
   return (
     <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}>
-      <MessageSimple
-        {...props}
-        // Only show avatar on the FIRST message of a group, and never for my own messages
-        hideAvatar={!isFirstInGroup || isMyMessage}
-        // Customizing components to keep it professional but functional
-        MessageFooter={() => (isLastInGroup && !isMyMessage) ? (
-          <div className="text-[9px] opacity-40 ml-12 mt-1">
-            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        ) : null}
-      />
+      {isSnap ? (
+        <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
+          {isViewed ? (
+            <div className="flex items-center gap-2 bg-base-200/50 px-4 py-2 rounded-2xl border border-base-300 opacity-60">
+              <CheckCircle className="size-4 text-success" />
+              <span className="text-xs font-medium italic">Viewed snap</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsViewingSnap(true)}
+              className="flex items-center gap-3 bg-primary text-primary-content px-5 py-3 rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all group/snap"
+            >
+              <div className="size-8 rounded-full bg-white/20 flex items-center justify-center">
+                <Camera className="size-5" />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-bold uppercase tracking-wider">New Snap</p>
+                <p className="text-[10px] opacity-80">Tap to view</p>
+              </div>
+            </button>
+          )}
+
+          {isViewingSnap && (
+            <SnapViewer snap={props} onClose={handleMarkViewed} />
+          )}
+        </div>
+      ) : (
+        <MessageSimple
+          {...props}
+          // Only show avatar on the FIRST message of a group, and never for my own messages
+          hideAvatar={!isFirstInGroup || isMyMessage}
+          // Customizing components to keep it professional but functional
+          MessageFooter={() => (isLastInGroup && !isMyMessage) ? (
+            <div className="text-[9px] opacity-40 ml-12 mt-1">
+              {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          ) : null}
+        />
+      )}
 
       <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} -mt-1.5 mb-1`}>
         {/* Emotion Badge - Subtle and only when needed */}

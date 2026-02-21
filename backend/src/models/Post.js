@@ -18,6 +18,7 @@ const postSchema = new mongoose.Schema(
     caption: { type: String, default: "" },
     mediaUrl: { type: String, default: "" },
     mediaType: { type: String, enum: ["image", "video", ""], default: "" },
+    songName: { type: String, default: "Original Audio" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema],
     shareCount: { type: Number, default: 0 },

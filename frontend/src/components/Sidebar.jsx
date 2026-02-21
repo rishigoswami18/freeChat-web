@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search } from "lucide-react";
+import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search, Film } from "lucide-react";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
@@ -53,6 +53,15 @@ const Sidebar = () => {
         >
           <Search className="size-5 text-base-content opacity-70" />
           <span>Search</span>
+        </Link>
+
+        <Link
+          to="/reels"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/reels" ? "btn-active" : ""
+            }`}
+        >
+          <Film className="size-5 text-secondary opacity-70" />
+          <span>Reels</span>
         </Link>
 
         <Link

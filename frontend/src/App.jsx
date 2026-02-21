@@ -15,6 +15,7 @@ import GameDashboard from "./pages/GameDashboard.jsx";
 import CompatibilityQuiz from "./pages/CompatibilityQuiz.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import ReelsPage from "./pages/ReelsPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -138,6 +139,18 @@ const App = () => {
                   isAuthenticated && isOnboarded ? (
                     <Layout showSidebar={false}>
                       <ChatPage />
+                    </Layout>
+                  ) : (
+                    <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                  )
+                }
+              />
+              <Route
+                path="/reels"
+                element={
+                  isAuthenticated && isOnboarded ? (
+                    <Layout showSidebar={false}>
+                      <ReelsPage />
                     </Layout>
                   ) : (
                     <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

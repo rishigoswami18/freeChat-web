@@ -8,9 +8,12 @@ import useAuthUser from "../hooks/useAuthUser";
 
 const StoryTray = () => {
     const { authUser } = useAuthUser();
+    const [selectedUserStories, setSelectedUserStories] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [caption, setCaption] = useState("");
+    const [songName, setSongName] = useState("");
     const queryClient = useQueryClient();
     const fileInputRef = useRef(null);
-    const [selectedUserStories, setSelectedUserStories] = useState(null);
 
     const { data: storiesGrouped = [], isLoading } = useQuery({
         queryKey: ["stories"],
@@ -22,6 +25,9 @@ const StoryTray = () => {
         onSuccess: () => {
             toast.success("Story shared! ✨");
             queryClient.invalidateQueries({ queryKey: ["stories"] });
+            setPreviewImage(null);
+            setCaption("");
+            setSongName("");
         },
         onError: (err) => toast.error(err.response?.data?.message || "Failed to share story"),
     });
@@ -31,10 +37,19 @@ const StoryTray = () => {
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                uploadStory({ image: reader.result });
+                setPreviewImage(reader.result);
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleConfirmUpload = () => {
+        if (!previewImage) return;
+        uploadStory({
+            image: previewImage,
+            caption: caption.trim(),
+            songName: songName.trim() || "Original Audio"
+        });
     };
 
     return (
@@ -112,6 +127,66 @@ const StoryTray = () => {
                     group={selectedUserStories}
                     onClose={() => setSelectedUserStories(null)}
                 />
+            )}
+
+            {/* Story Creation Modal */}
+            {previewImage && (
+                <div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
+                    <div className="bg-base-100 rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="relative aspect-[9/16] bg-base-300">
+                            <img src={previewImage} className="w-full h-full object-cover" alt="Preview" />
+                            <button
+                                onClick={() => setPreviewImage(null)}
+                                className="absolute top-4 right-4 btn btn-circle btn-sm bg-black/40 text-white border-none hover:bg-black/60"
+                            >
+                                <Plus className="size-5 rotate-45" />
+                            </button>
+                        </div>
+
+                        <div className="p-5 space-y-4">
+                            <div className="space-y-3">
+                                <input
+                                    type="text"
+                                    placeholder="Add a caption..."
+                                    className="input input-bordered w-full bg-base-200 focus:border-primary border-none rounded-xl"
+                                    value={caption}
+                                    onChange={(e) => setCaption(e.target.value)}
+                                />
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Song Name (Optional)"
+                                        className="input input-bordered w-full bg-base-200 focus:border-primary border-none rounded-xl pl-10"
+                                        value={songName}
+                                        onChange={(e) => setSongName(e.target.value)}
+                                    />
+                                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-50 rotate-45" />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    className="btn btn-ghost flex-1 rounded-xl"
+                                    onClick={() => setPreviewImage(null)}
+                                    disabled={isUploading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-primary flex-1 rounded-xl gap-2 shadow-lg shadow-primary/20"
+                                    onClick={handleConfirmUpload}
+                                    disabled={isUploading}
+                                >
+                                    {isUploading ? (
+                                        <Loader2 className="size-4 animate-spin" />
+                                    ) : (
+                                        "Share Now"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
