@@ -16,6 +16,10 @@ import CompatibilityQuiz from "./pages/CompatibilityQuiz.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import ReelsPage from "./pages/ReelsPage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
+import TermsPage from "./pages/TermsPage.jsx";
+import RefundPolicyPage from "./pages/RefundPolicyPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -251,6 +255,12 @@ const App = () => {
                   )
                 }
               />
+
+              {/* Public Support & Legal Pages (Required for Razorpay compliance) */}
+              <Route path="/contact" element={<Layout showSidebar={false}><ContactPage /></Layout>} />
+              <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
+              <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
+              <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
 
               {/* Catch-all route to prevent blank screens */}
               <Route path="*" element={<Navigate to="/" replace />} />
