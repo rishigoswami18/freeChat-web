@@ -21,13 +21,14 @@ router.use(protectRoute);
 router.get("/status", async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
-            .select("partnerId coupleStatus anniversary")
+            .select("partnerId coupleStatus anniversary coupleRequestSenderId")
             .populate("partnerId", "fullName profilePic bio");
 
         res.json({
             coupleStatus: user.coupleStatus,
             partner: user.partnerId || null,
             anniversary: user.anniversary,
+            coupleRequestSenderId: user.coupleRequestSenderId,
         });
     } catch (err) {
         console.error("Error getting couple status:", err.message);
@@ -81,10 +82,12 @@ router.post("/request/:id", async (req, res) => {
         // Set both users to pending
         me.partnerId = partnerId;
         me.coupleStatus = "pending";
+        me.coupleRequestSenderId = myId;
         await me.save();
 
         partner.partnerId = myId;
         partner.coupleStatus = "pending";
+        partner.coupleRequestSenderId = myId;
         await partner.save();
 
         res.status(200).json({ message: "Couple request sent!" });
@@ -125,10 +128,12 @@ router.put("/accept/:id", async (req, res) => {
         const now = new Date();
         me.coupleStatus = "coupled";
         me.anniversary = now;
+        me.coupleRequestSenderId = null;
         await me.save();
 
         partner.coupleStatus = "coupled";
         partner.anniversary = now;
+        partner.coupleRequestSenderId = null;
         await partner.save();
 
         res.status(200).json({ message: "You are now a couple! 💑" });
@@ -153,6 +158,7 @@ router.delete("/unlink", async (req, res) => {
         me.partnerId = null;
         me.coupleStatus = "none";
         me.anniversary = null;
+        me.coupleRequestSenderId = null;
         await me.save();
 
         // Clear partner's couple data
@@ -160,6 +166,7 @@ router.delete("/unlink", async (req, res) => {
             partner.partnerId = null;
             partner.coupleStatus = "none";
             partner.anniversary = null;
+            partner.coupleRequestSenderId = null;
             await partner.save();
         }
 

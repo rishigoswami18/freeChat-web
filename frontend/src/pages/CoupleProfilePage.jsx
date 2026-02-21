@@ -160,7 +160,7 @@ const CoupleProfilePage = () => {
         );
     }
 
-    const { coupleStatus, partner, anniversary } = coupleData || {};
+    const { coupleStatus, partner, anniversary, coupleRequestSenderId } = coupleData || {};
 
     // Calculate days together
     const getDaysTogether = () => {
@@ -170,7 +170,7 @@ const CoupleProfilePage = () => {
 
     // Who initiated the request? If partnerId sent to me, I need to accept
     const iReceivedRequest =
-        coupleStatus === "pending" && partner;
+        coupleStatus === "pending" && partner && coupleRequestSenderId && coupleRequestSenderId !== authUser._id;
 
     const filteredFriends = friends.filter((f) =>
         f.fullName?.toLowerCase().includes(searchTerm.toLowerCase())

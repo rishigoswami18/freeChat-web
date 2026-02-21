@@ -66,6 +66,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  coupleRequestSenderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
   // Membership fields
   isMember: {
     type: Boolean,
