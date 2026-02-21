@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRecommendedUsers, sendFriendRequest } from "../lib/api";
-import { Search, UserPlus, Check, X, Loader2 } from "lucide-react";
+import { Search, UserPlus, Check, X, Loader2, Star } from "lucide-react";
 import toast from "react-hot-toast";
 
 const SearchPage = () => {
@@ -64,15 +64,27 @@ const SearchPage = () => {
                     users.map((user) => (
                         <div
                             key={user._id}
-                            className="group bg-base-200/50 hover:bg-base-200 p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border border-transparent hover:border-primary/10 shadow-sm"
+                            className={`group p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border shadow-sm ${user.isTandemMatch
+                                    ? "bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 hover:border-primary/40 shadow-md ring-1 ring-primary/5"
+                                    : "bg-base-200/50 hover:bg-base-200 border-transparent hover:border-primary/10"
+                                }`}
                         >
                             <div className="avatar">
-                                <div className="size-14 rounded-full ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                                <div className={`size-14 rounded-full ring-2 transition-all ${user.isTandemMatch ? "ring-primary/40 scale-105" : "ring-transparent group-hover:ring-primary/20"
+                                    }`}>
                                     <img src={user.profilePic || "/avatar.png"} alt={user.fullName} />
                                 </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-base tracking-tight">{user.fullName}</h3>
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-base tracking-tight">{user.fullName}</h3>
+                                    {user.isTandemMatch && (
+                                        <span className="badge badge-primary badge-sm gap-1 py-2.5 font-bold animate-pulse">
+                                            <Star className="size-3 fill-current" />
+                                            Tandem Match
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="text-xs text-base-content/50 font-medium truncate">
                                     {user.nativeLanguage} • Learning {user.learningLanguage}
                                 </p>

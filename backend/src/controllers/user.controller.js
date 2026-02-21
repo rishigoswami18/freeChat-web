@@ -33,7 +33,37 @@ export async function getRecommendedUsers(req, res) {
       query.$and.push({ fullName: { $regex: q, $options: "i" } });
     }
 
-    const recommendedUsers = await User.find(query);
+    let recommendedUsers = await User.find(query);
+
+    // Calculate match scores
+    recommendedUsers = recommendedUsers.map(user => {
+      const userObj = user.toObject();
+      let matchScore = 0;
+      let isTandemMatch = false;
+
+      // Perfect Match: B speaks L (what A learns) AND B learns N (what A speaks)
+      if (user.nativeLanguage === currentUser.learningLanguage && user.learningLanguage === currentUser.nativeLanguage) {
+        matchScore = 100;
+        isTandemMatch = true;
+      }
+      // High Match: B speaks L (what A learns)
+      else if (user.nativeLanguage === currentUser.learningLanguage) {
+        matchScore = 50;
+      }
+      // Medium Match: B learns N (what A speaks)
+      else if (user.learningLanguage === currentUser.nativeLanguage) {
+        matchScore = 25;
+      }
+
+      return { ...userObj, matchScore, isTandemMatch };
+    });
+
+    // Sort by matchScore descending, then by newest
+    recommendedUsers.sort((a, b) => {
+      if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+      return b.createdAt - a.createdAt;
+    });
+
     res.status(200).json(recommendedUsers);
   } catch (error) {
     console.error("Error in getRecommendedUsers controller", error.message);
