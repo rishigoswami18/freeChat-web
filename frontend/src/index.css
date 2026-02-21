@@ -22,6 +22,16 @@
   --str-chat__primary-surface-color-low-emphasis: oklch(var(--b3));
   --str-chat__border-radius-circle: 9999px;
   font-family: inherit;
+  line-height: inherit;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .str-chat-channel,

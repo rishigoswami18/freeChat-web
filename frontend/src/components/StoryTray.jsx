@@ -37,16 +37,14 @@ const StoryTray = () => {
         }
     };
 
-    if (isLoading) return null;
-
     return (
-        <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
+        <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth min-h-[100px]">
             {/* Add Story Button */}
             <div className="flex flex-col items-center gap-1 min-w-[70px]">
                 <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="relative size-16 rounded-full border-2 border-dashed border-primary/50 flex items-center justify-center hover:bg-primary/5 transition-all group overflow-hidden"
+                    className="relative size-16 rounded-full border-2 border-dashed border-primary/50 flex items-center justify-center hover:bg-primary/5 transition-all group overflow-hidden bg-base-200"
                 >
                     {isUploading ? (
                         <Loader2 className="size-6 animate-spin text-primary" />
@@ -74,26 +72,34 @@ const StoryTray = () => {
             </div>
 
             {/* Friend Stories */}
-            {storiesGrouped.map((group) => (
-                <div
-                    key={group.userId}
-                    className="flex flex-col items-center gap-1 cursor-pointer min-w-[70px]"
-                    onClick={() => setSelectedUserStories(group)}
-                >
-                    <div className="size-16 rounded-full p-1 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
-                        <div className="size-full rounded-full border-2 border-base-100 overflow-hidden bg-base-300">
-                            <img
-                                src={group.profilePic || "/avatar.png"}
-                                alt={group.fullName}
-                                className="size-full object-cover"
-                            />
-                        </div>
-                    </div>
-                    <span className="text-[10px] font-medium truncate w-full text-center">
-                        {group.userId === authUser?._id ? "You" : group.fullName.split(" ")[0]}
-                    </span>
+            {isLoading ? (
+                <div className="flex gap-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="size-16 rounded-full bg-base-300 animate-pulse" />
+                    ))}
                 </div>
-            ))}
+            ) : (
+                storiesGrouped.map((group) => (
+                    <div
+                        key={group.userId}
+                        className="flex flex-col items-center gap-1 cursor-pointer min-w-[70px]"
+                        onClick={() => setSelectedUserStories(group)}
+                    >
+                        <div className="size-16 rounded-full p-1 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
+                            <div className="size-full rounded-full border-2 border-base-100 overflow-hidden bg-base-300">
+                                <img
+                                    src={group.profilePic || "/avatar.png"}
+                                    alt={group.fullName}
+                                    className="size-full object-cover"
+                                />
+                            </div>
+                        </div>
+                        <span className="text-[10px] font-medium truncate w-full text-center">
+                            {group.userId === authUser?._id ? "You" : group.fullName.split(" ")[0]}
+                        </span>
+                    </div>
+                ))
+            )}
 
             {/* Story Viewer Modal */}
             {selectedUserStories && (
