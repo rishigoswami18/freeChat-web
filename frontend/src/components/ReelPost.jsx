@@ -20,13 +20,21 @@ const ReelPost = ({ post, isActive }) => {
     });
 
     useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
         if (isActive) {
-            videoRef.current?.play().catch(() => { });
+            video.play().catch(() => { });
             setIsPlaying(true);
         } else {
-            videoRef.current?.pause();
+            video.pause();
+            video.currentTime = 0; // Reset to start when scrolled away if desired, or just pause
             setIsPlaying(false);
         }
+
+        return () => {
+            video.pause();
+        };
     }, [isActive]);
 
     const togglePlay = () => {

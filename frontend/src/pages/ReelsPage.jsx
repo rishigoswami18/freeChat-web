@@ -17,16 +17,28 @@ const ReelsPage = () => {
         const container = containerRef.current;
         if (!container) return;
 
-        const handleScroll = () => {
-            const index = Math.round(container.scrollTop / container.clientHeight);
-            if (index !== activeIndex) {
-                setActiveIndex(index);
-            }
+        const observerOptions = {
+            root: container,
+            threshold: 0.6, // Video must be 60% visible to trigger
         };
 
-        container.addEventListener("scroll", handleScroll);
-        return () => container.removeEventListener("scroll", handleScroll);
-    }, [activeIndex]);
+        const observerCallback = (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const index = parseInt(entry.target.getAttribute("data-index"));
+                    setActiveIndex(index);
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        // Observe all reel wrappers
+        const reelElements = container.querySelectorAll(".reel-wrapper");
+        reelElements.forEach((el) => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, [reels]); // Re-run when reels are loaded
 
     if (isLoading) {
         return (
@@ -58,7 +70,7 @@ const ReelsPage = () => {
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
             {reels.map((reel, index) => (
-                <div key={reel._id} className="h-screen w-full snap-start">
+                <div key={reel._id} className="h-screen w-full snap-start reel-wrapper" data-index={index}>
                     <ReelPost
                         post={reel}
                         isActive={index === activeIndex}
