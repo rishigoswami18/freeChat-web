@@ -1,17 +1,38 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getVideoPosts } from "../lib/api";
 import ReelPost from "../components/ReelPost";
+import ReelAd from "../components/ReelAd";
 import { Loader2, Film } from "lucide-react";
+import useAuthUser from "../hooks/useAuthUser";
 
 const ReelsPage = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const containerRef = useRef(null);
+    const { authUser } = useAuthUser();
 
-    const { data: reels = [], isLoading } = useQuery({
+    const { data: rawReels = [], isLoading } = useQuery({
         queryKey: ["reels"],
         queryFn: getVideoPosts,
     });
+
+    // Inject ads if user is not a member
+    const reelsWithAds = useMemo(() => {
+        if (!rawReels.length) return [];
+        if (authUser?.isMember) return rawReels;
+
+        const result = [];
+        const AD_INTERVAL = 3; // Show an ad every 3 reels
+
+        rawReels.forEach((reel, index) => {
+            result.push(reel);
+            if ((index + 1) % AD_INTERVAL === 0) {
+                result.push({ _id: `ad-${index}`, isAd: true });
+            }
+        });
+
+        return result;
+    }, [rawReels, authUser?.isMember]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -19,7 +40,7 @@ const ReelsPage = () => {
 
         const observerOptions = {
             root: container,
-            threshold: 0.6, // Video must be 60% visible to trigger
+            threshold: 0.6,
         };
 
         const observerCallback = (entries) => {
@@ -33,12 +54,11 @@ const ReelsPage = () => {
 
         const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-        // Observe all reel wrappers
         const reelElements = container.querySelectorAll(".reel-wrapper");
         reelElements.forEach((el) => observer.observe(el));
 
         return () => observer.disconnect();
-    }, [reels]); // Re-run when reels are loaded
+    }, [reelsWithAds]);
 
     if (isLoading) {
         return (
@@ -49,7 +69,7 @@ const ReelsPage = () => {
         );
     }
 
-    if (reels.length === 0) {
+    if (rawReels.length === 0) {
         return (
             <div className="h-screen flex flex-col items-center justify-center bg-black text-white p-6 text-center gap-6">
                 <div className="size-24 bg-white/10 rounded-full flex items-center justify-center">
@@ -69,12 +89,16 @@ const ReelsPage = () => {
             className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-            {reels.map((reel, index) => (
-                <div key={reel._id} className="h-screen w-full snap-start reel-wrapper" data-index={index}>
-                    <ReelPost
-                        post={reel}
-                        isActive={index === activeIndex}
-                    />
+            {reelsWithAds.map((item, index) => (
+                <div key={item._id} className="h-screen w-full snap-start reel-wrapper" data-index={index}>
+                    {item.isAd ? (
+                        <ReelAd isActive={index === activeIndex} />
+                    ) : (
+                        <ReelPost
+                            post={item}
+                            isActive={index === activeIndex}
+                        />
+                    )}
                 </div>
             ))}
         </div>
