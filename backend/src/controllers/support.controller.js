@@ -1,4 +1,5 @@
 import SupportMessage from "../models/SupportMessage.js";
+import { sendSupportEmail } from "../lib/email.service.js";
 
 export const submitSupportMessage = async (req, res) => {
     try {
@@ -15,6 +16,13 @@ export const submitSupportMessage = async (req, res) => {
         });
 
         await newMessage.save();
+
+        // Send email notification (Fail silently for now to not block the user's success)
+        try {
+            await sendSupportEmail(fullName, email, message);
+        } catch (emailError) {
+            console.error("Failed to send support email but message was saved to DB.");
+        }
 
         res.status(201).json({
             message: "Support message submitted successfully",
