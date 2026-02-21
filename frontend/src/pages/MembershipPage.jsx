@@ -97,7 +97,12 @@ const MembershipPage = () => {
 
             const rzp = new window.Razorpay(options);
             rzp.on("payment.failed", (response) => {
-                toast.error(`Payment failed: ${response.error.description}`);
+                console.error("Razorpay Payment Failed:", response.error);
+                let msg = response.error.description;
+                if (msg.includes("merchant")) {
+                    msg = "Merchant configuration issue. If using LIVE keys, ensure KYC is complete. Otherwise, use TEST keys.";
+                }
+                toast.error(`Payment failed: ${msg}`, { duration: 6000 });
             });
             rzp.open();
         } catch (err) {

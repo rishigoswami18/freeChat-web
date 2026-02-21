@@ -7,9 +7,18 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 // Initialize Razorpay
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
+
+if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    console.error("CRITICAL: Razorpay API keys are missing in .env!");
+} else {
+    console.log(`Razorpay initialized with ${RAZORPAY_KEY_ID.startsWith("rzp_live") ? "LIVE" : "TEST"} keys`);
+}
+
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+    key_id: RAZORPAY_KEY_ID,
+    key_secret: RAZORPAY_KEY_SECRET,
 });
 
 router.use(protectRoute);
@@ -60,9 +69,13 @@ router.post("/create-order", async (req, res) => {
             order,
         });
     } catch (err) {
+        console.error("Razorpay Order Creation Error Details:", JSON.stringify(err, null, 2));
         console.error("Error creating Razorpay order:", err);
         const errorMsg = err.error?.description || err.message || "Failed to create payment order";
-        res.status(500).json({ message: errorMsg });
+        res.status(500).json({
+            message: errorMsg,
+            details: err.error?.description || null
+        });
     }
 });
 
