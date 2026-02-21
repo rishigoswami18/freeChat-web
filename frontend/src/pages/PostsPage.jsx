@@ -4,6 +4,7 @@ import PostsFeed from "../components/PostsFeed";
 import useAuthUser from "../hooks/useAuthUser";
 import { useQuery } from "@tanstack/react-query";
 import { getFriends, getPosts } from "../lib/api";
+import StoryTray from "../components/StoryTray";
 
 const PostsPage = () => {
   const { authUser } = useAuthUser();
@@ -34,6 +35,7 @@ const PostsPage = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
+      <StoryTray />
       <h1 className="text-2xl sm:text-3xl font-bold mb-6">Feed</h1>
       <CreatePost onPost={addPost} authUser={authUser} />
       {isLoading ? (
