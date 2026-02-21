@@ -1,18 +1,9 @@
 import express from "express";
 import User from "../models/User.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { calculateAge } from "../utils/dateUtils.js";
 
 const router = express.Router();
-
-const calculateAge = (dob) => {
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
-    }
-    return age;
-};
 
 // All couple routes require auth
 router.use(protectRoute);
@@ -21,14 +12,18 @@ router.use(protectRoute);
 router.get("/status", async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
-            .select("partnerId coupleStatus anniversary coupleRequestSenderId")
-            .populate("partnerId", "fullName profilePic bio");
+            .select("partnerId coupleStatus anniversary coupleRequestSenderId dateOfBirth")
+            .populate("partnerId", "fullName profilePic bio dateOfBirth");
+
+        const myAge = calculateAge(user.dateOfBirth);
+        const partnerAge = user.partnerId ? calculateAge(user.partnerId.dateOfBirth) : 0;
 
         res.json({
             coupleStatus: user.coupleStatus,
             partner: user.partnerId || null,
             anniversary: user.anniversary,
             coupleRequestSenderId: user.coupleRequestSenderId,
+            isBothAdult: myAge >= 18 && partnerAge >= 18,
         });
     } catch (err) {
         console.error("Error getting couple status:", err.message);

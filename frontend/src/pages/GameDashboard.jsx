@@ -86,9 +86,16 @@ const GameDashboard = () => {
                 <h2 className="text-xl font-semibold mb-4">Available Games</h2>
                 <div className="grid gap-6 md:grid-cols-2">
                     {templates && Object.entries(templates).map(([key, template]) => (
-                        <div key={key} className="card bg-base-200 shadow-xl border border-base-300">
+                        <div key={key} className="card bg-base-200 shadow-xl border border-base-300 overflow-hidden">
+                            {template.isAdult && (
+                                <div className="absolute top-0 right-0 bg-error text-error-content text-[10px] font-bold px-2 py-0.5 rounded-bl-lg z-10">
+                                    18+ ONLY
+                                </div>
+                            )}
                             <div className="card-body">
-                                <h3 className="card-title">{template.title}</h3>
+                                <h3 className="card-title text-base sm:text-lg">
+                                    {template.title}
+                                </h3>
                                 <p className="text-sm opacity-70">{template.description}</p>
                                 <div className="card-actions justify-end mt-4">
                                     <button

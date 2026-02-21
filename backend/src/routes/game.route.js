@@ -2,6 +2,7 @@ import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import User from "../models/User.js";
 import GameSession from "../models/GameSession.js";
+import { calculateAge } from "../utils/dateUtils.js";
 
 const router = express.Router();
 
@@ -9,11 +10,15 @@ router.use(protectRoute);
 
 // Helper middleware to check if user is a premium member
 const checkMembership = async (req, res, next) => {
-    const user = await User.findById(req.user._id);
-    if (user.role !== "admin" && !user.isMember) {
-        return res.status(403).json({ message: "Premium membership required to play games" });
+    try {
+        const user = await User.findById(req.user._id);
+        if (user.role !== "admin" && !user.isMember) {
+            return res.status(403).json({ message: "Premium membership required to play games" });
+        }
+        next();
+    } catch (error) {
+        next(error);
     }
-    next();
 };
 
 const QUIZ_TEMPLATES = {
@@ -84,12 +89,76 @@ const QUIZ_TEMPLATES = {
                 ],
             }
         ]
+    },
+    long_distance_bucket_list: {
+        title: "Long Distance Bucket List ✈️",
+        description: "Plan your future together! What will you do when you're finally in the same city?",
+        questions: [
+            {
+                question: "What's the first thing you want to do when you meet at the airport?",
+                options: ["A long hug", "Go for a romantic dinner", "Take a selfie together", "Just hold hands"],
+            },
+            {
+                question: "Which of these virtual dates sounds best for our next weekend?",
+                options: ["Watch a movie synced up", "Cook the same meal while on video", "Play an online game together", "Just talk for hours"],
+            },
+            {
+                question: "If we could teleport to each other for just one hour, what would we do?",
+                options: ["Have a quick coffee date", "Take a walk in a local park", "Cuddle on the couch", "Go to our favorite restaurant"],
+            },
+            {
+                question: "What's the #1 city on your list for our first real vacation together?",
+                options: ["Paris", "Bali", "Reykjavik", "New York", "Santorini"],
+            }
+        ]
+    },
+    spicy_truth_or_dare: {
+        title: "Spicy Truth or Dare 🔞",
+        description: "Turn up the heat with some semi-spicy questions and dares!",
+        isAdult: true,
+        questions: [
+            {
+                question: "Truth: What is your favorite thing about your partner's body?",
+                options: ["Their eyes", "Their smile", "Their back", "Their hands", "Everything!"],
+            },
+            {
+                question: "Dare: Give your partner a 2-minute massage on a spot of their choice.",
+                options: ["Done ✓", "Not now"],
+            },
+            {
+                question: "Truth: Where is the most adventurous place you've ever thought about having a date?",
+                options: ["A rooftop", "A beach at night", "A hidden park", "A balcony", "Cinema"],
+            },
+            {
+                question: "Dare: Whisper something sweet (or spicy) into your partner's ear for 10 seconds.",
+                options: ["Done ✓", "Too shy"],
+            }
+        ]
     }
 };
 
 // Get available games
-router.get("/templates", checkMembership, (req, res) => {
-    res.json(QUIZ_TEMPLATES);
+router.get("/templates", checkMembership, async (req, res) => {
+    try {
+        const me = await User.findById(req.user._id);
+        const partner = await User.findById(me.partnerId);
+
+        const myAge = calculateAge(me.dateOfBirth);
+        const partnerAge = partner ? calculateAge(partner.dateOfBirth) : 0;
+
+        const isBothAdult = myAge >= 18 && partnerAge >= 18;
+
+        const filteredTemplates = {};
+        Object.entries(QUIZ_TEMPLATES).forEach(([key, template]) => {
+            if (template.isAdult && !isBothAdult) return;
+            filteredTemplates[key] = template;
+        });
+
+        res.json(filteredTemplates);
+    } catch (err) {
+        console.error("Error fetching templates:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
 });
 
 // Start a new game session
