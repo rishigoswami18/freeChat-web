@@ -9,9 +9,7 @@ const Footer = () => {
                     {/* Brand */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                            <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-content font-bold">
-                                fC
-                            </div>
+                            <img src="/logo.png" alt="freeChat" className="size-10 object-contain" />
                             <span className="text-xl font-bold tracking-tight">freeChat</span>
                         </div>
                         <p className="text-sm opacity-60 max-w-xs">
