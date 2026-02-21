@@ -110,6 +110,18 @@ const App = () => {
                 }
               />
               <Route
+                path="/search"
+                element={
+                  isAuthenticated && isOnboarded ? (
+                    <Layout showSidebar={true}>
+                      <SearchPage />
+                    </Layout>
+                  ) : (
+                    <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                  )
+                }
+              />
+              <Route
                 path="/call/:id"
                 element={
                   isAuthenticated && isOnboarded ? (
