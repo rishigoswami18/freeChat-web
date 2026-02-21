@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User } from "lucide-react";
+import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search } from "lucide-react";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
@@ -44,6 +44,15 @@ const Sidebar = () => {
         >
           <Users className="size-5 text-base-content opacity-70" />
           <span>Friends</span>
+        </Link>
+
+        <Link
+          to="/search"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/search" ? "btn-active" : ""
+            }`}
+        >
+          <Search className="size-5 text-base-content opacity-70" />
+          <span>Search</span>
         </Link>
 
         <Link
