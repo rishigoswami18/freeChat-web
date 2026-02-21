@@ -13,6 +13,7 @@ import {
   Crown,
   Gamepad2,
   User,
+  Search,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -29,6 +30,7 @@ const MobileDrawer = () => {
   const navItems = [
     { to: "/", icon: Home, label: "Feed" },
     { to: "/friends", icon: Users, label: "Friends" },
+    { to: "/search", icon: Search, label: "Search" },
     { to: "/notifications", icon: Bell, label: "Notifications" },
     { to: "/posts", icon: Pencil, label: "Posts" },
     { to: "/couple", icon: Heart, label: "Couple" },
@@ -137,7 +139,7 @@ const MobileDrawer = () => {
       {/* Bottom Tab Bar for quick navigation - Hide on Chat Page */}
       <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] bg-base-200/95 backdrop-blur-sm border-t border-base-300 safe-area-bottom ${location.pathname.startsWith("/chat") ? "hidden" : ""}`}>
         <div className="flex items-center justify-around py-2">
-          {[navItems[0], navItems[1], navItems[4], navItems[2]].map(({ to, icon: Icon, label }) => (
+          {[navItems[0], navItems[2], navItems[1], navItems[5], navItems[3]].map(({ to, icon: Icon, label }) => (
             <Link
               key={to}
               to={to}

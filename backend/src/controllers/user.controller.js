@@ -18,14 +18,21 @@ export async function getRecommendedUsers(req, res) {
   try {
     const currentUserId = req.user.id;
     const currentUser = req.user;
+    const { q } = req.query;
 
-    const recommendedUsers = await User.find({
+    let query = {
       $and: [
         { _id: { $ne: currentUserId } },
         { _id: { $nin: currentUser.friends } },
         { isOnboarded: true },
       ],
-    });
+    };
+
+    if (q) {
+      query.$and.push({ fullName: { $regex: q, $options: "i" } });
+    }
+
+    const recommendedUsers = await User.find(query);
     res.status(200).json(recommendedUsers);
   } catch (error) {
     console.error("Error in getRecommendedUsers controller", error.message);

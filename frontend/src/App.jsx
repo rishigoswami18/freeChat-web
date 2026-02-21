@@ -14,6 +14,7 @@ import MembershipPage from "./pages/MembershipPage.jsx";
 import GameDashboard from "./pages/GameDashboard.jsx";
 import CompatibilityQuiz from "./pages/CompatibilityQuiz.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
+import SearchPage from "./pages/SearchPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
