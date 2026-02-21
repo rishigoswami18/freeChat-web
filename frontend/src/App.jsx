@@ -141,7 +141,7 @@ const App = () => {
                 path="/chat/:id"
                 element={
                   isAuthenticated && isOnboarded ? (
-                    <Layout showSidebar={false}>
+                    <Layout showSidebar={false} showFooter={false}>
                       <ChatPage />
                     </Layout>
                   ) : (
@@ -153,7 +153,7 @@ const App = () => {
                 path="/reels"
                 element={
                   isAuthenticated && isOnboarded ? (
-                    <Layout showSidebar={false}>
+                    <Layout showSidebar={false} showFooter={false}>
                       <ReelsPage />
                     </Layout>
                   ) : (

@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import MobileDrawer from "./MobileDrawer";
 import Footer from "./Footer";
 
-const Layout = ({ children, showSidebar = false }) => {
+const Layout = ({ children, showSidebar = false, showFooter = true }) => {
   return (
     <div className="min-h-screen">
       <MobileDrawer />
@@ -16,7 +16,7 @@ const Layout = ({ children, showSidebar = false }) => {
           {/* pt-14 on mobile for MobileDrawer top bar, pt-16 on desktop for Navbar */}
           {/* pb-20 on mobile to clear bottom tab bar + safe area */}
           <main className="pt-14 pb-20 lg:pt-16 lg:pb-0 flex-1">{children}</main>
-          <Footer />
+          {showFooter && <Footer />}
         </div>
       </div>
     </div>
