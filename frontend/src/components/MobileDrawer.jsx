@@ -69,6 +69,9 @@ const MobileDrawer = () => {
           <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
             <Bell className="size-4" />
           </Link>
+          <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle text-error">
+            <LogOut className="size-4" />
+          </button>
           <div className="avatar">
             <div className="w-8 rounded-full">
               <img src={authUser?.profilePic} alt="You" />
