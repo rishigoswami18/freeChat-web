@@ -112,6 +112,48 @@ const QUIZ_TEMPLATES = {
             }
         ]
     },
+    fantasy_quest_mature: {
+        title: "Fantasy Scenarios 💋",
+        description: "Explore your shared fantasies and desires in a safe, fun way.",
+        isAdult: true,
+        questions: [
+            {
+                question: "What's a setting you've always found surprisingly romantic (or spicy)?",
+                options: ["A rainy cabin", "A luxury hotel", "A secluded beach", "A cozy fireplace", "Under the stars"],
+            },
+            {
+                question: "Which of these sounds most fun for a lazy morning together?",
+                options: ["Breakfast in bed", "Shower together", "Sleeping in late", "Morning walk", "Cuddling"],
+            },
+            {
+                question: "Reaction: Your partner surprises you with a spicy outfit. What's your move?",
+                options: ["Take lots of photos", "Cancel all plans", "Give them a huge kiss", "Blush and smile", "Compliment them non-stop"],
+            }
+        ]
+    },
+    never_have_i_ever_naughty: {
+        title: "Never Have I Ever: Naughty 🔞",
+        description: "The classic game, but with a spicy couple's twist!",
+        isAdult: true,
+        questions: [
+            {
+                question: "Never have I ever... sent a spicy photo to my partner.",
+                options: ["I have ✅", "Never ❌"],
+            },
+            {
+                question: "Never have I ever... had a crush on a fictional character.",
+                options: ["I have ✅", "Never ❌"],
+            },
+            {
+                question: "Never have I ever... thought about my partner during a boring meeting.",
+                options: ["I have ✅", "Never ❌"],
+            },
+            {
+                question: "Never have I ever... wanted to roleplay as someone else.",
+                options: ["I have ✅", "Never ❌"],
+            }
+        ]
+    },
     spicy_truth_or_dare: {
         title: "Spicy Truth or Dare 🔞",
         description: "Turn up the heat with some semi-spicy questions and dares!",
