@@ -25,6 +25,7 @@ export async function getRecommendedUsers(req, res) {
         { _id: { $ne: currentUserId } },
         { _id: { $nin: currentUser.friends } },
         { isOnboarded: true },
+        { isPublic: true },
       ],
     };
 
@@ -165,9 +166,9 @@ export async function getOutgoingFriendReqs(req, res) {
 export async function updateProfile(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut } = req.body;
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut, isPublic } = req.body;
 
-    const updateData = { fullName, bio, nativeLanguage, learningLanguage, location };
+    const updateData = { fullName, bio, nativeLanguage, learningLanguage, location, isPublic };
     const isPremium = req.user.isMember || req.user.role === "admin";
 
     if (isStealthMode !== undefined) {

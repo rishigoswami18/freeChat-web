@@ -19,6 +19,7 @@ const ProfilePage = () => {
         nativeLanguage: "",
         learningLanguage: "",
         dateOfBirth: "",
+        isPublic: true,
     });
 
     // Initialize/Update form data when authUser loads
@@ -31,6 +32,7 @@ const ProfilePage = () => {
                 nativeLanguage: authUser.nativeLanguage || "",
                 learningLanguage: authUser.learningLanguage || "",
                 dateOfBirth: authUser.dateOfBirth ? authUser.dateOfBirth.split("T")[0] : "",
+                isPublic: authUser.isPublic !== undefined ? authUser.isPublic : true,
             });
         }
     }, [authUser]);
@@ -229,6 +231,27 @@ const ProfilePage = () => {
                             required
                         />
                     </div>
+                </div>
+
+                {/* Profile Privacy Toggle */}
+                <div className="bg-base-200 p-4 rounded-xl flex items-center justify-between border border-primary/5">
+                    <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-sm flex items-center gap-2">
+                            {formData.isPublic ? <Globe className="size-4 text-success" /> : <Shield className="size-4 text-warning" />}
+                            Profile Visibility
+                        </span>
+                        <p className="text-xs opacity-50">
+                            {formData.isPublic
+                                ? "Your profile is public and discoverable by others."
+                                : "Your profile is private and hidden from search/recommendations."}
+                        </p>
+                    </div>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-success"
+                        checked={formData.isPublic}
+                        onChange={(e) => setFormData(prev => ({ ...prev, isPublic: e.target.checked }))}
+                    />
                 </div>
 
                 <div className="pt-6">

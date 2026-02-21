@@ -94,6 +94,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "Escape",
   },
+  isPublic: {
+    type: Boolean,
+    default: true,
+  },
 }
   , { timestamps: true });
 
