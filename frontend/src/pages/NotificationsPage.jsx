@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptFriendRequest, getFriendRequests } from "../lib/api";
-import { BellIcon, ClockIcon, MessageSquareIcon, UserCheckIcon } from "lucide-react";
+import { Bell, Clock, MessageSquare, UserCheck } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 
 const NotificationsPage = () => {
@@ -36,7 +36,7 @@ const NotificationsPage = () => {
             {incomingRequests.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <UserCheckIcon className="h-5 w-5 text-primary" />
+                  <UserCheck className="h-5 w-5 text-primary" />
                   Friend Requests
                   <span className="badge badge-primary ml-2">{incomingRequests.length}</span>
                 </h2>
@@ -85,7 +85,7 @@ const NotificationsPage = () => {
             {acceptedRequests.length > 0 && (
               <section className="space-y-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <BellIcon className="h-5 w-5 text-success" />
+                  <Bell className="h-5 w-5 text-success" />
                   New Connections
                 </h2>
 
@@ -106,12 +106,12 @@ const NotificationsPage = () => {
                               {notification.recipient.fullName} accepted your friend request
                             </p>
                             <p className="text-xs flex items-center opacity-70">
-                              <ClockIcon className="h-3 w-3 mr-1" />
+                              <Clock className="h-3 w-3 mr-1" />
                               Recently
                             </p>
                           </div>
                           <div className="badge badge-success">
-                            <MessageSquareIcon className="h-3 w-3 mr-1" />
+                            <MessageSquare className="h-3 w-3 mr-1" />
                             New Friend
                           </div>
                         </div>
