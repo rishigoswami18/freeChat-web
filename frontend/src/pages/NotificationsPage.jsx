@@ -19,8 +19,8 @@ const NotificationsPage = () => {
     },
   });
 
-  const incomingRequests = friendRequests?.incomingReqs || [];
-  const acceptedRequests = friendRequests?.acceptedReqs || [];
+  const incomingRequests = (friendRequests?.incomingReqs || []).filter(req => req.sender);
+  const acceptedRequests = (friendRequests?.acceptedReqs || []).filter(req => req.recipient);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

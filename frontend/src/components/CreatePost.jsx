@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { createPost } from "../lib/api";
-import { ImageIcon, VideoIcon, X, Loader2 } from "lucide-react";
+import { ImageIcon, VideoIcon, X, Loader2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 
 const TRENDING_SONGS = [
@@ -184,23 +184,34 @@ const CreatePost = ({ onPost, authUser }) => {
             </label>
           </div>
 
-          {/* Post Button */}
-          <button
-            className="btn btn-primary btn-sm px-6"
-            onClick={handlePost}
-            disabled={loading || (!content.trim() && !media)}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Posting...
-              </>
-            ) : (
-              "Post"
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsStoryModalOpen(true)}
+              className="btn btn-ghost btn-sm gap-2 text-primary hover:bg-primary/10 rounded-lg"
+            >
+              <Plus className="size-4" />
+              <span className="hidden sm:inline text-xs">Story</span>
+            </button>
+
+            {/* Post Button */}
+            <button
+              className="btn btn-primary btn-sm px-6"
+              onClick={handlePost}
+              disabled={loading || (!content.trim() && !media)}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  Posting...
+                </>
+              ) : (
+                "Post"
+              )}
+            </button>
+          </div>
         </div>
       </div>
+      <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
     </div>
   );
 };

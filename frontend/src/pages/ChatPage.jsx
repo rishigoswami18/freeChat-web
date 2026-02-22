@@ -91,10 +91,14 @@ const ChatPage = () => {
 
       setLoading(true);
       try {
-        const channelId = [authUser._id, targetUserId].sort().join("-");
-        const currChannel = chatClient.channel("messaging", channelId, {
-          members: [authUser._id, targetUserId],
-        });
+        const isGroup = targetUserId.startsWith("group_");
+        const channelId = isGroup
+          ? targetUserId
+          : [authUser._id, targetUserId].sort().join("-");
+
+        const currChannel = chatClient.channel("messaging", channelId,
+          isGroup ? {} : { members: [authUser._id, targetUserId] }
+        );
 
         await currChannel.watch();
         setChannel(currChannel);

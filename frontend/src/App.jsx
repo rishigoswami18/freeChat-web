@@ -17,6 +17,7 @@ import CompatibilityQuiz from "./pages/CompatibilityQuiz.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import ReelsPage from "./pages/ReelsPage.jsx";
+import InboxPage from "./pages/InboxPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
 import TermsPage from "./pages/TermsPage.jsx";
@@ -123,6 +124,18 @@ const App = () => {
                     isAuthenticated && isOnboarded ? (
                       <Layout showSidebar={true}>
                         <SearchPage />
+                      </Layout>
+                    ) : (
+                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                    )
+                  }
+                />
+                <Route
+                  path="/inbox"
+                  element={
+                    isAuthenticated && isOnboarded ? (
+                      <Layout showSidebar={true}>
+                        <InboxPage />
                       </Layout>
                     ) : (
                       <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

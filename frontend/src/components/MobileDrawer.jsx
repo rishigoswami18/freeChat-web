@@ -16,21 +16,26 @@ import {
   Search,
   Film,
   Flame,
+  MessageSquare,
+  Plus,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
 import ThemeSelector from "./ThemeSelector";
+import CreateStoryModal from "./CreateStoryModal";
 
 const MobileDrawer = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const { logoutMutation } = useLogout();
 
   const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
     { to: "/", icon: Home, label: "Feed" },
+    { to: "/inbox", icon: MessageSquare, label: "Inbox" },
     { to: "/friends", icon: Users, label: "Friends" },
     { to: "/reels", icon: Film, label: "Reels" },
     { to: "/search", icon: Search, label: "Search" },
@@ -44,6 +49,7 @@ const MobileDrawer = () => {
 
   return (
     <>
+      <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
       {/* Mobile Top Bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-base-200/95 backdrop-blur-sm border-b border-base-300 px-4 py-3 flex items-center justify-between safe-area-top">
         <div className="flex items-center gap-3">
@@ -111,6 +117,17 @@ const MobileDrawer = () => {
               {label}
             </Link>
           ))}
+
+          {/* Post Story Quick Action */}
+          <button
+            onClick={() => { toggleDrawer(); setIsStoryModalOpen(true); }}
+            className="flex items-center gap-3 px-4 py-4 rounded-xl text-primary font-bold transition-all bg-primary/10 hover:bg-primary/20 w-full mt-4 border border-primary/20"
+          >
+            <div className="bg-primary p-1.5 rounded-lg text-primary-content">
+              <Plus className="size-5" />
+            </div>
+            Post Story
+          </button>
         </nav>
 
         {/* User Profile + Theme & Logout */}

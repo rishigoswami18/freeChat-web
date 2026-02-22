@@ -1,11 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search, Film } from "lucide-react";
+import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search, Film, MessageSquare, Plus } from "lucide-react";
+import CreateStoryModal from "./CreateStoryModal";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
   const currentPath = location.pathname;
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
   return (
     <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex flex-col h-screen sticky top-0">
@@ -26,6 +29,15 @@ const Sidebar = () => {
         >
           <Home className="size-5 text-base-content opacity-70" />
           <span>Home</span>
+        </Link>
+
+        <Link
+          to="/inbox"
+          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/inbox" ? "btn-active" : ""
+            }`}
+        >
+          <MessageSquare className="size-5 text-primary opacity-70" />
+          <span>Inbox</span>
         </Link>
 
         <Link
@@ -99,7 +111,20 @@ const Sidebar = () => {
           <Crown className="size-5 text-amber-500 opacity-70" />
           <span>Premium</span>
         </Link>
+
+        {/* Post Story Quick Action */}
+        <button
+          onClick={() => setIsStoryModalOpen(true)}
+          className="btn btn-primary w-full gap-3 px-3 normal-case mt-4 shadow-lg shadow-primary/20 rounded-xl"
+        >
+          <div className="bg-primary-content/20 p-1 rounded-lg">
+            <Plus className="size-4" strokeWidth={3} />
+          </div>
+          <span>Post Story</span>
+        </button>
       </nav>
+
+      <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
 
       {/* USER PROFILE SECTION */}
       <div className="p-4 border-t border-base-300">
