@@ -203,7 +203,6 @@ const CreatePost = ({ onPost, authUser }) => {
           </div>
         </div>
       </div>
-      <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
     </>
   );
 };
