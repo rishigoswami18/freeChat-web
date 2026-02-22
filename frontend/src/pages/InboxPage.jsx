@@ -88,7 +88,15 @@ const InboxPage = () => {
                     <p className="text-xs opacity-60 truncate flex items-center gap-1">
                         {lastMessage ? (
                             <>
-                                <span className="font-bold">{(lastMessage.user?.name || "Someone").split(" ")[0]}:</span> {lastMessage.text}
+                                <span className="font-bold">
+                                    {lastMessage.user?.id === chatClient.userID ? "You" : (lastMessage.user?.name || "Someone").split(" ")[0]}
+                                    :
+                                </span>{" "}
+                                {lastMessage.extra_data?.isSnap || lastMessage.isSnap ? (
+                                    <span className="italic text-primary font-medium">Sent a snap 📸</span>
+                                ) : (
+                                    lastMessage.text
+                                )}
                             </>
                         ) : "No messages yet"}
                     </p>

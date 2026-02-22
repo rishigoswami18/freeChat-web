@@ -10,30 +10,37 @@ function ChatHeader() {
     const videoClient = useVideoClient();
     console.log("ChatHeader: videoClient available?", !!videoClient);
 
-    // Get the other member's info
-    const members = Object.values(channel.state.members);
-    const otherMember = members.find(
-        (m) => m.user?.id !== channel._client?.userID
-    );
+    const isGroup = channel.id.startsWith("group_");
 
-    const user = otherMember?.user;
+    // Resolve display data (name and image)
+    const displayData = isGroup ? {
+        name: channel.data.name || "Group",
+        image: channel.data.image || "/avatar.png"
+    } : (() => {
+        const members = Object.values(channel.state.members);
+        const otherMember = members.find((m) => m.user?.id !== channel._client?.userID);
+        return {
+            name: otherMember?.user?.name || "Chat",
+            image: otherMember?.user?.image || "/avatar.png",
+            user: otherMember?.user
+        };
+    })();
+
+    const user = displayData.user;
     const isOnline = user?.online;
 
     const handleCall = async () => {
-        if (!videoClient || !user) {
-            toast.error("Call service not ready. Please try again.");
+        if (!videoClient || isGroup || !user) {
+            toast.error(isGroup ? "Calls are not supported in groups yet." : "Call service not ready.");
             return;
         }
 
         try {
             const timestamp = Date.now().toString(36);
             const callId = `${[channel._client.userID, user.id].sort().join("-")}-${timestamp}`;
-
-            // Mark this as OUR outgoing call BEFORE creating it
             outgoingCallIds.add(callId);
 
             const call = videoClient.call("default", callId);
-
             await call.getOrCreate({
                 ring: true,
                 data: {
@@ -43,12 +50,10 @@ function ChatHeader() {
                     ],
                 },
             });
-
-            // Navigate caller to the call page
             navigate(`/call/${callId}`);
         } catch (error) {
-            console.error("Failed to initiate call:", error);
-            toast.error("Could not start the call. Please try again.");
+            console.error("Call Error:", error);
+            toast.error("Could not start call.");
         }
     };
 
@@ -57,9 +62,9 @@ function ChatHeader() {
             {/* Left: Back + Avatar + Info */}
             <div className="flex items-center gap-2 sm:gap-3">
                 <button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/inbox")}
                     className="btn btn-ghost btn-sm btn-circle"
-                    aria-label="Go back"
+                    aria-label="Go back to inbox"
                 >
                     <ArrowLeft className="size-5" />
                 </button>
@@ -67,42 +72,44 @@ function ChatHeader() {
                 <div className="avatar">
                     <div className="w-10 h-10 rounded-full ring ring-primary/20 ring-offset-base-100 ring-offset-1">
                         <img
-                            src={user?.image || "/avatar.png"}
-                            alt={user?.name || "User"}
+                            src={displayData.image}
+                            alt={displayData.name}
                         />
                     </div>
-                    {isOnline && (
+                    {isOnline && !isGroup && (
                         <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100" />
                     )}
                 </div>
 
-                <div>
-                    <h3 className="font-semibold text-sm leading-tight">
-                        {user?.name || "Chat"}
+                <div className="min-w-0">
+                    <h3 className="font-bold text-sm leading-tight truncate">
+                        {displayData.name}
                     </h3>
-                    <p className={`text-xs ${isOnline ? "text-success" : "text-base-content/50"}`}>
-                        {isOnline ? "Online" : "Offline"}
+                    <p className={`text-[10px] font-medium ${isOnline && !isGroup ? "text-success" : "text-base-content/50"}`}>
+                        {isGroup ? `${Object.keys(channel.state.members).length} members` : (isOnline ? "Online" : "Offline")}
                     </p>
                 </div>
             </div>
 
-            {/* Right: Call Buttons */}
-            <div className="flex items-center gap-1 sm:gap-2">
-                <button
-                    onClick={handleCall}
-                    className="btn btn-ghost btn-md btn-circle text-primary hover:bg-primary/10 transition-colors"
-                    aria-label="Video call"
-                >
-                    <Video className="size-6" />
-                </button>
-                <button
-                    onClick={handleCall}
-                    className="btn btn-ghost btn-md btn-circle text-success hover:bg-success/10 transition-colors"
-                    aria-label="Voice call"
-                >
-                    <Phone className="size-6" />
-                </button>
-            </div>
+            {/* Right: Call Buttons (Only for 1v1) */}
+            {!isGroup && (
+                <div className="flex items-center gap-1 sm:gap-2">
+                    <button
+                        onClick={handleCall}
+                        className="btn btn-ghost btn-md btn-circle text-primary hover:bg-primary/10 transition-colors"
+                        aria-label="Video call"
+                    >
+                        <Video className="size-6" />
+                    </button>
+                    <button
+                        onClick={handleCall}
+                        className="btn btn-ghost btn-md btn-circle text-success hover:bg-success/10 transition-colors"
+                        aria-label="Voice call"
+                    >
+                        <Phone className="size-6" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
