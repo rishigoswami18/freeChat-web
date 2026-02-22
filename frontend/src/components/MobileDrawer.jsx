@@ -17,7 +17,6 @@ import {
   Film,
   Flame,
   MessageSquare,
-  Plus,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -72,9 +71,6 @@ const MobileDrawer = () => {
             </div>
           )}
           <ThemeSelector size="btn-sm" />
-          <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
-            <Bell className="size-5 opacity-70" />
-          </Link>
           <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle">
             <LogOut className="size-5 opacity-70" />
           </button>
@@ -124,17 +120,6 @@ const MobileDrawer = () => {
               {label}
             </Link>
           ))}
-
-          {/* Post Story Quick Action */}
-          <button
-            onClick={() => { toggleDrawer(); setIsStoryModalOpen(true); }}
-            className="flex items-center gap-3 px-4 py-4 rounded-xl text-primary font-bold transition-all bg-primary/10 hover:bg-primary/20 w-full mt-4 border border-primary/20"
-          >
-            <div className="bg-primary p-1.5 rounded-lg text-primary-content">
-              <Plus className="size-5" />
-            </div>
-            Post Story
-          </button>
         </nav>
 
         {/* User Profile + Theme & Logout */}

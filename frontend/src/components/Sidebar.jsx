@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search, Film, MessageSquare, Plus } from "lucide-react";
+import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search, Film, MessageSquare } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
 
 const Sidebar = () => {
@@ -112,16 +112,6 @@ const Sidebar = () => {
           <span>Premium</span>
         </Link>
 
-        {/* Post Story Quick Action */}
-        <button
-          onClick={() => setIsStoryModalOpen(true)}
-          className="btn btn-primary w-full gap-3 px-3 normal-case mt-4 shadow-lg shadow-primary/20 rounded-xl"
-        >
-          <div className="bg-primary-content/20 p-1 rounded-lg">
-            <Plus className="size-4" strokeWidth={3} />
-          </div>
-          <span>Post Story</span>
-        </button>
       </nav>
 
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />

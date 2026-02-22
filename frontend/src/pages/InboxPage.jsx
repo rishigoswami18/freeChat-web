@@ -27,7 +27,20 @@ const InboxPage = () => {
     const sort = { last_message_at: -1 };
 
     const handleChannelSelect = (channel) => {
-        navigate(`/chat/${channel.id}`);
+        // ChatPage expects either a userId for 1v1 or a channelId starting with 'group_'
+        const isGroup = channel.id.startsWith("group_");
+        if (isGroup) {
+            navigate(`/chat/${channel.id}`);
+        } else {
+            const otherMember = Object.values(channel.state.members).find(
+                (m) => m.user.id !== chatClient.userID
+            );
+            if (otherMember) {
+                navigate(`/chat/${otherMember.user.id}`);
+            } else {
+                navigate(`/chat/${channel.id}`);
+            }
+        }
     };
 
     const CustomChannelPreview = (props) => {
