@@ -34,7 +34,7 @@ const MobileDrawer = () => {
   const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
-    { to: "/", icon: Home, label: "Feed" },
+    { to: "/", icon: Home, label: "Home" },
     { to: "/inbox", icon: MessageSquare, label: "Inbox" },
     { to: "/friends", icon: Users, label: "Friends" },
     { to: "/reels", icon: Film, label: "Reels" },
