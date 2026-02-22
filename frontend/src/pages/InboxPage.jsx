@@ -32,6 +32,21 @@ const InboxPage = () => {
 
     const CustomChannelPreview = (props) => {
         const { channel, active, lastMessage } = props;
+        const chatClient = useChatClient();
+
+        // Resolve channel name: if data.name is missing, it's likely a 1v1 chat
+        // Find the member that ISN'T the current user
+        const displayData = channel.data.name ? {
+            name: channel.data.name,
+            image: channel.data.image
+        } : (() => {
+            const otherMember = Object.values(channel.state.members).find(m => m.user.id !== chatClient.userID);
+            return {
+                name: otherMember?.user.name || "Unknown User",
+                image: otherMember?.user.image
+            };
+        })();
+
         return (
             <div
                 onClick={() => handleChannelSelect(channel)}
@@ -40,18 +55,18 @@ const InboxPage = () => {
                 `}
             >
                 <div className="avatar">
-                    <div className="size-12 rounded-full ring-2 ring-primary/10">
+                    <div className="size-12 rounded-full ring-2 ring-primary/10 overflow-hidden">
                         <img
-                            src={channel.data.image || "/avatar.png"}
-                            alt={channel.data.name}
-                            className="object-cover"
+                            src={displayData.image || "/avatar.png"}
+                            alt={displayData.name}
+                            className="size-full object-cover"
                         />
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
                         <p className={`text-sm font-bold truncate ${active ? "text-primary" : ""}`}>
-                            {channel.data.name || "Unknown Channel"}
+                            {displayData.name}
                         </p>
                         <span className="text-[10px] opacity-40 uppercase font-black">
                             {channel.data.last_message_at ? new Date(channel.data.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}

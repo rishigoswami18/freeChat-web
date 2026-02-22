@@ -71,6 +71,7 @@ const MobileDrawer = () => {
               <span className="font-bold text-xs tabular-nums">{authUser.streak}</span>
             </div>
           )}
+          <ThemeSelector size="btn-sm" />
           <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
             <Bell className="size-5 opacity-70" />
           </Link>
@@ -153,13 +154,10 @@ const MobileDrawer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex items-center justify-center p-1 bg-base-200 rounded-xl border border-base-300">
-              <ThemeSelector size="btn-ghost btn-sm w-full" />
-            </div>
+          <div className="grid grid-cols-1 gap-2">
             <button
               onClick={() => { toggleDrawer(); logoutMutation(); }}
-              className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20"
+              className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20 w-full"
             >
               <LogOut className="size-4" />
               Logout
