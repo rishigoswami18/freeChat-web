@@ -28,7 +28,7 @@ const Sidebar = () => {
             }`}
         >
           <Home className="size-5 text-base-content opacity-70" />
-          <span>Home</span>
+          <span>Feed</span>
         </Link>
 
         <Link

@@ -36,7 +36,9 @@ const PostsPage = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
       <StoryTray />
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6">Feed</h1>
+      <div className="mt-8 mb-6">
+        <h1 className="text-4xl font-black tracking-tight text-base-content/90">Feed</h1>
+      </div>
       <CreatePost onPost={addPost} authUser={authUser} />
       {isLoading ? (
         <div className="flex justify-center py-12">

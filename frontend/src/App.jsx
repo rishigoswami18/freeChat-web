@@ -55,7 +55,7 @@ const App = () => {
                   element={
                     isAuthenticated && isOnboarded ? (
                       <Layout showSidebar={true}>
-                        <HomePage />
+                        <PostsPage />
                       </Layout>
                     ) : (
                       <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

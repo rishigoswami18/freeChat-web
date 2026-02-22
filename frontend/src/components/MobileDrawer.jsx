@@ -34,7 +34,7 @@ const MobileDrawer = () => {
   const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
-    { to: "/", icon: Home, label: "Home" },
+    { to: "/", icon: Home, label: "Feed" },
     { to: "/inbox", icon: MessageSquare, label: "Inbox" },
     { to: "/friends", icon: Users, label: "Friends" },
     { to: "/reels", icon: Film, label: "Reels" },
@@ -71,7 +71,13 @@ const MobileDrawer = () => {
               <span className="font-bold text-xs tabular-nums">{authUser.streak}</span>
             </div>
           )}
-          <div className="avatar ring-2 ring-primary/20 rounded-full p-0.5">
+          <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
+            <Bell className="size-5 opacity-70" />
+          </Link>
+          <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle">
+            <LogOut className="size-5 opacity-70" />
+          </button>
+          <div className="avatar ring-2 ring-primary/20 rounded-full p-0.5 ml-1">
             <div className="w-8 h-8 rounded-full">
               <img src={authUser?.profilePic || "/avatar.png"} alt="You" className="object-cover" />
             </div>
@@ -173,7 +179,7 @@ const MobileDrawer = () => {
       {/* Bottom Tab Bar for quick navigation - Hide on Chat Page */}
       <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] bg-base-200/95 backdrop-blur-sm border-t border-base-300 safe-area-bottom ${location.pathname.startsWith("/chat") ? "hidden" : ""}`}>
         <div className="flex items-center justify-around py-2">
-          {[navItems[0], navItems[2], navItems[1], navItems[3], navItems[4]].map(({ to, icon: Icon, label }) => (
+          {[navItems[0], navItems[3], navItems[2], navItems[4], navItems[5]].map(({ to, icon: Icon, label }) => (
             <Link
               key={to}
               to={to}
