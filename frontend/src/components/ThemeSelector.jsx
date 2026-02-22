@@ -1,4 +1,4 @@
-import { PaletteIcon } from "lucide-react";
+import { Palette } from "lucide-react";
 import { useThemeStore } from "../store/useThemeStore";
 import { THEMES } from "../constants";
 
@@ -9,7 +9,7 @@ const ThemeSelector = ({ size = "btn-md" }) => {
     <div className="dropdown dropdown-end">
       {/* DROPDOWN TRIGGER */}
       <button tabIndex={0} className={`btn btn-ghost btn-circle ${size}`}>
-        <PaletteIcon className="size-5" />
+        <Palette className="size-5" />
       </button>
 
       <div
@@ -30,7 +30,7 @@ const ThemeSelector = ({ size = "btn-md" }) => {
             `}
               onClick={() => setTheme(themeOption.name)}
             >
-              <PaletteIcon className="size-4" />
+              <Palette className="size-4" />
               <span className="text-sm font-medium">{themeOption.label}</span>
               {/* THEME PREVIEW COLORS */}
               <div className="ml-auto flex gap-1">

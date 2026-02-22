@@ -1,4 +1,4 @@
-import { VideoIcon } from "lucide-react";
+import { Video } from "lucide-react";
 
 function CallButton({ handleVideoCall }) {
   return (
@@ -7,7 +7,7 @@ function CallButton({ handleVideoCall }) {
         onClick={handleVideoCall}
         className="btn btn-success btn-sm text-white"
       >
-        <VideoIcon className="size-6" />
+        <Video className="size-6" />
       </button>
     </div>
   );

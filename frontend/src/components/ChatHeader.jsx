@@ -1,6 +1,6 @@
 import { useChannelStateContext } from "stream-chat-react";
-import { VideoIcon, PhoneIcon, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Video, Phone, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import toast from "react-hot-toast";
 
@@ -93,14 +93,14 @@ function ChatHeader() {
                     className="btn btn-ghost btn-md btn-circle text-primary hover:bg-primary/10 transition-colors"
                     aria-label="Video call"
                 >
-                    <VideoIcon className="size-6" />
+                    <Video className="size-6" />
                 </button>
                 <button
                     onClick={handleCall}
                     className="btn btn-ghost btn-md btn-circle text-success hover:bg-success/10 transition-colors"
                     aria-label="Voice call"
                 >
-                    <PhoneIcon className="size-6" />
+                    <Phone className="size-6" />
                 </button>
             </div>
         </div>
