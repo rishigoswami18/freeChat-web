@@ -110,7 +110,7 @@ const EmotionMessage = (props) => {
           )}
 
           {isViewingSnap && (
-            <SnapViewer snap={props} onClose={handleMarkViewed} />
+            <SnapViewer message={message} onClose={handleMarkViewed} />
           )}
         </div>
       ) : (
