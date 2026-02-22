@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import cloudinary from "../lib/cloudinary.js";
@@ -83,15 +84,55 @@ router.get("/videos", async (req, res) => {
   }
 });
 
-// Get feed posts (user + friends)
+// Get feed posts (user + friends + public profiles)
 router.get("/", async (req, res) => {
   try {
     const { userId, friends } = req.query;
     const friendIds = friends ? friends.split(",").filter(Boolean) : [];
 
-    const posts = await Post.find({
-      userId: { $in: [userId, ...friendIds] },
-    }).sort({ createdAt: -1 });
+    // Convert string IDs to ObjectIds for the aggregation pipeline
+    // Fallback to req.user._id if userId is not provided in query
+    const myId = userId ? new mongoose.Types.ObjectId(userId) : req.user._id;
+    const peerIds = friendIds.map(id => {
+      try {
+        return new mongoose.Types.ObjectId(id);
+      } catch (e) {
+        return null;
+      }
+    }).filter(Boolean);
+
+    const posts = await Post.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "authorInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$authorInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          $or: [
+            { userId: { $in: [myId, ...peerIds] } },
+            { "authorInfo.isPublic": true },
+          ],
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $project: {
+          authorInfo: 0, // Remove the joined data to keep response structure identical
+        },
+      },
+    ]);
 
     res.json(posts);
   } catch (err) {

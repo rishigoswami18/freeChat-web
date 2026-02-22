@@ -58,23 +58,16 @@ const MobileDrawer = () => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-1">
-          <ThemeSelector size="btn-sm" />
+        <div className="flex items-center gap-2">
           {authUser?.streak > 0 && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-orange-500/10 rounded-full border border-orange-500/20 text-orange-500 mr-1 animate-pulse">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-500/20 to-red-500/10 rounded-full border border-orange-500/30 text-orange-500 shadow-sm animate-pulse">
               <Flame className="size-4 fill-current" />
-              <span className="font-bold text-xs">{authUser.streak}</span>
+              <span className="font-bold text-xs tabular-nums">{authUser.streak}</span>
             </div>
           )}
-          <Link to="/notifications" className="btn btn-ghost btn-sm btn-circle">
-            <Bell className="size-4" />
-          </Link>
-          <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle text-error">
-            <LogOut className="size-4" />
-          </button>
-          <div className="avatar">
-            <div className="w-8 rounded-full">
-              <img src={authUser?.profilePic} alt="You" />
+          <div className="avatar ring-2 ring-primary/20 rounded-full p-0.5">
+            <div className="w-8 h-8 rounded-full">
+              <img src={authUser?.profilePic || "/avatar.png"} alt="You" className="object-cover" />
             </div>
           </div>
         </div>
@@ -120,29 +113,35 @@ const MobileDrawer = () => {
           ))}
         </nav>
 
-        {/* User Profile + Logout */}
-        <div className="p-4 border-t border-base-300">
-          <div className="flex items-center gap-3 mb-3">
+        {/* User Profile + Theme & Logout */}
+        <div className="p-4 border-t border-base-300 space-y-4">
+          <div className="flex items-center gap-3">
             <div className="avatar">
-              <div className="w-10 rounded-full ring ring-primary/20">
-                <img src={authUser?.profilePic} alt="User Avatar" />
+              <div className="w-12 h-12 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2">
+                <img src={authUser?.profilePic || "/avatar.png"} alt="User Avatar" className="object-cover" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate">{authUser?.fullName}</p>
-              <p className="text-xs text-success flex items-center gap-1">
-                <span className="size-2 rounded-full bg-success inline-block" />
-                Online
+              <p className="font-bold text-base truncate">{authUser?.fullName}</p>
+              <p className="text-xs text-success flex items-center gap-1 font-medium">
+                <span className="size-2 rounded-full bg-success animate-pulse" />
+                Active Now
               </p>
             </div>
           </div>
-          <button
-            onClick={() => { toggleDrawer(); logoutMutation(); }}
-            className="btn btn-ghost btn-sm w-full justify-start gap-2 text-error"
-          >
-            <LogOut className="size-4" />
-            Logout
-          </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center justify-center p-1 bg-base-200 rounded-xl border border-base-300">
+              <ThemeSelector size="btn-ghost btn-sm w-full" />
+            </div>
+            <button
+              onClick={() => { toggleDrawer(); logoutMutation(); }}
+              className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20"
+            >
+              <LogOut className="size-4" />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
