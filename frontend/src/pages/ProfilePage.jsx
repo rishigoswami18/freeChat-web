@@ -7,12 +7,13 @@ import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 import BadgeIcon from "../components/BadgeIcon";
 import { Flame } from "lucide-react";
+import { isPremiumUser } from "../lib/premium";
 
 const ProfilePage = () => {
     const { authUser, isLoading } = useAuthUser();
     const queryClient = useQueryClient();
     const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
-    const isPremium = authUser?.isMember || authUser?.role === "admin";
+    const isPremium = isPremiumUser(authUser);
 
     const [formData, setFormData] = useState({
         fullName: "",

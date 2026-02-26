@@ -25,6 +25,7 @@ import {
     ArrowRight,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { isPremiumUser, isFreeTrial } from "../lib/premium";
 
 const CoupleProfilePage = () => {
     const { authUser } = useAuthUser();
@@ -133,8 +134,8 @@ const CoupleProfilePage = () => {
         );
     }
 
-    // Membership gate
-    if (!memberData?.isMember) {
+    // Membership gate (bypassed during free trial)
+    if (!isPremiumUser(authUser)) {
         return (
             <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto">
                 <h1 className="text-2xl sm:text-3xl font-bold mb-6 flex items-center gap-2">

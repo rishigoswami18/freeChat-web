@@ -5,6 +5,7 @@ import SnapViewer from "./SnapViewer";
 import useAuthUser from "../hooks/useAuthUser";
 import { translateText } from "../lib/api";
 import toast from "react-hot-toast";
+import { isPremiumUser } from "../lib/premium";
 
 const emotionColors = {
   joy: "bg-yellow-400 text-yellow-950 border-yellow-500",
@@ -26,7 +27,7 @@ const EmotionMessage = (props) => {
       : false;
 
   const { authUser } = useAuthUser();
-  const isPremium = authUser?.isMember || authUser?.role === "admin";
+  const isPremium = isPremiumUser(authUser);
 
   const [translatedText, setTranslatedText] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);

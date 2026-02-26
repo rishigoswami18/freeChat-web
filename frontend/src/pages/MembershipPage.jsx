@@ -21,6 +21,7 @@ import {
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
+import { isFreeTrial, getFreeTrialEnd } from "../lib/premium";
 
 const MembershipPage = () => {
     const queryClient = useQueryClient();
@@ -138,6 +139,21 @@ const MembershipPage = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold mb-2">freeChat Premium</h1>
                 <p className="text-sm opacity-60">Unlock couple profiles and exclusive features</p>
             </div>
+
+            {/* Free Trial Banner */}
+            {isFreeTrial() && (
+                <div className="alert bg-gradient-to-r from-emerald-500/15 to-teal-500/10 border border-emerald-500/25 mb-6 rounded-2xl">
+                    <Sparkles className="size-5 text-emerald-400" />
+                    <div>
+                        <h3 className="font-bold text-emerald-400">🎉 Free Trial Active!</h3>
+                        <p className="text-xs opacity-70">
+                            All premium features are free until{" "}
+                            {getFreeTrialEnd().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}.
+                            Enjoy everything freeChat has to offer!
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* ===== ACTIVE MEMBER ===== */}
             {isMember ? (
