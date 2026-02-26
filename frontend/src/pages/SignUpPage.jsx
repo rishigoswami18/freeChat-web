@@ -3,6 +3,7 @@ import { ShipWheel } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import useSignUp from "../hooks/useSignUp";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -192,6 +193,16 @@ const SignUpPage = () => {
                     "Create Account"
                   )}
                 </button>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-base-300" />
+                  <span className="text-xs font-medium opacity-40 uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-base-300" />
+                </div>
+
+                {/* Google Sign Up */}
+                <GoogleSignInButton text="signup_with" />
 
                 <div className="text-center mt-2">
                   <p className="text-sm opacity-60">

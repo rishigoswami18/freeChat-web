@@ -2,6 +2,114 @@ import { upsertStreamUser } from "../lib/stream.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import { generateUniqueUsername } from "../utils/usernameUtils.js";
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// --- Google OAuth Sign-In ---
+export async function googleLogin(req, res) {
+  const { credential } = req.body;
+
+  try {
+    if (!credential) {
+      return res.status(400).json({ message: "Google credential is required" });
+    }
+
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    if (!email) {
+      return res.status(400).json({ message: "Google account has no email" });
+    }
+
+    // Check if user already exists (by googleId or email)
+    let user = await User.findOne({
+      $or: [{ googleId }, { email }],
+    });
+
+    if (!user) {
+      // Create a new user
+      const username = await generateUniqueUsername(name);
+
+      user = await User.create({
+        email,
+        fullName: name,
+        username,
+        googleId,
+        profilePic: picture || `https://avatar.iran.liara.run/public/${Math.floor(Math.random() * 100) + 1}.png`,
+        dateOfBirth: new Date("2000-01-01"),
+        streak: 1,
+        lastLoginDate: new Date(),
+      });
+
+      // Sync with Stream
+      try {
+        await upsertStreamUser({
+          id: user._id.toString(),
+          name: user.fullName,
+          image: user.profilePic || "",
+        });
+      } catch (error) {
+        console.log("Error syncing Stream user (Google):", error);
+      }
+    } else {
+      // Link googleId if not already linked
+      if (!user.googleId) {
+        user.googleId = googleId;
+      }
+      // Update profile picture from Google if user doesn't have one
+      if (!user.profilePic || user.profilePic.includes("avatar.iran.liara.run")) {
+        user.profilePic = picture || user.profilePic;
+      }
+
+      // --- Streak Logic ---
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+      if (!user.lastLoginDate) {
+        user.streak = 1;
+      } else {
+        const lastLogin = new Date(user.lastLoginDate);
+        const lastLoginDay = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate()).getTime();
+        const diffDays = (today - lastLoginDay) / (1000 * 60 * 60 * 24);
+
+        if (diffDays === 1) {
+          user.streak += 1;
+        } else if (diffDays > 1) {
+          user.streak = 1;
+        }
+      }
+      user.lastLoginDate = now;
+      await user.save();
+    }
+
+    // Generate JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("jwt", token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.log("Error in Google login controller:", error.message);
+    if (error.message?.includes("Token used too late") || error.message?.includes("Invalid token")) {
+      return res.status(401).json({ message: "Google token expired or invalid. Please try again." });
+    }
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
 
 // --- NEW: Bridge for Android App ---
 export async function syncFirebaseUser(req, res) {
