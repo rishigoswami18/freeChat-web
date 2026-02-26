@@ -6,8 +6,9 @@ import {
   Send,
   User,
   MessageSquare,
+  Trash2,
 } from "lucide-react";
-import { likePost, commentOnPost, sharePost } from "../lib/api";
+import { likePost, commentOnPost, sharePost, deletePost } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 import toast from "react-hot-toast";
 import PostAd from "./PostAd";
@@ -59,10 +60,25 @@ const PostCard = ({ post, setPosts }) => {
   const [commentText, setCommentText] = useState("");
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isLiked = post.likes?.includes(authUser?._id);
   const likeCount = post.likes?.length || 0;
   const commentCount = post.comments?.length || 0;
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    setIsDeleting(true);
+    try {
+      await deletePost(post._id);
+      setPosts((prev) => prev.filter((p) => p._id !== post._id));
+      toast.success("Post deleted");
+    } catch {
+      toast.error("Failed to delete post");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleLike = async () => {
     if (isLiking) return;
@@ -165,6 +181,21 @@ const PostCard = ({ post, setPosts }) => {
               )}
             </div>
           </div>
+
+          {/* Delete Button - only show if it's our own post */}
+          {post.userId === authUser?._id && (
+            <button
+              onClick={handleDelete}
+              className="btn btn-ghost btn-sm btn-circle text-error ml-auto"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                <Trash2 className="size-4" />
+              )}
+            </button>
+          )}
         </div>
 
         {/* Content */}

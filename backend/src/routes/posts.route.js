@@ -244,4 +244,46 @@ router.put("/:id/share", async (req, res) => {
   }
 });
 
+// Get user specific posts
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const posts = await Post.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching user posts:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Delete post
+router.delete("/:id", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    // Check ownership
+    if (post.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Unauthorized to delete this post" });
+    }
+
+    // Delete media from cloudinary if it exists
+    if (post.mediaUrl && post.mediaUrl.includes("cloudinary")) {
+      try {
+        const publicId = post.mediaUrl.split("/").pop().split(".")[0];
+        const resourceType = post.mediaType === "video" ? "video" : "image";
+        await cloudinary.uploader.destroy(`freechat_posts/${publicId}`, { resource_type: resourceType });
+      } catch (cloudinaryErr) {
+        console.error("Error deleting from Cloudinary:", cloudinaryErr.message);
+        // Continue deleting post from DB even if cloudinary delete fails
+      }
+    }
+
+    await Post.findByIdAndDelete(req.params.id);
+    res.json({ message: "Post deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting post:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 export default router;

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import useAuthUser from "../hooks/useAuthUser";
-import { updateProfile } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar } from "lucide-react";
+import { updateProfile, getUserPosts } from "../lib/api";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid } from "lucide-react";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 import BadgeIcon from "../components/BadgeIcon";
+import PostsFeed from "../components/PostsFeed";
 import { Flame } from "lucide-react";
 import { isPremiumUser } from "../lib/premium";
 
@@ -14,6 +15,20 @@ const ProfilePage = () => {
     const queryClient = useQueryClient();
     const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
     const isPremium = isPremiumUser(authUser);
+
+    const [userPosts, setUserPosts] = useState([]);
+
+    // Fetch user specific posts
+    const { isLoading: isLoadingPosts } = useQuery({
+        queryKey: ["userPosts", authUser?._id],
+        queryFn: async () => {
+            if (!authUser?._id) return [];
+            const data = await getUserPosts(authUser._id);
+            setUserPosts(data);
+            return data;
+        },
+        enabled: !!authUser?._id,
+    });
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -387,6 +402,23 @@ const ProfilePage = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className="mt-12 pt-8 border-t">
+                <h2 className="text-2xl font-black mb-6 flex items-center gap-3 italic tracking-tight uppercase">
+                    <Grid className="text-primary size-7" />
+                    Your Posts
+                </h2>
+
+                {isLoadingPosts ? (
+                    <div className="flex justify-center py-12">
+                        <span className="loading loading-spinner loading-lg text-primary" />
+                    </div>
+                ) : (
+                    <div className="pb-10">
+                        <PostsFeed posts={userPosts} setPosts={setUserPosts} />
+                    </div>
+                )}
             </div>
 
             <p className="text-center text-xs opacity-40 mt-8 italic pb-10">

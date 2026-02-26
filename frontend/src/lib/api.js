@@ -111,6 +111,16 @@ export const sharePost = async (postId) => {
   return response.data;
 };
 
+export const deletePost = async (postId) => {
+  const response = await axiosInstance.delete(`/posts/${postId}`);
+  return response.data;
+};
+
+export const getUserPosts = async (userId) => {
+  const response = await axiosInstance.get(`/posts/user/${userId}`);
+  return response.data;
+};
+
 export const getVideoPosts = async () => {
   const response = await axiosInstance.get("/posts/videos");
   return response.data;
