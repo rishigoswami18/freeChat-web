@@ -1,5 +1,30 @@
+# freeChat — Free Chat App | www.freechatweb.in
+# Robots.txt
+
 User-agent: *
 Allow: /
+Allow: /login
+Allow: /signup
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms
+Allow: /refund-policy
+Allow: /reels
+Disallow: /api/
+Disallow: /onboarding
+Disallow: /chat/
+Disallow: /call/
+Disallow: /game/
+
+# Crawl-delay for polite crawling
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
 
 # Sitemap
 Sitemap: https://www.freechatweb.in/sitemap.xml
+
+# Host
+Host: https://www.freechatweb.in

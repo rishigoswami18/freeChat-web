@@ -22,6 +22,7 @@ import ContactPage from "./pages/ContactPage.jsx";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
 import TermsPage from "./pages/TermsPage.jsx";
 import RefundPolicyPage from "./pages/RefundPolicyPage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -57,8 +58,10 @@ const App = () => {
                       <Layout showSidebar={true}>
                         <PostsPage />
                       </Layout>
+                    ) : isAuthenticated ? (
+                      <Navigate to="/onboarding" />
                     ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      <LandingPage />
                     )
                   }
                 />
