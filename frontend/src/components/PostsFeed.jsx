@@ -10,6 +10,7 @@ import {
 import { likePost, commentOnPost, sharePost } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 import toast from "react-hot-toast";
+import PostAd from "./PostAd";
 
 const PostsFeed = ({ posts, setPosts }) => {
   if (!posts || posts.length === 0) {
@@ -24,8 +25,16 @@ const PostsFeed = ({ posts, setPosts }) => {
 
   return (
     <div className="space-y-5">
-      {posts.map((post) => (
-        <PostCard key={post._id} post={post} setPosts={setPosts} />
+      {posts.map((post, index) => (
+        <div key={post._id}>
+          <PostCard post={post} setPosts={setPosts} />
+          {/* Show an ad after every 3 posts */}
+          {(index + 1) % 3 === 0 && (
+            <div className="mt-5">
+              <PostAd index={Math.floor(index / 3)} />
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );
