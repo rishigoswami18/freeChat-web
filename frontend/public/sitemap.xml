@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Main Landing/Home -->
   <url>
-    <loc>https://freechat-web-1.onrender.com/</loc>
+    <loc>https://www.freechatweb.in/</loc>
     <lastmod>2026-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -10,7 +10,7 @@
   
   <!-- Content/Community Pages -->
   <url>
-    <loc>https://freechat-web-1.onrender.com/reels</loc>
+    <loc>https://www.freechatweb.in/reels</loc>
     <lastmod>2026-02-22</lastmod>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
@@ -18,25 +18,25 @@
   
   <!-- Compliance Pages (Required for Trust) -->
   <url>
-    <loc>https://freechat-web-1.onrender.com/contact</loc>
+    <loc>https://www.freechatweb.in/contact</loc>
     <lastmod>2026-02-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://freechat-web-1.onrender.com/privacy-policy</loc>
+    <loc>https://www.freechatweb.in/privacy-policy</loc>
     <lastmod>2026-02-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://freechat-web-1.onrender.com/terms</loc>
+    <loc>https://www.freechatweb.in/terms</loc>
     <lastmod>2026-02-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://freechat-web-1.onrender.com/refund-policy</loc>
+    <loc>https://www.freechatweb.in/refund-policy</loc>
     <lastmod>2026-02-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
