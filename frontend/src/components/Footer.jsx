@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart, Mail, Shield, Scale, RefreshCcw } from "lucide-react";
+import Logo from "./Logo";
 
 const Footer = () => {
     return (
@@ -8,10 +9,7 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     {/* Brand */}
                     <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                            <img src="/logo.png" alt="freeChat" className="size-10 object-contain" />
-                            <span className="text-xl font-bold tracking-tight">freeChat</span>
-                        </div>
+                        <Logo className="size-10" fontSize="text-xl" />
                         <p className="text-sm opacity-60 max-w-xs">
                             An immersive social platform for connecting with friends and partners. Unleash your creativity with Reels and Stories.
                         </p>

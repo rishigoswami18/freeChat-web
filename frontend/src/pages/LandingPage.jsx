@@ -12,11 +12,11 @@ import {
     Sparkles,
     ArrowRight,
     Star,
-    ShipWheel,
     Eye,
     Languages,
     Film,
 } from "lucide-react";
+import Logo from "../components/Logo";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 30 },
@@ -106,12 +106,7 @@ const LandingPage = () => {
             {/* ===== NAVIGATION ===== */}
             <nav className="navbar bg-base-100/80 backdrop-blur-lg border-b border-base-300 sticky top-0 z-50">
                 <div className="container mx-auto flex items-center justify-between px-4">
-                    <Link to="/" className="flex items-center gap-2">
-                        <ShipWheel className="size-8 text-primary" />
-                        <span className="text-2xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-                            freeChat
-                        </span>
-                    </Link>
+                    <Logo className="size-8" fontSize="text-2xl" />
                     <div className="flex items-center gap-3">
                         <Link to="/login" className="btn btn-ghost btn-sm">
                             Login
@@ -381,11 +376,8 @@ const LandingPage = () => {
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <ShipWheel className="size-6 text-primary" />
-                                <span className="text-xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-                                    freeChat
-                                </span>
+                            <div className="mb-3">
+                                <Logo className="size-6" fontSize="text-xl" />
                             </div>
                             <p className="text-sm opacity-70 max-w-xs">
                                 freeChat is a free chat app and social networking platform for

@@ -129,8 +129,19 @@ export const getVideoPosts = async () => {
 // ----------------- CHAT / STREAM -----------------
 
 export const getStreamToken = async () => {
-  const response = await axiosInstance.get("/chat/token");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/chat/token");
+    console.log("✅ getStreamToken success:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ getStreamToken failed! Details:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config?.url
+    });
+    throw error;
+  }
 };
 
 export const translateText = async (text, targetLang) => {

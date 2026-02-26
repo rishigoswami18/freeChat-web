@@ -49,13 +49,21 @@ export const ChatProvider = ({ children }) => {
 
         const initChat = async () => {
             if (!tokenData?.token || !authUser) {
-                console.log("Waiting for token/auth...", { hasToken: !!tokenData?.token, hasAuth: !!authUser });
+                if (tokenError) {
+                    console.error("Token Fetch Error:", tokenError);
+                }
+                console.warn("Chat Connection Pending - Status:", {
+                    hasAuth: !!authUser,
+                    hasToken: !!tokenData?.token,
+                    dataReceived: !!tokenData,
+                    queryStatus: tokenError ? "error" : "loading/idle",
+                    apiError: tokenError?.response?.data?.message || tokenError?.message || "none"
+                });
                 return;
             }
 
             const client = StreamChat.getInstance(STREAM_API_KEY);
 
-            // If already connected and matched, sync state and leave
             if (client.userID === authUser._id) {
                 console.log("Chat client already connected for:", authUser._id);
                 if (isInstanceCurrent && chatClient !== client) {
@@ -144,7 +152,7 @@ export const ChatProvider = ({ children }) => {
         return () => {
             isInstanceCurrent = false;
         };
-    }, [tokenData, authUser, navigate, chatClient]);
+    }, [tokenData, authUser, navigate]);
 
     return (
         <ChatContext.Provider value={chatClient}>

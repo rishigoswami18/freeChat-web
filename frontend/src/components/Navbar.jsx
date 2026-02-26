@@ -3,6 +3,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { Bell, LogOut, Pencil, Flame } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const { authUser } = useAuthUser();
@@ -18,16 +19,7 @@ const Navbar = () => {
           {/* LOGO - ONLY IN THE CHAT PAGE */}
           {isChatPage && (
             <div className="pl-5">
-              <Link to="/" className="flex items-center gap-2.5 group">
-                <img
-                  src="/logo.png"
-                  alt="freeChat"
-                  className="size-8 object-contain group-hover:scale-110 transition-transform"
-                />
-                <span className="text-2xl font-extrabold tracking-tight gradient-text">
-                  freeChat
-                </span>
-              </Link>
+              <Logo className="size-8" fontSize="text-2xl" />
             </div>
           )}
 

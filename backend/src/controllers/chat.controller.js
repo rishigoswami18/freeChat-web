@@ -4,14 +4,50 @@ import { generateStreamToken } from "../lib/stream.js";
 
 export async function getStreamToken(req, res) {
   try {
-    const token = generateStreamToken(req.user.id);
+    if (!process.env.STREAM_API_KEY || !process.env.STREAM_API_SECRET) {
+      console.error("❌ Stream API Key or Secret missing in environment variables");
+      return res.status(500).json({ message: "Chat configuration error on server" });
+    }
 
+    const token = generateStreamToken(req.user._id);
+
+    if (!token) {
+      console.error("❌ Failed to generate Stream token for user:", req.user._id);
+      return res.status(500).json({ message: "Chat token generation failed" });
+    }
+
+    console.log("✅ Stream token generated successfully for:", req.user.id);
     res.status(200).json({ token });
   } catch (error) {
     console.log("Error in getStreamToken controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+export const testStreamConnection = async (req, res) => {
+  try {
+    const key = process.env.STREAM_API_KEY;
+    const secret = process.env.STREAM_API_SECRET;
+
+    if (!key || !secret) {
+      return res.status(200).json({
+        status: "error",
+        message: "Stream keys are missing in environment variables",
+        key_present: !!key,
+        secret_present: !!secret
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Stream configuration found",
+      key_preview: `${key.substring(0, 3)}...${key.substring(key.length - 3)}`,
+      secret_length: secret.length
+    });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: error.message });
+  }
+};
 
 export const testMLConnection = async (req, res) => {
   try {

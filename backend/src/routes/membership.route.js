@@ -6,20 +6,25 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-// Initialize Razorpay
+// Initialize Razorpay safely
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 
-if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-    console.error("CRITICAL: Razorpay API keys are missing in .env!");
-} else {
-    console.log(`Razorpay initialized with ${RAZORPAY_KEY_ID.startsWith("rzp_live") ? "LIVE" : "TEST"} keys`);
-}
+let razorpay = null;
 
-const razorpay = new Razorpay({
-    key_id: RAZORPAY_KEY_ID,
-    key_secret: RAZORPAY_KEY_SECRET,
-});
+if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    console.error("❌ CRITICAL: Razorpay API keys are missing in .env! Membership features will fail.");
+} else {
+    try {
+        razorpay = new Razorpay({
+            key_id: RAZORPAY_KEY_ID,
+            key_secret: RAZORPAY_KEY_SECRET,
+        });
+        console.log(`✅ Razorpay initialized with ${RAZORPAY_KEY_ID.startsWith("rzp_live") ? "LIVE" : "TEST"} keys`);
+    } catch (err) {
+        console.error("❌ Failed to initialize Razorpay:", err.message);
+    }
+}
 
 router.use(protectRoute);
 
@@ -61,6 +66,10 @@ router.post("/create-order", async (req, res) => {
                 plan: "premium_monthly",
             },
         };
+
+        if (!razorpay) {
+            return res.status(500).json({ message: "Payment service is currently unavailable (API keys missing)" });
+        }
 
         const order = await razorpay.orders.create(options);
 

@@ -22,6 +22,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
 import ThemeSelector from "./ThemeSelector";
 import CreateStoryModal from "./CreateStoryModal";
+import Logo from "./Logo";
 
 const MobileDrawer = () => {
   const { authUser } = useAuthUser();
@@ -55,12 +56,7 @@ const MobileDrawer = () => {
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
             <Menu className="size-5" />
           </button>
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="freeChat" className="size-6 object-contain" />
-            <span className="text-lg font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              freeChat
-            </span>
-          </Link>
+          <Logo className="size-6" fontSize="text-lg" />
         </div>
 
         <div className="flex items-center gap-2">
@@ -89,16 +85,7 @@ const MobileDrawer = () => {
       >
         {/* Drawer Header */}
         <div className="p-4 flex justify-between items-center border-b border-base-300">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="freeChat" className="size-6 object-contain" />
-            <h2 className="text-lg font-bold">freeChat</h2>
-            {authUser?.streak > 0 && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-orange-500/10 rounded-lg border border-orange-500/20 text-orange-500 animate-pulse ml-1">
-                <Flame className="size-3.5 fill-current" />
-                <span className="font-bold text-xs">{authUser.streak}</span>
-              </div>
-            )}
-          </div>
+          <Logo className="size-6" fontSize="text-lg" streak={authUser?.streak} />
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
             <X className="size-5" />
           </button>

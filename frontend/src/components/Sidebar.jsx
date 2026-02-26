@@ -14,6 +14,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
+import Logo from "./Logo";
 
 const navItems = [
   { to: "/", icon: Home, label: "Feed" },
@@ -38,19 +39,7 @@ const Sidebar = () => {
     <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0">
       {/* Brand */}
       <div className="px-5 py-5 border-b border-base-300/50">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="relative">
-            <img
-              src="/logo.png"
-              alt="freeChat"
-              className="size-9 object-contain group-hover:scale-110 transition-transform duration-300"
-            />
-            <div className="absolute -inset-1 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
-          <span className="text-2xl font-extrabold tracking-tight gradient-text">
-            freeChat
-          </span>
-        </Link>
+        <Logo className="size-9" fontSize="text-2xl" />
       </div>
 
       {/* Navigation */}

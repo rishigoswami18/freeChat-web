@@ -4,6 +4,7 @@ import {
   getStreamToken,
   sendMessage,
   testMLConnection,
+  testStreamConnection,
 } from "../controllers/chat.controller.js";
 
 import cloudinary from "../lib/cloudinary.js";
@@ -38,7 +39,8 @@ router.post("/upload-media", protectRoute, async (req, res) => {
 // NEW route → emotion-aware message sending
 router.post("/send", protectRoute, sendMessage);
 
-// DIAGNOSTIC route (run this in browser to check ML connection)
+// DIAGNOSTIC routes (run these in browser to check connection status)
 router.get("/test-ml", testMLConnection);
+router.get("/test-stream", testStreamConnection);
 
 export default router;

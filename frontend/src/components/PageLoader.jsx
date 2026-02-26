@@ -1,5 +1,5 @@
-import { ShipWheel } from "lucide-react";
 import { useThemeStore } from "../store/useThemeStore";
+import Logo from "./Logo";
 
 const PageLoader = () => {
   const { theme } = useThemeStore();
@@ -8,11 +8,10 @@ const PageLoader = () => {
       className="min-h-screen flex flex-col items-center justify-center gap-4"
       data-theme={theme}
     >
-      <div className="relative">
-        <ShipWheel className="size-12 text-primary animate-spin" style={{ animationDuration: '2s' }} />
-        <div className="absolute -inset-4 bg-primary/10 rounded-full blur-xl animate-pulse" />
+      <div className="relative animate-bounce">
+        <Logo className="size-16" showText={false} />
       </div>
-      <span className="text-lg font-bold gradient-text tracking-tight">
+      <span className="text-xl font-extrabold gradient-text tracking-tight mt-2">
         freeChat
       </span>
     </div>

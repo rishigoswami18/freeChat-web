@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ShipWheel } from "lucide-react";
 import { Link } from "react-router-dom";
 import useLogin from "../hooks/useLogin";
 import GoogleSignInButton from "../components/GoogleSignInButton";
+import Logo from "../components/Logo";
 
 const LoginPage = () => {
   const [loginData, setLoginData] = useState({
@@ -26,14 +26,8 @@ const LoginPage = () => {
         {/* LOGIN FORM SECTION */}
         <div className="w-full lg:w-1/2 p-6 sm:p-10 flex flex-col justify-center">
           {/* LOGO */}
-          <div className="mb-8 flex items-center justify-start gap-2.5">
-            <div className="relative">
-              <ShipWheel className="size-10 text-primary" />
-              <div className="absolute -inset-2 bg-primary/20 rounded-full blur-lg" />
-            </div>
-            <span className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-              freeChat
-            </span>
+          <div className="mb-8">
+            <Logo className="size-10" fontSize="text-3xl" />
           </div>
 
           {/* ERROR MESSAGE DISPLAY */}
