@@ -4,6 +4,7 @@ import { googleLogin } from "../lib/api";
 import toast from "react-hot-toast";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+console.log("GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID);
 
 const GoogleSignInButton = ({ text = "signin_with" }) => {
     const btnRef = useRef(null);
@@ -77,30 +78,38 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
         }
     }, [handleCredentialResponse, text]);
 
-    if (!GOOGLE_CLIENT_ID) return null;
 
     return (
-        <div className="w-full space-y-3">
+        <div className="w-full space-y-4 py-2">
             {/* Divider */}
             <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-base-300" />
-                <span className="text-xs font-medium opacity-40 uppercase tracking-wider">or</span>
-                <div className="flex-1 h-px bg-base-300" />
+                <div className="flex-1 h-px bg-base-300/50" />
+                <span className="text-[10px] font-bold opacity-30 uppercase tracking-widest">or</span>
+                <div className="flex-1 h-px bg-base-300/50" />
             </div>
 
-            {/* Button */}
-            {isPending ? (
-                <div className="flex items-center justify-center py-3 rounded-full border border-base-300 bg-base-200/50">
-                    <span className="loading loading-spinner loading-sm mr-2"></span>
-                    <span className="text-sm font-medium opacity-70">
-                        Signing in with Google...
-                    </span>
-                </div>
-            ) : (
-                <div
-                    ref={btnRef}
-                    className="w-full flex items-center justify-center [&>div]:w-full"
-                />
+            {/* Google Button Container */}
+            <div className="w-full flex justify-center min-h-[44px]">
+                {isPending ? (
+                    <div className="flex items-center justify-center w-full py-2.5 rounded-xl border border-base-300 bg-base-200/30 animate-pulse">
+                        <span className="loading loading-spinner loading-xs mr-2 opacity-50"></span>
+                        <span className="text-xs font-semibold opacity-50">
+                            Connecting...
+                        </span>
+                    </div>
+                ) : (
+                    <div
+                        ref={btnRef}
+                        className="w-full flex justify-center [&>div]:mx-auto"
+                        style={{ minWidth: '200px' }}
+                    />
+                )}
+            </div>
+
+            {!GOOGLE_CLIENT_ID && (
+                <p className="text-[10px] text-error text-center font-medium opacity-70">
+                    Google Sign-In is currently unavailable (Missing Client ID)
+                </p>
             )}
         </div>
     );

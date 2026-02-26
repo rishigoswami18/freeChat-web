@@ -22,6 +22,13 @@ export const ChatProvider = ({ children }) => {
     const { authUser } = useAuthUser();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (!STREAM_API_KEY) {
+            console.error("VITE_STREAM_API_KEY is missing from .env");
+            toast.error("Config missing: VITE_STREAM_API_KEY");
+        }
+    }, []);
+
     const { data: tokenData, error: tokenError } = useQuery({
         queryKey: ["streamToken"],
         queryFn: getStreamToken,
@@ -41,42 +48,61 @@ export const ChatProvider = ({ children }) => {
         let isInstanceCurrent = true;
 
         const initChat = async () => {
-            if (!tokenData?.token || !authUser) return;
+            if (!tokenData?.token || !authUser) {
+                console.log("Waiting for token/auth...", { hasToken: !!tokenData?.token, hasAuth: !!authUser });
+                return;
+            }
 
-            // If already connected correctly, skip
             const client = StreamChat.getInstance(STREAM_API_KEY);
-            if (client.userID === authUser._id && chatClient) return;
 
-            // Prevent overlapping connection attempts
-            if (connectionRef.current === tokenData.token) return;
+            // If already connected and matched, sync state and leave
+            if (client.userID === authUser._id) {
+                console.log("Chat client already connected for:", authUser._id);
+                if (isInstanceCurrent && chatClient !== client) {
+                    setChatClient(client);
+                }
+                return;
+            }
+
+            // Only skip if already in progress AND we don't have a mismatched client
+            if (connectionRef.current === tokenData.token && isConnecting) {
+                console.log("Connection already in progress for this token");
+                return;
+            }
+
             connectionRef.current = tokenData.token;
 
             try {
+                console.log("Starting chat connection for:", authUser.fullName);
                 setIsConnecting(true);
 
-                // Disconnect existing wrong user if any
                 if (client.userID && client.userID !== authUser._id) {
+                    console.log("Disconnecting previous user:", client.userID);
                     await client.disconnectUser();
                 }
 
-                // Connect user
-                if (client.userID !== authUser._id) {
-                    await client.connectUser(
-                        {
-                            id: authUser._id,
-                            name: authUser.fullName,
-                            image: authUser.profilePic,
-                        },
-                        tokenData.token
-                    );
-                }
+                // Add a timeout to the connection attempt
+                const connectPromise = client.connectUser(
+                    {
+                        id: authUser._id,
+                        name: authUser.fullName,
+                        image: authUser.profilePic,
+                    },
+                    tokenData.token
+                );
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Connection timeout")), 10000)
+                );
+
+                await Promise.race([connectPromise, timeoutPromise]);
 
                 if (isInstanceCurrent) {
-                    console.log("Stream Chat Connected:", authUser.fullName);
+                    console.log("Stream Chat Connection Successful");
                     setChatClient(client);
                 }
 
-                // Message Handlers
+                // Global Message Handler
                 const handleNewMessage = (event) => {
                     if (event.user.id === authUser._id) return;
                     const isOnChatPage = window.location.pathname.includes(`/chat/${event.user.id}`);
@@ -103,8 +129,11 @@ export const ChatProvider = ({ children }) => {
                 client.on("notification.message_new", handleNewMessage);
 
             } catch (err) {
-                console.error("Chat Connection Error:", err);
+                console.error("Chat Connection Error details:", err);
                 connectionRef.current = null;
+                if (isInstanceCurrent) {
+                    toast.error("Messenger connection failed. Please check your internet.");
+                }
             } finally {
                 if (isInstanceCurrent) setIsConnecting(false);
             }
