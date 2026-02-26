@@ -5,7 +5,6 @@ import ReelPost from "../components/ReelPost";
 import ReelAd from "../components/ReelAd";
 import { Loader2, Film } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
-import { isPremiumUser } from "../lib/premium";
 
 const ReelsPage = () => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -17,10 +16,9 @@ const ReelsPage = () => {
         queryFn: getVideoPosts,
     });
 
-    // Inject ads if user is not a member
+    // Inject ads for everyone
     const reelsWithAds = useMemo(() => {
         if (!rawReels.length) return [];
-        if (isPremiumUser(authUser)) return rawReels;
 
         const result = [];
         const AD_INTERVAL = 3; // Show an ad every 3 reels
@@ -33,7 +31,7 @@ const ReelsPage = () => {
         });
 
         return result;
-    }, [rawReels, authUser]);
+    }, [rawReels]);
 
     useEffect(() => {
         const container = containerRef.current;
