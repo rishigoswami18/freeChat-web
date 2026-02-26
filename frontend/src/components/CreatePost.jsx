@@ -21,23 +21,70 @@ const CreatePost = ({ onPost, authUser }) => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleFileSelect = (e, type) => {
+  const compressImage = (file, maxWidth = 1920, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+
+        // Scale down if larger than maxWidth
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to compressed JPEG base64
+        const compressed = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressed);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        // Fallback to raw file if compression fails
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+      };
+      img.src = url;
+    });
+  };
+
+  const handleFileSelect = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 45MB)
-    if (file.size > 45 * 1024 * 1024) {
-      toast.error("File size must be under 45MB");
+    // Validate file size (max 10MB for videos, images will be compressed)
+    if (type === "video" && file.size > 10 * 1024 * 1024) {
+      toast.error("Video size must be under 10MB");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setMedia(reader.result);
-      setMediaType(type);
-      setMediaPreview(reader.result);
-    };
-    reader.readAsDataURL(file);
+    if (type === "image") {
+      // Compress images before uploading
+      try {
+        const compressed = await compressImage(file);
+        setMedia(compressed);
+        setMediaType(type);
+        setMediaPreview(compressed);
+      } catch {
+        toast.error("Failed to process image");
+      }
+    } else {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMedia(reader.result);
+        setMediaType(type);
+        setMediaPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const removeMedia = () => {
