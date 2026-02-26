@@ -39,8 +39,14 @@ export const ChatProvider = ({ children }) => {
 
     useEffect(() => {
         if (tokenError) {
-            console.error("Failed to fetch stream token:", tokenError);
-            toast.error("Messenger connection failed. Please refresh.");
+            const status = tokenError.response?.status;
+            const message = tokenError.response?.data?.message || tokenError.message;
+            console.error("❌ Chat Token Failure:", { status, message });
+
+            toast.error(
+                `Messenger connection failed (${status || 'Network Error'}): ${message.substring(0, 30)}...`,
+                { duration: 6000 }
+            );
         }
     }, [tokenError]);
 
