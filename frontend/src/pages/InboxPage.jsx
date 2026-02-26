@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
     Chat,
     ChannelList,
@@ -19,23 +19,22 @@ const InboxPage = () => {
 
     if (!chatClient) return <ChatLoader />;
 
-    const filters = {
+    const filters = useMemo(() => ({
         members: { $in: [chatClient.userID] },
         type: "messaging"
-    };
+    }), [chatClient.userID]);
 
-    const sort = { last_message_at: -1 };
+    const sort = useMemo(() => ({ last_message_at: -1 }), []);
 
     const handleChannelSelect = (channel) => {
-        // ChatPage expects either a userId for 1v1 or a channelId starting with 'group_'
         const isGroup = channel.id.startsWith("group_");
         if (isGroup) {
             navigate(`/chat/${channel.id}`);
         } else {
             const otherMember = Object.values(channel.state.members).find(
-                (m) => m.user.id !== chatClient.userID
+                (m) => m.user?.id !== chatClient.userID
             );
-            if (otherMember) {
+            if (otherMember?.user?.id) {
                 navigate(`/chat/${otherMember.user.id}`);
             } else {
                 navigate(`/chat/${channel.id}`);
@@ -48,24 +47,22 @@ const InboxPage = () => {
         const chatClient = useChatClient();
 
         // Resolve channel name: if data.name is missing, it's likely a 1v1 chat
-        // Find the member that ISN'T the current user
         const displayData = channel.data.name ? {
             name: channel.data.name,
             image: channel.data.image
         } : (() => {
-            const otherMember = Object.values(channel.state.members).find(m => m.user.id !== chatClient.userID);
+            const otherMember = Object.values(channel.state.members).find(m => m.user?.id !== chatClient?.userID);
             return {
-                name: otherMember?.user.name || "Unknown User",
-                image: otherMember?.user.image
+                name: otherMember?.user?.name || otherMember?.user?.fullName || "Unknown User",
+                image: otherMember?.user?.image || otherMember?.user?.profilePic
             };
         })();
 
         return (
             <div
-                onClick={() => handleChannelSelect(channel)}
                 className={`flex items-center gap-4 p-4 cursor-pointer border-b border-base-300 transition-all hover:bg-base-200 outline-none
-                    ${active ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"}
-                `}
+                ${active ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"}
+            `}
             >
                 <div className="avatar">
                     <div className="size-12 rounded-full ring-2 ring-primary/10 overflow-hidden">
@@ -89,7 +86,7 @@ const InboxPage = () => {
                         {lastMessage ? (
                             <>
                                 <span className="font-bold">
-                                    {lastMessage.user?.id === chatClient.userID ? "You" : (lastMessage.user?.name || "Someone").split(" ")[0]}
+                                    {lastMessage.user?.id === chatClient?.userID ? "You" : (lastMessage.user?.name || "Someone").split(" ")[0]}
                                     :
                                 </span>{" "}
                                 {lastMessage.extra_data?.isSnap || lastMessage.isSnap ? (
@@ -131,7 +128,11 @@ const InboxPage = () => {
                         <ChannelList
                             filters={filters}
                             sort={sort}
-                            Preview={CustomChannelPreview}
+                            Preview={(previewProps) => (
+                                <div onClick={() => handleChannelSelect(previewProps.channel)}>
+                                    <CustomChannelPreview {...previewProps} />
+                                </div>
+                            )}
                             EmptyStateIndicator={() => (
                                 <div className="flex flex-col items-center justify-center py-20 opacity-40 px-6 text-center">
                                     <div className="p-10 bg-base-200 rounded-full mb-6">

@@ -17,10 +17,15 @@ const TRENDING_SONGS = [
 
 // Upload file directly to Cloudinary from the browser (no backend needed)
 const uploadToCloudinary = async (file, resourceType = "image", onProgress) => {
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    throw new Error("Cloudinary configuration missing in environment");
+  }
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-  formData.append("folder", "freechat_posts");
+  // Remove folder parameter if it's causing issues with unsigned presets
+  // formData.append("folder", "freechat_posts");
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -34,15 +39,20 @@ const uploadToCloudinary = async (file, resourceType = "image", onProgress) => {
     };
 
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
+      try {
         const data = JSON.parse(xhr.responseText);
-        resolve(data.secure_url);
-      } else {
-        reject(new Error("Upload failed"));
+        if (xhr.status >= 200 && xhr.status < 300 && data.secure_url) {
+          resolve(data.secure_url);
+        } else {
+          console.error("Cloudinary upload error response:", data);
+          reject(new Error(data.error?.message || "Upload failed"));
+        }
+      } catch (err) {
+        reject(new Error("Failed to parse Cloudinary response"));
       }
     };
 
-    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.onerror = () => reject(new Error("Network error during upload"));
     xhr.send(formData);
   });
 };
@@ -55,7 +65,8 @@ const CreatePost = ({ onPost, authUser }) => {
   const [songName, setSongName] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   const handleFileSelect = (e, type) => {
     const file = e.target.files?.[0];
@@ -83,7 +94,8 @@ const CreatePost = ({ onPost, authUser }) => {
     setMediaPreview(null);
     setSongName("");
     setUploadProgress(0);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (imageInputRef.current) imageInputRef.current.value = "";
+    if (videoInputRef.current) videoInputRef.current.value = "";
   };
 
   const handlePost = async () => {
@@ -97,21 +109,42 @@ const CreatePost = ({ onPost, authUser }) => {
 
     try {
       let mediaUrl = "";
+      let mediaBase64 = null;
 
-      // Upload media directly to Cloudinary from browser
+      // Primary: Upload media directly to Cloudinary from browser (better for performance)
       if (mediaFile) {
-        const resourceType = mediaType === "video" ? "video" : "image";
-        toast.loading("Uploading media...", { id: "upload" });
-        mediaUrl = await uploadToCloudinary(mediaFile, resourceType, (progress) => {
-          setUploadProgress(progress);
-        });
-        toast.dismiss("upload");
+        try {
+          const resourceType = mediaType === "video" ? "video" : "image";
+          toast.loading(`Uploading ${mediaType}...`, { id: "upload" });
+          mediaUrl = await uploadToCloudinary(mediaFile, resourceType, (progress) => {
+            setUploadProgress(progress);
+          });
+          toast.dismiss("upload");
+        } catch (uploadError) {
+          console.warn("Direct upload failed, attempting fallback...", uploadError);
+          toast.dismiss("upload");
+
+          // Fallback: Convert to Base64 and send to backend for upload
+          // Only for files < 10MB to avoid hitting backend limits
+          if (mediaFile.size < 10 * 1024 * 1024) {
+            toast.loading("Uploading via fallback...", { id: "upload-fallback" });
+            const reader = new FileReader();
+            mediaBase64 = await new Promise((resolve) => {
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(mediaFile);
+            });
+            toast.dismiss("upload-fallback");
+          } else {
+            throw new Error(`Upload failed: ${uploadError.message}. Please try a smaller file.`);
+          }
+        }
       }
 
-      // Send only the URL to the backend (lightweight!)
+      // Send the data to the backend
       const postData = {
         content: content.trim(),
-        mediaUrl,
+        mediaUrl, // Used if direct upload worked
+        media: mediaBase64, // Used for backend fallback
         mediaType,
         songName: songName.trim(),
       };
@@ -123,6 +156,7 @@ const CreatePost = ({ onPost, authUser }) => {
       toast.success("Post published!");
     } catch (error) {
       toast.dismiss("upload");
+      toast.dismiss("upload-fallback");
       const errorMsg = error.response?.data?.message || error.message || "Failed to create post";
       toast.error(errorMsg);
       console.error("Error creating post:", error);
@@ -238,7 +272,7 @@ const CreatePost = ({ onPost, authUser }) => {
               <label className="text-base-content/60 hover:text-success cursor-pointer transition-colors">
                 <ImageIcon className="size-6" />
                 <input
-                  ref={fileInputRef}
+                  ref={imageInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
@@ -250,6 +284,7 @@ const CreatePost = ({ onPost, authUser }) => {
               <label className="text-base-content/60 hover:text-info cursor-pointer transition-colors">
                 <VideoIcon className="size-6" />
                 <input
+                  ref={videoInputRef}
                   type="file"
                   accept="video/*"
                   className="hidden"

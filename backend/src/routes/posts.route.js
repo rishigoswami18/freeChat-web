@@ -14,7 +14,13 @@ router.use(protectRoute);
 router.post("/", async (req, res) => {
   try {
     const { content, media, mediaUrl: directUrl, mediaType, songName } = req.body;
-    console.log("Create post request received. Content length:", content?.length, "Media type:", mediaType, "Direct URL:", !!directUrl, "Base64 media:", !!media, "Song name:", songName);
+    console.log("Create post request received:", {
+      contentLength: content?.length,
+      mediaType,
+      hasDirectUrl: !!directUrl,
+      hasBase64Media: !!media,
+      songName
+    });
 
     if (!content && !media && !directUrl) {
       return res.status(400).json({ message: "Post must have content or media" });
@@ -25,25 +31,27 @@ router.post("/", async (req, res) => {
     // Option 1: Frontend uploaded directly to Cloudinary (preferred for large files)
     if (directUrl) {
       mediaUrl = directUrl;
+      console.log("Using direct media URL:", mediaUrl);
     }
     // Option 2: Base64 upload through backend (fallback / backward compat)
     else if (media) {
       try {
+        console.log("Attempting backend media upload to Cloudinary...");
         const resourceType = mediaType === "video" ? "video" : "image";
         const uploaded = await cloudinary.uploader.upload(media, {
           folder: "freechat_posts",
           resource_type: resourceType,
-          timeout: 60000,
+          timeout: 120000, // Increased timeout to 2 minutes
         });
         mediaUrl = uploaded.secure_url;
+        console.log("Backend upload successful:", mediaUrl);
       } catch (uploadErr) {
-        console.error("Cloudinary upload failed:", uploadErr.message);
-        return res.status(500).json({ message: "Media upload failed. Please try a smaller file or try again." });
+        console.error("Cloudinary upload failed:", uploadErr);
+        return res.status(500).json({ message: "Media upload failed: " + (uploadErr.message || "Unknown error") });
       }
     }
 
     // Detect emotion from post content using ML service if user is premium
-    // This should NEVER block post creation
     let caption = "";
     if (content && (req.user.isMember || req.user.role === "admin")) {
       try {
@@ -65,9 +73,10 @@ router.post("/", async (req, res) => {
       songName: songName || "Original Audio",
     });
 
+    console.log("Post created successfully with ID:", newPost._id);
     res.status(201).json(newPost);
   } catch (err) {
-    console.error("Error creating post:", err);
+    console.error("Error creating post in route handler:", err);
     res.status(500).json({ message: err.message || "Failed to create post. Please try again." });
   }
 });

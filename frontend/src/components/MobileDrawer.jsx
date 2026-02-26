@@ -162,7 +162,7 @@ const MobileDrawer = () => {
       {/* Bottom Tab Bar for quick navigation - Hide on Chat Page */}
       <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] bg-base-200/95 backdrop-blur-sm border-t border-base-300 safe-area-bottom ${location.pathname.startsWith("/chat") ? "hidden" : ""}`}>
         <div className="flex items-center justify-around py-2">
-          {[navItems[0], navItems[3], navItems[2], navItems[4], navItems[5]].map(({ to, icon: Icon, label }) => (
+          {[navItems[0], navItems[1], navItems[3], navItems[4], navItems[10]].map(({ to, icon: Icon, label }) => (
             <Link
               key={to}
               to={to}
