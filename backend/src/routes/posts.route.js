@@ -22,19 +22,31 @@ router.post("/", async (req, res) => {
 
     let mediaUrl = "";
     if (media) {
-      // Upload base64 to Cloudinary
-      const resourceType = mediaType === "video" ? "video" : "image";
-      const uploaded = await cloudinary.uploader.upload(media, {
-        folder: "freechat_posts",
-        resource_type: resourceType,
-      });
-      mediaUrl = uploaded.secure_url;
+      try {
+        // Upload base64 to Cloudinary with a timeout
+        const resourceType = mediaType === "video" ? "video" : "image";
+        const uploaded = await cloudinary.uploader.upload(media, {
+          folder: "freechat_posts",
+          resource_type: resourceType,
+          timeout: 60000, // 60 second timeout
+        });
+        mediaUrl = uploaded.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload failed:", uploadErr.message);
+        return res.status(500).json({ message: "Media upload failed. Please try a smaller file or try again." });
+      }
     }
 
     // Detect emotion from post content using ML service if user is premium
+    // This should NEVER block post creation
     let caption = "";
     if (content && (req.user.isMember || req.user.role === "admin")) {
-      caption = await detectEmotion(content);
+      try {
+        caption = await detectEmotion(content);
+      } catch (mlErr) {
+        console.error("Emotion detection failed (non-blocking):", mlErr.message);
+        caption = "";
+      }
     }
 
     const newPost = await Post.create({
@@ -51,7 +63,7 @@ router.post("/", async (req, res) => {
     res.status(201).json(newPost);
   } catch (err) {
     console.error("Error creating post:", err);
-    res.status(500).json({ message: err.message || "Internal Server Error" });
+    res.status(500).json({ message: err.message || "Failed to create post. Please try again." });
   }
 });
 

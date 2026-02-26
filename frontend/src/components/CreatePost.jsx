@@ -68,7 +68,8 @@ const CreatePost = ({ onPost, authUser }) => {
       removeMedia();
       toast.success("Post published!");
     } catch (error) {
-      toast.error("Failed to create post");
+      const errorMsg = error.response?.data?.message || "Failed to create post";
+      toast.error(errorMsg);
       console.error("Error creating post:", error);
     } finally {
       setLoading(false);
