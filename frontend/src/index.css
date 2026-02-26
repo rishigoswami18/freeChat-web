@@ -1,6 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== Global Typography & Defaults ===== */
+* {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: oklch(var(--p) / 0.3);
+  color: oklch(var(--pc));
+}
+
+/* ===== Premium Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(var(--bc) / 0.15);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--bc) / 0.25);
+}
 
 /* ===== Safe Area for notched phones ===== */
 .safe-area-top {
@@ -9,6 +42,112 @@
 
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* ===== No Scrollbar Utility ===== */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===== Glassmorphism Utilities ===== */
+.glass-panel {
+  background: oklch(var(--b2) / 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid oklch(var(--bc) / 0.06);
+}
+
+.glass-panel-solid {
+  background: oklch(var(--b2) / 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ===== Smooth Page Transitions ===== */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Card Hover Effects ===== */
+.card-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px oklch(var(--bc) / 0.08),
+    0 4px 10px -5px oklch(var(--bc) / 0.04);
+}
+
+/* ===== Premium Button Glow ===== */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg,
+      transparent 40%,
+      oklch(var(--pc) / 0.08) 50%,
+      transparent 60%);
+  animation: btn-shine 3s ease-in-out infinite;
+}
+
+@keyframes btn-shine {
+
+  0%,
+  100% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+
+  50% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+/* ===== Gradient Text Utility ===== */
+.gradient-text {
+  background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== Dot Pulse (Online indicator) ===== */
+@keyframes dot-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+.dot-pulse {
+  animation: dot-pulse 2s ease-in-out infinite;
 }
 
 /* ===== Stream Chat Core Layout ===== */
@@ -21,17 +160,8 @@
   --str-chat__secondary-surface-color: oklch(var(--b2));
   --str-chat__primary-surface-color-low-emphasis: oklch(var(--b3));
   --str-chat__border-radius-circle: 9999px;
-  font-family: inherit;
+  font-family: 'Inter', inherit;
   line-height: inherit;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 .str-chat-channel,
@@ -55,7 +185,7 @@
 
 @media (min-width: 640px) {
   .str-chat__list {
-    padding: 16px;
+    padding: 20px;
   }
 }
 
@@ -66,13 +196,11 @@
 /* ===== Message Input ===== */
 .str-chat__message-input {
   border-top: 1px solid oklch(var(--b3));
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: oklch(var(--b1));
   color: oklch(var(--bc)) !important;
-  /* Force theme-aware text color */
 }
 
-/* Ensure the actual textarea/input inside is readable */
 .str-chat__message-input-textarea,
 .str-chat__message-input input,
 .str-chat__message-input textarea,
@@ -80,30 +208,29 @@
   color: #ffffff !important;
   background: transparent !important;
   -webkit-text-fill-color: #ffffff !important;
-  /* Fix for some mobile browsers */
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
 }
 
-/* Placeholder visibility */
 .str-chat__message-input-textarea::placeholder,
 .str-chat__message-input textarea::placeholder {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* ===== Message Bubble Styling ===== */
 .str-chat__message-simple-text-inner {
   border-radius: 18px !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
-/* Ensure received messages (dark bubbles) have light text in dark mode */
 .str-chat__message-simple--others .str-chat__message-simple-text-inner {
   color: #ffffff !important;
 }
 
-/* Ensure sent messages (usually light blue) have readable dark text */
 .str-chat__message-simple--me .str-chat__message-simple-text-inner {
   color: #1a1a1a !important;
-  /* Force black text for the blue bubbles */
 }
 
 /* ===== Hide default channel header (we use custom) ===== */
@@ -142,20 +269,18 @@
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  /* Use dvh for mobile browsers that hide the address bar */
   height: 100dvh;
-  background: #0f0f0f;
+  background: #0a0a0f;
   overflow: hidden;
 }
 
-/* Header bar */
 .call-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(16px);
   z-index: 10;
 }
 
@@ -176,7 +301,7 @@
   height: 8px;
   border-radius: 50%;
   background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
+  box-shadow: 0 0 12px #22c55e;
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
@@ -204,14 +329,12 @@
   }
 }
 
-/* Video area — takes all remaining space */
 .call-video-area {
   flex: 1;
   min-height: 0;
   position: relative;
 }
 
-/* Make Stream's speaker layout fill the area */
 .call-video-area .str-video__speaker-layout {
   height: 100% !important;
   width: 100% !important;
@@ -230,7 +353,6 @@
   border-radius: 0 !important;
 }
 
-/* Participant bar at bottom */
 .call-video-area .str-video__speaker-layout__participants-bar {
   padding: 4px 8px;
   gap: 6px;
@@ -244,7 +366,7 @@
 }
 
 .call-video-area .str-video__speaker-layout__participants-bar .str-video__participant-view {
-  border-radius: 8px !important;
+  border-radius: 12px !important;
   overflow: hidden;
   min-width: 80px;
   max-width: 120px;
@@ -252,20 +374,19 @@
 
 @media (min-width: 640px) {
   .call-video-area .str-video__speaker-layout__participants-bar .str-video__participant-view {
-    border-radius: 12px !important;
+    border-radius: 16px !important;
     min-width: 140px;
     max-width: 180px;
   }
 }
 
-/* Controls bar */
 .call-controls-bar {
   display: flex;
   justify-content: center;
   padding: 10px 12px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
 }
 
 @media (min-width: 640px) {
@@ -274,39 +395,37 @@
   }
 }
 
-/* Style the call control buttons */
 .call-controls-bar .str-video__call-controls {
-  gap: 8px;
+  gap: 10px;
 }
 
 @media (min-width: 640px) {
   .call-controls-bar .str-video__call-controls {
-    gap: 12px;
+    gap: 14px;
   }
 }
 
 .call-controls-bar .str-video__call-controls__button {
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.2s ease;
 }
 
 @media (min-width: 640px) {
   .call-controls-bar .str-video__call-controls__button {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
   }
 }
 
 .call-controls-bar .str-video__call-controls__button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   transform: scale(1.08);
 }
 
-/* End call button in red */
 .call-controls-bar .str-video__end-call-button {
   background: #ef4444 !important;
   border-color: #ef4444 !important;
@@ -317,29 +436,25 @@
   transform: scale(1.08);
 }
 
-/* Video placeholder / avatar */
 .str-video__participant-view__avatar {
   background: #1a1a2e !important;
 }
 
-/* Name tag on video */
 .str-video__participant-details {
   background: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(8px);
   border-radius: 8px !important;
   padding: 4px 10px !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 /* ===== Mobile-specific touch improvements ===== */
 @media (max-width: 639px) {
-
-  /* Larger tap targets on mobile */
   .btn-sm {
     min-height: 36px;
     min-width: 36px;
   }
 
-  /* Prevent text selection on interactive elements */
   button,
   a,
   .btn {
@@ -347,8 +462,81 @@
     touch-action: manipulation;
   }
 
-  /* Smoother scrolling on mobile */
   html {
     -webkit-overflow-scrolling: touch;
   }
+}
+
+/* ===== Subtle Animations ===== */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* ===== Premium Sidebar Active Indicator ===== */
+.sidebar-link {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px;
+  height: 60%;
+  background: oklch(var(--p));
+  border-radius: 0 4px 4px 0;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-link-active::before {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* ===== Avatar Ring Glow ===== */
+.avatar-glow {
+  position: relative;
+}
+
+.avatar-glow::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-glow:hover::after {
+  opacity: 0.5;
 }

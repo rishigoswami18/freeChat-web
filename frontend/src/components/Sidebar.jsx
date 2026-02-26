@@ -1,8 +1,32 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, Home, ShipWheel, Users, Heart, Crown, Gamepad2, User, Search, Film, MessageSquare } from "lucide-react";
+import {
+  Home,
+  Users,
+  Bell,
+  Heart,
+  Crown,
+  Gamepad2,
+  User,
+  Search,
+  Film,
+  MessageSquare,
+} from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
+
+const navItems = [
+  { to: "/", icon: Home, label: "Feed" },
+  { to: "/inbox", icon: MessageSquare, label: "Inbox" },
+  { to: "/profile", icon: User, label: "Profile" },
+  { to: "/friends", icon: Users, label: "Friends" },
+  { to: "/search", icon: Search, label: "Explore" },
+  { to: "/reels", icon: Film, label: "Reels" },
+  { to: "/notifications", icon: Bell, label: "Notifications" },
+  { to: "/couple", icon: Heart, label: "Couple" },
+  { to: "/games", icon: Gamepad2, label: "Games" },
+  { to: "/membership", icon: Crown, label: "Premium" },
+];
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
@@ -11,122 +35,75 @@ const Sidebar = () => {
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
   return (
-    <aside className="w-64 bg-base-200 border-r border-base-300 hidden lg:flex flex-col h-screen sticky top-0">
-      <div className="p-5 border-b border-base-300">
-        <Link to="/" className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="freeChat" className="size-9 object-contain" />
-          <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary  tracking-wider">
+    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0">
+      {/* Brand */}
+      <div className="px-5 py-5 border-b border-base-300/50">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="relative">
+            <img
+              src="/logo.png"
+              alt="freeChat"
+              className="size-9 object-contain group-hover:scale-110 transition-transform duration-300"
+            />
+            <div className="absolute -inset-1 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+          <span className="text-2xl font-extrabold tracking-tight gradient-text">
             freeChat
           </span>
         </Link>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
-        <Link
-          to="/"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/" ? "btn-active" : ""
-            }`}
-        >
-          <Home className="size-5 text-base-content opacity-70" />
-          <span>Feed</span>
-        </Link>
-
-        <Link
-          to="/inbox"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/inbox" ? "btn-active" : ""
-            }`}
-        >
-          <MessageSquare className="size-5 text-primary opacity-70" />
-          <span>Inbox</span>
-        </Link>
-
-        <Link
-          to="/profile"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/profile" ? "btn-active" : ""
-            }`}
-        >
-          <User className="size-5 text-primary opacity-70" />
-          <span>Profile</span>
-        </Link>
-
-        <Link
-          to="/friends"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/friends" ? "btn-active" : ""
-            }`}
-        >
-          <Users className="size-5 text-base-content opacity-70" />
-          <span>Friends</span>
-        </Link>
-
-        <Link
-          to="/search"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/search" ? "btn-active" : ""
-            }`}
-        >
-          <Search className="size-5 text-base-content opacity-70" />
-          <span>Search</span>
-        </Link>
-
-        <Link
-          to="/reels"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/reels" ? "btn-active" : ""
-            }`}
-        >
-          <Film className="size-5 text-secondary opacity-70" />
-          <span>Reels</span>
-        </Link>
-
-        <Link
-          to="/notifications"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/notifications" ? "btn-active" : ""
-            }`}
-        >
-          <Bell className="size-5 text-base-content opacity-70" />
-          <span>Notifications</span>
-        </Link>
-
-        <Link
-          to="/couple"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/couple" ? "btn-active" : ""
-            }`}
-        >
-          <Heart className="size-5 text-pink-500 opacity-70" />
-          <span>Couple</span>
-        </Link>
-
-        <Link
-          to="/games"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/games" ? "btn-active" : ""
-            }`}
-        >
-          <Gamepad2 className="size-5 text-primary opacity-70" />
-          <span>Games</span>
-        </Link>
-
-        <Link
-          to="/membership"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${currentPath === "/membership" ? "btn-active" : ""
-            }`}
-        >
-          <Crown className="size-5 text-amber-500 opacity-70" />
-          <span>Premium</span>
-        </Link>
-
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto no-scrollbar">
+        {navItems.map(({ to, icon: Icon, label }) => {
+          const isActive = currentPath === to;
+          return (
+            <Link
+              key={to}
+              to={to}
+              className={`sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                ${isActive
+                  ? "sidebar-link-active bg-primary/10 text-primary font-semibold"
+                  : "text-base-content/70 hover:text-base-content hover:bg-base-300/50"
+                }`}
+            >
+              <Icon
+                className={`size-[18px] flex-shrink-0 ${isActive ? "text-primary" : "opacity-60"
+                  }`}
+              />
+              <span>{label}</span>
+              {isActive && (
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
+      <CreateStoryModal
+        isOpen={isStoryModalOpen}
+        onClose={() => setIsStoryModalOpen(false)}
+      />
 
-      {/* USER PROFILE SECTION */}
-      <div className="p-4 border-t border-base-300">
-        <Link to="/profile" className="flex items-center gap-3 p-2 hover:bg-base-300 rounded-xl transition-colors">
-          <img
-            src={authUser?.profilePic || "/avatar.png"}
-            alt="User Avatar"
-            className="size-10 rounded-full object-cover border-2 border-primary"
-          />
+      {/* User Profile Section */}
+      <div className="p-3 border-t border-base-300/50">
+        <Link
+          to="/profile"
+          className="flex items-center gap-3 p-2.5 hover:bg-base-300/50 rounded-xl transition-all duration-200 group"
+        >
+          <div className="relative">
+            <img
+              src={authUser?.profilePic || "/avatar.png"}
+              alt="User Avatar"
+              className="size-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
+            />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-200 dot-pulse" />
+          </div>
           <div className="flex-1 overflow-hidden">
-            <h3 className="font-semibold truncate">{authUser?.fullName}</h3>
-            <p className="text-xs opacity-50 truncate">Update Profile</p>
+            <h3 className="font-semibold text-sm truncate">
+              {authUser?.fullName}
+            </h3>
+            <p className="text-[11px] text-success font-medium">Online</p>
           </div>
         </Link>
       </div>

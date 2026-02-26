@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, LogOut, ShipWheel, Pencil, Flame } from "lucide-react";
+import { Bell, LogOut, Pencil, Flame } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
 
@@ -12,53 +12,71 @@ const Navbar = () => {
   const { logoutMutation } = useLogout();
 
   return (
-    <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-16 hidden lg:flex items-center">
+    <nav className="glass-panel-solid border-b border-base-300/50 sticky top-0 z-30 h-14 hidden lg:flex items-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-end w-full">
           {/* LOGO - ONLY IN THE CHAT PAGE */}
           {isChatPage && (
             <div className="pl-5">
-              <Link to="/" className="flex items-center gap-2.5">
-                <img src="/logo.png" alt="freeChat" className="size-9 object-contain" />
-                <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+              <Link to="/" className="flex items-center gap-2.5 group">
+                <img
+                  src="/logo.png"
+                  alt="freeChat"
+                  className="size-8 object-contain group-hover:scale-110 transition-transform"
+                />
+                <span className="text-2xl font-extrabold tracking-tight gradient-text">
                   freeChat
                 </span>
               </Link>
             </div>
           )}
 
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Streak Badge */}
             {authUser?.streak > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/10 rounded-full border border-orange-500/20 text-orange-500 animate-pulse transition-all mr-2">
-                <Flame className="size-5 fill-current" />
-                <span className="font-bold text-sm">{authUser.streak}</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500/15 to-red-500/10 rounded-full border border-orange-500/20 text-orange-500 mr-1">
+                <Flame className="size-4 fill-current" />
+                <span className="font-bold text-sm tabular-nums">
+                  {authUser.streak}
+                </span>
               </div>
             )}
-            <Link to={"/notifications"}>
-              <button className="btn btn-ghost btn-circle">
-                <Bell className="h-6 w-6 text-base-content opacity-70" />
+
+            {/* Notifications */}
+            <Link to="/notifications">
+              <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
+                <Bell className="size-[18px] text-base-content/60" />
               </button>
             </Link>
-          </div>
 
-          <ThemeSelector />
+            <ThemeSelector />
 
-          <Link to="/posts">
-            <button className="btn btn-ghost btn-circle">
-              <Pencil className="font-semibold text-base text-base-content" />
+            {/* New Post */}
+            <Link to="/posts">
+              <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
+                <Pencil className="size-[18px] text-base-content/60" />
+              </button>
+            </Link>
+
+            {/* Avatar */}
+            <Link to="/profile" className="avatar ml-1">
+              <div className="w-8 h-8 rounded-full ring-2 ring-primary/20 hover:ring-primary/50 transition-all duration-200 overflow-hidden">
+                <img
+                  src={authUser?.profilePic}
+                  alt="User Avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </Link>
+
+            {/* Logout */}
+            <button
+              className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error transition-colors"
+              onClick={logoutMutation}
+            >
+              <LogOut className="size-[18px] opacity-60" />
             </button>
-          </Link>
-
-          <Link to="/profile" className="avatar">
-            <div className="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1 hover:scale-110 transition-transform">
-              <img src={authUser?.profilePic} alt="User Avatar" rel="noreferrer" />
-            </div>
-          </Link>
-
-          {/* Logout button */}
-          <button className="btn btn-ghost btn-circle" onClick={logoutMutation}>
-            <LogOut className="h-6 w-6 text-base-content opacity-70" />
-          </button>
+          </div>
         </div>
       </div>
     </nav>
