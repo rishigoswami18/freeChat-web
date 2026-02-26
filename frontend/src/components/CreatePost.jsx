@@ -1,7 +1,10 @@
 import { useState, useRef } from "react";
 import { createPost } from "../lib/api";
-import { ImageIcon, VideoIcon, X, Loader2, Plus } from "lucide-react";
+import { ImageIcon, VideoIcon, X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 const TRENDING_SONGS = [
   "Blinding Lights - The Weeknd",
@@ -12,114 +15,120 @@ const TRENDING_SONGS = [
   "Original Audio",
 ];
 
+// Upload file directly to Cloudinary from the browser (no backend needed)
+const uploadToCloudinary = async (file, resourceType = "image", onProgress) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  formData.append("folder", "freechat_posts");
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        onProgress(percent);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const data = JSON.parse(xhr.responseText);
+        resolve(data.secure_url);
+      } else {
+        reject(new Error("Upload failed"));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Upload failed"));
+    xhr.send(formData);
+  });
+};
+
 const CreatePost = ({ onPost, authUser }) => {
   const [content, setContent] = useState("");
-  const [media, setMedia] = useState(null); // base64 string
+  const [mediaFile, setMediaFile] = useState(null); // raw File object for upload
   const [mediaType, setMediaType] = useState(""); // "image" or "video"
   const [mediaPreview, setMediaPreview] = useState(null); // preview URL
   const [songName, setSongName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
 
-  const compressImage = (file, maxWidth = 1920, quality = 0.8) => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-
-        // Scale down if larger than maxWidth
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convert to compressed JPEG base64
-        const compressed = canvas.toDataURL("image/jpeg", quality);
-        resolve(compressed);
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        // Fallback to raw file if compression fails
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      };
-      img.src = url;
-    });
-  };
-
-  const handleFileSelect = async (e, type) => {
+  const handleFileSelect = (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 10MB for videos, images will be compressed)
-    if (type === "video" && file.size > 10 * 1024 * 1024) {
-      toast.error("Video size must be under 10MB");
+    // Validate file size
+    const maxSize = type === "video" ? 100 * 1024 * 1024 : 50 * 1024 * 1024;
+    const maxLabel = type === "video" ? "100MB" : "50MB";
+    if (file.size > maxSize) {
+      toast.error(`File size must be under ${maxLabel}`);
       return;
     }
 
-    if (type === "image") {
-      // Compress images before uploading
-      try {
-        const compressed = await compressImage(file);
-        setMedia(compressed);
-        setMediaType(type);
-        setMediaPreview(compressed);
-      } catch {
-        toast.error("Failed to process image");
-      }
-    } else {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMedia(reader.result);
-        setMediaType(type);
-        setMediaPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    // Create preview URL (no base64 needed!)
+    const previewUrl = URL.createObjectURL(file);
+    setMediaFile(file);
+    setMediaType(type);
+    setMediaPreview(previewUrl);
   };
 
   const removeMedia = () => {
-    setMedia(null);
+    if (mediaPreview) URL.revokeObjectURL(mediaPreview);
+    setMediaFile(null);
     setMediaType("");
     setMediaPreview(null);
     setSongName("");
+    setUploadProgress(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handlePost = async () => {
-    if (!content.trim() && !media) {
+    if (!content.trim() && !mediaFile) {
       toast.error("Write something or add media");
       return;
     }
 
     setLoading(true);
+    setUploadProgress(0);
+
     try {
+      let mediaUrl = "";
+
+      // Upload media directly to Cloudinary from browser
+      if (mediaFile) {
+        const resourceType = mediaType === "video" ? "video" : "image";
+        toast.loading("Uploading media...", { id: "upload" });
+        mediaUrl = await uploadToCloudinary(mediaFile, resourceType, (progress) => {
+          setUploadProgress(progress);
+        });
+        toast.dismiss("upload");
+      }
+
+      // Send only the URL to the backend (lightweight!)
       const postData = {
         content: content.trim(),
-        media,
+        mediaUrl,
         mediaType,
         songName: songName.trim(),
       };
+
       const saved = await createPost(postData);
       onPost(saved);
       setContent("");
       removeMedia();
       toast.success("Post published!");
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to create post";
+      toast.dismiss("upload");
+      const errorMsg = error.response?.data?.message || error.message || "Failed to create post";
       toast.error(errorMsg);
       console.error("Error creating post:", error);
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -180,6 +189,21 @@ const CreatePost = ({ onPost, authUser }) => {
             </div>
           )}
 
+          {/* Upload Progress Bar */}
+          {loading && uploadProgress > 0 && uploadProgress < 100 && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="opacity-60">Uploading...</span>
+                <span className="font-bold text-primary">{uploadProgress}%</span>
+              </div>
+              <progress
+                className="progress progress-primary w-full"
+                value={uploadProgress}
+                max="100"
+              />
+            </div>
+          )}
+
           {/* Song Name Input (Only for Videos) */}
           {mediaType === "video" && (
             <div className="mt-3 space-y-2">
@@ -237,12 +261,12 @@ const CreatePost = ({ onPost, authUser }) => {
             <button
               className="btn btn-primary btn-sm px-8 rounded-lg shadow-lg shadow-primary/20"
               onClick={handlePost}
-              disabled={loading || (!content.trim() && !media)}
+              disabled={loading || (!content.trim() && !mediaFile)}
             >
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Posting...
+                  {uploadProgress > 0 && uploadProgress < 100 ? `${uploadProgress}%` : "Posting..."}
                 </>
               ) : (
                 "Post"

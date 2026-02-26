@@ -10,25 +10,30 @@ const router = express.Router();
 // All routes require auth
 router.use(protectRoute);
 
-// Create post (with optional media upload)
+// Create post (with optional media - supports both direct URL and base64 upload)
 router.post("/", async (req, res) => {
   try {
-    const { content, media, mediaType, songName } = req.body;
-    console.log("Create post request received. Content length:", content?.length, "Media type:", mediaType, "Media present:", !!media, "Song name:", songName);
+    const { content, media, mediaUrl: directUrl, mediaType, songName } = req.body;
+    console.log("Create post request received. Content length:", content?.length, "Media type:", mediaType, "Direct URL:", !!directUrl, "Base64 media:", !!media, "Song name:", songName);
 
-    if (!content && !media) {
+    if (!content && !media && !directUrl) {
       return res.status(400).json({ message: "Post must have content or media" });
     }
 
     let mediaUrl = "";
-    if (media) {
+
+    // Option 1: Frontend uploaded directly to Cloudinary (preferred for large files)
+    if (directUrl) {
+      mediaUrl = directUrl;
+    }
+    // Option 2: Base64 upload through backend (fallback / backward compat)
+    else if (media) {
       try {
-        // Upload base64 to Cloudinary with a timeout
         const resourceType = mediaType === "video" ? "video" : "image";
         const uploaded = await cloudinary.uploader.upload(media, {
           folder: "freechat_posts",
           resource_type: resourceType,
-          timeout: 60000, // 60 second timeout
+          timeout: 60000,
         });
         mediaUrl = uploaded.secure_url;
       } catch (uploadErr) {
