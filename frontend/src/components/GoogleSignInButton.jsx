@@ -37,7 +37,6 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
             return;
         }
 
-        // Wait for Google Identity Services to load
         const initGoogle = () => {
             if (window.google?.accounts?.id) {
                 window.google.accounts.id.initialize({
@@ -60,7 +59,6 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
             }
         };
 
-        // Google script might not be loaded yet
         if (window.google?.accounts?.id) {
             initGoogle();
         } else {
@@ -71,7 +69,6 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
                 }
             }, 100);
 
-            // Cleanup after 10 seconds
             const timeout = setTimeout(() => clearInterval(interval), 10000);
             return () => {
                 clearInterval(interval);
@@ -83,7 +80,15 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
     if (!GOOGLE_CLIENT_ID) return null;
 
     return (
-        <div className="w-full">
+        <div className="w-full space-y-3">
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-base-300" />
+                <span className="text-xs font-medium opacity-40 uppercase tracking-wider">or</span>
+                <div className="flex-1 h-px bg-base-300" />
+            </div>
+
+            {/* Button */}
             {isPending ? (
                 <div className="flex items-center justify-center py-3 rounded-full border border-base-300 bg-base-200/50">
                     <span className="loading loading-spinner loading-sm mr-2"></span>

@@ -105,13 +105,6 @@ const LoginPage = () => {
                     )}
                   </button>
 
-                  {/* Divider */}
-                  <div className="flex items-center gap-3 my-1">
-                    <div className="flex-1 h-px bg-base-300" />
-                    <span className="text-xs font-medium opacity-40 uppercase tracking-wider">or</span>
-                    <div className="flex-1 h-px bg-base-300" />
-                  </div>
-
                   {/* Google Sign In */}
                   <GoogleSignInButton text="signin_with" />
 
