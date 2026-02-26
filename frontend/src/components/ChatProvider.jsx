@@ -45,74 +45,72 @@ export const ChatProvider = ({ children }) => {
     }, [tokenError]);
 
     useEffect(() => {
-        let isInstanceCurrent = true;
-
-        const initChat = async () => {
-            if (!tokenData?.token || !authUser) {
-                if (tokenError) {
-                    console.error("Token Fetch Error:", tokenError);
-                }
-                console.warn("Chat Connection Pending - Status:", {
-                    hasAuth: !!authUser,
-                    hasToken: !!tokenData?.token,
-                    dataReceived: !!tokenData,
-                    queryStatus: tokenError ? "error" : "loading/idle",
-                    apiError: tokenError?.response?.data?.message || tokenError?.message || "none"
-                });
-                return;
+        if (!authUser || !tokenData?.token || !STREAM_API_KEY) {
+            if (authUser && !tokenData?.token) {
+                console.warn("Chat connection delayed: Waiting for token from server...");
             }
-
-            const client = StreamChat.getInstance(STREAM_API_KEY);
-
-            if (client.userID === authUser._id) {
-                console.log("Chat client already connected for:", authUser._id);
-                if (isInstanceCurrent && chatClient !== client) {
-                    setChatClient(client);
-                }
-                return;
+            if (authUser && tokenData?.token && !STREAM_API_KEY) {
+                console.error("❌ VITE_STREAM_API_KEY is missing from frontend environment variables!");
             }
+            return;
+        }
 
-            // Only skip if already in progress AND we don't have a mismatched client
-            if (connectionRef.current === tokenData.token && isConnecting) {
-                console.log("Connection already in progress for this token");
-                return;
-            }
+        let isMounted = true;
 
-            connectionRef.current = tokenData.token;
-
+        const connect = async () => {
             try {
-                console.log("Starting chat connection for:", authUser.fullName);
+                const client = StreamChat.getInstance(STREAM_API_KEY);
+                const currentUserId = String(authUser._id);
+
+                // Add debugger helper for production console
+                window.logChatStatus = () => {
+                    const status = {
+                        currentUserId,
+                        clientUserId: client.userID,
+                        keyPreview: `${STREAM_API_KEY.substring(0, 3)}...`,
+                        hasToken: !!tokenData?.token,
+                        tokenPreview: tokenData.token ? `${tokenData.token.substring(0, 10)}...` : "none",
+                        isConnected: client.userID === currentUserId
+                    };
+                    console.table(status);
+                    return status;
+                };
+
+                // If already connected for this user, just set it
+                if (client.userID === currentUserId) {
+                    if (isMounted) {
+                        console.log("✅ Using existing chat connection");
+                        setChatClient(client);
+                    }
+                    return;
+                }
+
                 setIsConnecting(true);
 
-                if (client.userID && client.userID !== authUser._id) {
-                    console.log("Disconnecting previous user:", client.userID);
+                // If connected to wrong user, disconnect first
+                if (client.userID && client.userID !== currentUserId) {
+                    console.log("🔄 Disconnecting previous user:", client.userID);
                     await client.disconnectUser();
                 }
 
-                // Add a timeout to the connection attempt
-                const connectPromise = client.connectUser(
+                console.log("🔌 Connecting to Stream Chat as:", currentUserId);
+                await client.connectUser(
                     {
-                        id: authUser._id,
+                        id: currentUserId,
                         name: authUser.fullName,
                         image: authUser.profilePic,
                     },
                     tokenData.token
                 );
 
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Connection timeout")), 10000)
-                );
-
-                await Promise.race([connectPromise, timeoutPromise]);
-
-                if (isInstanceCurrent) {
-                    console.log("Stream Chat Connection Successful");
+                if (isMounted) {
+                    console.log("✅ Chat connected successfully");
                     setChatClient(client);
                 }
 
                 // Global Message Handler
                 const handleNewMessage = (event) => {
-                    if (event.user.id === authUser._id) return;
+                    if (event.user.id === currentUserId) return;
                     const isOnChatPage = window.location.pathname.includes(`/chat/${event.user.id}`);
                     if (!isOnChatPage) {
                         messageSound.play().catch(() => { });
@@ -136,21 +134,20 @@ export const ChatProvider = ({ children }) => {
                 client.on("message.new", handleNewMessage);
                 client.on("notification.message_new", handleNewMessage);
 
-            } catch (err) {
-                console.error("Chat Connection Error details:", err);
-                connectionRef.current = null;
-                if (isInstanceCurrent) {
+            } catch (error) {
+                console.error("❌ Chat connection failed:", error);
+                if (isMounted) {
                     toast.error("Messenger connection failed. Please check your internet.");
                 }
             } finally {
-                if (isInstanceCurrent) setIsConnecting(false);
+                if (isMounted) setIsConnecting(false);
             }
         };
 
-        initChat();
+        connect();
 
         return () => {
-            isInstanceCurrent = false;
+            isMounted = false;
         };
     }, [tokenData, authUser, navigate]);
 
