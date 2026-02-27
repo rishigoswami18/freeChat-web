@@ -12,11 +12,29 @@ const IncomingCallNotification = () => {
     const calls = useCalls();
     const navigate = useNavigate();
 
+    // Debug: log all calls the SDK is aware of
+    useEffect(() => {
+        if (calls.length > 0) {
+            console.log("📞 useCalls() detected calls:", calls.map(c => ({
+                id: c.id,
+                state: c.state.callingState,
+                isOutgoing: outgoingCallIds.has(c.id),
+                createdBy: c.state.createdBy?.id || "unknown",
+            })));
+        }
+    }, [calls]);
+
     // Filter: only ringing calls that WE did NOT initiate
     const incomingCalls = calls.filter((call) => {
-        const isRinging = call.state.callingState === CallingState.RINGING;
+        const callingState = call.state.callingState;
+        const isRinging = callingState === CallingState.RINGING;
         const isOurCall = outgoingCallIds.has(call.id);
         const isOnCallPage = window.location.pathname.includes(`/call/${call.id}`);
+
+        if (isRinging) {
+            console.log(`📞 Ringing call ${call.id}: isOurCall=${isOurCall}, isOnCallPage=${isOnCallPage}`);
+        }
+
         return isRinging && !isOurCall && !isOnCallPage;
     });
 

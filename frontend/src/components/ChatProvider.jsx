@@ -6,7 +6,7 @@ import { getStreamToken } from "../lib/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
+
 
 const ChatContext = createContext(null);
 
@@ -22,12 +22,7 @@ export const ChatProvider = ({ children }) => {
     const { authUser } = useAuthUser();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!STREAM_API_KEY) {
-            console.error("VITE_STREAM_API_KEY is missing from .env");
-            toast.error("Config missing: VITE_STREAM_API_KEY");
-        }
-    }, []);
+
 
     const { data: tokenData, error: tokenError } = useQuery({
         queryKey: ["streamToken"],
@@ -51,15 +46,14 @@ export const ChatProvider = ({ children }) => {
     }, [tokenError]);
 
     useEffect(() => {
-        if (!authUser || !tokenData?.token || !STREAM_API_KEY) {
+        if (!authUser || !tokenData?.token || !tokenData?.apiKey) {
             if (authUser && !tokenData?.token) {
                 console.warn("Chat connection delayed: Waiting for token from server...");
             }
-            if (authUser && tokenData?.token && !STREAM_API_KEY) {
-                console.error("❌ VITE_STREAM_API_KEY is missing from frontend environment variables!");
-            }
             return;
         }
+
+        const STREAM_API_KEY = tokenData.apiKey;
 
         let isMounted = true;
 

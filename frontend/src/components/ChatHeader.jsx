@@ -42,8 +42,12 @@ function ChatHeader() {
         }
 
         try {
+            const myId = String(channel._client.userID);
+            const theirId = String(user.id);
             const timestamp = Date.now().toString(36);
-            const callId = `${[channel._client.userID, user.id].sort().join("-")}-${timestamp}`;
+            const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
+
+            console.log("📞 Initiating call:", { callId, myId, theirId });
             outgoingCallIds.add(callId);
 
             const call = videoClient.call("default", callId);
@@ -51,11 +55,12 @@ function ChatHeader() {
                 ring: true,
                 data: {
                     members: [
-                        { user_id: channel._client.userID },
-                        { user_id: user.id },
+                        { user_id: myId },
+                        { user_id: theirId },
                     ],
                 },
             });
+            console.log("📞 Call created with ring:true, navigating to call page");
             navigate(`/call/${callId}`);
         } catch (error) {
             console.error("Call Error:", error);
@@ -92,8 +97,8 @@ function ChatHeader() {
                     </h3>
                     <p
                         className={`text-[11px] font-medium ${isOnline && !isGroup
-                                ? "text-success"
-                                : "text-base-content/40"
+                            ? "text-success"
+                            : "text-base-content/40"
                             }`}
                     >
                         {isGroup
