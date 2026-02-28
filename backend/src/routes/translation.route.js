@@ -2,6 +2,7 @@ import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { translateText } from "../utils/translationService.js";
 import User from "../models/User.js";
+import { hasPremiumAccess } from "../utils/freeTrial.js";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.post("/", protectRoute, async (req, res) => {
 
         // Check membership (Premium Gating)
         const user = await User.findById(req.user._id);
-        if (user.role !== "admin" && !user.isMember) {
+        if (!hasPremiumAccess(user)) {
             return res.status(403).json({ message: "Real-time translation is a premium feature. Please upgrade to use it." });
         }
 

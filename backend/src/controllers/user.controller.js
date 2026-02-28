@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 import cloudinary from "../lib/cloudinary.js";
 import { upsertStreamUser } from "../lib/stream.js";
+import { hasPremiumAccess } from "../utils/freeTrial.js";
 
 // backend/src/controllers/user.controller.js
 export const getAllUsers = async (req, res) => {
@@ -211,7 +212,7 @@ export async function updateProfile(req, res) {
     const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut, isPublic } = req.body;
 
     const updateData = { fullName, bio, nativeLanguage, learningLanguage, location, isPublic };
-    const isPremium = req.user.isMember || req.user.role === "admin";
+    const isPremium = hasPremiumAccess(req.user);
 
     if (isStealthMode !== undefined) {
       // Only error if trying to turn it ON while not premium

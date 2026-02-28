@@ -3,6 +3,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import User from "../models/User.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { hasPremiumAccess, isFreeTrial } from "../utils/freeTrial.js";
 
 const router = express.Router();
 
@@ -33,9 +34,10 @@ router.get("/status", async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select("isMember memberSince role");
         res.json({
-            isMember: user.role === "admin" ? true : user.isMember,
+            isMember: hasPremiumAccess(user),
             memberSince: user.memberSince,
-            role: user.role
+            role: user.role,
+            freeTrial: isFreeTrial()
         });
     } catch (err) {
         console.error("Error getting membership status:", err.message);

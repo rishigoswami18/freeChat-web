@@ -1,4 +1,5 @@
 import { detectEmotion } from "../utils/emotionService.js";
+import { hasPremiumAccess } from "../utils/freeTrial.js";
 
 import { generateStreamToken } from "../lib/stream.js";
 
@@ -78,7 +79,7 @@ export const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "Text is required" });
     }
     let emotion = "neutral";
-    if (req.user.isMember || req.user.role === "admin") {
+    if (hasPremiumAccess(req.user)) {
       emotion = await detectEmotion(text);
     }
     res.status(200).json({ text, emotion });

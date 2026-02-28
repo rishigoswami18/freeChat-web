@@ -4,6 +4,7 @@ import Post from "../models/Post.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import cloudinary from "../lib/cloudinary.js";
 import { detectEmotion } from "../utils/emotionService.js";
+import { hasPremiumAccess } from "../utils/freeTrial.js";
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.post("/", async (req, res) => {
 
     // Detect emotion from post content using ML service if user is premium
     let caption = "";
-    if (content && (req.user.isMember || req.user.role === "admin")) {
+    if (content && hasPremiumAccess(req.user)) {
       try {
         caption = await detectEmotion(content);
       } catch (mlErr) {
@@ -203,7 +204,7 @@ router.post("/:id/comment", async (req, res) => {
 
     // Detect emotion from comment text using ML service if user is premium
     let caption = "";
-    if (req.user.isMember || req.user.role === "admin") {
+    if (hasPremiumAccess(req.user)) {
       caption = await detectEmotion(text.trim());
     }
 

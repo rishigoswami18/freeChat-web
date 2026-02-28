@@ -3,6 +3,7 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 import User from "../models/User.js";
 import GameSession from "../models/GameSession.js";
 import { calculateAge } from "../utils/dateUtils.js";
+import { hasPremiumAccess } from "../utils/freeTrial.js";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.use(protectRoute);
 const checkMembership = async (req, res, next) => {
     try {
         const user = await User.findById(req.user._id);
-        if (user.role !== "admin" && !user.isMember) {
+        if (!hasPremiumAccess(user)) {
             return res.status(403).json({ message: "Premium membership required to play games" });
         }
         next();
