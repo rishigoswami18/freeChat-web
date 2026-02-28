@@ -59,103 +59,93 @@ const InboxPage = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
-            {/* Header */}
-            <header className="sticky top-0 z-10 flex items-center justify-between p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200 dark:bg-gray-900/80 dark:border-gray-700">
-                <h1 className="text-xl font-black text-pink-600 flex items-center gap-2">
-                    <MessageSquare className="size-5" />
-                    Inbox
+        <div className="flex flex-col h-full bg-base-100 max-w-2xl mx-auto overflow-hidden">
+            {/* Page Title & Compose (Consistent with app style) */}
+            <div className="px-4 py-6 flex items-center justify-between">
+                <h1 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-2">
+                    <MessageSquare className="size-6 text-primary" />
+                    Messages
                 </h1>
                 <button
-                    onClick={() => toast("Compose new message – coming soon!")}
-                    className="btn btn-ghost btn-sm text-pink-600 hover:bg-pink-100/50 transition"
+                    onClick={() => toast("Coming soon!")}
+                    className="btn btn-ghost btn-sm btn-circle hover:bg-primary/10 text-primary transition-all active:scale-90"
                 >
-                    New
+                    <ArrowRight className="size-5 rotate-[-45deg]" />
                 </button>
-            </header>
+            </div>
 
-            {/* Search Bar */}
-            <div className="p-3 bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+            {/* Search Bar - Modern Look */}
+            <div className="px-4 pb-4">
+                <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4.5 text-base-content/30 group-focus-within:text-primary transition-colors" />
                     <input
                         type="text"
-                        placeholder="Search conversations…"
+                        placeholder="Search for a name..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-300 transition"
+                        className="w-full pl-11 pr-5 py-3 rounded-2xl bg-base-200 focus:bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-2 focus:ring-primary/40 transition-all text-sm font-medium"
                     />
                 </div>
             </div>
 
             {/* Conversation List */}
-            <main className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto no-scrollbar pb-4 pr-1">
                 {filtered.length === 0 ? (
-                    <p className="text-center text-gray-500 py-12">No conversations found.</p>
+                    <div className="flex flex-col items-center justify-center py-20 opacity-30 gap-3">
+                        <MessageSquare className="size-12" />
+                        <p className="font-bold uppercase tracking-widest text-xs">No active chats</p>
+                    </div>
                 ) : (
-                    <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                    <div className="flex flex-col">
                         {filtered.map((conv) => (
-                            <li key={conv.id} className="group">
-                                <Link
-                                    to={`/chat/${conv.id}`}
-                                    className="flex items-center p-4 hover:bg-pink-50 dark:hover:bg-gray-800 transition"
-                                >
-                                    <img
-                                        src={conv.partner.avatar}
-                                        alt={conv.partner.name}
-                                        className="w-12 h-12 rounded-full mr-3 object-cover border-2 border-pink-200"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-center">
-                                            <h2 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                                {conv.partner.name}
-                                            </h2>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">
-                                                {timeAgo(conv.timestamp)}
-                                            </span>
+                            <Link
+                                key={conv.id}
+                                to={`/chat/fake_${conv.partner.name.toLowerCase().replace(/\s/g, '_')}`}
+                                className="group flex items-center gap-4 px-4 py-4 hover:bg-base-200/50 transition-all active:bg-base-200"
+                            >
+                                <div className="relative flex-shrink-0">
+                                    <div className="avatar ring-2 ring-primary/20 ring-offset-base-100 ring-offset-2 rounded-full p-0.5">
+                                        <div className="w-14 h-14 rounded-full overflow-hidden shadow-lg group-active:scale-95 transition-transform">
+                                            <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
                                         </div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                                    </div>
+                                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success rounded-full border-2 border-base-100" />
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline gap-2 mb-1">
+                                        <h2 className="font-black italic text-base uppercase tracking-tight text-base-content truncate">
+                                            {conv.partner.name}
+                                        </h2>
+                                        <span className="text-[10px] uppercase font-black opacity-30 whitespace-nowrap">
+                                            {timeAgo(conv.timestamp)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <p className={`text-sm truncate flex-1 ${conv.unread ? "font-bold text-base-content" : "opacity-50"}`}>
                                             {conv.lastMessage}
                                         </p>
+                                        {conv.unread && (
+                                            <div className="size-2 rounded-full bg-primary animate-pulse" />
+                                        )}
                                     </div>
-                                    {conv.unread && (
-                                        <span className="ml-2 flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                                        </span>
-                                    )}
-                                    {/* Delete button (mobile swipe‑to‑delete can be simulated with a tap) */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleDelete(conv.id);
-                                        }}
-                                        className="ml-2 opacity-0 group-hover:opacity-100 transition text-gray-400 hover:text-red-500"
-                                    >
-                                        <X className="size-5" />
-                                    </button>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </main>
+                                </div>
 
-            {/* Footer navigation for mobile */}
-            <footer className="p-2 bg-white/80 dark:bg-gray-900/80 border-t border-gray-200 dark:border-gray-700 flex justify-around">
-                <Link to="/" className="text-pink-600 flex flex-col items-center text-xs">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2v6h14v-6l2 2V6a2 2 0 00-2-2h-4l-2-2-2 2H5a2 2 0 00-2 2v6z" /></svg>
-                    Home
-                </Link>
-                <Link to="/inbox" className="text-pink-600 flex flex-col items-center text-xs">
-                    <MessageSquare className="size-5" />
-                    Inbox
-                </Link>
-                <Link to="/profile" className="text-pink-600 flex flex-col items-center text-xs">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" /></svg>
-                    Profile
-                </Link>
-            </footer>
+                                {/* Desktop-only delete icon or swipe action hinted */}
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleDelete(conv.id);
+                                    }}
+                                    className="hidden group-hover:flex btn btn-ghost btn-xs btn-circle text-error/30 hover:text-error transition-all"
+                                >
+                                    <X className="size-3.5" />
+                                </button>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
