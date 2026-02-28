@@ -196,7 +196,7 @@ const CoupleProfilePage = () => {
             <h1 className="text-2xl sm:text-3xl font-bold mb-1 flex items-center gap-2">
                 <HeartHandshake className="text-pink-500" />
                 Couple Profile
-                <span className="text-[10px] bg-primary text-primary-content px-2 py-0.5 rounded-full animate-pulse ml-2 uppercase">v2.4 Final</span>
+                <span className="text-[10px] bg-primary text-primary-content px-2 py-0.5 rounded-full animate-pulse ml-2 uppercase">v2.5 ❤️</span>
             </h1>
             <p className="text-[10px] opacity-30 mb-6 uppercase font-black tracking-widest">Shared Love Notes & Dashboard</p>
 
