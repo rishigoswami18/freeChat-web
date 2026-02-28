@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import useSignUp from "../hooks/useSignUp";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import Logo from "../components/Logo";
+import toast from "react-hot-toast";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -11,15 +12,44 @@ const SignUpPage = () => {
     email: "",
     password: "",
     dateOfBirth: "",
+    otp: "", // Added otp field
   });
+
+  const [isSendingOtp, setIsSendingOtp] = useState(false); // Added isSendingOtp state
+  const [otpSent, setOtpSent] = useState(false); // Added otpSent state
 
   const maxDate = new Date();
   const maxDateStr = maxDate.toISOString().split("T")[0];
 
   const { isPending, error, signupMutation } = useSignUp();
 
+  // Added handleSendCode function
+  const handleSendCode = async () => {
+    if (!signupData.email) return toast.error("Please enter your email first");
+
+    // Quick local regex check
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(signupData.email)) {
+      return toast.error("Please enter a valid email address");
+    }
+
+    setIsSendingOtp(true);
+    try {
+      const { requestOTP } = await import("../lib/api");
+      await requestOTP(signupData.email);
+      setOtpSent(true);
+      toast.success("Verification code sent to your email!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send code");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
   const handleSignup = (e) => {
     e.preventDefault();
+    // Added check for otpSent
+    if (!otpSent) return toast.error("Please verify your email first");
     signupMutation(signupData);
   };
 
@@ -85,27 +115,70 @@ const SignUpPage = () => {
                         Email
                       </span>
                     </label>
-                    <input
-                      type="email"
-                      placeholder="john@example.com"
-                      className={`input input-bordered w-full rounded-xl focus:input-primary transition-all bg-base-200/50 ${signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email)
+                    <div className="relative">
+                      <input
+                        type="email"
+                        placeholder="john@example.com"
+                        className={`input input-bordered w-full rounded-xl focus:input-primary transition-all bg-base-200/50 pr-24 ${signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email)
                           ? "border-error focus:input-error" : ""
-                        }`}
-                      value={signupData.email}
-                      onChange={(e) =>
-                        setSignupData({
-                          ...signupData,
-                          email: e.target.value,
-                        })
-                      }
-                      required
-                    />
+                          }`}
+                        value={signupData.email}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            email: e.target.value,
+                          })
+                        }
+                        required
+                        disabled={otpSent} // Disabled when OTP is sent
+                      />
+                      {!otpSent && ( // Show button only if OTP not sent
+                        <button
+                          type="button"
+                          onClick={handleSendCode}
+                          disabled={isSendingOtp}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-xs btn-primary rounded-lg"
+                        >
+                          {isSendingOtp ? <span className="loading loading-spinner loading-xs"></span> : "Send Code"}
+                        </button>
+                      )}
+                    </div>
                     {signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email) && (
                       <p className="text-[10px] text-error mt-1 pl-1">
                         Please enter a valid email address
                       </p>
                     )}
+                    {otpSent && ( // Success message when OTP is sent
+                      <p className="text-[10px] text-success mt-1 pl-1 font-medium">
+                        ✓ Email locked for verification
+                      </p>
+                    )}
                   </div>
+
+                  {/* OTP FIELD */}
+                  {otpSent && ( // Show OTP field only if OTP is sent
+                    <div className="form-control w-full animate-in fade-in slide-in-from-top-1 duration-300">
+                      <label className="label py-1">
+                        <span className="label-text font-medium text-xs uppercase tracking-wider opacity-60">
+                          Verification Code (OTP)
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="6-digit code"
+                        maxLength={6}
+                        className="input input-bordered w-full rounded-xl focus:input-primary transition-all bg-base-200/50 font-mono tracking-[1em] text-center"
+                        value={signupData.otp}
+                        onChange={(e) =>
+                          setSignupData({
+                            ...signupData,
+                            otp: e.target.value.replace(/\D/g, ""), // Allow only digits
+                          })
+                        }
+                        required
+                      />
+                    </div>
+                  )}
 
                   {/* PASSWORD */}
                   <div className="form-control w-full">

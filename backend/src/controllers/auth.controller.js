@@ -3,6 +3,14 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import { generateUniqueUsername } from "../utils/usernameUtils.js";
 import { OAuth2Client } from "google-auth-library";
+import OTP from "../models/OTP.js";
+import { sendOTPEmail } from "../lib/email.service.js";
+
+const throwawayDomains = [
+  "yopmail.com", "mailinator.com", "guerrillamail.com", "temp-mail.org",
+  "10minutemail.com", "dispostable.com", "getnada.com", "sharklasers.com",
+  "protonmail.ch", "tutanota.com", "dropmail.me"
+];
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -212,6 +220,26 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
+    // Throwaway domain check
+    const domain = email.split("@")[1];
+    if (throwawayDomains.includes(domain.toLowerCase())) {
+      return res.status(400).json({ message: "Temporary or throwaway email domains are not allowed." });
+    }
+
+    // OTP Verification
+    const { otp: userOtp } = req.body;
+    if (!userOtp) {
+      return res.status(400).json({ message: "Verification code is required" });
+    }
+
+    const validOtp = await OTP.findOne({ email, otp: userOtp });
+    if (!validOtp) {
+      return res.status(400).json({ message: "Invalid or expired verification code" });
+    }
+
+    // Delete OTP after successful verification
+    await OTP.deleteOne({ _id: validOtp._id });
+
     const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
@@ -344,5 +372,44 @@ export async function onboard(req, res) {
   } catch (error) {
     console.error("Onboarding error:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function requestOTP(req, res) {
+  const { email } = req.body;
+  try {
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    // Validate email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Please provide a valid email address" });
+    }
+
+    const domain = email.split("@")[1];
+    if (throwawayDomains.includes(domain.toLowerCase())) {
+      return res.status(400).json({ message: "Temporary email domains are not allowed." });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "Email is already registered" });
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save to DB (overwrite if exists)
+    await OTP.findOneAndUpdate(
+      { email },
+      { otp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send Email
+    await sendOTPEmail(email, otp);
+
+    res.status(200).json({ success: true, message: "Verification code sent to your email!" });
+  } catch (error) {
+    console.error("Error in requestOTP:", error);
+    res.status(500).json({ message: "Failed to send verification code" });
   }
 }

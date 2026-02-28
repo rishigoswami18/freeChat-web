@@ -7,6 +7,12 @@ export const signup = async (signupData) => {
   return response.data;
 };
 
+export const requestOTP = async (email) => {
+  const response = await axiosInstance.post("/auth/request-otp", { email });
+  return response.data;
+};
+
+
 export const login = async (loginData) => {
   const response = await axiosInstance.post("/auth/login", loginData);
   return response.data;

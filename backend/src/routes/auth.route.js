@@ -1,9 +1,10 @@
 import express from "express";
-import { login, logout, onboard, signup, googleLogin } from "../controllers/auth.controller.js"
+import { login, logout, onboard, signup, googleLogin, requestOTP } from "../controllers/auth.controller.js"
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+router.post("/request-otp", requestOTP);
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
