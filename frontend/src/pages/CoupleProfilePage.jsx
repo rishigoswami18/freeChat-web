@@ -24,7 +24,6 @@ import {
     Lock,
     Gamepad2,
     ArrowRight,
-    MessageHeart,
     PenLine,
     Sparkles,
     Waves,
@@ -213,7 +212,7 @@ const CoupleProfilePage = () => {
                                 <div className="flex justify-between items-center mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-primary/20 rounded-xl text-primary shadow-lg shadow-primary/10">
-                                            <MessageHeart className="size-5" />
+                                            <Heart className="size-5 fill-current" />
                                         </div>
                                         <div>
                                             <h3 className="font-black text-xs uppercase tracking-widest opacity-60">Romantic Note</h3>
