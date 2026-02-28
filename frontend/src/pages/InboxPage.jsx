@@ -2,12 +2,10 @@ import { useState, useMemo } from "react";
 import {
     Chat,
     ChannelList,
-    ChannelPreviewMessenger,
-    Window
 } from "stream-chat-react";
 import { useChatClient } from "../components/ChatProvider";
 import ChatLoader from "../components/ChatLoader";
-import { Search, Plus, MessageSquare, Users, Settings } from "lucide-react";
+import { Plus, MessageSquare, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreateGroupModal from "../components/CreateGroupModal";
 
@@ -15,7 +13,6 @@ const InboxPage = () => {
     const chatClient = useChatClient();
     const navigate = useNavigate();
     const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
 
     if (!chatClient) return <ChatLoader />;
 
@@ -46,7 +43,6 @@ const InboxPage = () => {
         const { channel, active, lastMessage } = props;
         const chatClient = useChatClient();
 
-        // Resolve channel name: if data.name is missing, it's likely a 1v1 chat
         const displayData = channel.data.name ? {
             name: channel.data.name,
             image: channel.data.image
@@ -60,12 +56,12 @@ const InboxPage = () => {
 
         return (
             <div
-                className={`flex items-center gap-4 p-4 cursor-pointer border-b border-base-300 transition-all hover:bg-base-200 outline-none
-                ${active ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"}
+                className={`flex items-center gap-3 sm:gap-4 px-3 py-3 sm:p-4 cursor-pointer border-b border-base-300/50 transition-all active:bg-base-300/50 active:scale-[0.99]
+                ${active ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent hover:bg-base-200"}
             `}
             >
-                <div className="avatar">
-                    <div className="size-12 rounded-full ring-2 ring-primary/10 overflow-hidden">
+                <div className="avatar flex-shrink-0">
+                    <div className="size-11 sm:size-12 rounded-full ring-2 ring-primary/10 overflow-hidden">
                         <img
                             src={displayData.image || "/avatar.png"}
                             alt={displayData.name}
@@ -78,11 +74,11 @@ const InboxPage = () => {
                         <p className={`text-sm font-bold truncate ${active ? "text-primary" : ""}`}>
                             {displayData.name}
                         </p>
-                        <span className="text-[10px] opacity-40 uppercase font-black">
-                            {channel.data.last_message_at ? new Date(channel.data.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                        <span className="text-[10px] opacity-40 uppercase font-black ml-2 flex-shrink-0">
+                            {channel.data.last_message_at ? new Date(channel.data.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
                         </span>
                     </div>
-                    <p className="text-xs opacity-60 truncate flex items-center gap-1">
+                    <p className="text-xs opacity-50 truncate flex items-center gap-1">
                         {lastMessage ? (
                             <>
                                 <span className="font-bold">
@@ -104,19 +100,19 @@ const InboxPage = () => {
 
     return (
         <div className="h-[100dvh] flex flex-col bg-base-100 overflow-hidden">
-            {/* Header */}
-            <div className="p-4 sm:p-6 border-b border-base-300 bg-base-200/50 flex items-center justify-between sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-primary/20 rounded-2xl text-primary ring-4 ring-primary/5">
-                        <MessageSquare className="size-6" />
+            {/* Header — compact on mobile */}
+            <div className="px-3 py-2.5 sm:p-4 border-b border-base-300/50 bg-base-200/50 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                    <div className="p-2 sm:p-2.5 bg-primary/20 rounded-xl sm:rounded-2xl text-primary ring-4 ring-primary/5">
+                        <MessageSquare className="size-5 sm:size-6" />
                     </div>
-                    <h1 className="text-2xl font-black italic tracking-tighter">INBOX</h1>
+                    <h1 className="text-xl sm:text-2xl font-black italic tracking-tighter">INBOX</h1>
                 </div>
                 <button
                     onClick={() => setIsGroupModalOpen(true)}
-                    className="btn btn-primary rounded-xl gap-2 font-bold shadow-lg shadow-primary/20"
+                    className="btn btn-primary btn-sm sm:btn-md rounded-xl gap-1.5 font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform"
                 >
-                    <Plus className="size-5" />
+                    <Plus className="size-4 sm:size-5" />
                     <span className="hidden sm:inline">New Group</span>
                 </button>
             </div>
@@ -124,7 +120,7 @@ const InboxPage = () => {
             {/* List */}
             <div className="flex-1 overflow-hidden">
                 <Chat client={chatClient}>
-                    <div className="h-full custom-scrollbar overflow-y-auto">
+                    <div className="h-full overflow-y-auto overscroll-contain">
                         <ChannelList
                             filters={filters}
                             sort={sort}
@@ -135,10 +131,10 @@ const InboxPage = () => {
                             )}
                             EmptyStateIndicator={() => (
                                 <div className="flex flex-col items-center justify-center py-20 opacity-40 px-6 text-center">
-                                    <div className="p-10 bg-base-200 rounded-full mb-6">
-                                        <Users className="size-16" />
+                                    <div className="p-8 sm:p-10 bg-base-200 rounded-full mb-6">
+                                        <Users className="size-12 sm:size-16" />
                                     </div>
-                                    <h2 className="text-xl font-bold mb-2">Your inbox looks empty</h2>
+                                    <h2 className="text-lg sm:text-xl font-bold mb-2">Your inbox looks empty</h2>
                                     <p className="max-w-xs text-sm">Start a conversation or create a group to see messages here.</p>
                                 </div>
                             )}

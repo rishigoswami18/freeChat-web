@@ -179,7 +179,7 @@
 
 /* ===== Message List ===== */
 .str-chat__list {
-  padding: 12px;
+  padding: 10px;
   background: oklch(var(--b1));
 }
 
@@ -196,9 +196,15 @@
 /* ===== Message Input ===== */
 .str-chat__message-input {
   border-top: 1px solid oklch(var(--b3));
-  padding: 10px 14px;
+  padding: 8px 10px;
   background: oklch(var(--b1));
   color: oklch(var(--bc)) !important;
+}
+
+@media (min-width: 640px) {
+  .str-chat__message-input {
+    padding: 10px 14px;
+  }
 }
 
 .str-chat__message-input-textarea,
@@ -448,23 +454,67 @@
   font-family: 'Inter', sans-serif !important;
 }
 
-/* ===== Mobile-specific touch improvements ===== */
+/* ===== Mobile-first Touch & Performance ===== */
 @media (max-width: 639px) {
+
+  /* Bigger touch targets */
   .btn-sm {
     min-height: 36px;
     min-width: 36px;
   }
 
+  /* Remove tap highlight, improve touch response */
   button,
   a,
-  .btn {
+  .btn,
+  [role="button"] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
 
+  /* Smooth native scrolling */
   html {
     -webkit-overflow-scrolling: touch;
   }
+
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="date"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Better card visual on mobile */
+  .card {
+    border-radius: 16px;
+  }
+
+  /* Hide footer on mobile — bottom tab bar replaces it */
+  footer {
+    display: none !important;
+  }
+
+  /* Tighter story tray padding for more items visible */
+  .story-tray {
+    gap: 10px;
+  }
+
+  /* Full-width modals on mobile */
+  .modal-box {
+    width: calc(100vw - 16px) !important;
+    max-width: 100% !important;
+    margin: 8px !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* ===== Overscroll prevention for mobile ===== */
+.overscroll-contain {
+  overscroll-behavior: contain;
 }
 
 /* ===== Subtle Animations ===== */
@@ -495,7 +545,23 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* ===== Premium Sidebar Active Indicator ===== */
@@ -539,4 +605,21 @@
 
 .avatar-glow:hover::after {
   opacity: 0.5;
+}
+
+/* ===== Pull to refresh indicator styling ===== */
+@keyframes bounce-subtle {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.bounce-subtle {
+  animation: bounce-subtle 1s ease-in-out infinite;
 }

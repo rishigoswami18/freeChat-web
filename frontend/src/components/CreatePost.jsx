@@ -24,8 +24,6 @@ const uploadToCloudinary = async (file, resourceType = "image", onProgress) => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-  // Remove folder parameter if it's causing issues with unsigned presets
-  // formData.append("folder", "freechat_posts");
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -59,9 +57,9 @@ const uploadToCloudinary = async (file, resourceType = "image", onProgress) => {
 
 const CreatePost = ({ onPost, authUser }) => {
   const [content, setContent] = useState("");
-  const [mediaFile, setMediaFile] = useState(null); // raw File object for upload
-  const [mediaType, setMediaType] = useState(""); // "image" or "video"
-  const [mediaPreview, setMediaPreview] = useState(null); // preview URL
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaType, setMediaType] = useState("");
+  const [mediaPreview, setMediaPreview] = useState(null);
   const [songName, setSongName] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -72,7 +70,6 @@ const CreatePost = ({ onPost, authUser }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size
     const maxSize = type === "video" ? 100 * 1024 * 1024 : 50 * 1024 * 1024;
     const maxLabel = type === "video" ? "100MB" : "50MB";
     if (file.size > maxSize) {
@@ -80,7 +77,6 @@ const CreatePost = ({ onPost, authUser }) => {
       return;
     }
 
-    // Create preview URL (no base64 needed!)
     const previewUrl = URL.createObjectURL(file);
     setMediaFile(file);
     setMediaType(type);
@@ -111,7 +107,6 @@ const CreatePost = ({ onPost, authUser }) => {
       let mediaUrl = "";
       let mediaBase64 = null;
 
-      // Primary: Upload media directly to Cloudinary from browser (better for performance)
       if (mediaFile) {
         try {
           const resourceType = mediaType === "video" ? "video" : "image";
@@ -124,8 +119,6 @@ const CreatePost = ({ onPost, authUser }) => {
           console.warn("Direct upload failed, attempting fallback...", uploadError);
           toast.dismiss("upload");
 
-          // Fallback: Convert to Base64 and send to backend for upload
-          // Only for files < 10MB to avoid hitting backend limits
           if (mediaFile.size < 10 * 1024 * 1024) {
             toast.loading("Uploading via fallback...", { id: "upload-fallback" });
             const reader = new FileReader();
@@ -140,11 +133,10 @@ const CreatePost = ({ onPost, authUser }) => {
         }
       }
 
-      // Send the data to the backend
       const postData = {
         content: content.trim(),
-        mediaUrl, // Used if direct upload worked
-        media: mediaBase64, // Used for backend fallback
+        mediaUrl,
+        media: mediaBase64,
         mediaType,
         songName: songName.trim(),
       };
@@ -168,30 +160,28 @@ const CreatePost = ({ onPost, authUser }) => {
 
   return (
     <>
-      <div className="card bg-base-200 shadow-md mb-6 overflow-hidden">
-        <div className="card-body p-4 sm:p-5">
+      <div className="card bg-base-200 shadow-sm sm:shadow-md mb-4 sm:mb-6 overflow-hidden rounded-2xl">
+        <div className="card-body p-3 sm:p-5">
           {/* User Info Row */}
-          <div className="flex items-center gap-3 mb-3">
-            <div className="avatar px-1">
-              <div className="w-11 h-11 rounded-full border-2 border-primary/20 p-0.5">
-                <div className="w-full h-full rounded-full overflow-hidden">
-                  <img
-                    src={authUser?.profilePic || "/avatar.png"}
-                    alt={authUser?.fullName}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
+          <div className="flex items-center gap-2.5 mb-2.5">
+            <div className="avatar">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 border-primary/20 overflow-hidden">
+                <img
+                  src={authUser?.profilePic || "/avatar.png"}
+                  alt={authUser?.fullName}
+                  className="object-cover w-full h-full"
+                />
               </div>
             </div>
             <div>
               <p className="font-semibold text-sm">{authUser?.fullName}</p>
-              <p className="text-xs text-base-content/50">What's on your mind?</p>
+              <p className="text-[11px] text-base-content/40">What's on your mind?</p>
             </div>
           </div>
 
           {/* Text Input */}
           <textarea
-            className="textarea textarea-ghost w-full bg-base-100 resize-none text-base placeholder:italic focus:bg-base-100 min-h-[80px] p-0 mb-2"
+            className="textarea textarea-ghost w-full bg-base-100 resize-none text-[15px] sm:text-base placeholder:italic focus:bg-base-100 min-h-[70px] sm:min-h-[80px] p-0 mb-2"
             placeholder="Share your thoughts, a photo, or a video..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -200,10 +190,10 @@ const CreatePost = ({ onPost, authUser }) => {
 
           {/* Media Preview */}
           {mediaPreview && (
-            <div className="relative mt-3 rounded-xl overflow-hidden bg-base-300">
+            <div className="relative mt-2 rounded-xl overflow-hidden bg-base-300 -mx-3 sm:-mx-5">
               <button
                 onClick={removeMedia}
-                className="absolute top-2 right-2 btn btn-circle btn-sm bg-black/60 hover:bg-black/80 text-white border-none z-10"
+                className="absolute top-2 right-2 btn btn-circle btn-sm bg-black/60 hover:bg-black/80 text-white border-none z-10 active:scale-90 transition-transform"
               >
                 <X className="size-4" />
               </button>
@@ -211,13 +201,14 @@ const CreatePost = ({ onPost, authUser }) => {
                 <img
                   src={mediaPreview}
                   alt="Preview"
-                  className="w-full max-h-80 object-contain"
+                  className="w-full max-h-72 sm:max-h-80 object-cover sm:object-contain"
                 />
               ) : (
                 <video
                   src={mediaPreview}
                   controls
-                  className="w-full max-h-80"
+                  playsInline
+                  className="w-full max-h-72 sm:max-h-80"
                 />
               )}
             </div>
@@ -241,22 +232,20 @@ const CreatePost = ({ onPost, authUser }) => {
           {/* Song Name Input (Only for Videos) */}
           {mediaType === "video" && (
             <div className="mt-3 space-y-2">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Song Name (e.g. Blinding Lights - The Weeknd)"
-                  className="input input-bordered input-sm w-full bg-base-100 focus:border-primary"
-                  value={songName}
-                  onChange={(e) => setSongName(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="text-[10px] font-bold opacity-40 w-full uppercase tracking-wider">Suggested Songs</span>
+              <input
+                type="text"
+                placeholder="Song Name (e.g. Blinding Lights)"
+                className="input input-bordered input-sm w-full bg-base-100 focus:border-primary rounded-xl"
+                value={songName}
+                onChange={(e) => setSongName(e.target.value)}
+              />
+              <div className="flex flex-wrap gap-1.5">
+                <span className="text-[10px] font-bold opacity-40 w-full uppercase tracking-wider">Suggested</span>
                 {TRENDING_SONGS.map((song) => (
                   <button
                     key={song}
                     onClick={() => setSongName(song)}
-                    className={`badge badge-sm cursor-pointer hover:bg-primary hover:text-primary-content transition-colors ${songName === song ? 'badge-primary' : 'badge-outline opacity-60'}`}
+                    className={`badge badge-sm cursor-pointer transition-colors active:scale-95 ${songName === song ? 'badge-primary' : 'badge-outline opacity-60 hover:bg-primary hover:text-primary-content'}`}
                   >
                     {song}
                   </button>
@@ -266,11 +255,10 @@ const CreatePost = ({ onPost, authUser }) => {
           )}
 
           {/* Actions Row */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-base-300">
-            <div className="flex items-center gap-4">
-              {/* Image Upload */}
-              <label className="text-base-content/60 hover:text-success cursor-pointer transition-colors">
-                <ImageIcon className="size-6" />
+          <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-base-300/50">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <label className="text-base-content/50 hover:text-success active:scale-90 cursor-pointer transition-all p-1">
+                <ImageIcon className="size-5 sm:size-6" />
                 <input
                   ref={imageInputRef}
                   type="file"
@@ -280,9 +268,8 @@ const CreatePost = ({ onPost, authUser }) => {
                 />
               </label>
 
-              {/* Video Upload */}
-              <label className="text-base-content/60 hover:text-info cursor-pointer transition-colors">
-                <VideoIcon className="size-6" />
+              <label className="text-base-content/50 hover:text-info active:scale-90 cursor-pointer transition-all p-1">
+                <VideoIcon className="size-5 sm:size-6" />
                 <input
                   ref={videoInputRef}
                   type="file"
@@ -294,7 +281,7 @@ const CreatePost = ({ onPost, authUser }) => {
             </div>
 
             <button
-              className="btn btn-primary btn-sm px-8 rounded-lg shadow-lg shadow-primary/20"
+              className="btn btn-primary btn-sm px-6 sm:px-8 rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-transform"
               onClick={handlePost}
               disabled={loading || (!content.trim() && !mediaFile)}
             >

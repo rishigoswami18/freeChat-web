@@ -6,7 +6,6 @@ import {
   Bell,
   Menu,
   X,
-  ShipWheel,
   LogOut,
   Pencil,
   Heart,
@@ -43,64 +42,67 @@ const MobileDrawer = () => {
     { to: "/posts", icon: Pencil, label: "Posts" },
     { to: "/couple", icon: Heart, label: "Couple" },
     { to: "/games", icon: Gamepad2, label: "Games" },
-    { to: "/premium", icon: Crown, label: "Premium" },
+    { to: "/membership", icon: Crown, label: "Premium" },
     { to: "/profile", icon: User, label: "Profile" },
   ];
+
+  // Bottom tab items: Feed, Inbox, Reels, Search, Profile
+  const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[10]];
 
   return (
     <>
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
       {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-base-200/95 backdrop-blur-sm border-b border-base-300 px-4 py-3 flex items-center justify-between safe-area-top">
-        <div className="flex items-center gap-3">
-          <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-2.5 flex items-center justify-between safe-area-top">
+        <div className="flex items-center gap-2">
+          <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
             <Menu className="size-5" />
           </button>
           <Logo className="size-6" fontSize="text-lg" />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {authUser?.streak > 0 && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-orange-500/20 to-red-500/10 rounded-full border border-orange-500/30 text-orange-500 shadow-sm animate-pulse">
-              <Flame className="size-4 fill-current" />
-              <span className="font-bold text-xs tabular-nums">{authUser.streak}</span>
+            <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500/20 to-red-500/10 rounded-full border border-orange-500/30 text-orange-500">
+              <Flame className="size-3.5 fill-current" />
+              <span className="font-bold text-[11px] tabular-nums">{authUser.streak}</span>
             </div>
           )}
           <ThemeSelector size="btn-sm" />
-          <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle">
-            <LogOut className="size-5 opacity-70" />
+          <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
+            <LogOut className="size-4.5 opacity-70" />
           </button>
-          <div className="avatar ring-2 ring-primary/20 rounded-full p-0.5 ml-1">
-            <div className="w-8 h-8 rounded-full">
-              <img src={authUser?.profilePic || "/avatar.png"} alt="You" className="object-cover" />
+          <Link to="/profile" className="avatar ring-2 ring-primary/20 rounded-full p-0.5">
+            <div className="w-7 h-7 rounded-full overflow-hidden">
+              <img src={authUser?.profilePic || "/avatar.png"} alt="You" className="object-cover w-full h-full" />
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
       {/* Slide-out Drawer */}
       <div
         className={`fixed inset-y-0 left-0 w-72 bg-base-100 border-r border-base-300 z-[60] transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 ease-in-out flex flex-col`}
+          } transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col`}
       >
         {/* Drawer Header */}
         <div className="p-4 flex justify-between items-center border-b border-base-300">
           <Logo className="size-6" fontSize="text-lg" streak={authUser?.streak} />
-          <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle">
+          <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
             <X className="size-5" />
           </button>
         </div>
 
         {/* Nav Links */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto no-scrollbar overscroll-contain">
           {navItems.map(({ to, icon: Icon, label }) => (
             <Link
               key={to}
               to={to}
               onClick={toggleDrawer}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${location.pathname === to
-                ? "bg-primary text-primary-content"
-                : "hover:bg-base-200"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] ${location.pathname === to
+                ? "bg-primary text-primary-content shadow-md shadow-primary/20"
+                : "hover:bg-base-200 active:bg-base-300"
                 }`}
             >
               <Icon className="size-5" />
@@ -109,12 +111,12 @@ const MobileDrawer = () => {
           ))}
         </nav>
 
-        {/* User Profile + Theme & Logout */}
-        <div className="p-4 border-t border-base-300 space-y-4">
+        {/* User Profile + Logout */}
+        <div className="p-4 border-t border-base-300 space-y-3">
           <div className="flex items-center gap-3">
             <div className="avatar">
-              <div className="w-12 h-12 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2">
-                <img src={authUser?.profilePic || "/avatar.png"} alt="User Avatar" className="object-cover" />
+              <div className="w-12 h-12 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
+                <img src={authUser?.profilePic || "/avatar.png"} alt="User Avatar" className="object-cover w-full h-full" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -126,42 +128,46 @@ const MobileDrawer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-2">
-            <button
-              onClick={() => { toggleDrawer(); logoutMutation(); }}
-              className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20 w-full"
-            >
-              <LogOut className="size-4" />
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={() => { toggleDrawer(); logoutMutation(); }}
+            className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20 w-full active:scale-[0.97] transition-transform"
+          >
+            <LogOut className="size-4" />
+            Logout
+          </button>
         </div>
       </div>
 
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[55]"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[55] animate-fade-in"
           onClick={toggleDrawer}
         />
       )}
 
-      {/* Bottom Tab Bar for quick navigation - Hide on Chat Page */}
-      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] bg-base-200/95 backdrop-blur-sm border-t border-base-300 safe-area-bottom ${location.pathname.startsWith("/chat") ? "hidden" : ""}`}>
-        <div className="flex items-center justify-around py-2">
-          {[navItems[0], navItems[1], navItems[3], navItems[4], navItems[10]].map(({ to, icon: Icon, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-colors ${location.pathname === to
-                ? "text-primary"
-                : "text-base-content/50"
-                }`}
-            >
-              <Icon className="size-5" />
-              <span className="text-[10px] font-medium">{label}</span>
-            </Link>
-          ))}
+      {/* Bottom Tab Bar with improved mobile UX */}
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""}`}>
+        <div className="flex items-center justify-around py-1.5 px-1">
+          {bottomTabs.map(({ to, icon: Icon, label }) => {
+            const isActive = location.pathname === to;
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={`relative flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 active:scale-90 ${isActive
+                  ? "text-primary"
+                  : "text-base-content/40"
+                  }`}
+              >
+                {isActive && (
+                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-primary rounded-full" />
+                )}
+                <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />
+                <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </>
