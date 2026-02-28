@@ -10,7 +10,9 @@ const useLogout = () => {
     error,
   } = useMutation({
     mutationFn: logout,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+    onSuccess: () => {
+      queryClient.clear(); // Clear EVERYTHING on logout for security
+    },
   });
 
   return { logoutMutation, isPending, error };

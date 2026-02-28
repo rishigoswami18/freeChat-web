@@ -25,9 +25,9 @@ export const ChatProvider = ({ children }) => {
 
 
     const { data: tokenData, error: tokenError } = useQuery({
-        queryKey: ["streamToken"],
+        queryKey: ["streamToken", authUser?._id], // Added user ID to cache key
         queryFn: getStreamToken,
-        enabled: !!authUser,
+        enabled: !!authUser?._id, // More specific check
         staleTime: 5 * 60 * 1000,
         retry: 3,
     });
@@ -61,6 +61,7 @@ export const ChatProvider = ({ children }) => {
             try {
                 const client = StreamChat.getInstance(STREAM_API_KEY);
                 const currentUserId = String(authUser._id);
+                console.log(`🔌 Attempting Stream connection for: ${currentUserId}`);
 
                 // Add debugger helper for production console
                 window.logChatStatus = () => {

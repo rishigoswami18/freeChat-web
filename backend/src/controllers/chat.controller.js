@@ -22,7 +22,7 @@ export async function getStreamToken(req, res) {
       return res.status(500).json({ message: "Stream token generation failed" });
     }
 
-    console.log("✅ Stream token generated successfully for:", userId);
+    console.log(`✅ Stream token generated for ${userId}: ${token.substring(0, 10)}...`);
     res.status(200).json({ token, apiKey: process.env.STREAM_API_KEY });
   } catch (error) {
     console.error("❌ Error in getStreamToken controller:", error.stack || error.message);
