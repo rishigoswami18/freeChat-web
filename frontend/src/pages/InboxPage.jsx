@@ -26,15 +26,32 @@ const InboxPage = () => {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        if (!chatClient || !authUser) return;
+        if (!chatClient?.userID || !authUser) return;
+
+        // Debug helper
+        window.logInbox = async () => {
+            const filter = { type: "messaging", members: { $in: [authUser._id] } };
+            const channels = await chatClient.queryChannels(filter, { updated_at: -1 });
+            console.log("Inbox Channels Found:", channels.length, channels);
+            return channels;
+        };
 
         const fetchChannels = async () => {
-            setIsLoading(true);
             try {
-                // Query for messaging channels where the user is a member
-                const filter = { type: "messaging", members: { $in: [authUser._id] } };
-                const sort = [{ last_message_at: -1 }];
-                const options = { limit: 30, presence: true, state: true };
+                // Broaden filter to ensure we see all chats user is part of
+                const filter = {
+                    type: "messaging",
+                    members: { $in: [authUser._id] }
+                };
+
+                // Sort by last message OR update time to catch new empty channels
+                const sort = [{ last_message_at: -1 }, { updated_at: -1 }];
+                const options = {
+                    limit: 30,
+                    presence: true,
+                    state: true,
+                    watch: true // Watch for changes
+                };
 
                 const channels = await chatClient.queryChannels(filter, sort, options);
 
@@ -82,17 +99,28 @@ const InboxPage = () => {
 
         fetchChannels();
 
-        // Listen for new messages to refresh the list
+        // Listen for all relevant events to refresh the list automatically
         const handleEvent = (event) => {
-            if (event.type === 'message.new' || event.type === 'notification.message_new') {
+            const refreshEvents = [
+                'message.new',
+                'notification.message_new',
+                'channel.updated',
+                'channel.visible',
+                'member.added'
+            ];
+            if (refreshEvents.includes(event.type)) {
+                console.log("Inbox event received:", event.type);
                 fetchChannels();
             }
         };
 
-        chatClient.on(handleEvent);
-        return () => chatClient.off(handleEvent);
+        const listener = chatClient.on(handleEvent);
+        return () => {
+            listener.unsubscribe();
+            delete window.logInbox;
+        };
 
-    }, [chatClient, authUser]);
+    }, [chatClient, chatClient?.userID, authUser]);
 
     const filtered = conversations.filter((c) =>
         c.partner.name.toLowerCase().includes(search.toLowerCase())
