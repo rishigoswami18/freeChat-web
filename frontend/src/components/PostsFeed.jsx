@@ -12,6 +12,7 @@ import { likePost, commentOnPost, sharePost, deletePost } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 import toast from "react-hot-toast";
 import PostAd from "./PostAd";
+import LikedByModal from "./LikedByModal";
 
 const PostsFeed = ({ posts, setPosts }) => {
   if (!posts || posts.length === 0) {
@@ -62,6 +63,7 @@ const PostCard = ({ post, setPosts }) => {
   const [isCommenting, setIsCommenting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [likeAnim, setLikeAnim] = useState(false);
+  const [showLikesModal, setShowLikesModal] = useState(false);
 
   const isLiked = post.likes?.includes(authUser?._id);
   const likeCount = post.likes?.length || 0;
@@ -230,8 +232,11 @@ const PostCard = ({ post, setPosts }) => {
 
         {/* Stats Row */}
         {(likeCount > 0 || commentCount > 0 || post.shareCount > 0) && (
-          <div className="flex items-center justify-between text-[11px] text-base-content/40 px-0.5 mb-1.5">
-            <span className="font-medium">
+          <div className="flex items-center justify-between text-[11px] text-base-content/40 px-0.5 mb-1.5 font-medium">
+            <span
+              className="cursor-pointer hover:underline hover:text-primary transition-colors active:scale-95"
+              onClick={() => likeCount > 0 && setShowLikesModal(true)}
+            >
               {likeCount > 0 && `${likeCount} like${likeCount !== 1 ? "s" : ""}`}
             </span>
             <div className="flex gap-3">
@@ -345,6 +350,12 @@ const PostCard = ({ post, setPosts }) => {
             </div>
           </div>
         )}
+
+        <LikedByModal
+          isOpen={showLikesModal}
+          onClose={() => setShowLikesModal(false)}
+          postId={post._id}
+        />
       </div>
     </div>
   );

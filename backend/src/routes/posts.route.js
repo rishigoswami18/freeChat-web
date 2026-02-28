@@ -168,6 +168,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get list of users who liked the post
+router.get("/:id/likes", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate("likes", "fullName profilePic username nativeLanguage learningLanguage");
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    res.json(post.likes);
+  } catch (err) {
+    console.error("Error fetching post likes:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 // Toggle like
 router.put("/:id/like", async (req, res) => {
   try {

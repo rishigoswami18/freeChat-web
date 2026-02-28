@@ -101,6 +101,11 @@ export const likePost = async (postId) => {
   return response.data;
 };
 
+export const getPostLikes = async (postId) => {
+  const response = await axiosInstance.get(`/posts/${postId}/likes`);
+  return response.data;
+};
+
 export const commentOnPost = async (postId, text) => {
   const response = await axiosInstance.post(`/posts/${postId}/comment`, { text });
   return response.data;
