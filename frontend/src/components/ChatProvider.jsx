@@ -135,9 +135,13 @@ export const ChatProvider = ({ children }) => {
                 client.on("notification.message_new", handleNewMessage);
 
             } catch (error) {
-                console.error("❌ Chat connection failed:", error);
                 if (isMounted) {
-                    toast.error("Messenger connection failed. Please check your internet.");
+                    const errorMsg = error.message || "Unknown connection error";
+                    console.error("❌ Chat connection failed detail:", error);
+                    toast.error(`Messenger error: ${errorMsg.substring(0, 60)}`, {
+                        duration: 5000,
+                        id: "chat-conn-error"
+                    });
                 }
             } finally {
                 if (isMounted) setIsConnecting(false);
