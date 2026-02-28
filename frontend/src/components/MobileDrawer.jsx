@@ -29,7 +29,7 @@ const MobileDrawer = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
-  const { logoutMutation } = useLogout();
+  const { logoutMutation, isPending: isLoggingOut } = useLogout();
 
   const toggleDrawer = () => setIsOpen(!isOpen);
 
@@ -70,8 +70,12 @@ const MobileDrawer = () => {
             </div>
           )}
           <ThemeSelector size="btn-sm" />
-          <button onClick={logoutMutation} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
-            <LogOut className="size-4.5 opacity-70" />
+          <button
+            onClick={() => logoutMutation()}
+            disabled={isLoggingOut}
+            className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform"
+          >
+            {isLoggingOut ? <span className="loading loading-spinner loading-xs" /> : <LogOut className="size-4.5 opacity-70" />}
           </button>
           <Link to="/profile" className="avatar ring-2 ring-primary/20 rounded-full p-0.5">
             <div className="w-7 h-7 rounded-full overflow-hidden">
@@ -142,10 +146,11 @@ const MobileDrawer = () => {
 
           <button
             onClick={() => { toggleDrawer(); logoutMutation(); }}
+            disabled={isLoggingOut}
             className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20 w-full active:scale-[0.97] transition-transform"
           >
-            <LogOut className="size-4" />
-            Logout
+            {isLoggingOut ? <span className="loading loading-spinner loading-xs" /> : <LogOut className="size-4" />}
+            {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
         </div>
       </div>
