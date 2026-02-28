@@ -1,24 +1,38 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createStory } from "../lib/api";
-import { Plus, Loader2, X, Music } from "lucide-react";
+import { createStory, getSongs } from "../lib/api";
+import { Plus, Loader2, X, Music, Search, Play } from "lucide-react";
 import toast from "react-hot-toast";
-
-const TRENDING_SONGS = [
-    "Blinding Lights - The Weeknd",
-    "Stay - The Kid LAROI & Justin Bieber",
-    "Flowers - Miley Cyrus",
-    "As It Was - Harry Styles",
-    "Heat Waves - Glass Animals",
-    "Original Audio",
-];
 
 const CreateStoryModal = ({ isOpen, onClose }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const [caption, setCaption] = useState("");
     const [songName, setSongName] = useState("");
+    const [audioUrl, setAudioUrl] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [songs, setSongs] = useState([]);
     const queryClient = useQueryClient();
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        const fetchSongs = async () => {
+            try {
+                const data = await getSongs();
+                setSongs(data);
+            } catch (err) {
+                console.error("Error fetching songs:", err);
+            }
+        };
+        if (isOpen) fetchSongs();
+    }, [isOpen]);
+
+    const filteredSongs = useMemo(() => {
+        if (!searchQuery) return songs.slice(0, 10);
+        return songs.filter(s =>
+            s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.artist.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [songs, searchQuery]);
 
     const { mutate: uploadStory, isPending: isUploading } = useMutation({
         mutationFn: createStory,
@@ -46,7 +60,8 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
         uploadStory({
             image: previewImage,
             caption: caption.trim(),
-            songName: songName.trim() || "Original Audio"
+            songName: songName.trim() || "Original Audio",
+            audioUrl: audioUrl
         });
     };
 
@@ -54,6 +69,8 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
         setPreviewImage(null);
         setCaption("");
         setSongName("");
+        setAudioUrl("");
+        setSearchQuery("");
         onClose();
     };
 
@@ -73,7 +90,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                         </div>
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="btn btn-primary w-full rounded-xl"
+                            className="btn btn-primary w-full rounded-xl shadow-lg shadow-primary/20"
                         >
                             Select from Gallery
                         </button>
@@ -91,7 +108,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        <div className="p-5 space-y-4">
+                        <div className="p-5 space-y-4 max-h-[40vh] overflow-y-auto no-scrollbar">
                             <div className="space-y-3">
                                 <input
                                     type="text"
@@ -102,31 +119,65 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                     onChange={(e) => setCaption(e.target.value)}
                                 />
                                 <div className="space-y-2">
-                                    <div className="relative">
+                                    <div className="relative group">
                                         <input
                                             type="text"
-                                            placeholder="Song Name (Optional)"
+                                            placeholder="Search songs..."
                                             className="input input-bordered w-full bg-base-200 focus:border-primary border-none rounded-xl pl-10"
-                                            value={songName}
-                                            onChange={(e) => setSongName(e.target.value)}
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
                                         />
-                                        <Music className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-50" />
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 opacity-50 group-focus-within:text-primary transition-colors" />
                                     </div>
-                                    <div className="flex flex-wrap gap-1.5 px-1 overflow-x-auto no-scrollbar pb-1">
-                                        {TRENDING_SONGS.map((song) => (
-                                            <button
-                                                key={song}
-                                                onClick={() => setSongName(song)}
-                                                className={`text-[9px] px-2 py-1 rounded-full border transition-all whitespace-nowrap ${songName === song ? 'bg-primary text-primary-content border-primary' : 'bg-base-200 text-base-content/60 border-base-300 hover:border-primary/40'}`}
-                                            >
-                                                {song}
-                                            </button>
-                                        ))}
+
+                                    {songName && (
+                                        <div className="flex items-center justify-between bg-primary/10 p-2 rounded-xl border border-primary/20">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <Music className="size-3 text-primary" />
+                                                <span className="text-[10px] font-bold text-primary truncate">{songName}</span>
+                                            </div>
+                                            <button onClick={() => { setSongName(""); setAudioUrl(""); }} className="btn btn-ghost btn-xs btn-circle"><X className="size-3" /></button>
+                                        </div>
+                                    )}
+
+                                    <div className="flex flex-wrap gap-1.5 px-1 max-h-24 overflow-y-auto no-scrollbar">
+                                        {filteredSongs.length > 0 ? filteredSongs.map((song) => {
+                                            const label = `${song.title} - ${song.artist}`;
+                                            const isSelected = songName === label;
+                                            return (
+                                                <div key={song._id} className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSongName(label);
+                                                            setAudioUrl(song.audioUrl);
+                                                        }}
+                                                        className={`text-[9px] px-2 py-1 rounded-full border transition-all whitespace-nowrap ${isSelected ? 'bg-primary text-primary-content border-primary' : 'bg-base-200 text-base-content/60 border-base-300 hover:border-primary/40'}`}
+                                                    >
+                                                        {label}
+                                                    </button>
+                                                    {song.audioUrl && (
+                                                        <button
+                                                            className="btn btn-ghost btn-xs btn-circle text-primary"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                const audio = new Audio(song.audioUrl);
+                                                                audio.play().catch(() => { });
+                                                                setTimeout(() => audio.pause(), 3000);
+                                                            }}
+                                                        >
+                                                            <Play className="size-2.5" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        }) : (
+                                            <p className="text-[10px] opacity-40 p-2">No songs found</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 pt-2">
                                 <button
                                     className="btn btn-ghost flex-1 rounded-xl"
                                     onClick={() => setPreviewImage(null)}

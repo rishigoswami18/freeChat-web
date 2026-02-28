@@ -8,6 +8,15 @@ const storySchema = new mongoose.Schema(
         imageUrl: { type: String, required: true },
         caption: { type: String, default: "" },
         songName: { type: String, default: "Original Audio" },
+        audioUrl: { type: String, default: "" },
+        views: [
+            {
+                userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+                fullName: String,
+                profilePic: String,
+                viewedAt: { type: Date, default: Date.now }
+            }
+        ],
         createdAt: { type: Date, default: Date.now, index: { expires: "24h" } },
     },
     { timestamps: true }

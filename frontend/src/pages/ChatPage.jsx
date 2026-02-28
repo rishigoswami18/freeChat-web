@@ -23,6 +23,7 @@ import { useChatClient } from "../components/ChatProvider";
 import ChatLoader from "../components/ChatLoader";
 import ChatHeader from "../components/ChatHeader";
 import EmotionMessage from "../components/EmotionMessage";
+import VoiceRecorder from "../components/VoiceRecorder";
 
 
 
@@ -150,20 +151,44 @@ const ChatPage = () => {
           <Window>
             <ChatHeader />
             <MessageList Message={EmotionMessage} />
-            <div className="relative group/input">
-              <MessageInput focus />
-              <button
-                onClick={handleSnapClick}
-                disabled={isUploading}
-                className="absolute right-14 bottom-3 btn btn-circle btn-sm btn-ghost hover:bg-primary/20 text-primary transition-all z-10"
-                title="Send a Snap"
-              >
-                {isUploading ? (
-                  <Loader2 className="size-5 animate-spin" />
-                ) : (
-                  <Camera className="size-5" />
-                )}
-              </button>
+            <div className="relative group/input flex items-end gap-2 pr-4 bg-base-100 border-t border-base-200">
+              <div className="flex-1">
+                <MessageInput focus />
+              </div>
+
+              <div className="flex items-center gap-1.5 pb-2.5 pr-2">
+                <VoiceRecorder
+                  onSend={async (data) => {
+                    if (!channel) return;
+                    try {
+                      await channel.sendMessage({
+                        text: "Sent a voice message",
+                        isVoice: true,
+                        mediaUrl: data.url,
+                        mediaType: "audio",
+                        duration: data.duration,
+                      });
+                    } catch (error) {
+                      console.error("Error sending voice message:", error);
+                      toast.error("Failed to send voice message");
+                    }
+                  }}
+                />
+
+                <button
+                  onClick={handleSnapClick}
+                  disabled={isUploading}
+                  className="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 text-primary transition-all flex items-center justify-center p-0 min-h-0 size-8"
+                  title="Send a Snap"
+                >
+                  {isUploading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Camera className="size-4" />
+                  )}
+                </button>
+              </div>
+
               <input
                 type="file"
                 ref={fileInputRef}

@@ -289,3 +289,21 @@ export async function unfriend(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+export async function buyVerification(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user.isVerified) return res.status(400).json({ message: "You are already verified" });
+
+    const COST = 1000;
+    if (user.gems < COST) return res.status(400).json({ message: "You need 1000 gems for verification" });
+
+    user.gems -= COST;
+    user.isVerified = true;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Verification badge activated! 🎉", user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}

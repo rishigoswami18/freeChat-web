@@ -10,6 +10,7 @@ import {
   sendFriendRequest,
   updateProfile,
   unfriend,
+  buyVerification,
 } from "../controllers/user.controller.js";
 import { migrateUsernames } from "../controllers/migration.controller.js";
 
@@ -30,6 +31,7 @@ router.get("/friend-requests", getFriendRequests);
 router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.put("/profile", updateProfile);
+router.put("/buy-verification", buyVerification);
 
 router.delete("/unfriend/:id", unfriend);
 

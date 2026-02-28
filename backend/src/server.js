@@ -18,6 +18,9 @@ import gameRoutes from "./routes/game.route.js";
 import storyRoutes from "./routes/story.route.js"; // Added import
 import translationRoutes from "./routes/translation.route.js";
 import supportRoutes from "./routes/support.route.js";
+import gemRoutes from "./routes/gem.route.js";
+import bondRoutes from "./routes/bond.route.js";
+import { seedQuestions } from "./controllers/bond.controller.js";
 import { connectDB } from "./lib/db.js";
 
 const app = express();
@@ -73,6 +76,8 @@ app.use("/api/membership", membershipRoutes);
 app.use("/api/games", gameRoutes);
 app.use("/api/translate", translationRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/gems", gemRoutes);
+app.use("/api/bond", bondRoutes);
 
 
 if (process.env.NODE_ENV === "production") {
@@ -83,7 +88,8 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
-  connectDB();
+  await connectDB();
+  await seedQuestions();
 });

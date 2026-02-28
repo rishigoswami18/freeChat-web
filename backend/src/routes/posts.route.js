@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import Post from "../models/Post.js";
+import Song from "../models/Song.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import cloudinary from "../lib/cloudinary.js";
 import { detectEmotion } from "../utils/emotionService.js";
@@ -14,13 +15,14 @@ router.use(protectRoute);
 // Create post (with optional media - supports both direct URL and base64 upload)
 router.post("/", async (req, res) => {
   try {
-    const { content, media, mediaUrl: directUrl, mediaType, songName } = req.body;
+    const { content, media, mediaUrl: directUrl, mediaType, songName, audioUrl } = req.body;
     console.log("Create post request received:", {
       contentLength: content?.length,
       mediaType,
       hasDirectUrl: !!directUrl,
       hasBase64Media: !!media,
-      songName
+      songName,
+      hasAudioUrl: !!audioUrl
     });
 
     if (!content && !media && !directUrl) {
@@ -72,6 +74,7 @@ router.post("/", async (req, res) => {
       mediaUrl,
       mediaType: mediaType || "",
       songName: songName || "Original Audio",
+      audioUrl: audioUrl || "",
     });
 
     console.log("Post created successfully with ID:", newPost._id);
@@ -85,28 +88,99 @@ router.post("/", async (req, res) => {
 // Get video posts with prioritization (for Reels)
 router.get("/videos", async (req, res) => {
   try {
-    // Return videos sorted by a score of (likes + shares) and date
-    // For simplicity, we'll fetch more than needed and sort them or just use a weighted sort if possible.
-    // Here we'll just get all videos and sort by popular + recent.
-    const posts = await Post.find({
-      mediaType: "video",
-    });
+    console.log("Fetching video posts for Reels...");
+    const isPremium = hasPremiumAccess(req.user);
 
-    // Sort logic: Popularity (likes + shares) weighted with recency
-    const sortedPosts = posts.sort((a, b) => {
+    // Fetch real video posts
+    let posts = await Post.find({
+      mediaType: "video",
+      isAd: false, // Exclude ads from regular posts
+    });
+    console.log(`Found ${posts.length} non-ad video posts.`);
+
+    // Sort by popularity/recency
+    posts.sort((a, b) => {
       const scoreA = (a.likes.length * 2) + (a.shareCount * 5);
       const scoreB = (b.likes.length * 2) + (b.shareCount * 5);
-
-      // If scores are equal, sort by date
-      if (scoreA === scoreB) {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      }
+      if (scoreA === scoreB) return new Date(b.createdAt) - new Date(a.createdAt);
       return scoreB - scoreA;
     });
+    console.log("Video posts sorted by popularity and recency.");
 
-    res.json(sortedPosts);
+    // If user is not premium, inject ads every 4th post
+    if (!isPremium) {
+      console.log("User is not premium. Injecting ads into video feed.");
+      const ads = await Post.find({ isAd: true }).limit(5); // Fetch a few ads
+      console.log(`Found ${ads.length} ad posts in DB.`);
+
+      // Fallback sample ad if none in DB
+      const sampleAd = {
+        _id: "ad_123",
+        userId: "ad_user_id", // Placeholder for ad user
+        fullName: "FreeChat Business",
+        profilePic: "https://res.cloudinary.com/demo/image/upload/v1624103175/samples/people/steve-jobs.jpg",
+        content: "Grow your business with FreeChat Ads. Target the right audience today!",
+        mediaUrl: "https://res.cloudinary.com/demo/video/upload/v1624103175/samples/elephants.mp4",
+        mediaType: "video",
+        isAd: true,
+        adLink: "https://freechatweb.in/ads",
+        adCta: "Get Started",
+        likes: [],
+        comments: [],
+        shareCount: 0,
+        songName: "Sponsored Content",
+        isVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const finalPosts = [];
+      let adIndex = 0;
+
+      posts.forEach((post, index) => {
+        finalPosts.push(post);
+        // Inject an ad every 4th post
+        if ((index + 1) % 4 === 0) {
+          const currentAd = ads[adIndex] || sampleAd;
+          finalPosts.push(currentAd);
+          adIndex = (adIndex + 1) % (ads.length > 0 ? ads.length : 1); // Cycle through available ads
+          console.log(`Injected ad at position ${finalPosts.length}. Ad ID: ${currentAd._id}`);
+        }
+      });
+
+      console.log(`Final video feed with ads: ${finalPosts.length} items.`);
+      return res.json(finalPosts);
+    }
+
+    console.log("User is premium. No ads injected.");
+    res.json(posts);
   } catch (err) {
     console.error("Error fetching video posts:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Get curated songs for Reels/Videos
+router.get("/songs", async (req, res) => {
+  try {
+    const songs = await Song.find().sort({ isTrending: -1, title: 1 });
+    res.json(songs);
+  } catch (err) {
+    console.error("Error fetching songs:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Add a new song to the library (Admin/Internal)
+router.post("/songs", async (req, res) => {
+  try {
+    const { title, artist, audioUrl, isTrending } = req.body;
+    if (!title || !artist) return res.status(400).json({ message: "Title and artist required" });
+
+    const newSong = await Song.create({ title, artist, audioUrl, isTrending });
+    res.status(201).json(newSong);
+  } catch (err) {
+    console.error("Error adding song:", err.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

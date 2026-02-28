@@ -137,6 +137,16 @@ export const getVideoPosts = async () => {
   return response.data;
 };
 
+export const getSongs = async () => {
+  const response = await axiosInstance.get("/posts/songs");
+  return response.data;
+};
+
+export const addSong = async (songData) => {
+  const response = await axiosInstance.post("/posts/songs", songData);
+  return response.data;
+};
+
 // ----------------- CHAT / STREAM -----------------
 
 export const getStreamToken = async () => {
@@ -196,6 +206,11 @@ export const getStories = async () => {
 
 export const createStory = async (storyData) => {
   const response = await axiosInstance.post("/stories", storyData);
+  return response.data;
+};
+
+export const viewStory = async (storyId) => {
+  const response = await axiosInstance.post(`/stories/view/${storyId}`);
   return response.data;
 };
 
@@ -259,5 +274,39 @@ export const submitGameAnswers = async (sessionId, quizAnswers) => {
 
 export const updateProfile = async (profileData) => {
   const response = await axiosInstance.put("/users/profile", profileData);
+  return response.data;
+};
+
+export const buyVerification = async () => {
+  const response = await axiosInstance.put("/users/buy-verification");
+  return response.data;
+};
+
+// ----------------- GEMS / MONETIZATION -----------------
+
+export const getWalletBalance = async () => {
+  const response = await axiosInstance.get("/gems/balance");
+  return response.data;
+};
+
+export const sendGift = async (creatorId, giftAmount, giftName) => {
+  const response = await axiosInstance.post("/gems/send", { creatorId, giftAmount, giftName });
+  return response.data;
+};
+
+export const purchaseGems = async (amount) => {
+  const response = await axiosInstance.post("/gems/purchase", { amount });
+  return response.data;
+};
+
+// ----------------- BONDBEYOND / RELATIONSHIP -----------------
+
+export const getDailyInsight = async () => {
+  const response = await axiosInstance.get("/bond/insight");
+  return response.data;
+};
+
+export const updateMood = async (mood) => {
+  const response = await axiosInstance.put("/bond/mood", { mood });
   return response.data;
 };

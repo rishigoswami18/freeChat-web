@@ -1,4 +1,4 @@
-import { ShipWheel, Flame } from "lucide-react";
+import { HeartHandshake, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Logo = ({ className = "size-8", showText = true, fontSize = "text-2xl", streak = 0 }) => {
@@ -6,13 +6,18 @@ const Logo = ({ className = "size-8", showText = true, fontSize = "text-2xl", st
         <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2.5 group">
                 <div className="relative">
-                    <ShipWheel className={`${className} text-primary group-hover:scale-110 transition-transform duration-300`} />
+                    <HeartHandshake className={`${className} text-primary group-hover:scale-110 transition-transform duration-300`} />
                     <div className="absolute -inset-2 bg-primary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 {showText && (
-                    <span className={`${fontSize} font-extrabold tracking-tight gradient-text`}>
-                        freeChat
-                    </span>
+                    <div className="flex flex-col">
+                        <span className={`${fontSize} font-extrabold tracking-tight gradient-text leading-none`}>
+                            BondBeyond
+                        </span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 ml-0.5 mt-0.5">
+                            Powered by freechatweb.in
+                        </span>
+                    </div>
                 )}
             </Link>
             {streak > 0 && (

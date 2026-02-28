@@ -1,19 +1,11 @@
-import { useState, useRef } from "react";
-import { createPost } from "../lib/api";
-import { ImageIcon, VideoIcon, X, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { createPost, getSongs } from "../lib/api";
+import { ImageIcon, VideoIcon, X, Loader2, Play } from "lucide-react";
 import toast from "react-hot-toast";
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-const TRENDING_SONGS = [
-  "Blinding Lights - The Weeknd",
-  "Stay - The Kid LAROI & Justin Bieber",
-  "Flowers - Miley Cyrus",
-  "As It Was - Harry Styles",
-  "Heat Waves - Glass Animals",
-  "Original Audio",
-];
 
 // Upload file directly to Cloudinary from the browser (no backend needed)
 const uploadToCloudinary = async (file, resourceType = "image", onProgress) => {
@@ -61,10 +53,49 @@ const CreatePost = ({ onPost, authUser }) => {
   const [mediaType, setMediaType] = useState("");
   const [mediaPreview, setMediaPreview] = useState(null);
   const [songName, setSongName] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [songs, setSongs] = useState([]);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
+
+  const filteredSongs = useMemo(() => {
+    if (!searchQuery) return songs;
+    return songs.filter(s =>
+      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.artist.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [songs, searchQuery]);
+
+  useEffect(() => {
+    const preSelected = localStorage.getItem("preSelectedSong");
+    if (preSelected) {
+      try {
+        const songData = JSON.parse(preSelected);
+        setSongName(`${songData.title} - ${songData.artist}`);
+        setAudioUrl(songData.audioUrl);
+        // We might want to switch to video mode automatically if a song is selected
+        setMediaType("video");
+        localStorage.removeItem("preSelectedSong");
+      } catch (e) {
+        console.error("Error parsing preselected song", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const data = await getSongs();
+        setSongs(data);
+      } catch (err) {
+        console.error("Error fetching songs:", err);
+      }
+    };
+    fetchSongs();
+  }, []);
 
   const handleFileSelect = (e, type) => {
     const file = e.target.files?.[0];
@@ -89,6 +120,7 @@ const CreatePost = ({ onPost, authUser }) => {
     setMediaType("");
     setMediaPreview(null);
     setSongName("");
+    setAudioUrl("");
     setUploadProgress(0);
     if (imageInputRef.current) imageInputRef.current.value = "";
     if (videoInputRef.current) videoInputRef.current.value = "";
@@ -104,14 +136,14 @@ const CreatePost = ({ onPost, authUser }) => {
     setUploadProgress(0);
 
     try {
-      let mediaUrl = "";
+      let mediaUrlResp = "";
       let mediaBase64 = null;
 
       if (mediaFile) {
         try {
           const resourceType = mediaType === "video" ? "video" : "image";
           toast.loading(`Uploading ${mediaType}...`, { id: "upload" });
-          mediaUrl = await uploadToCloudinary(mediaFile, resourceType, (progress) => {
+          mediaUrlResp = await uploadToCloudinary(mediaFile, resourceType, (progress) => {
             setUploadProgress(progress);
           });
           toast.dismiss("upload");
@@ -135,10 +167,11 @@ const CreatePost = ({ onPost, authUser }) => {
 
       const postData = {
         content: content.trim(),
-        mediaUrl,
+        mediaUrl: mediaUrlResp,
         media: mediaBase64,
         mediaType,
         songName: songName.trim(),
+        audioUrl: audioUrl,
       };
 
       const saved = await createPost(postData);
@@ -231,25 +264,71 @@ const CreatePost = ({ onPost, authUser }) => {
 
           {/* Song Name Input (Only for Videos) */}
           {mediaType === "video" && (
-            <div className="mt-3 space-y-2">
-              <input
-                type="text"
-                placeholder="Song Name (e.g. Blinding Lights)"
-                className="input input-bordered input-sm w-full bg-base-100 focus:border-primary rounded-xl"
-                value={songName}
-                onChange={(e) => setSongName(e.target.value)}
-              />
-              <div className="flex flex-wrap gap-1.5">
-                <span className="text-[10px] font-bold opacity-40 w-full uppercase tracking-wider">Suggested</span>
-                {TRENDING_SONGS.map((song) => (
+            <div className="mt-3 space-y-3">
+              <div className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  placeholder="Searching for a song..."
+                  className="input input-bordered input-sm w-full bg-base-100 focus:border-primary rounded-xl"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchQuery}
+                />
+                <input
+                  type="text"
+                  placeholder="Selected Song"
+                  className="input input-bordered input-sm w-full bg-base-100 border-primary font-bold rounded-xl"
+                  readOnly
+                  value={songName || "No song selected"}
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1 custom-scrollbar">
+                <span className="text-[10px] font-bold opacity-40 w-full uppercase tracking-wider sticky top-0 bg-base-200 z-10">
+                  {searchQuery ? "Search Results" : "Trending Audio"}
+                </span>
+                {filteredSongs.length > 0 ? filteredSongs.map((song) => {
+                  const label = `${song.title} - ${song.artist}`;
+                  const isSelected = songName === label;
+                  return (
+                    <div key={song._id} className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setSongName(label);
+                          setAudioUrl(song.audioUrl);
+                        }}
+                        className={`badge badge-sm cursor-pointer transition-all active:scale-95 ${isSelected ? 'badge-primary' : 'badge-outline opacity-60 hover:bg-primary hover:text-primary-content'}`}
+                      >
+                        {label}
+                      </button>
+                      {song.audioUrl && (
+                        <button
+                          className="btn btn-ghost btn-xs btn-circle text-primary"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const audio = new Audio(song.audioUrl);
+                            audio.play().catch(err => toast.error("Wait for audio to load"));
+                            toast.success(`Previewing ${song.title}`, { duration: 2000 });
+                            setTimeout(() => audio.pause(), 5000); // 5 sec preview
+                          }}
+                        >
+                          <Play className="size-3" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                }) : (
+                  <span className="text-[10px] opacity-40">{searchQuery ? "No songs found" : "Loading songs..."}</span>
+                )}
+                {!searchQuery && songs.length === 0 && (
                   <button
-                    key={song}
-                    onClick={() => setSongName(song)}
-                    className={`badge badge-sm cursor-pointer transition-colors active:scale-95 ${songName === song ? 'badge-primary' : 'badge-outline opacity-60 hover:bg-primary hover:text-primary-content'}`}
+                    onClick={() => {
+                      setSongName("Original Audio");
+                      setAudioUrl("");
+                    }}
+                    className={`badge badge-sm cursor-pointer transition-colors active:scale-95 ${songName === "Original Audio" ? 'badge-primary' : 'badge-outline opacity-60 hover:bg-primary hover:text-primary-content'}`}
                   >
-                    {song}
+                    Original Audio
                   </button>
-                ))}
+                )}
               </div>
             </div>
           )}

@@ -3,7 +3,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
-import { Loader2, MapPin, ShipWheel, Shuffle, Camera } from "lucide-react";
+import { Loader2, MapPin, HeartHandshake, Shuffle, Camera } from "lucide-react";
 import { LANGUAGES } from "../constants";
 import Logo from "../components/Logo";
 
@@ -65,7 +65,10 @@ const OnboardingPage = () => {
           <div className="flex justify-center mb-6">
             <Logo className="size-12" showText={false} />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">Complete Your Profile</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-1">Complete Your Profile</h1>
+          <div className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 text-center mb-6">
+            Powered by freechatweb.in
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* PROFILE PIC CONTAINER */}
@@ -203,16 +206,16 @@ const OnboardingPage = () => {
 
             {/* SUBMIT BUTTON */}
 
-            <button className="btn btn-primary w-full" disabled={isPending} type="submit">
+            <button className="btn btn-primary w-full rounded-2xl h-14" disabled={isPending} type="submit">
               {!isPending ? (
                 <>
-                  <ShipWheel className="size-5 mr-2" />
-                  Complete Onboarding
+                  <HeartHandshake className="size-5 mr-2" />
+                  Start Our Journey Together
                 </>
               ) : (
                 <>
                   <Loader2 className="animate-spin size-5 mr-2" />
-                  Onboarding...
+                  Preparing Your Bond...
                 </>
               )}
             </button>

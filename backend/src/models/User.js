@@ -123,6 +123,29 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  // Monetization fields
+  gems: {
+    type: Number,
+    default: 0,
+  },
+  earnings: {
+    type: Number,
+    default: 0,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  // BondBeyond Relationship fields
+  mood: {
+    type: String,
+    enum: ["happy", "neutral", "sad", "angry", "tired", "excited", "romantic", ""],
+    default: "",
+  },
+  lastMoodUpdate: {
+    type: Date,
+    default: null,
+  },
 }
   , { timestamps: true });
 

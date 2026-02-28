@@ -10,6 +10,7 @@ const ReelsPage = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const containerRef = useRef(null);
     const { authUser } = useAuthUser();
+    const [displayReels, setDisplayReels] = useState([]);
 
     const { data: rawReels = [], isLoading } = useQuery({
         queryKey: ["reels"],
@@ -26,12 +27,31 @@ const ReelsPage = () => {
         rawReels.forEach((reel, index) => {
             result.push(reel);
             if ((index + 1) % AD_INTERVAL === 0) {
-                result.push({ _id: `ad-${index}`, isAd: true });
+                result.push({ _id: `ad-${index}-${Math.random()}`, isAd: true });
             }
         });
 
         return result;
     }, [rawReels]);
+
+    // Initialize displayReels
+    useEffect(() => {
+        if (reelsWithAds.length > 0 && displayReels.length === 0) {
+            setDisplayReels(reelsWithAds);
+        }
+    }, [reelsWithAds, displayReels.length]);
+
+    // Handle Infinite Scroll by Repeating
+    useEffect(() => {
+        if (displayReels.length > 0 && activeIndex >= displayReels.length - 2) {
+            const suffix = `repeat-${displayReels.length}`;
+            const repeated = reelsWithAds.map(r => ({
+                ...r,
+                _id: `${r._id}-${suffix}`
+            }));
+            setDisplayReels(prev => [...prev, ...repeated]);
+        }
+    }, [activeIndex, displayReels.length, reelsWithAds]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -57,9 +77,9 @@ const ReelsPage = () => {
         reelElements.forEach((el) => observer.observe(el));
 
         return () => observer.disconnect();
-    }, [reelsWithAds]);
+    }, [displayReels]);
 
-    if (isLoading) {
+    if (isLoading && displayReels.length === 0) {
         return (
             <div className="h-screen flex flex-col items-center justify-center bg-black text-white gap-4">
                 <Loader2 className="size-12 animate-spin text-primary" />
@@ -68,7 +88,7 @@ const ReelsPage = () => {
         );
     }
 
-    if (rawReels.length === 0) {
+    if (rawReels.length === 0 && !isLoading) {
         return (
             <div className="h-screen flex flex-col items-center justify-center bg-black text-white p-6 text-center gap-6">
                 <div className="size-24 bg-white/10 rounded-full flex items-center justify-center">
@@ -88,8 +108,8 @@ const ReelsPage = () => {
             className="h-screen w-full bg-black overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-            {reelsWithAds.map((item, index) => (
-                <div key={item._id} className="h-screen w-full snap-start reel-wrapper" data-index={index}>
+            {displayReels.map((item, index) => (
+                <div key={item._id} className="h-screen w-full snap-start reel-wrapper flex justify-center bg-black" data-index={index}>
                     {item.isAd ? (
                         <ReelAd isActive={index === activeIndex} />
                     ) : (

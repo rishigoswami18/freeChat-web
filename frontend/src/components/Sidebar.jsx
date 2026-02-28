@@ -5,7 +5,7 @@ import {
   Home,
   Users,
   Bell,
-  Heart,
+  HeartHandshake,
   Crown,
   Gamepad2,
   User,
@@ -25,7 +25,7 @@ const navItems = [
   { to: "/search", icon: Search, label: "Explore" },
   { to: "/reels", icon: Film, label: "Reels" },
   { to: "/notifications", icon: Bell, label: "Notifications" },
-  { to: "/couple", icon: Heart, label: "Couple" },
+  { to: "/couple", icon: HeartHandshake, label: "Bond Dashboard" },
   { to: "/games", icon: Gamepad2, label: "Games" },
   { to: "/membership", icon: Crown, label: "Premium" },
 ];
@@ -37,7 +37,7 @@ const Sidebar = () => {
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
   return (
-    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0">
+    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0 font-outfit">
       {/* Brand */}
       <div className="px-5 py-5 border-b border-base-300/50">
         <Logo className="size-9" fontSize="text-2xl" />
@@ -109,6 +109,12 @@ const Sidebar = () => {
             <p className="text-[11px] text-success font-medium">Online</p>
           </div>
         </Link>
+      </div>
+
+      <div className="px-3 pb-4">
+        <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 text-center">
+          Powered by freechatweb.in
+        </div>
       </div>
     </aside>
   );

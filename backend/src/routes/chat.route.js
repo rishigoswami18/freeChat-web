@@ -20,10 +20,9 @@ router.post("/upload-media", protectRoute, async (req, res) => {
     const { media, mediaType } = req.body;
     if (!media) return res.status(400).json({ message: "Media is required" });
 
-    const resourceType = mediaType === "video" ? "video" : "image";
     const uploaded = await cloudinary.uploader.upload(media, {
       folder: "freechat_messages",
-      resource_type: resourceType,
+      resource_type: "auto",
     });
 
     res.status(200).json({

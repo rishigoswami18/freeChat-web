@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
-import { Languages, Loader2, Star, Camera, CheckCircle } from "lucide-react";
+import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCircle, Mic } from "lucide-react";
 import SnapViewer from "./SnapViewer";
 import useAuthUser from "../hooks/useAuthUser";
 import { translateText } from "../lib/api";
 import toast from "react-hot-toast";
 import { isPremiumUser } from "../lib/premium";
+import { useRef, useEffect } from "react";
 
 const emotionColors = {
   joy: "bg-yellow-400 text-yellow-950 border-yellow-500",
@@ -15,6 +16,80 @@ const emotionColors = {
   fear: "bg-purple-500 text-white border-purple-600",
   surprise: "bg-orange-400 text-orange-950 border-orange-500",
   neutral: "bg-slate-300 text-slate-900 border-slate-400",
+};
+
+const VoiceMessagePlayer = ({ url, duration, isMyMessage }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const audioRef = useRef(null);
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      audioRef.current?.pause();
+    } else {
+      audioRef.current?.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleTimeUpdate = () => {
+    setCurrentTime(audioRef.current?.currentTime || 0);
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+
+  return (
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-md min-w-[180px] sm:min-w-[240px] border transition-all ${isMyMessage ? 'bg-primary text-primary-content border-primary/20' : 'bg-base-200 text-base-content border-base-300'}`}>
+      <audio
+        ref={audioRef}
+        src={url}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={handleEnded}
+        className="hidden"
+      />
+
+      <button
+        onClick={togglePlay}
+        className={`size-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${isMyMessage ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-primary text-primary-content hover:bg-primary-focus'}`}
+      >
+        {isPlaying ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current ml-0.5" />}
+      </button>
+
+      <div className="flex-1 space-y-1.5">
+        <div className="h-1 w-full bg-black/10 rounded-full overflow-hidden relative">
+          <div
+            className={`h-full transition-all duration-100 ease-linear ${isMyMessage ? 'bg-white' : 'bg-primary'}`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex justify-between items-center px-0.5">
+          <span className="text-[9px] font-bold opacity-70">
+            {isPlaying ? formatTime(currentTime) : <Mic className="size-2.5" />}
+          </span>
+          <span className="text-[9px] font-mono tracking-tighter opacity-70">
+            {formatTime(duration || 0)}
+          </span>
+        </div>
+      </div>
+
+      <div className={`flex items-center gap-0.5 ${isPlaying ? 'animate-pulse opacity-100' : 'opacity-30'}`}>
+        <div className="w-[2px] h-3 bg-current rounded-full" />
+        <div className="w-[2px] h-5 bg-current rounded-full" />
+        <div className="w-[2px] h-2 bg-current rounded-full" />
+      </div>
+    </div>
+  );
 };
 
 const EmotionMessage = (props) => {
@@ -34,6 +109,7 @@ const EmotionMessage = (props) => {
   const [isViewingSnap, setIsViewingSnap] = useState(false);
 
   const isSnap = message?.extra_data?.isSnap || message?.isSnap;
+  const isVoice = message?.extra_data?.isVoice || message?.isVoice;
   const isViewed = message?.extra_data?.isViewed || message?.isViewed;
 
   const handleMarkViewed = async () => {
@@ -113,6 +189,14 @@ const EmotionMessage = (props) => {
           {isViewingSnap && (
             <SnapViewer message={message} onClose={handleMarkViewed} />
           )}
+        </div>
+      ) : isVoice ? (
+        <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} mb-2`}>
+          <VoiceMessagePlayer
+            url={message.mediaUrl || message.extra_data?.mediaUrl}
+            duration={message.duration || message.extra_data?.duration}
+            isMyMessage={isMyMessage}
+          />
         </div>
       ) : (
         <MessageSimple

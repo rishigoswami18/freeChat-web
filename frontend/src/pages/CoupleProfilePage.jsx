@@ -10,6 +10,10 @@ import {
     getFriends,
     getMembershipStatus,
     updateRomanticNote,
+    buyVerification,
+    purchaseGems,
+    getDailyInsight,
+    updateMood,
 } from "../lib/api";
 import {
     Heart,
@@ -27,7 +31,13 @@ import {
     PenLine,
     Sparkles,
     Waves,
+    Globe,
+    MessageCircle,
+    Gem,
+    TrendingUp,
+    Shield,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { isPremiumUser } from "../lib/premium";
 
@@ -37,6 +47,40 @@ const CoupleProfilePage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditingNote, setIsEditingNote] = useState(false);
     const [noteDraft, setNoteDraft] = useState("");
+
+    // BondBeyond Daily Insights
+    const { data: insightData, isLoading: insightLoading } = useQuery({
+        queryKey: ["dailyInsight"],
+        queryFn: getDailyInsight,
+    });
+
+    const { mutate: handleUpdateMood, isPending: isUpdatingMood } = useMutation({
+        mutationFn: updateMood,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["dailyInsight"] });
+            queryClient.setQueryData(["authUser"], (old) => ({ ...old, user: { ...old.user, mood: data.user.mood } }));
+            toast.success("Mood shared with your partner! ✨");
+        }
+    });
+
+    const moodEmojis = {
+        happy: "😊",
+        neutral: "😐",
+        sad: "😢",
+        angry: "😠",
+        tired: "😴",
+        excited: "🤩",
+        romantic: "❤️"
+    };
+
+    const { mutate: handleBuyVerification, isPending: isBuyingVerification } = useMutation({
+        mutationFn: buyVerification,
+        onSuccess: () => {
+            toast.success("Verification badge activated! 🎉");
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+        },
+        onError: (err) => toast.error(err.response?.data?.message || "Failed to buy verification")
+    });
 
     // Fetch couple status
     const { data: coupleData, isLoading: coupleLoading } = useQuery({
@@ -193,13 +237,130 @@ const CoupleProfilePage = () => {
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto pb-24 sm:pb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-1 flex items-center gap-2">
-                <HeartHandshake className="text-pink-500" />
-                Couple Profile
-                <span className="text-[10px] bg-primary text-primary-content px-2 py-0.5 rounded-full animate-pulse ml-2 uppercase">v2.5 ❤️</span>
+                <HeartHandshake className="text-primary" />
+                Bond Dashboard
+                <span className="text-[10px] bg-primary text-primary-content px-2 py-0.5 rounded-full animate-pulse ml-2 uppercase">BondBeyond v1.0</span>
             </h1>
-            <p className="text-[10px] opacity-30 mb-6 uppercase font-black tracking-widest">Shared Love Notes & Dashboard</p>
+            <p className="text-[10px] opacity-30 mb-6 uppercase font-black tracking-widest">Strengthen your connection every day</p>
 
             <div className="space-y-6">
+                {/* DAILY CHECK-IN SECTION */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="card bg-base-200 border border-base-300 rounded-3xl p-6 shadow-xl"
+                >
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="size-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
+                            <Sparkles className="size-5" />
+                        </div>
+                        <div>
+                            <h3 className="font-black text-xs uppercase tracking-widest opacity-60">Daily Check-in</h3>
+                            <p className="text-[9px] opacity-40 font-bold uppercase">How's your mood right now?</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 justify-center py-2">
+                        {Object.entries(moodEmojis).map(([key, emoji]) => (
+                            <button
+                                key={key}
+                                onClick={() => handleUpdateMood(key)}
+                                disabled={isUpdatingMood}
+                                className={`btn btn-circle btn-lg text-2xl transition-all ${authUser?.mood === key ? 'btn-primary shadow-lg scale-110' : 'btn-ghost bg-base-100 hover:scale-110'}`}
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                    </div>
+
+                    {insightData?.partner && (
+                        <div className="mt-6 pt-6 border-t border-base-300/50 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="avatar">
+                                    <div className="size-10 rounded-full ring-2 ring-primary/20 ring-offset-2 ring-offset-base-200">
+                                        <img src={insightData.partner.profilePic || "/avatar.png"} alt="" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase opacity-40 tracking-wider">Partner's Mood</p>
+                                    <p className="font-bold text-sm">{insightData?.partner?.fullName?.split(' ')[0] || "Partner"} is feeling {insightData?.partner?.mood ? insightData.partner.mood : '...'}</p>
+                                </div>
+                            </div>
+                            {insightData.partner.mood && (
+                                <span className="text-4xl animate-bounce-slow">
+                                    {moodEmojis[insightData.partner.mood]}
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </motion.div>
+
+                {/* DAILY QUESTION/INSIGHT */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-2 border-primary/20 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+                >
+                    <div className="absolute -right-4 -top-4 opacity-5 pointer-events-none">
+                        <Globe className="size-32" />
+                    </div>
+                    <div className="relative z-10 flex flex-col items-center text-center gap-4">
+                        <div className="badge badge-primary font-black text-[10px] uppercase tracking-widest px-4 py-3">Today's Reflection</div>
+                        <h2 className="text-xl sm:text-2xl font-black italic text-base-content leading-tight">
+                            "{insightData?.question?.text || "What's one thing you appreciate about your partner today?"}"
+                        </h2>
+                        <Link to="/inbox" className="btn btn-primary rounded-xl font-bold uppercase gap-2 shadow-lg shadow-primary/20">
+                            <MessageCircle className="size-4" />
+                            Discuss in Chat
+                        </Link>
+                    </div>
+                </motion.div>
+                {/* WALLET DASHBOARD - MONETIZATION HUB */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="card bg-base-200 border border-yellow-500/10 p-4 rounded-3xl shadow-sm group hover:border-yellow-500/30 transition-all">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Gem className="size-4 text-yellow-500" />
+                            <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">My Gems</span>
+                        </div>
+                        <p className="text-2xl font-black italic">{authUser?.gems || 0}</p>
+                        <button onClick={() => toast("Redirecting to Gem Shop...")} className="text-[9px] text-primary font-bold uppercase mt-2 hover:underline">Top Up -&gt;</button>
+                    </div>
+                    <div className="card bg-base-200 border border-success/10 p-4 rounded-3xl shadow-sm group hover:border-success/30 transition-all">
+                        <div className="flex items-center gap-2 mb-1">
+                            <TrendingUp className="size-4 text-success" />
+                            <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">Earnings</span>
+                        </div>
+                        <p className="text-2xl font-black italic">₹{authUser?.earnings?.toFixed(2) || "0.00"}</p>
+                        <button onClick={() => toast("Payout feature coming soon!")} className="text-[9px] text-success font-bold uppercase mt-2 hover:underline">Withdraw -&gt;</button>
+                    </div>
+                </div>
+
+                {/* VERIFICATION BANNER */}
+                {!authUser?.isVerified && (
+                    <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        className="card bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-3xl p-5 flex flex-row items-center justify-between shadow-lg"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="size-12 bg-primary rounded-2xl flex items-center justify-center text-primary-content shadow-lg shadow-primary/20">
+                                <Shield className="size-7" />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-sm uppercase italic tracking-tighter">Get Verified</h3>
+                                <p className="text-[10px] opacity-60">Unlock trust & visibility for 1000 Gems.</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => window.confirm("Spend 1000 Gems for verification?") && handleBuyVerification()}
+                            disabled={isBuyingVerification}
+                            className="btn btn-primary btn-sm rounded-xl font-bold uppercase text-[10px]"
+                        >
+                            {isBuyingVerification ? <Loader2 className="size-3 animate-spin" /> : "Verify Now"}
+                        </button>
+                    </motion.div>
+                )}
                 {/* ===== COUPLED STATE ===== */}
                 {coupleStatus === "coupled" && partner && (
                     <>
@@ -288,7 +449,7 @@ const CoupleProfilePage = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <h2 className="text-xl sm:text-2xl font-black italic tracking-tight uppercase">{authUser?.fullName.split(' ')[0]} & {partner.fullName.split(' ')[0]}</h2>
+                                <h2 className="text-xl sm:text-2xl font-black italic tracking-tight uppercase">{authUser?.fullName?.split(' ')[0] || "You"} & {partner?.fullName?.split(' ')[0] || "Partner"}</h2>
                                 {partner.bio && <p className="text-xs sm:text-sm opacity-60 mt-1 italic">"{partner.bio}"</p>}
 
                                 <div className="mt-6 p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 w-full flex flex-col items-center gap-1 shadow-inner">

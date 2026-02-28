@@ -10,7 +10,7 @@ router.use(protectRoute);
 // Create story
 router.post("/", async (req, res) => {
     try {
-        const { image, caption, songName } = req.body;
+        const { image, caption, songName, audioUrl } = req.body;
 
         if (!image) {
             return res.status(400).json({ message: "Image is required for a story" });
@@ -28,6 +28,7 @@ router.post("/", async (req, res) => {
             imageUrl: uploaded.secure_url,
             caption: caption || "",
             songName: songName || "Original Audio",
+            audioUrl: audioUrl || "",
         });
 
         res.status(201).json(newStory);
@@ -66,6 +67,37 @@ router.get("/", async (req, res) => {
     } catch (err) {
         console.error("Error fetching stories:", err.message);
         res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// View a story
+router.post("/view/:storyId", async (req, res) => {
+    try {
+        const { storyId } = req.params;
+        const story = await Story.findById(storyId);
+
+        if (!story) return res.status(404).json({ message: "Story not found" });
+
+        // Don't count own view
+        if (story.userId.toString() === req.user._id.toString()) {
+            return res.json(story);
+        }
+
+        // Check if already viewed
+        const alreadyViewed = story.views.some(v => v.userId.toString() === req.user._id.toString());
+        if (alreadyViewed) return res.json(story);
+
+        story.views.push({
+            userId: req.user._id,
+            fullName: req.user.fullName,
+            profilePic: req.user.profilePic || ""
+        });
+
+        await story.save();
+        res.json(story);
+    } catch (err) {
+        console.error("Error recording story view:", err);
+        res.status(500).json({ message: "Error recording view" });
     }
 });
 

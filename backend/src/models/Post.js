@@ -19,9 +19,13 @@ const postSchema = new mongoose.Schema(
     mediaUrl: { type: String, default: "" },
     mediaType: { type: String, enum: ["image", "video", ""], default: "" },
     songName: { type: String, default: "Original Audio" },
+    audioUrl: { type: String, default: "" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema],
     shareCount: { type: Number, default: 0 },
+    isAd: { type: Boolean, default: false },
+    adLink: { type: String, default: "" },
+    adCta: { type: String, default: "Learn More" },
   },
   { timestamps: true }
 );

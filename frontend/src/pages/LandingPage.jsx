@@ -143,12 +143,14 @@ const LandingPage = () => {
                             variants={fadeUp}
                             custom={1}
                         >
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
-                                freeChat
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary italic">
+                                BondBeyond
                             </span>
-                            <br />
+                            <div className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 -mt-1 mb-4 flex justify-center">
+                                Powered by freechatweb.in
+                            </div>
                             <span className="text-base-content text-3xl sm:text-4xl lg:text-5xl">
-                                Free Chat App for Real Connection
+                                Your Relationship, Stronger Every Day.
                             </span>
                         </motion.h1>
 
@@ -159,12 +161,11 @@ const LandingPage = () => {
                             variants={fadeUp}
                             custom={2}
                         >
-                            freeChat is the <strong>free chat app</strong> that gives you
-                            everything — <strong>secure messaging</strong>,{" "}
-                            <strong>HD video calls</strong>, <strong>reels</strong>,{" "}
-                            <strong>stories</strong>, and a vibrant community. No ads
-                            cluttering your feed, no selling your data. Just real people, real
-                            conversations.
+                            freeChat is the <strong>ultimate social app</strong> with built-in
+                            <strong> BondBeyond technology</strong> — helping you
+                            <strong>express feelings</strong>, <strong>reduce conflict</strong>, and
+                            <strong>grow closer</strong>. Build a stronger connection in just
+                            <strong>5 minutes a day</strong> through shared notes, reels, and meaningful stories.
                         </motion.p>
 
                         <motion.div
@@ -176,24 +177,15 @@ const LandingPage = () => {
                         >
                             <Link
                                 to="/signup"
-                                className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25"
+                                className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 rounded-2xl"
                             >
-                                Start Chatting Free
+                                Start Chatting Today
                                 <ArrowRight className="size-5" />
                             </Link>
-                            <Link to="/login" className="btn btn-outline btn-lg gap-2">
+                            <Link to="/login" className="btn btn-outline btn-lg gap-2 rounded-2xl">
                                 <Users className="size-5" />
                                 I Already Have an Account
                             </Link>
-
-                            <a
-                                href="/freechat.apk"
-                                download
-                                className="btn btn-secondary btn-lg gap-2 shadow-lg shadow-secondary/25"
-                            >
-                                <Smartphone className="size-5" />
-                                Download Android App
-                            </a>
                         </motion.div>
                     </div>
                 </div>
@@ -237,14 +229,13 @@ const LandingPage = () => {
                             What is <span className="text-primary">freeChat</span>?
                         </h2>
                         <p className="text-lg opacity-80 leading-relaxed">
-                            freeChat is a <strong>free chat and social networking app</strong>{" "}
+                            freeChat is a <strong>free messenger and social network</strong>{" "}
                             designed for people who value{" "}
-                            <strong>real human connection</strong>. Unlike traditional social
-                            media platforms filled with noise and algorithms, freeChat puts{" "}
-                            <strong>you</strong> in control. Chat with friends, make video
-                            calls, share stories and reels, exchange languages, play games,
-                            and build meaningful relationships — all completely{" "}
-                            <strong>free</strong>.
+                            <strong>real human connection</strong>. With integrated
+                            <strong> BondBeyond technology</strong>, it makes it easier to talk,
+                            understand each other, and build a stronger connection. Whether it's
+                            <strong>daily mood tracking</strong>, <strong>HD video calls</strong>,
+                            or <strong>viral reels</strong>, freeChat is where real bonds happen.
                         </p>
                     </motion.div>
                 </div>

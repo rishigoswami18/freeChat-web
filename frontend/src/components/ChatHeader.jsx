@@ -1,5 +1,5 @@
 import { useChannelStateContext } from "stream-chat-react";
-import { Video, Phone, ArrowLeft } from "lucide-react";
+import { Video, Phone, ArrowLeft, Wind } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import toast from "react-hot-toast";
@@ -60,7 +60,6 @@ function ChatHeader() {
                     ],
                 },
             });
-            console.log("📞 Call created with ring:true, navigating to call page");
             navigate(`/call/${callId}`);
         } catch (error) {
             console.error("Call Error:", error);
@@ -68,7 +67,6 @@ function ChatHeader() {
         }
     };
 
-    // Separate audio‑only call (no video stream)
     const handleAudioCall = async () => {
         if (!videoClient || isGroup || !user) {
             toast.error(
@@ -83,9 +81,7 @@ function ChatHeader() {
             const theirId = String(user.id);
             const timestamp = Date.now().toString(36);
             const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
-            console.log("📞 Initiating audio‑only call:", { callId, myId, theirId });
             outgoingCallIds.add(callId);
-            // Use the same call but indicate audio‑only via query param
             const call = videoClient.call("default", callId);
             await call.getOrCreate({
                 ring: true,
@@ -94,7 +90,6 @@ function ChatHeader() {
                         { user_id: myId },
                         { user_id: theirId },
                     ],
-                    // Custom flag for audio‑only – backend can respect this
                     audioOnly: true,
                 },
             });
@@ -105,9 +100,20 @@ function ChatHeader() {
         }
     };
 
+    const handleCoolDown = async () => {
+        try {
+            await channel.sendMessage({
+                text: "✨ [BondBeyond Insight] Let's take a 5-minute 'Cool Down' break. Take a deep breath and reflect on how much you mean to each other. 🧘‍♀️🧘‍♂️",
+                silent: false,
+            });
+            toast.success("Suggested a 5-minute break. ✨");
+        } catch (error) {
+            toast.error("Failed to suggest break");
+        }
+    };
+
     return (
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-base-300/50 glass-panel-solid sticky top-0 z-50">
-            {/* Left: Back + Avatar + Info */}
             <div className="flex items-center gap-2.5 sm:gap-3">
                 <button
                     onClick={() => navigate("/inbox")}
@@ -147,9 +153,15 @@ function ChatHeader() {
                 </div>
             </div>
 
-            {/* Right: Call Buttons (Only for 1v1) */}
             {!isGroup && (
                 <div className="flex items-center gap-1">
+                    <button
+                        onClick={handleCoolDown}
+                        className="btn btn-ghost btn-sm btn-circle text-info hover:bg-info/10 transition-colors"
+                        title="Cool Down"
+                    >
+                        <Wind className="size-5" />
+                    </button>
                     <button
                         onClick={handleCall}
                         className="btn btn-ghost btn-sm btn-circle text-primary hover:bg-primary/10 transition-colors"
