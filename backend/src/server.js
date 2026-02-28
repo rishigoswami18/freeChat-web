@@ -62,7 +62,7 @@ app.use("/api/auth/signup", authLimiter);
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://www.freechatweb.in", "https://freechatweb.in"],
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173", "https://www.freechatweb.in", "https://freechatweb.in"],
     credentials: true,
   })
 );

@@ -139,8 +139,16 @@ const StoryViewer = ({ group, onClose }) => {
                 </AnimatePresence>
 
                 {/* Interaction Areas */}
-                <div className="absolute inset-y-20 left-0 w-1/3 z-20 cursor-pointer" onClick={handlePrev} />
-                <div className="absolute inset-y-20 right-0 w-1/3 z-20 cursor-pointer" onClick={handleNext} />
+                <div className="absolute inset-y-0 left-0 w-1/4 z-30 cursor-pointer group/nav" onClick={handlePrev}>
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 backdrop-blur-md rounded-full opacity-0 group-hover/nav:opacity-100 transition-opacity">
+                        <ChevronLeft className="size-6 text-white" />
+                    </div>
+                </div>
+                <div className="absolute inset-y-0 right-0 w-1/4 z-30 cursor-pointer group/nav" onClick={handleNext}>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 backdrop-blur-md rounded-full opacity-0 group-hover/nav:opacity-100 transition-opacity">
+                        <ChevronRight className="size-6 text-white" />
+                    </div>
+                </div>
 
                 {/* Overlays */}
                 <div className="absolute bottom-40 inset-x-0 p-6 z-30 text-center pointer-events-none">

@@ -78,7 +78,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 transition-all duration-300">
-            <div className="bg-base-100 rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="bg-base-100 rounded-3xl overflow-hidden w-full max-w-sm max-h-[90vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
                 {!previewImage ? (
                     <div className="p-8 flex flex-col items-center text-center space-y-6">
                         <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
@@ -98,7 +98,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                     </div>
                 ) : (
                     <>
-                        <div className="relative aspect-[9/16] bg-base-300">
+                        <div className="relative h-[40vh] bg-base-300 flex-shrink-0">
                             <img src={previewImage} className="w-full h-full object-cover" alt="Preview" />
                             <button
                                 onClick={() => setPreviewImage(null)}
@@ -108,7 +108,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        <div className="p-5 space-y-4 max-h-[40vh] overflow-y-auto no-scrollbar">
+                        <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-4">
                             <div className="space-y-3">
                                 <input
                                     type="text"
@@ -177,26 +177,28 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-2">
-                                <button
-                                    className="btn btn-ghost flex-1 rounded-xl"
-                                    onClick={() => setPreviewImage(null)}
-                                    disabled={isUploading}
-                                >
-                                    Change
-                                </button>
-                                <button
-                                    className="btn btn-primary flex-1 rounded-xl gap-2 shadow-lg shadow-primary/20"
-                                    onClick={handleConfirmUpload}
-                                    disabled={isUploading}
-                                >
-                                    {isUploading ? (
-                                        <Loader2 className="size-4 animate-spin" />
-                                    ) : (
-                                        "Share story"
-                                    )}
-                                </button>
-                            </div>
+                        </div>
+
+                        {/* Footer Buttons - Fixed at bottom */}
+                        <div className="p-5 border-t border-base-300 bg-base-100 flex gap-3 flex-shrink-0">
+                            <button
+                                className="btn btn-ghost flex-1 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-base-200 transition-all"
+                                onClick={() => setPreviewImage(null)}
+                                disabled={isUploading}
+                            >
+                                Change
+                            </button>
+                            <button
+                                className="btn btn-primary flex-1 rounded-2xl gap-2 shadow-[0_8px_20px_-5px_rgba(var(--p),0.4)] hover:shadow-primary/40 active:scale-95 transition-all font-black uppercase text-xs tracking-widest"
+                                onClick={handleConfirmUpload}
+                                disabled={isUploading}
+                            >
+                                {isUploading ? (
+                                    <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                    "Share Now"
+                                )}
+                            </button>
                         </div>
                     </>
                 )}

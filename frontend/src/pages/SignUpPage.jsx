@@ -5,6 +5,7 @@ import useSignUp from "../hooks/useSignUp";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import Logo from "../components/Logo";
 import toast from "react-hot-toast";
+import { requestOTP } from "../lib/api";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -35,7 +36,6 @@ const SignUpPage = () => {
 
     setIsSendingOtp(true);
     try {
-      const { requestOTP } = await import("../lib/api");
       await requestOTP(signupData.email);
       setOtpSent(true);
       toast.success("Verification code sent to your email!");

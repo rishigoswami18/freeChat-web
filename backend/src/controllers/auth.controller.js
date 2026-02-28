@@ -405,11 +405,19 @@ export async function requestOTP(req, res) {
     );
 
     // Send Email
-    await sendOTPEmail(email, otp);
+    try {
+      await sendOTPEmail(email, otp);
+    } catch (emailError) {
+      console.error("Critical: Failed to send OTP email:", emailError);
+      return res.status(500).json({
+        message: "We're having trouble sending verification emails. Please try again later or contact support.",
+        error: process.env.NODE_ENV === "development" ? emailError.message : undefined
+      });
+    }
 
     res.status(200).json({ success: true, message: "Verification code sent to your email!" });
   } catch (error) {
     console.error("Error in requestOTP:", error);
-    res.status(500).json({ message: "Failed to send verification code" });
+    res.status(500).json({ message: "An unexpected error occurred. Please try again." });
   }
 }
