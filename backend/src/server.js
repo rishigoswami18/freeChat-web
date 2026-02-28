@@ -4,6 +4,9 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import helmet from "helmet";
+import compression from "compression";
+import { rateLimit } from "express-rate-limit";
 
 import authRoutes from "./routes/auth.route.js";
 import postsRoutes from "./routes/posts.route.js";
@@ -22,6 +25,30 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Security & Performance Middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP for easier integration with CDNs/Stream
+}));
+app.use(compression()); // Compress all responses
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 1000, // Limit each IP to 1000 requests per window
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: "Too many requests, please try again later."
+});
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  limit: 20, // Stricter limit for login/signup
+  message: "Too many login attempts, please try again in an hour."
+});
+
+app.use("/api/", limiter);
+app.use("/api/auth", authLimiter);
 
 app.use(
   cors({
