@@ -139,93 +139,93 @@ const InboxPage = () => {
     };
 
     return (
-        <div className="flex flex-col h-full bg-base-100 max-w-2xl mx-auto overflow-hidden">
-            {/* Page Title & Compose (Consistent with app style) */}
-            <div className="px-4 py-6 flex items-center justify-between">
-                <h1 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-2">
-                    <MessageSquare className="size-6 text-primary" />
-                    Messages
-                </h1>
-                <button
-                    onClick={() => toast("Coming soon!")}
-                    className="btn btn-ghost btn-sm btn-circle hover:bg-primary/10 text-primary transition-all active:scale-90"
-                >
-                    <ArrowRight className="size-5 rotate-[-45deg]" />
-                </button>
-            </div>
+        <div className="w-full max-w-2xl mx-auto bg-base-100 min-h-full pb-10">
+            {/* Sticky Header & Search area */}
+            <div className="sticky top-0 z-20 bg-base-100/95 backdrop-blur-md border-b border-base-content/5">
+                <div className="px-4 py-6 flex items-center justify-between">
+                    <h1 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-2">
+                        <MessageSquare className="size-6 text-primary" />
+                        Messages
+                    </h1>
+                    <button
+                        onClick={() => toast("Coming soon!")}
+                        className="btn btn-ghost btn-sm btn-circle hover:bg-primary/10 text-primary transition-all active:scale-90"
+                    >
+                        <ArrowRight className="size-5 rotate-[-45deg]" />
+                    </button>
+                </div>
 
-            {/* Search Bar - Modern Look */}
-            <div className="px-4 pb-4">
-                <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4.5 text-base-content/30 group-focus-within:text-primary transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Search for a name..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-11 pr-5 py-3 rounded-2xl bg-base-200 focus:bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-2 focus:ring-primary/40 transition-all text-sm font-medium"
-                    />
+                {/* Search Bar */}
+                <div className="px-4 pb-4">
+                    <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4.5 text-base-content/30 group-focus-within:text-primary transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Search for a name..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-11 pr-5 py-3 rounded-2xl bg-base-200 focus:bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-2 focus:ring-primary/40 transition-all text-sm font-medium"
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Conversation List */}
-            <div className="flex-1 overflow-y-auto no-scrollbar pb-4 pr-1">
+            <div className="px-1">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
+                    <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
                         <Loader2 className="size-8 animate-spin text-primary" />
                         <p className="font-bold uppercase tracking-widest text-xs">Loading chats...</p>
                     </div>
                 ) : filtered.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 opacity-30 gap-3">
+                    <div className="flex flex-col items-center justify-center py-32 opacity-30 gap-3">
                         <MessageSquare className="size-12" />
-                        <p className="font-bold uppercase tracking-widest text-xs">No active chats</p>
+                        <p className="font-bold uppercase tracking-widest text-xs font-black">No active chats</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col">
+                    <div className="flex flex-col divide-y divide-base-content/5">
                         {filtered.map((conv) => (
                             <Link
                                 key={conv.id}
                                 to={`/chat/${conv.targetUserId}`}
-                                className="group flex items-center gap-4 px-4 py-4 hover:bg-base-200/50 transition-all active:bg-base-200"
+                                className="group flex items-center gap-4 px-4 py-5 hover:bg-base-200/50 transition-all active:bg-base-200"
                             >
                                 <div className="relative flex-shrink-0">
-                                    <div className="avatar ring-2 ring-primary/20 ring-offset-base-100 ring-offset-2 rounded-full p-0.5">
-                                        <div className="w-14 h-14 rounded-full overflow-hidden shadow-lg group-active:scale-95 transition-transform">
+                                    <div className="avatar ring-2 ring-primary/15 rounded-full p-0.5">
+                                        <div className="w-14 h-14 rounded-full overflow-hidden shadow-sm group-active:scale-95 transition-transform">
                                             <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
                                         </div>
                                     </div>
-                                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-success rounded-full border-2 border-base-100" />
+                                    <span className="absolute bottom-0.5 right-0.5 size-3.5 bg-success rounded-full border-2 border-base-100" />
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-baseline gap-2 mb-1">
-                                        <h2 className="font-black italic text-base uppercase tracking-tight text-base-content truncate">
+                                    <div className="flex justify-between items-baseline gap-2 mb-1.5">
+                                        <h2 className="font-bold italic text-base uppercase tracking-tight text-base-content truncate">
                                             {conv.partner.name}
                                         </h2>
-                                        <span className="text-[10px] uppercase font-black opacity-30 whitespace-nowrap">
+                                        <span className="text-[10px] uppercase font-black opacity-25 whitespace-nowrap">
                                             {timeAgo(conv.timestamp)}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <p className={`text-sm truncate flex-1 ${conv.unread ? "font-bold text-base-content" : "opacity-50"}`}>
+                                        <p className={`text-sm truncate flex-1 leading-snug ${conv.unread ? "font-bold text-base-content" : "opacity-40"}`}>
                                             {conv.lastMessage}
                                         </p>
                                         {conv.unread && (
-                                            <div className="size-2 rounded-full bg-primary animate-pulse" />
+                                            <div className="size-2.5 rounded-full bg-primary shadow-sm shadow-primary/40 animate-pulse" />
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Desktop-only delete icon or swipe action hinted */}
-                                <button
+                                <X
                                     onClick={(e) => {
                                         e.preventDefault();
+                                        e.stopPropagation();
                                         handleDelete(conv.id);
                                     }}
-                                    className="hidden group-hover:flex btn btn-ghost btn-xs btn-circle text-error/30 hover:text-error transition-all"
-                                >
-                                    <X className="size-3.5" />
-                                </button>
+                                    className="hidden group-hover:block size-4 text-error/30 hover:text-error transition-all"
+                                />
                             </Link>
                         ))}
                     </div>
