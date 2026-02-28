@@ -1,32 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MessageSquare, Search, ArrowRight, X } from "lucide-react";
+import { MessageSquare, Search, ArrowRight, X, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useChatClient } from "../components/ChatProvider";
+import useAuthUser from "../hooks/useAuthUser";
 
-// Mock data – replace with real API calls later
-const mockConversations = [
-    {
-        id: "c1",
-        partner: { name: "Alex Rivera", avatar: "/avatar.png" },
-        lastMessage: "Can't wait for our weekend getaway! 🌴",
-        timestamp: "2026-02-27T18:45:00Z",
-        unread: true,
-    },
-    {
-        id: "c2",
-        partner: { name: "Samira Khan", avatar: "/avatar.png" },
-        lastMessage: "Did you see that new recipe?",
-        timestamp: "2026-02-27T14:12:00Z",
-        unread: false,
-    },
-    {
-        id: "c3",
-        partner: { name: "Jordan Lee", avatar: "/avatar.png" },
-        lastMessage: "❤️",
-        timestamp: "2026-02-26T22:03:00Z",
-        unread: true,
-    },
-];
+// Removed mock data for real integration
 
 /** Format timestamp to a friendly "time ago" string */
 const timeAgo = (iso) => {
@@ -40,22 +19,95 @@ const timeAgo = (iso) => {
 };
 
 const InboxPage = () => {
+    const chatClient = useChatClient();
+    const { authUser } = useAuthUser();
     const [conversations, setConversations] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
 
-    // Simulated fetch – replace with real API later
     useEffect(() => {
-        const timer = setTimeout(() => setConversations(mockConversations), 300);
-        return () => clearTimeout(timer);
-    }, []);
+        if (!chatClient || !authUser) return;
+
+        const fetchChannels = async () => {
+            setIsLoading(true);
+            try {
+                // Query for messaging channels where the user is a member
+                const filter = { type: "messaging", members: { $in: [authUser._id] } };
+                const sort = [{ last_message_at: -1 }];
+                const options = { limit: 30, presence: true, state: true };
+
+                const channels = await chatClient.queryChannels(filter, sort, options);
+
+                const mapped = channels.map((channel) => {
+                    const isGroup = channel.id.startsWith("group_");
+                    let partner = { name: "Unknown", avatar: "/avatar.png", id: channel.id };
+
+                    if (isGroup) {
+                        partner = {
+                            name: channel.data.name || "Group",
+                            avatar: channel.data.image || "/avatar.png",
+                            id: channel.id
+                        };
+                    } else {
+                        const otherMember = Object.values(channel.state.members).find(
+                            (m) => m.user?.id !== authUser._id
+                        );
+                        partner = {
+                            name: otherMember?.user?.name || "Deleted User",
+                            avatar: otherMember?.user?.image || "/avatar.png",
+                            id: otherMember?.user?.id || "unknown"
+                        };
+                    }
+
+                    const lastMessage = channel.state.messages[channel.state.messages.length - 1];
+
+                    return {
+                        id: channel.id,
+                        targetUserId: partner.id,
+                        partner,
+                        lastMessage: lastMessage?.text || "No messages yet",
+                        timestamp: channel.state.last_message_at || channel.data.created_at,
+                        unread: channel.countUnread() > 0,
+                    };
+                });
+
+                setConversations(mapped);
+            } catch (error) {
+                console.error("Error fetching channels:", error);
+                toast.error("Could not load conversations.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchChannels();
+
+        // Listen for new messages to refresh the list
+        const handleEvent = (event) => {
+            if (event.type === 'message.new' || event.type === 'notification.message_new') {
+                fetchChannels();
+            }
+        };
+
+        chatClient.on(handleEvent);
+        return () => chatClient.off(handleEvent);
+
+    }, [chatClient, authUser]);
 
     const filtered = conversations.filter((c) =>
         c.partner.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const handleDelete = (id) => {
-        setConversations((prev) => prev.filter((c) => c.id !== id));
-        toast.success("Conversation removed");
+    const handleDelete = async (id) => {
+        if (!chatClient) return;
+        try {
+            const channel = chatClient.channel("messaging", id);
+            await channel.hide();
+            setConversations((prev) => prev.filter((c) => c.id !== id));
+            toast.success("Conversation hidden");
+        } catch (error) {
+            toast.error("Failed to remove conversation");
+        }
     };
 
     return (
@@ -90,7 +142,12 @@ const InboxPage = () => {
 
             {/* Conversation List */}
             <div className="flex-1 overflow-y-auto no-scrollbar pb-4 pr-1">
-                {filtered.length === 0 ? (
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
+                        <Loader2 className="size-8 animate-spin text-primary" />
+                        <p className="font-bold uppercase tracking-widest text-xs">Loading chats...</p>
+                    </div>
+                ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 opacity-30 gap-3">
                         <MessageSquare className="size-12" />
                         <p className="font-bold uppercase tracking-widest text-xs">No active chats</p>
@@ -100,7 +157,7 @@ const InboxPage = () => {
                         {filtered.map((conv) => (
                             <Link
                                 key={conv.id}
-                                to={`/chat/fake_${conv.partner.name.toLowerCase().replace(/\s/g, '_')}`}
+                                to={`/chat/${conv.targetUserId}`}
                                 className="group flex items-center gap-4 px-4 py-4 hover:bg-base-200/50 transition-all active:bg-base-200"
                             >
                                 <div className="relative flex-shrink-0">

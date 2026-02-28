@@ -12,6 +12,7 @@ import {
   Search,
   Film,
   MessageSquare,
+  Smartphone,
 } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
@@ -68,6 +69,19 @@ const Sidebar = () => {
           );
         })}
       </nav>
+
+      <div className="px-3 py-2">
+        <a
+          href="/freechat.apk"
+          download
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"
+        >
+          <div className="size-6 rounded-lg bg-secondary/20 flex items-center justify-center group-hover/apk:rotate-12 transition-transform">
+            <Smartphone className="size-3.5" />
+          </div>
+          Download App (APK)
+        </a>
+      </div>
 
       <CreateStoryModal
         isOpen={isStoryModalOpen}

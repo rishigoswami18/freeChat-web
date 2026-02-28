@@ -15,6 +15,7 @@ import {
     Eye,
     Languages,
     Film,
+    Smartphone,
 } from "lucide-react";
 import Logo from "../components/Logo";
 
@@ -184,6 +185,15 @@ const LandingPage = () => {
                                 <Users className="size-5" />
                                 I Already Have an Account
                             </Link>
+
+                            <a
+                                href="/freechat.apk"
+                                download
+                                className="btn btn-secondary btn-lg gap-2 shadow-lg shadow-secondary/25"
+                            >
+                                <Smartphone className="size-5" />
+                                Download Android App
+                            </a>
                         </motion.div>
                     </div>
                 </div>
@@ -402,6 +412,16 @@ const LandingPage = () => {
                                     <Link to="/contact" className="hover:text-primary transition">
                                         Contact Us
                                     </Link>
+                                </li>
+                                <li>
+                                    <a
+                                        href="/freechat.apk"
+                                        download
+                                        className="flex items-center gap-2 hover:text-primary transition font-bold text-accent"
+                                    >
+                                        <Smartphone className="size-4" />
+                                        Download Android App
+                                    </a>
                                 </li>
                             </ul>
                         </div>

@@ -16,6 +16,7 @@ import {
   Film,
   Flame,
   MessageSquare,
+  Smartphone,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -109,6 +110,17 @@ const MobileDrawer = () => {
               {label}
             </Link>
           ))}
+
+          {/* Download APK Link */}
+          <a
+            href="/freechat.apk"
+            download
+            onClick={toggleDrawer}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-accent transition-all duration-200 active:scale-[0.98] hover:bg-accent/10 mt-4 border border-dashed border-accent/30 bg-accent/5"
+          >
+            <Smartphone className="size-5" />
+            Download Android App
+          </a>
         </nav>
 
         {/* User Profile + Logout */}
