@@ -87,8 +87,10 @@ const SignUpPage = () => {
                     </label>
                     <input
                       type="email"
-                      placeholder="john@gmail.com"
-                      className="input input-bordered w-full rounded-xl focus:input-primary transition-all bg-base-200/50"
+                      placeholder="john@example.com"
+                      className={`input input-bordered w-full rounded-xl focus:input-primary transition-all bg-base-200/50 ${signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email)
+                          ? "border-error focus:input-error" : ""
+                        }`}
                       value={signupData.email}
                       onChange={(e) =>
                         setSignupData({
@@ -98,6 +100,11 @@ const SignUpPage = () => {
                       }
                       required
                     />
+                    {signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email) && (
+                      <p className="text-[10px] text-error mt-1 pl-1">
+                        Please enter a valid email address
+                      </p>
+                    )}
                   </div>
 
                   {/* PASSWORD */}

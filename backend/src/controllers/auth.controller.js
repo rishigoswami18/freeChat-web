@@ -202,9 +202,9 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
+      return res.status(400).json({ message: "Please provide a valid email address (e.g., name@example.com)" });
     }
 
     const existingUser = await User.findOne({ email });
