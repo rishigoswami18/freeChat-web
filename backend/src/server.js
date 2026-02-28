@@ -33,22 +33,25 @@ app.use(helmet({
 app.use(compression()); // Compress all responses
 
 // Rate Limiting
+app.set('trust proxy', 1); // Trust Render proxy for correct IP detection
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 1000, // Limit each IP to 1000 requests per window
+  limit: 2000, // Increased limit for broader API usage
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: "Too many requests, please try again later."
 });
 
 const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  limit: 20, // Stricter limit for login/signup
-  message: "Too many login attempts, please try again in an hour."
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100, // Relaxed limit (was 20 per hour, now 100 per 15 min)
+  message: "Too many login/auth attempts, please try again in a few minutes."
 });
 
 app.use("/api/", limiter);
-app.use("/api/auth", authLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/signup", authLimiter);
 
 app.use(
   cors({
