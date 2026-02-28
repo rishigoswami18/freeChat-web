@@ -59,9 +59,9 @@ const features = [
     },
     {
         icon: Shield,
-        title: "Stealth Mode & Privacy",
+        title: "Stealth Mode Hidden Chat App",
         description:
-            "Activate Stealth Mode to instantly hide your activity. Your privacy is always in your hands.",
+            "Activate Stealth Mode to instantly hide your screen. The perfect hidden chat app and cool couple app for the couple whose parent are strict.",
         color: "text-yellow-400",
     },
     {
@@ -80,9 +80,9 @@ const features = [
     },
     {
         icon: Heart,
-        title: "Couple Profiles",
+        title: "Romantic Note App & Couple Profiles",
         description:
-            "Create shared couple profiles and celebrate your connection with a dedicated space.",
+            "A dedicated romantic note app or website feature. Create shared couple profiles, play games, and celebrate your connection.",
         color: "text-red-400",
     },
     {
@@ -161,11 +161,8 @@ const LandingPage = () => {
                             variants={fadeUp}
                             custom={2}
                         >
-                            freeChat is the <strong>ultimate social app</strong> with built-in
-                            <strong> BondBeyond technology</strong> — helping you
-                            <strong>express feelings</strong>, <strong>reduce conflict</strong>, and
-                            <strong>grow closer</strong>. Build a stronger connection in just
-                            <strong>5 minutes a day</strong> through shared notes, reels, and meaningful stories.
+                            <strong>freechatweb</strong> is the ultimate <strong>couple app with game</strong> and social network. Featuring
+                            <strong> BondBeyond</strong> technology — a cool couple app that makes your relationship strong. Express feelings, leave notes in our romantic note app feature, and communicate privately.
                         </motion.p>
 
                         <motion.div
@@ -226,16 +223,12 @@ const LandingPage = () => {
                         variants={fadeUp}
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                            What is <span className="text-primary">freeChat</span>?
+                            What is <span className="text-primary">freechatweb</span>?
                         </h2>
                         <p className="text-lg opacity-80 leading-relaxed">
-                            freeChat is a <strong>free messenger and social network</strong>{" "}
-                            designed for people who value{" "}
-                            <strong>real human connection</strong>. With integrated
-                            <strong> BondBeyond technology</strong>, it makes it easier to talk,
-                            understand each other, and build a stronger connection. Whether it's
-                            <strong>daily mood tracking</strong>, <strong>HD video calls</strong>,
-                            or <strong>viral reels</strong>, freeChat is where real bonds happen.
+                            <strong>freechat</strong> is a free messenger, <strong>bondbeyond app that make relationship strong</strong>, and hidden chat app rolled into one.
+                            It is built for real human connection. Whether you're using our <strong>cool couple app</strong> features, playing a <strong>couple app with game</strong>,
+                            using it as an <strong>app for the couple whose parent are strict</strong> through Stealth Mode, or sharing a <strong>romantic note</strong> to your partner, freechatweb is where real bonds happen.
                         </p>
                     </motion.div>
                 </div>
