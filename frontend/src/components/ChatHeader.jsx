@@ -68,6 +68,43 @@ function ChatHeader() {
         }
     };
 
+    // Separate audio‑only call (no video stream)
+    const handleAudioCall = async () => {
+        if (!videoClient || isGroup || !user) {
+            toast.error(
+                isGroup
+                    ? "Calls are not supported in groups yet."
+                    : "Call service not ready."
+            );
+            return;
+        }
+        try {
+            const myId = String(channel._client.userID);
+            const theirId = String(user.id);
+            const timestamp = Date.now().toString(36);
+            const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
+            console.log("📞 Initiating audio‑only call:", { callId, myId, theirId });
+            outgoingCallIds.add(callId);
+            // Use the same call but indicate audio‑only via query param
+            const call = videoClient.call("default", callId);
+            await call.getOrCreate({
+                ring: true,
+                data: {
+                    members: [
+                        { user_id: myId },
+                        { user_id: theirId },
+                    ],
+                    // Custom flag for audio‑only – backend can respect this
+                    audioOnly: true,
+                },
+            });
+            navigate(`/call/${callId}?type=audio`);
+        } catch (error) {
+            console.error("Audio Call Error:", error);
+            toast.error("Could not start audio call.");
+        }
+    };
+
     return (
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-base-300/50 glass-panel-solid sticky top-0 z-50">
             {/* Left: Back + Avatar + Info */}
@@ -121,7 +158,7 @@ function ChatHeader() {
                         <Video className="size-5" />
                     </button>
                     <button
-                        onClick={handleCall}
+                        onClick={handleAudioCall}
                         className="btn btn-ghost btn-sm btn-circle text-success hover:bg-success/10 transition-colors"
                         aria-label="Voice call"
                     >
