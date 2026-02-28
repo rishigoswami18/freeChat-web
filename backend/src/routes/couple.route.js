@@ -12,7 +12,7 @@ router.use(protectRoute);
 router.get("/status", async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
-            .select("partnerId coupleStatus anniversary coupleRequestSenderId dateOfBirth")
+            .select("partnerId coupleStatus anniversary coupleRequestSenderId dateOfBirth romanticNote romanticNoteLastUpdated")
             .populate("partnerId", "fullName profilePic bio dateOfBirth");
 
         const myAge = calculateAge(user.dateOfBirth);
@@ -23,10 +23,43 @@ router.get("/status", async (req, res) => {
             partner: user.partnerId || null,
             anniversary: user.anniversary,
             coupleRequestSenderId: user.coupleRequestSenderId,
+            romanticNote: user.romanticNote,
+            romanticNoteLastUpdated: user.romanticNoteLastUpdated,
             isBothAdult: myAge >= 18 && partnerAge >= 18,
         });
     } catch (err) {
         console.error("Error getting couple status:", err.message);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Update romantic note
+router.put("/note", async (req, res) => {
+    try {
+        const { note } = req.body;
+        const myId = req.user._id;
+
+        const me = await User.findById(myId);
+        if (me.coupleStatus !== "coupled" || !me.partnerId) {
+            return res.status(400).json({ message: "You must be in a coupled relationship to set a note" });
+        }
+
+        const now = new Date();
+
+        // Update both users for synchronization
+        await User.updateMany(
+            { _id: { $in: [myId, me.partnerId] } },
+            {
+                $set: {
+                    romanticNote: note || "",
+                    romanticNoteLastUpdated: now
+                }
+            }
+        );
+
+        res.json({ message: "Romantic note updated! ❤️", note, lastUpdated: now });
+    } catch (err) {
+        console.error("Error updating romantic note:", err.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });

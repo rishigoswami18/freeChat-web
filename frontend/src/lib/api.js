@@ -176,6 +176,11 @@ export const unlinkCouple = async () => {
   return response.data;
 };
 
+export const updateRomanticNote = async (note) => {
+  const response = await axiosInstance.put("/couple/note", { note });
+  return response.data;
+};
+
 // ----------------- STORIES -----------------
 
 export const getStories = async () => {

@@ -75,6 +75,14 @@ const userSchema = new mongoose.Schema({
     ref: "User",
     default: null,
   },
+  romanticNote: {
+    type: String,
+    default: "",
+  },
+  romanticNoteLastUpdated: {
+    type: Date,
+    default: null,
+  },
   // Membership fields
   isMember: {
     type: Boolean,
