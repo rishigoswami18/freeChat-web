@@ -1,3 +1,7 @@
+/**
+ * BondBeyond — All Rights Reserved © 2026
+ * Powered by freechatweb.in
+ */
 import express from "express";
 import "dotenv/config";
 import cookieParser from "cookie-parser";

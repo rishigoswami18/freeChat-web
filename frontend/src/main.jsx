@@ -1,3 +1,7 @@
+/**
+ * BondBeyond — All Rights Reserved © 2026
+ * Powered by freechatweb.in
+ */
 // main.jsx
 
 import { StrictMode } from "react";
@@ -8,7 +12,7 @@ import App from "./App.jsx";
 
 // ❌ OLD: import { BrowserRouter } from "react-router";
 // ✅ NEW: 
-import { BrowserRouter } from "react-router-dom"; 
+import { BrowserRouter } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

@@ -1,3 +1,7 @@
+/**
+ * BondBeyond — All Rights Reserved © 2026
+ * Powered by freechatweb.in
+ */
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
