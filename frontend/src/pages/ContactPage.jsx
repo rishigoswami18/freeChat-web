@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios";
 
 const ContactPage = () => {
     const [formData, setFormData] = useState({
@@ -16,7 +16,7 @@ const ContactPage = () => {
         setIsSubmitting(true);
 
         try {
-            await axios.post("/api/support", formData);
+            await axiosInstance.post("/support", formData);
             toast.success("Message sent! We'll get back to you soon.");
             setFormData({ fullName: "", email: "", message: "" });
         } catch (error) {
