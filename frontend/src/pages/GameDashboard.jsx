@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGameTemplates, getActiveGameSessions, startGame } from "../lib/api";
-import { Gamepad2, Play, Users, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
+import { getGameTemplates, getActiveGameSessions, getGameHistory, startGame } from "../lib/api";
+import { Gamepad2, Play, Users, CheckCircle2, Loader2, ArrowLeft, History, Trophy, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -18,6 +18,11 @@ const GameDashboard = () => {
         queryFn: getActiveGameSessions,
     });
 
+    const { data: gameHistory, isLoading: historyLoading } = useQuery({
+        queryKey: ["gameHistory"],
+        queryFn: getGameHistory,
+    });
+
     const { mutate: handleStartGame, isPending: isStarting } = useMutation({
         mutationFn: startGame,
         onSuccess: (data) => {
@@ -28,7 +33,7 @@ const GameDashboard = () => {
         onError: (err) => toast.error(err.response?.data?.message || "Failed to start game"),
     });
 
-    if (templatesLoading || activeLoading) {
+    if (templatesLoading || activeLoading || historyLoading) {
         return (
             <div className="flex justify-center py-20">
                 <Loader2 className="size-8 animate-spin text-primary" />
@@ -74,6 +79,55 @@ const GameDashboard = () => {
                                         <Play className="size-4 fill-current" />
                                         Resume
                                     </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Game History */}
+            {gameHistory?.length > 0 && (
+                <section className="mb-10">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <History className="size-5 text-primary" />
+                        Recent Results
+                    </h2>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                        {gameHistory.map((session) => (
+                            <div key={session._id} className="group relative card bg-base-200 border border-base-300 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                                {session.score >= 80 && (
+                                    <div className="absolute top-0 right-0 p-1 bg-primary text-primary-content">
+                                        <Trophy className="size-3" />
+                                    </div>
+                                )}
+                                <div className="card-body p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
+                                            {session.gameType.replace(/_/g, ' ')}
+                                        </span>
+                                        <div className="flex items-center gap-1 text-[10px] opacity-40 font-bold">
+                                            <Calendar className="size-3" />
+                                            {new Date(session.updatedAt).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <span className="text-2xl font-black text-primary italic">
+                                                {session.score}%
+                                            </span>
+                                            <span className="text-[10px] font-bold opacity-60 uppercase tracking-tighter">Compatibility Score</span>
+                                        </div>
+                                        <div className="avatar-group -space-x-3 rtl:space-x-reverse">
+                                            {session.participants.map((p) => (
+                                                <div key={p._id} className="avatar border-2 border-base-200">
+                                                    <div className="w-8">
+                                                        <img src={p.profilePic || "/avatar.png"} alt={p.fullName} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         ))}

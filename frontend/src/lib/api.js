@@ -241,6 +241,11 @@ export const getActiveGameSessions = async () => {
   return response.data;
 };
 
+export const getGameHistory = async () => {
+  const response = await axiosInstance.get("/games/history");
+  return response.data;
+};
+
 export const submitGameAnswers = async (sessionId, quizAnswers) => {
   const response = await axiosInstance.post("/games/submit", { sessionId, quizAnswers });
   return response.data;

@@ -88,7 +88,7 @@ const QUIZ_TEMPLATES = {
                     "Relaxing by the pool with endless cocktails.",
                     "Waking up to the sound of the ocean every day."
                 ],
-            }
+            },
         ]
     },
     long_distance_bucket_list: {
@@ -283,10 +283,27 @@ router.get("/active", checkMembership, async (req, res) => {
     }
 });
 
+// Get completed sessions (History)
+router.get("/history", checkMembership, async (req, res) => {
+    try {
+        const sessions = await GameSession.find({
+            participants: req.user._id,
+            status: "completed"
+        }).populate("participants", "fullName profilePic")
+            .sort({ updatedAt: -1 })
+            .limit(10);
+
+        res.json(sessions);
+    } catch (err) {
+        console.error("Error fetching game history:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 // Submit answers
 router.post("/submit", checkMembership, async (req, res) => {
     try {
-        const { sessionId, quizAnswers } = req.body; // quizAnswers: [{ questionIndex: 0, answer: "Red" }, ...]
+        const { sessionId, quizAnswers } = req.body;
         const session = await GameSession.findById(sessionId);
 
         if (!session) {
@@ -303,8 +320,6 @@ router.post("/submit", checkMembership, async (req, res) => {
 
         // Set answers for the current user
         session.answers.set(req.user._id.toString(), quizAnswers);
-
-        // Mark as modified if it's a Map
         session.markModified("answers");
 
         // Check if all participants have answered
@@ -326,7 +341,7 @@ router.post("/submit", checkMembership, async (req, res) => {
 
             session.score = Math.round((matches / session.questions.length) * 100);
 
-            // --- Award Badges ---
+            // Award Badges
             try {
                 const badgeName = "Quiz Master";
                 await User.updateMany(
@@ -339,7 +354,6 @@ router.post("/submit", checkMembership, async (req, res) => {
         }
 
         await session.save();
-
         res.json({ success: true, session });
     } catch (err) {
         console.error("Error submitting answers:", err);
