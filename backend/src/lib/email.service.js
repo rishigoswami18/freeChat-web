@@ -6,14 +6,19 @@ import nodemailer from "nodemailer";
 export const sendSupportEmail = async (fullName, email, message) => {
     try {
         // Create a transporter using SMTP
+        const isSecure = process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465";
+
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT),
-            secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+            secure: isSecure,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            tls: {
+                rejectUnauthorized: false // Helps with connection issues on shared hosting
+            }
         });
 
         const mailOptions = {
@@ -48,14 +53,19 @@ export const sendSupportEmail = async (fullName, email, message) => {
  */
 export const sendOTPEmail = async (email, otp) => {
     try {
+        const isSecure = process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465";
+
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT),
-            secure: process.env.SMTP_SECURE === "true",
+            secure: isSecure,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            tls: {
+                rejectUnauthorized: false
+            }
         });
 
         const mailOptions = {
@@ -97,14 +107,19 @@ export const sendOTPEmail = async (email, otp) => {
  */
 export const sendResetPasswordEmail = async (email, otp) => {
     try {
+        const isSecure = process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465";
+
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT),
-            secure: process.env.SMTP_SECURE === "true",
+            secure: isSecure,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            tls: {
+                rejectUnauthorized: false
+            }
         });
 
         const mailOptions = {
