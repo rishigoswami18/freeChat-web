@@ -67,11 +67,19 @@ const LoginPage = () => {
                   </div>
 
                   <div className="form-control w-full">
-                    <label className="label">
-                      <span className="label-text font-medium text-xs uppercase tracking-wider opacity-60">
-                        Password
-                      </span>
-                    </label>
+                    <div className="flex justify-between items-center px-1">
+                      <label className="label py-1">
+                        <span className="label-text font-medium text-xs uppercase tracking-wider opacity-60">
+                          Password
+                        </span>
+                      </label>
+                      <Link
+                        to="/forgot-password"
+                        className="text-[10px] uppercase tracking-widest font-bold text-primary hover:underline"
+                      >
+                        Forgot?
+                      </Link>
+                    </div>
                     <input
                       type="password"
                       placeholder="••••••••"

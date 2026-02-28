@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { generateUniqueUsername } from "../utils/usernameUtils.js";
 import { OAuth2Client } from "google-auth-library";
 import OTP from "../models/OTP.js";
-import { sendOTPEmail } from "../lib/email.service.js";
+import { sendOTPEmail, sendResetPasswordEmail } from "../lib/email.service.js";
 
 const throwawayDomains = [
   "yopmail.com", "mailinator.com", "guerrillamail.com", "temp-mail.org",
@@ -423,5 +423,75 @@ export async function requestOTP(req, res) {
   } catch (error) {
     console.error("Error in requestOTP:", error);
     res.status(500).json({ message: "An unexpected error occurred. Please try again." });
+  }
+}
+export async function forgotPassword(req, res) {
+  const { email } = req.body;
+  try {
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Small security choice: return 200/success even if email doesn't exist
+      // to prevent "Email Harvesting", OR return 404. 
+      // User experience is better with 404 for a legit app.
+      return res.status(404).json({ message: "No account found with this email" });
+    }
+
+    if (user.googleId) {
+      return res.status(400).json({ message: "This account is linked with Google. Please sign in with Google." });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save to DB
+    await OTP.findOneAndUpdate(
+      { email },
+      { otp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // Send Reset Email
+    try {
+      await sendResetPasswordEmail(email, otp);
+    } catch (emailError) {
+      console.error("Failed to send reset email:", emailError);
+      return res.status(500).json({ message: "Error sending reset email. Try again later." });
+    }
+
+    res.status(200).json({ success: true, message: "Reset code sent to your email!" });
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function resetPassword(req, res) {
+  const { email, otp, newPassword } = req.body;
+  try {
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const validOtp = await OTP.findOne({ email, otp });
+    if (!validOtp) {
+      return res.status(400).json({ message: "Invalid or expired reset code" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update password
+    user.password = newPassword;
+    await user.save(); // Password hash middleware in User model handles hashing
+
+    // Delete OTP
+    await OTP.deleteOne({ _id: validOtp._id });
+
+    res.status(200).json({ success: true, message: "Password updated successfully! You can now log in." });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 }

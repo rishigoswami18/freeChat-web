@@ -27,6 +27,8 @@ import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
 import TermsPage from "./pages/TermsPage.jsx";
 import RefundPolicyPage from "./pages/RefundPolicyPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -102,6 +104,14 @@ const App = () => {
                       <Navigate to={isOnboarded ? "/" : "/onboarding"} />
                     )
                   }
+                />
+                <Route
+                  path="/forgot-password"
+                  element={!isAuthenticated ? <ForgotPasswordPage /> : <Navigate to="/" />}
+                />
+                <Route
+                  path="/reset-password"
+                  element={!isAuthenticated ? <ResetPasswordPage /> : <Navigate to="/" />}
                 />
                 <Route
                   path="/notifications"
