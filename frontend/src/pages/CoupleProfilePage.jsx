@@ -43,10 +43,14 @@ const CoupleProfilePage = () => {
     const { data: coupleData, isLoading: coupleLoading } = useQuery({
         queryKey: ["coupleStatus"],
         queryFn: getCoupleStatus,
-        onSuccess: (data) => {
-            if (data?.romanticNote) setNoteDraft(data.romanticNote);
-        }
     });
+
+    // Update note draft when data is fetched
+    useEffect(() => {
+        if (coupleData?.romanticNote && !isEditingNote) {
+            setNoteDraft(coupleData.romanticNote);
+        }
+    }, [coupleData, isEditingNote]);
 
     // Fetch friends list (for sending couple requests)
     const { data: friends = [] } = useQuery({
