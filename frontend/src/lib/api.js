@@ -28,6 +28,11 @@ export const googleLogin = async (credential) => {
   return response.data;
 };
 
+export const googleLoginWithAccessToken = async (accessToken) => {
+  const response = await axiosInstance.post("/auth/google-token", { accessToken });
+  return response.data;
+};
+
 export const getAuthUser = async () => {
   try {
     const res = await axiosInstance.get("/auth/me");
