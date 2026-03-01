@@ -146,33 +146,33 @@ function ChatHeader() {
     };
 
     return (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-base-300/30 chat-input-glass sticky top-0 z-50 shadow-sm backdrop-blur-xl">
-            <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-base-300/30 glass-panel-solid sticky top-0 z-[100] shadow-sm backdrop-blur-xl w-full flex-shrink-0 overflow-hidden select-none">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <button
                     onClick={() => navigate("/inbox")}
-                    className="btn btn-ghost btn-sm btn-circle hover:bg-base-300/50"
+                    className="flex-shrink-0 btn btn-ghost btn-xs sm:btn-sm btn-circle hover:bg-base-300/50"
                     aria-label="Go back to inbox"
                 >
                     <ArrowLeft className="size-5" />
                 </button>
 
-                <div className="relative">
+                <div className="relative flex-shrink-0">
                     <div className="avatar">
-                        <div className="w-10 h-10 rounded-full ring-2 ring-primary/20 overflow-hidden">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full ring-2 ring-primary/20 overflow-hidden">
                             <img src={displayData.image} alt={displayData.name} />
                         </div>
                     </div>
                     {isOnline && !isGroup && (
-                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100 dot-pulse" />
+                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-100 dot-pulse" />
                     )}
                 </div>
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                     <h3 className="font-bold text-sm leading-tight truncate">
                         {displayData.name}
                     </h3>
                     <p
-                        className={`text-[11px] font-medium ${isOnline && !isGroup
+                        className={`text-[10px] sm:text-[11px] font-medium truncate ${isOnline && !isGroup
                             ? "text-success"
                             : "text-base-content/40"
                             }`}
@@ -187,27 +187,27 @@ function ChatHeader() {
             </div>
 
             {!isGroup && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-1">
                     <button
                         onClick={handleCoolDown}
-                        className="btn btn-ghost btn-sm btn-circle text-info hover:bg-info/10 transition-colors"
+                        className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-info hover:bg-info/10 transition-colors"
                         title="Cool Down"
                     >
-                        <Wind className="size-5" />
+                        <Wind className="size-4.5 sm:size-5" />
                     </button>
                     <button
                         onClick={handleCall}
-                        className="btn btn-ghost btn-sm btn-circle text-primary hover:bg-primary/10 transition-colors"
+                        className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-primary hover:bg-primary/10 transition-colors"
                         aria-label="Video call"
                     >
-                        <Video className="size-5" />
+                        <Video className="size-4.5 sm:size-5" />
                     </button>
                     <button
                         onClick={handleAudioCall}
-                        className="btn btn-ghost btn-sm btn-circle text-success hover:bg-success/10 transition-colors"
+                        className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-success hover:bg-success/10 transition-colors"
                         aria-label="Voice call"
                     >
-                        <Phone className="size-5" />
+                        <Phone className="size-4.5 sm:size-5" />
                     </button>
                 </div>
             )}
