@@ -207,10 +207,20 @@ const CallContent = ({ isAudioCall }) => {
               {/* Main View (The "Big" screen) */}
               <div className="h-full w-full">
                 {isSwapped ? (
-                  localParticipant && <ParticipantView participant={localParticipant} />
+                  localParticipant && (
+                    <ParticipantView
+                      participant={localParticipant}
+                      ParticipantDetails={null}
+                      Menu={null}
+                    />
+                  )
                 ) : (
                   remoteParticipant ? (
-                    <ParticipantView participant={remoteParticipant} />
+                    <ParticipantView
+                      participant={remoteParticipant}
+                      ParticipantDetails={null}
+                      Menu={null}
+                    />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
                       <div className="text-center">

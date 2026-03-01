@@ -868,3 +868,38 @@ body {
 .bounce-subtle {
   animation: bounce-subtle 1s ease-in-out infinite;
 }
+
+/* ===== WhatsApp Video Coverage Fix ===== */
+/* Force the video views to fill the entire container */
+.str-video__participant-view {
+  width: 100% !important;
+  height: 100% !important;
+  background: #000 !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+/* Force the actual VIDEO hardware stream to cover the full viewport */
+.str-video__participant-view video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* Ensure the SDK components inside view (labels, etc) are correctly hidden or positioned */
+.str-video__participant-details {
+  display: none !important;
+}
+
+.str-video__participant-view__video-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Fine tune the PIP window for a taller, more WhatsApp-like look */
+.str-video__participant-view--local {
+  aspect-ratio: 2/3 !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
