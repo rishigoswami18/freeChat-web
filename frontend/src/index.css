@@ -548,11 +548,114 @@ body {
 }
 
 .str-video__participant-details {
-  background: rgba(0, 0, 0, 0.6) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
   backdrop-filter: blur(8px);
-  border-radius: 8px !important;
-  padding: 4px 10px !important;
+  border-radius: 99px !important;
+  padding: 4px 12px !important;
   font-family: 'Inter', sans-serif !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* WhatsApp Style Call UI */
+.whatsapp-call-bg {
+  background: radial-gradient(circle at center, #1a2a24 0%, #0a0f0d 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.whatsapp-call-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+  opacity: 0.05;
+}
+
+.floating-controls {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 31, 35, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 40px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.control-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: white;
+}
+
+.control-btn-active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-btn-inactive {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.control-btn-danger {
+  background: #ff3b30;
+  width: 60px;
+  height: 60px;
+}
+
+.control-btn:active {
+  transform: scale(0.9);
+}
+
+.call-avatar-container {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Speaker Layout Overrides for WhatsApp Video Style */
+.str-video__speaker-layout__wrapper {
+  background: #000 !important;
+}
+
+.str-video__participant-view--local {
+  width: 100px !important;
+  height: 150px !important;
+  position: absolute !important;
+  top: 60px !important;
+  right: 20px !important;
+  border-radius: 12px !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  z-index: 50 !important;
+  overflow: hidden !important;
+}
+
+@media (min-width: 640px) {
+  .str-video__participant-view--local {
+    width: 180px !important;
+    height: 270px !important;
+  }
 }
 
 /* ===== Mobile-first Touch & Performance ===== */

@@ -76,6 +76,8 @@ const IncomingCallUI = ({ call, navigate }) => {
         };
     }, [call]);
 
+    const isAudioOnly = call.state.custom?.audioOnly || call.data?.audioOnly;
+
     const handleAccept = async () => {
         try {
             // Stop ringtone immediately
@@ -83,7 +85,8 @@ const IncomingCallUI = ({ call, navigate }) => {
             ringtone.currentTime = 0;
 
             // Just navigate to the call page. 
-            navigate(`/call/${call.id}`);
+            const typeParam = isAudioOnly ? "?type=audio" : "";
+            navigate(`/call/${call.id}${typeParam}`);
         } catch (error) {
             console.error("Failed to accept call:", error);
         }
@@ -117,7 +120,7 @@ const IncomingCallUI = ({ call, navigate }) => {
                     {caller?.name || "Someone"}
                 </h2>
                 <p className="text-base-content/60 mb-8 text-sm">
-                    Incoming video call...
+                    {isAudioOnly ? "Incoming audio call..." : "Incoming video call..."}
                 </p>
 
                 <div className="flex items-center justify-center gap-8">
