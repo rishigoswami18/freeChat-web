@@ -4,6 +4,39 @@ import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import toast from "react-hot-toast";
 
+// Format "Last seen" like WhatsApp
+function formatLastSeen(lastActive) {
+    if (!lastActive) return "Offline";
+
+    const now = new Date();
+    const last = new Date(lastActive);
+    const diffMs = now - last;
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHrs = Math.floor(diffMs / 3600000);
+
+    // Less than 1 minute ago
+    if (diffMin < 1) return "Last seen just now";
+
+    // Less than 60 minutes ago
+    if (diffMin < 60) return `Last seen ${diffMin}m ago`;
+
+    // Today
+    const isToday = now.toDateString() === last.toDateString();
+    if (isToday) {
+        return `Last seen today at ${last.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    // Yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (yesterday.toDateString() === last.toDateString()) {
+        return `Last seen yesterday at ${last.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    // Older
+    return `Last seen ${last.toLocaleDateString([], { day: "numeric", month: "short" })}`;
+}
+
 function ChatHeader() {
     const { channel } = useChannelStateContext();
     const navigate = useNavigate();
@@ -148,7 +181,7 @@ function ChatHeader() {
                             ? `${Object.keys(channel.state.members).length} members`
                             : isOnline
                                 ? "Online"
-                                : "Offline"}
+                                : formatLastSeen(user?.last_active)}
                     </p>
                 </div>
             </div>
@@ -183,3 +216,4 @@ function ChatHeader() {
 }
 
 export default ChatHeader;
+
