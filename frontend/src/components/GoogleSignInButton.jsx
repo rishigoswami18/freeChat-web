@@ -4,7 +4,6 @@ import { googleLogin } from "../lib/api";
 import toast from "react-hot-toast";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-console.log("GOOGLE_CLIENT_ID:", GOOGLE_CLIENT_ID);
 
 const GoogleSignInButton = ({ text = "signin_with" }) => {
     const btnRef = useRef(null);
@@ -45,6 +44,8 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
                     callback: handleCredentialResponse,
                     auto_select: false,
                     cancel_on_tap_outside: true,
+                    ux_mode: "popup",
+                    use_fedcm_for_prompt: false,
                 });
 
                 if (btnRef.current) {
@@ -116,3 +117,4 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
 };
 
 export default GoogleSignInButton;
+
