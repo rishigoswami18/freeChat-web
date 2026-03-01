@@ -57,8 +57,8 @@ export const sendOTPEmail = async (email, otp) => {
 
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT),
-            secure: isSecure,
+            port: 465, // Use 465 for SSL instead of 587 for Render
+            secure: true,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
@@ -111,8 +111,8 @@ export const sendResetPasswordEmail = async (email, otp) => {
 
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT),
-            secure: isSecure,
+            port: 465, // Use 465 for SSL instead of 587 for Render
+            secure: true,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
