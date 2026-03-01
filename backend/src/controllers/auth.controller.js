@@ -160,7 +160,7 @@ export async function googleLoginWithAccessToken(req, res) {
         fullName: name,
         username,
         googleId,
-        profilePic: picture || `https://avatar.iran.liara.run/public/${Math.floor(Math.random() * 100) + 1}.png`,
+        profilePic: picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`,
         dateOfBirth: new Date("2000-01-01"),
         streak: 1,
         lastLoginDate: new Date(),
@@ -230,9 +230,6 @@ export async function syncFirebaseUser(req, res) {
     });
 
     if (!user) {
-      const idx = Math.floor(Math.random() * 100) + 1;
-      const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-
       const username = await generateUniqueUsername(fullName);
 
       // Create MERN user linked to Firebase
@@ -243,7 +240,7 @@ export async function syncFirebaseUser(req, res) {
         firebaseId,
         password,
         dateOfBirth: req.body.dateOfBirth || new Date("2000-01-01"),
-        profilePic: randomAvatar,
+        profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff`,
       });
 
       // Keep Stream integration working
@@ -336,9 +333,6 @@ export async function signup(req, res) {
       console.log(`Signup: Proceeding without OTP for ${email}`);
     }
 
-    const idx = Math.floor(Math.random() * 100) + 1;
-    const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-
     const username = await generateUniqueUsername(fullName);
 
     const newUser = await User.create({
@@ -347,7 +341,7 @@ export async function signup(req, res) {
       username,
       password,
       dateOfBirth: dob,
-      profilePic: randomAvatar,
+      profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff`,
       streak: 1,
       lastLoginDate: new Date(),
     });
