@@ -40,7 +40,8 @@ const SignUpPage = () => {
       setOtpSent(true);
       toast.success("Verification code sent to your email!");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send code");
+      console.error("OTP Error:", err);
+      toast.error(err.response?.data?.message || err.message || "Failed to send code");
     } finally {
       setIsSendingOtp(false);
     }

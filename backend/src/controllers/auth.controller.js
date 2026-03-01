@@ -128,18 +128,22 @@ export async function googleLoginWithAccessToken(req, res) {
       return res.status(400).json({ message: "Google access token is required" });
     }
 
-    // Fetch user info from Google
+    // Fetch user info from Google (Reliable method for all Node versions)
     const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Google Token Verification Failed:", errorText);
-      return res.status(401).json({ message: "Invalid or expired Google token" });
+      console.error("❌ Google API Error:", errorText);
+      return res.status(401).json({
+        message: "Google token verification failed.",
+        details: errorText
+      });
     }
 
     const payload = await response.json();
+    console.log("✅ Google Auth Success for:", payload.email);
     const { sub: googleId, email, name, picture } = payload;
 
     if (!email) {
@@ -323,10 +327,13 @@ export async function signup(req, res) {
     if (userOtp) {
       const validOtp = await OTP.findOne({ email, otp: userOtp });
       if (!validOtp) {
+        // Log the failure but don't strictly block if needed (Optional: return 400 for strictness)
+        console.warn(`Signup: Invalid OTP attempt for ${email}`);
         return res.status(400).json({ message: "Invalid or expired verification code" });
       }
-      // Delete OTP after successful verification
       await OTP.deleteOne({ _id: validOtp._id });
+    } else {
+      console.log(`Signup: Proceeding without OTP for ${email}`);
     }
 
     const idx = Math.floor(Math.random() * 100) + 1;
@@ -470,6 +477,7 @@ export async function onboard(req, res) {
 
 export async function requestOTP(req, res) {
   const { email } = req.body;
+  console.log("📩 Received OTP request for:", email);
   try {
     if (!email) return res.status(400).json({ message: "Email is required" });
 

@@ -20,4 +20,8 @@ router.get("/me", protectRoute, (req, res) => {
   res.status(200).json({ success: true, user: req.user });
 });
 
+router.get("/ping", (req, res) => {
+  res.status(200).json({ message: "pong" });
+});
+
 export default router;

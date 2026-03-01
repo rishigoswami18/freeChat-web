@@ -18,9 +18,9 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
         },
         onError: (error) => {
             setIsLoading(false);
-            toast.error(
-                error.response?.data?.message || "Google sign-in failed. Please try again."
-            );
+            const errorMsg = error.response?.data?.message || error.response?.data?.details || error.message || "Google sign-in failed. Please try again.";
+            console.error("Google Auth Error:", error);
+            toast.error(errorMsg);
         },
     });
 
