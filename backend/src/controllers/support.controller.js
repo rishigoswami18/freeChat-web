@@ -21,7 +21,7 @@ export const submitSupportMessage = async (req, res) => {
         try {
             await sendSupportEmail(fullName, email, message);
         } catch (emailError) {
-            console.error("Failed to send support email but message was saved to DB.");
+            console.error("Failed to send support email:", emailError.message);
         }
 
         res.status(201).json({
