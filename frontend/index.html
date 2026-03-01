@@ -272,6 +272,24 @@
   </noscript>
 
   <div id="root"></div>
+  <script>
+    // --- Direct OAuth Callback Handler (Fastsest & Most Reliable) ---
+    (function () {
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token=")) {
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get("access_token");
+        if (accessToken && window.opener) {
+          // Send token back to the main window
+          window.opener.postMessage({ type: "GOOGLE_OAUTH_TOKEN", token: accessToken }, "*");
+          // Visual feedback
+          document.body.innerHTML = "<div style='display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#111;color:#fff;'><h2>Sign-in Successful!</h2><p>Closing this window...</p></div>";
+          // Close immediately
+          setTimeout(() => window.close(), 500);
+        }
+      }
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 
