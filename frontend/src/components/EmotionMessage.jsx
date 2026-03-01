@@ -204,8 +204,8 @@ const EmotionMessage = (props) => {
           // Only show avatar on the FIRST message of a group, and never for my own messages
           hideAvatar={!isFirstInGroup || isMyMessage}
           // Customizing components to keep it professional but functional
-          MessageFooter={() => (isLastInGroup && !isMyMessage) ? (
-            <div className="text-[9px] opacity-40 ml-12 mt-1">
+          MessageFooter={() => (isLastInGroup) ? (
+            <div className={`text-[10px] opacity-40 mt-1 mb-2 ${isMyMessage ? 'mr-1 text-right' : 'ml-12 text-left'} font-medium`}>
               {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
           ) : null}

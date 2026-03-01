@@ -145,60 +145,73 @@ const ChatPage = () => {
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-base-100 text-base-content relative">
-      <Chat client={chatClient}>
+    <div className="h-[100dvh] flex flex-col bg-base-100 text-base-content relative overflow-hidden">
+      {/* Premium Wallpaper Overlay */}
+      <div className="absolute inset-0 premium-chat-bg opacity-30 pointer-events-none" />
+
+      <Chat client={chatClient} theme="messaging light">
         <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
-          <Window>
-            <ChatHeader />
-            <MessageList Message={EmotionMessage} />
-            <div className="relative group/input flex items-end gap-2 pr-4 bg-base-100 border-t border-base-200">
-              <div className="flex-1">
-                <MessageInput focus />
+          <div className="flex-1 flex flex-col min-h-0 relative z-10 glass-panel border-0 rounded-none h-full">
+            <Window>
+              <ChatHeader />
+              <div className="flex-1 overflow-hidden relative">
+                <MessageList Message={EmotionMessage} />
               </div>
 
-              <div className="flex items-center gap-1.5 pb-2.5 pr-2">
-                <VoiceRecorder
-                  onSend={async (data) => {
-                    if (!channel) return;
-                    try {
-                      await channel.sendMessage({
-                        text: "Sent a voice message",
-                        isVoice: true,
-                        mediaUrl: data.url,
-                        mediaType: "audio",
-                        duration: data.duration,
-                      });
-                    } catch (error) {
-                      console.error("Error sending voice message:", error);
-                      toast.error("Failed to send voice message");
-                    }
-                  }}
-                />
+              {/* Premium Input Container */}
+              <div className="safe-area-bottom chat-input-glass animate-in slide-in-from-bottom-5 duration-500">
+                <div className="flex items-end gap-2 p-2 sm:p-3 max-w-5xl mx-auto">
+                  <div className="flex-1 min-w-0 bg-base-100/30 rounded-2xl border border-base-300/30 focus-within:border-primary/50 transition-all shadow-sm">
+                    <MessageInput focus grow />
+                  </div>
 
-                <button
-                  onClick={handleSnapClick}
-                  disabled={isUploading}
-                  className="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 text-primary transition-all flex items-center justify-center p-0 min-h-0 size-8"
-                  title="Send a Snap"
-                >
-                  {isUploading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Camera className="size-4" />
-                  )}
-                </button>
+                  <div className="flex items-center gap-1.5 pb-1">
+                    <div className="flex items-center gap-1 bg-base-300/30 p-1 rounded-full border border-base-300/20">
+                      <VoiceRecorder
+                        onSend={async (data) => {
+                          if (!channel) return;
+                          try {
+                            await channel.sendMessage({
+                              text: "Sent a voice message",
+                              isVoice: true,
+                              mediaUrl: data.url,
+                              mediaType: "audio",
+                              duration: data.duration,
+                            });
+                          } catch (error) {
+                            console.error("Error sending voice message:", error);
+                            toast.error("Failed to send voice message");
+                          }
+                        }}
+                      />
+
+                      <button
+                        onClick={handleSnapClick}
+                        disabled={isUploading}
+                        className="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 text-primary transition-all flex items-center justify-center p-0 min-h-0 size-9 active:scale-90"
+                        title="Send a Snap"
+                      >
+                        {isUploading ? (
+                          <Loader2 className="size-4.5 animate-spin" />
+                        ) : (
+                          <Camera className="size-4.5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                  />
+                </div>
               </div>
-
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*,video/*"
-                onChange={handleFileChange}
-              />
-            </div>
-          </Window>
-          <Thread />
+            </Window>
+            <Thread />
+          </div>
         </Channel>
       </Chat>
     </div>

@@ -146,7 +146,7 @@ function ChatHeader() {
     };
 
     return (
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-base-300/50 glass-panel-solid sticky top-0 z-50">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-base-300/30 chat-input-glass sticky top-0 z-50 shadow-sm backdrop-blur-xl">
             <div className="flex items-center gap-2.5 sm:gap-3">
                 <button
                     onClick={() => navigate("/inbox")}

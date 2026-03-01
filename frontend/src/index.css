@@ -298,6 +298,36 @@ body {
   border-left-color: oklch(var(--pc) / 0.5) !important;
 }
 
+/* ===== Premium Chat Background & Wallpaper ===== */
+.premium-chat-bg {
+  background-color: oklch(var(--b1));
+  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+  /* subtle pattern */
+  background-attachment: fixed;
+}
+
+.chat-container-glass {
+  background: oklch(var(--b1) / 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chat-input-glass {
+  background: oklch(var(--b2) / 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid oklch(var(--bc) / 0.08);
+}
+
+/* Custom Message Bubble Shapes */
+.str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  border-bottom-left-radius: 4px !important;
+}
+
+.str-chat__message-simple--me .str-chat__message-simple-text-inner {
+  border-bottom-right-radius: 4px !important;
+}
+
 /* ===== Hide default channel header (we use custom) ===== */
 .str-chat__header-livestream {
   display: none;

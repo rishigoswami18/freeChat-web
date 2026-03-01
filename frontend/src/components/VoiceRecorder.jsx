@@ -98,19 +98,19 @@ const VoiceRecorder = ({ onSend }) => {
 
     if (isRecording) {
         return (
-            <div className="flex items-center gap-3 bg-base-200 px-4 py-2 rounded-full shadow-lg animate-in slide-in-from-bottom-2 duration-300">
+            <div className="flex items-center gap-3 bg-base-100 px-4 py-2 rounded-2xl shadow-xl border border-primary/20 animate-in zoom-in-95 duration-200">
                 <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-xs font-mono font-bold w-10 text-base-content/70">
+                    <div className="size-2 rounded-full bg-error animate-ping" />
+                    <span className="text-sm font-mono font-bold w-12 text-error">
                         {formatTime(recordingTime)}
                     </span>
                 </div>
 
-                <div className="h-4 w-[1px] bg-base-300 mx-1" />
+                <div className="h-6 w-[1px] bg-base-300 mx-1" />
 
                 <button
                     onClick={() => stopRecording(false)}
-                    className="p-1.5 hover:bg-base-300 rounded-full text-error transition-colors"
+                    className="btn btn-ghost btn-circle btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors"
                     title="Cancel"
                 >
                     <Trash2 className="size-4" />
@@ -118,15 +118,15 @@ const VoiceRecorder = ({ onSend }) => {
 
                 <button
                     onClick={() => stopRecording(true)}
-                    className="btn btn-primary btn-xs rounded-full gap-1 px-3 h-8 min-h-0"
+                    className="btn btn-primary btn-sm rounded-xl gap-2 px-4 shadow-lg active:scale-95 transition-all"
                     disabled={isUploading}
                 >
                     {isUploading ? (
-                        <Loader2 className="size-3 animate-spin" />
+                        <Loader2 className="size-4 animate-spin" />
                     ) : (
                         <>
-                            <Send className="size-3" />
-                            <span className="text-[10px] font-bold uppercase">Send</span>
+                            <Send className="size-4" />
+                            <span className="text-xs font-bold uppercase tracking-wide">Send</span>
                         </>
                     )}
                 </button>
