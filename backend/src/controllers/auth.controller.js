@@ -128,29 +128,29 @@ export async function googleLoginWithAccessToken(req, res) {
       return res.status(400).json({ message: "Google access token is required" });
     }
 
-    // Fetch user info from Google using the access token
+    // Fetch user info from Google
     const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     if (!response.ok) {
-      return res.status(401).json({ message: "Invalid Google access token" });
+      const errorText = await response.text();
+      console.error("❌ Google Token Verification Failed:", errorText);
+      return res.status(401).json({ message: "Invalid or expired Google token" });
     }
 
-    const { sub: googleId, email, name, picture } = await response.json();
+    const payload = await response.json();
+    const { sub: googleId, email, name, picture } = payload;
 
     if (!email) {
       return res.status(400).json({ message: "Google account has no email" });
     }
 
-    // Check if user already exists (by googleId or email)
-    let user = await User.findOne({
-      $or: [{ googleId }, { email }],
-    });
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
     if (!user) {
+      console.log("Creating new Google user:", email);
       const username = await generateUniqueUsername(name);
-
       user = await User.create({
         email,
         fullName: name,
@@ -168,40 +168,34 @@ export async function googleLoginWithAccessToken(req, res) {
           name: user.fullName,
           image: user.profilePic || "",
         });
-      } catch (error) {
-        console.log("Error syncing Stream user (Google):", error);
+      } catch (streamErr) {
+        console.error("Stream Sync Error:", streamErr.message);
       }
     } else {
-      if (!user.googleId) {
-        user.googleId = googleId;
-      }
+      console.log("Logging in existing user:", email);
+      if (!user.googleId) user.googleId = googleId;
       if (!user.profilePic || user.profilePic.includes("avatar.iran.liara.run")) {
         user.profilePic = picture || user.profilePic;
       }
 
+      // Streak logic
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const lastLogin = user.lastLoginDate ? new Date(user.lastLoginDate) : null;
 
-      if (!user.lastLoginDate) {
+      if (!lastLogin) {
         user.streak = 1;
       } else {
-        const lastLogin = new Date(user.lastLoginDate);
         const lastLoginDay = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate()).getTime();
         const diffDays = (today - lastLoginDay) / (1000 * 60 * 60 * 24);
-
-        if (diffDays === 1) {
-          user.streak += 1;
-        } else if (diffDays > 1) {
-          user.streak = 1;
-        }
+        if (diffDays === 1) user.streak += 1;
+        else if (diffDays > 1) user.streak = 1;
       }
       user.lastLoginDate = now;
       await user.save();
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: "7d" });
 
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -212,8 +206,8 @@ export async function googleLoginWithAccessToken(req, res) {
 
     res.status(200).json({ success: true, user });
   } catch (error) {
-    console.log("Error in Google access token login:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("❌ CRITICAL Error in Google access token login:", error);
+    res.status(500).json({ message: `Server error: ${error.message}` });
   }
 }
 
