@@ -58,36 +58,29 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
             return;
         }
 
-        // Poll popup for the redirect with access token
-        const pollInterval = setInterval(() => {
-            try {
-                if (!popup || popup.closed) {
-                    clearInterval(pollInterval);
-                    setIsLoading(false);
-                    return;
-                }
-
-                // Try to read the hash without fully checking the origin first 
-                // (the browser will throw if it's still on Google's domain)
-                const popupHash = popup.location.hash;
-
-                if (popupHash && popupHash.includes("access_token=")) {
-                    const hashParams = new URLSearchParams(popupHash.substring(1));
-                    const accessToken = hashParams.get("access_token");
-
-                    if (accessToken) {
-                        popup.close();
-                        clearInterval(pollInterval);
-                        accessTokenMutation(accessToken);
-                    }
-                }
-            } catch (e) {
-                // Ignore SecurityError — popup is still on Google's domain or redirecting
+        // --- New Message Listener (More reliable than polling) ---
+        const handleMessage = (event) => {
+            if (event.data?.type === "GOOGLE_OAUTH_TOKEN" && event.data?.token) {
+                const token = event.data.token;
+                window.removeEventListener("message", handleMessage);
+                accessTokenMutation(token);
             }
-        }, 500);
+        };
+
+        window.addEventListener("message", handleMessage);
+
+        // Safety cleanup if popup is closed or times out
+        const pollInterval = setInterval(() => {
+            if (!popup || popup.closed) {
+                clearInterval(pollInterval);
+                window.removeEventListener("message", handleMessage);
+                setIsLoading(false);
+            }
+        }, 1000);
 
         setTimeout(() => {
             clearInterval(pollInterval);
+            window.removeEventListener("message", handleMessage);
             if (popup && !popup.closed) popup.close();
             setIsLoading(false);
         }, 120000);

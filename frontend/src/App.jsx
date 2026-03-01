@@ -4,6 +4,7 @@
  */
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 
 import HomePage from "./pages/HomePage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
@@ -48,6 +49,20 @@ const App = () => {
 
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;
+
+  // --- OAuth Popup Callback Handler ---
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token=")) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get("access_token");
+      if (accessToken && window.opener) {
+        window.opener.postMessage({ type: "GOOGLE_OAUTH_TOKEN", token: accessToken }, "*");
+        document.body.innerHTML = "<div style='display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'>Logging you in...</div>";
+        setTimeout(() => window.close(), 1000); // Close popup after sending message
+      }
+    }
+  }, []);
 
   if (isLoading) return <PageLoader />;
 
