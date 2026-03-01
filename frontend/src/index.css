@@ -903,3 +903,28 @@ body {
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
+
+/* ===== Chat Layout Locking Fix ===== */
+/* Prevent any horizontal 'irritation' or scrolling in the chat UI */
+.str-chat__main-panel,
+.str-chat__header,
+.str-chat__channel-header,
+.str-chat__container {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+}
+
+/* Force the body to be more rigid on mobile */
+@media (max-width: 640px) {
+  .str-chat__list {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* Allow only vertical scrolling on the header area */
+.chat-header-locked {
+  touch-action: pan-y !important;
+  max-width: 100vw !important;
+}
