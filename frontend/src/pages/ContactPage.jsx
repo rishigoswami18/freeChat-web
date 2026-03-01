@@ -50,13 +50,13 @@ const ContactPage = () => {
                         <div>
                             <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
                             <div className="space-y-6">
-                                <a href="mailto:rishigoswamisl99@gmail.com" className="flex items-center gap-4 hover:bg-base-200 p-2 -m-2 rounded-xl transition-colors">
+                                <a href="mailto:freechatweb00@gmail.com" className="flex items-center gap-4 hover:bg-base-200 p-2 -m-2 rounded-xl transition-colors">
                                     <div className="p-3 bg-primary/10 rounded-xl text-primary">
                                         <Mail className="size-6" />
                                     </div>
                                     <div>
                                         <p className="text-sm opacity-60">Email Address</p>
-                                        <p className="font-medium">rishigoswamisl99@gmail.com</p>
+                                        <p className="font-medium">freechatweb00@gmail.com</p>
                                     </div>
                                 </a>
 
