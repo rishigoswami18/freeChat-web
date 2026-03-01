@@ -50,7 +50,7 @@ export async function googleLogin(req, res) {
         fullName: name,
         username,
         googleId,
-        profilePic: picture || `https://avatar.iran.liara.run/public/${Math.floor(Math.random() * 100) + 1}.png`,
+        profilePic: picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`,
         dateOfBirth: new Date("2000-01-01"),
         streak: 1,
         lastLoginDate: new Date(),
@@ -73,7 +73,7 @@ export async function googleLogin(req, res) {
       }
       // Update profile picture from Google if user doesn't have one
       if (!user.profilePic || user.profilePic.includes("avatar.iran.liara.run")) {
-        user.profilePic = picture || user.profilePic;
+        user.profilePic = picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random&color=fff`;
       }
 
       // --- Streak Logic ---
