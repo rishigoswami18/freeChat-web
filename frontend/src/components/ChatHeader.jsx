@@ -146,11 +146,11 @@ function ChatHeader() {
     };
 
     return (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-base-300/30 glass-panel-solid sticky top-0 z-[100] shadow-sm backdrop-blur-xl w-full flex-shrink-0 overflow-hidden select-none">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-base-300/30 bg-base-100 relative z-[100] shadow-sm w-full flex-shrink-0 overflow-hidden select-none">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                 <button
                     onClick={() => navigate("/inbox")}
-                    className="flex-shrink-0 btn btn-ghost btn-xs sm:btn-sm btn-circle hover:bg-base-300/50"
+                    className="flex-shrink-0 btn btn-ghost btn-xs sm:btn-sm btn-circle hover:bg-base-300"
                     aria-label="Go back to inbox"
                 >
                     <ArrowLeft className="size-5" />
