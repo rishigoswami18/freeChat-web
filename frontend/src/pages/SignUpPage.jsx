@@ -48,8 +48,6 @@ const SignUpPage = () => {
 
   const handleSignup = (e) => {
     e.preventDefault();
-    // Added check for otpSent
-    if (!otpSent) return toast.error("Please verify your email first");
     signupMutation(signupData);
   };
 

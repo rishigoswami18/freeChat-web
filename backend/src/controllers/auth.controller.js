@@ -226,19 +226,16 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Temporary or throwaway email domains are not allowed." });
     }
 
-    // OTP Verification
+    // OTP Verification (optional — allows signup even when email service is down)
     const { otp: userOtp } = req.body;
-    if (!userOtp) {
-      return res.status(400).json({ message: "Verification code is required" });
+    if (userOtp) {
+      const validOtp = await OTP.findOne({ email, otp: userOtp });
+      if (!validOtp) {
+        return res.status(400).json({ message: "Invalid or expired verification code" });
+      }
+      // Delete OTP after successful verification
+      await OTP.deleteOne({ _id: validOtp._id });
     }
-
-    const validOtp = await OTP.findOne({ email, otp: userOtp });
-    if (!validOtp) {
-      return res.status(400).json({ message: "Invalid or expired verification code" });
-    }
-
-    // Delete OTP after successful verification
-    await OTP.deleteOne({ _id: validOtp._id });
 
     const idx = Math.floor(Math.random() * 100) + 1;
     const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
