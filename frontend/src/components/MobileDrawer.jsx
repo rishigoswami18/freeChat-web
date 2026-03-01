@@ -73,9 +73,14 @@ const MobileDrawer = () => {
           <button
             onClick={() => logoutMutation()}
             disabled={isLoggingOut}
-            className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform"
+            className="btn btn-ghost btn-xs btn-circle active:scale-95 transition-all duration-200 hover:bg-error/10 hover:text-error group"
+            title="Logout"
           >
-            {isLoggingOut ? <span className="loading loading-spinner loading-xs" /> : <LogOut className="size-4.5 opacity-70" />}
+            {isLoggingOut ? (
+              <span className="loading loading-spinner loading-[10px]" />
+            ) : (
+              <LogOut className="size-4 opacity-70 group-hover:opacity-100 group-active:scale-90 transition-transform" />
+            )}
           </button>
           <Link to="/profile" className="avatar ring-2 ring-primary/20 rounded-full p-0.5">
             <div className="w-7 h-7 rounded-full overflow-hidden">
@@ -147,9 +152,13 @@ const MobileDrawer = () => {
           <button
             onClick={() => { toggleDrawer(); logoutMutation(); }}
             disabled={isLoggingOut}
-            className="btn btn-ghost btn-sm bg-error/10 hover:bg-error/20 text-error rounded-xl gap-2 border border-error/20 w-full active:scale-[0.97] transition-transform"
+            className="btn btn-error btn-outline btn-sm rounded-xl gap-2 w-full active:scale-[0.96] transition-all duration-200 h-10 border-error/20 hover:bg-error hover:border-error group font-bold"
           >
-            {isLoggingOut ? <span className="loading loading-spinner loading-xs" /> : <LogOut className="size-4" />}
+            {isLoggingOut ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              <LogOut className="size-4 group-hover:rotate-6 transition-transform" />
+            )}
             {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
         </div>

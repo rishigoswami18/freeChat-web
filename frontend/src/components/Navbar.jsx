@@ -65,11 +65,16 @@ const Navbar = () => {
 
                 {/* Logout */}
                 <button
-                  className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error transition-colors"
+                  className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error active:scale-90 transition-all duration-200 group"
                   onClick={() => logoutMutation()}
                   disabled={isLoggingOut}
+                  title="Logout"
                 >
-                  {isLoggingOut ? <span className="loading loading-spinner loading-xs" /> : <LogOut className="size-[18px] opacity-60" />}
+                  {isLoggingOut ? (
+                    <span className="loading loading-spinner loading-xs text-error" />
+                  ) : (
+                    <LogOut className="size-[18px] opacity-70 group-hover:opacity-100 group-active:scale-90 transition-transform" />
+                  )}
                 </button>
               </>
             )}
