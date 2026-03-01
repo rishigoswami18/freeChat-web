@@ -32,7 +32,6 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
 
         setIsLoading(true);
 
-        // Build Google OAuth URL manually (no library needed!)
         const redirectUri = window.location.origin;
         const scope = "email profile openid";
         const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -42,7 +41,6 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
             `&scope=${encodeURIComponent(scope)}` +
             `&prompt=select_account`;
 
-        // Open popup
         const width = 500;
         const height = 600;
         const left = window.screenX + (window.outerWidth - width) / 2;
@@ -63,42 +61,34 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
         // Poll popup for the redirect with access token
         const pollInterval = setInterval(() => {
             try {
-                // Check if popup was closed by user
-                if (popup.closed) {
+                if (!popup || popup.closed) {
                     clearInterval(pollInterval);
                     setIsLoading(false);
                     return;
                 }
 
-                // Check if popup redirected back to our origin
-                const popupUrl = popup.location.href;
+                // Try to read the hash without fully checking the origin first 
+                // (the browser will throw if it's still on Google's domain)
+                const popupHash = popup.location.hash;
 
-                if (popupUrl.startsWith(redirectUri)) {
-                    // Extract access_token from hash fragment
-                    const hashParams = new URLSearchParams(
-                        popup.location.hash.substring(1)
-                    );
+                if (popupHash && popupHash.includes("access_token=")) {
+                    const hashParams = new URLSearchParams(popupHash.substring(1));
                     const accessToken = hashParams.get("access_token");
 
-                    popup.close();
-                    clearInterval(pollInterval);
-
                     if (accessToken) {
+                        popup.close();
+                        clearInterval(pollInterval);
                         accessTokenMutation(accessToken);
-                    } else {
-                        setIsLoading(false);
-                        toast.error("Google sign-in cancelled or failed.");
                     }
                 }
             } catch (e) {
-                // Cross-origin error — popup is still on Google's page, keep polling
+                // Ignore SecurityError — popup is still on Google's domain or redirecting
             }
         }, 500);
 
-        // Safety timeout: stop polling after 2 minutes
         setTimeout(() => {
             clearInterval(pollInterval);
-            if (!popup.closed) popup.close();
+            if (popup && !popup.closed) popup.close();
             setIsLoading(false);
         }, 120000);
     };
