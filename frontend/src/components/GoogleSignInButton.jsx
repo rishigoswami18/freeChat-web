@@ -67,19 +67,31 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
             }
         };
 
-        window.addEventListener("message", handleMessage);
+        // --- Storage Polling (The most reliable fallback) ---
+        const pollStorage = setInterval(() => {
+            const token = localStorage.getItem("google_auth_token");
+            if (token) {
+                localStorage.removeItem("google_auth_token"); // Clean up
+                clearInterval(pollStorage);
+                window.removeEventListener("message", handleMessage);
+                if (popup && !popup.closed) popup.close();
+                accessTokenMutation(token);
+            }
+        }, 500);
 
         // Safety cleanup if popup is closed or times out
-        const pollInterval = setInterval(() => {
+        const pollPopupStatus = setInterval(() => {
             if (!popup || popup.closed) {
-                clearInterval(pollInterval);
+                clearInterval(pollPopupStatus);
+                clearInterval(pollStorage);
                 window.removeEventListener("message", handleMessage);
                 setIsLoading(false);
             }
         }, 1000);
 
         setTimeout(() => {
-            clearInterval(pollInterval);
+            clearInterval(pollPopupStatus);
+            clearInterval(pollStorage);
             window.removeEventListener("message", handleMessage);
             if (popup && !popup.closed) popup.close();
             setIsLoading(false);

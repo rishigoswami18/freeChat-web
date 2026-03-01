@@ -7,30 +7,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="/logo.png" />
   <link rel="apple-touch-icon" href="/logo.png" />
-  <link rel="canonical" href="https://www.freechatweb.in" />
-  <link rel="manifest" href="/manifest.json" />
-
-  <!-- ===== PRIMARY SEO: Target keyword "BondBeyond" ===== -->
-  <title>BondBeyond — Strengthen Your Relationship | Powered by freechatweb.in</title>
-  <meta name="title" content="BondBeyond — Strengthen Your Relationship in 5 Minutes a Day | bondbeyond.app" />
-  <meta name="description"
-    content="BondBeyond by freechatweb is the ultimate cool couple app and hidden chat app. Best app for couples with strict parents featuring stealth mode, romantic notes, games, and relationship building tools." />
-  <meta name="keywords"
-    content="freechat, freechatweb, bondbeyond, app that make relationship strong, couple app, cool couple app, couple app with game, romantic note app, romantic note website, hidden chat app, app for the couple whose parent are strict, stealth mode chat, relationship growth app, Hrishikesh giri, Hrishikesh giri freechat" />
-  <meta name="author" content="Hrishikesh giri" />
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-  <meta name="theme-color" content="#6366f1" />
-  <meta name="google-adsense-account" content="ca-pub-4421164590159929" />
-  <meta name="google-site-verification" content="yHQbtZMlMQsaDHdwIr53sIkt4fn64x3cW9J_bcibSZE" />
-  <meta name="yandex-verification" content="c50cd8e3095fc184" />
-  <meta name="rating" content="general" />
-  <meta name="distribution" content="global" />
-  <meta name="revisit-after" content="1 days" />
   <meta name="language" content="English" />
   <meta name="coverage" content="Worldwide" />
   <meta name="target" content="all" />
   <meta name="HandheldFriendly" content="True" />
   <meta name="MobileOptimized" content="320" />
+
+  <script>
+    // --- BULLETPROOF OAUTH HANDLER ---
+    (function () {
+      const hash = window.location.hash || window.location.href;
+      if (hash && hash.includes("access_token=")) {
+        const urlParams = new URLSearchParams(hash.split('#')[1] || hash.split('?')[1]);
+        const accessToken = urlParams.get("access_token");
+
+        if (accessToken) {
+          // 1. Save to storage for the main window to find
+          localStorage.setItem("google_auth_token", accessToken);
+
+          // 2. Try to notify via message as backup
+          if (window.opener) {
+            window.opener.postMessage({ type: "GOOGLE_OAUTH_TOKEN", token: accessToken }, "*");
+          }
+
+          // 3. UI feedback & self-destruct
+          document.documentElement.innerHTML = "<body style='background:#111;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'><div><h2>Logged in!</h2><p>Closing window...</p></div></body>";
+          setTimeout(() => window.close(), 500);
+        }
+      }
+    })();
+  </script>
+
 
   <!-- ===== OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ===== -->
   <meta property="og:type" content="website" />
