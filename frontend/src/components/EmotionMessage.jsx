@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
-import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCircle, Mic } from "lucide-react";
+import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCheck, Mic } from "lucide-react";
 import SnapViewer from "./SnapViewer";
 import useAuthUser from "../hooks/useAuthUser";
 import { translateText } from "../lib/api";
@@ -176,7 +176,7 @@ const EmotionMessage = (props) => {
         <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
           {isViewed ? (
             <div className="flex items-center gap-2 bg-base-200/50 px-4 py-2 rounded-2xl border border-base-300 opacity-60">
-              <CheckCircle className="size-4 text-success" />
+              <CheckCheck className="size-4 text-success" />
               <span className="text-xs font-medium italic">Viewed snap</span>
             </div>
           ) : (
@@ -208,73 +208,93 @@ const EmotionMessage = (props) => {
         </div>
       ) : (
         <div
-          className={`transition-all duration-300 ${isWhisper ? 'opacity-60' : ''} ${isShout ? 'drop-shadow-xl' : ''}`}
-          style={{
-            transform: `scale(${scale})`,
-            transformOrigin: isMyMessage ? 'right center' : 'left center',
-            marginTop: isShout ? `${(scale - 1) * 12}px` : undefined,
-            marginBottom: isShout ? `${(scale - 1) * 12}px` : undefined,
-          }}
+          className={`relative ${isShout ? 'drop-shadow-xl' : ''} ${isMyMessage ? 'flex justify-end' : 'flex justify-start'}`}
         >
-          <MessageSimple
-            {...props}
-            // Only show avatar on the FIRST message of a group, and never for my own messages
-            hideAvatar={!isFirstInGroup || isMyMessage}
-            // Customizing components to keep it professional but functional
-            MessageFooter={() => (isLastInGroup) ? (
-              <div className={`text-[10px] opacity-40 mt-1 mb-2 ${isMyMessage ? 'mr-1 text-right' : 'ml-12 text-left'} font-medium`}>
-                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            ) : null}
-          />
+          <div
+            className={`message-scale-container transition-all duration-300 ${isWhisper ? 'opacity-60' : ''}`}
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: isMyMessage ? 'right bottom' : 'left bottom',
+              marginTop: isShout ? `${(scale - 1) * 20}px` : undefined,
+              marginBottom: isShout ? `${(scale - 1) * 20}px` : undefined,
+            }}
+          >
+            <div className={`relative ${isFirstInGroup ? (isMyMessage ? 'bubble-tail-me' : 'bubble-tail-others') : ''}`}>
+              <MessageSimple
+                {...props}
+                hideAvatar={!isFirstInGroup || isMyMessage}
+                // Force fully disable these to avoid ANY leakage
+                MessageHeader={() => null}
+                MessageTimestamp={() => null}
+                MessageStatus={() => null}
+                // Internal bubble layout
+                className={`
+                  ${isFirstInGroup ? (isMyMessage ? 'bubble-top-right' : 'bubble-top-left') : ''}
+                  ${!isLastInGroup ? 'mb-0.5' : 'mb-3'}
+                  custom-message-bubble
+                `}
+                MessageFooter={() => (
+                  <div className="absolute bottom-1 right-2 flex items-center gap-1 select-none pointer-events-none z-10">
+                    <span className={`text-[9.5px] font-bold tracking-tight ${isMyMessage ? 'text-white/80' : 'text-base-content/40'}`}>
+                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                    </span>
+                    {isMyMessage && (
+                      <div className="flex -space-x-1.5 translate-y-[1px]">
+                        <CheckCheck className={`size-3 ${message.status === 'received' || message.status === 'read' ? 'text-sky-300' : 'text-white/40'}`} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              />
+            </div>
+          </div>
         </div>
       )}
 
-      <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} -mt-1.5 mb-1`}>
-        {/* Emotion Badge - Subtle and only when needed */}
-        {emotion && emotionColors[emotion] && (
-          <div className="z-10 mb-0.5">
+      <div className={`flex flex-col ${isMyMessage ? "items-end mr-14" : "items-start ml-14"} -mt-1.5 mb-1 gap-1`}>
+        {/* Emotion Badge & Translation - Single Row */}
+        <div className="flex items-center gap-2">
+          {emotion && emotionColors[emotion] && (
             <span
-              className={`inline-block text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-sm border ${emotionColors[emotion]}`}
+              className={`text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-sm border shadow-sm ${emotionColors[emotion]}`}
             >
               {emotion}
             </span>
-          </div>
-        )}
+          )}
 
-        {/* Translation Link/Result */}
-        {message.text && (
-          <div className="flex flex-col items-start gap-1">
-            {!translatedText ? (
-              <button
-                onClick={handleTranslate}
-                className="text-[9px] flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity text-primary font-medium"
-                disabled={isTranslating}
-              >
-                {isTranslating ? (
-                  <Loader2 className="size-2.5 animate-spin" />
-                ) : (
-                  <>
-                    <Languages className="size-2.5" />
-                    Translate
-                    {!isPremium && <Star className="size-2 text-warning fill-warning opacity-70" />}
-                  </>
-                )}
-              </button>
-            ) : (
-              <div className="bg-base-200/50 px-2 py-1 rounded-md border border-base-300 max-w-[200px] animate-in fade-in slide-in-from-top-1 duration-300 text-left">
-                <p className="text-[10px] italic text-base-content/80 leading-tight">
-                  <Languages className="size-2 inline mr-1" />
-                  {translatedText}
-                </p>
-                <button
-                  onClick={() => setTranslatedText("")}
-                  className="text-[8px] text-primary hover:underline mt-0.5"
-                >
-                  Hide
-                </button>
-              </div>
-            )}
+          {message.text && !translatedText && (
+            <button
+              onClick={handleTranslate}
+              className="text-[9px] flex items-center gap-1 opacity-40 hover:opacity-100 transition-opacity text-primary font-bold"
+              disabled={isTranslating}
+            >
+              {isTranslating ? (
+                <Loader2 className="size-2.5 animate-spin" />
+              ) : (
+                <>
+                  <Languages className="size-2.5" />
+                  Translate
+                  {!isPremium && <Star className="size-2 text-warning fill-warning" />}
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Translation Result */}
+        {translatedText && (
+          <div className="bg-base-200/80 backdrop-blur-sm px-2.5 py-1.5 rounded-xl border border-base-300 max-w-[220px] animate-in slide-in-from-top-1 duration-300 shadow-sm relative group/trans">
+            <p className="text-[10px] italic text-base-content leading-tight pr-4">
+              <Languages className="size-2.5 inline mr-1 text-primary" />
+              {translatedText}
+            </p>
+            <button
+              onClick={() => setTranslatedText("")}
+              className="absolute top-1 right-1 text-primary hover:scale-110"
+              title="Hide"
+            >
+              ×
+            </button>
           </div>
         )}
       </div>

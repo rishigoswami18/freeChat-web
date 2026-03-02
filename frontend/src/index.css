@@ -7,13 +7,13 @@
 /* ===== Global Typography & Defaults ===== */
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   width: 100%;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
-  scroll-behavior: smooth;
-  height: 100%;
+  height: 100dvh;
+  overscroll-behavior: none;
 }
 
 * {
@@ -25,8 +25,8 @@ body {
 
 #root {
   width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 ::selection {
@@ -287,106 +287,127 @@ body {
 
 /* Ensure global layout doesn't fight with chat layout */
 .chat-page-root {
-  height: calc(100vh - 4rem) !important;
-  /* PC Height */
+  height: 100dvh !important;
+  width: 100vw !important;
+  display: flex;
+  flex-direction: column;
+  position: fixed !important;
+  inset: 0 !important;
+  overflow: hidden !important;
+  z-index: 9999;
 }
 
-@media (max-width: 1024px) {
-  .chat-page-root {
-    height: calc(100dvh - 3.5rem) !important;
-    /* Mobile Height */
+
+
+/* ===== Message Bubble Styling (WhatsApp/Telegram Inspired) ===== */
+.str-chat__message-simple {
+  margin-bottom: 2px !important;
+}
+
+.str-chat__message-simple-text-inner {
+  border-radius: 12px !important;
+  padding: 8px 12px 6px 12px !important;
+  position: relative !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  transition: transform 0.2s ease;
+  max-width: 85% !important;
+}
+
+@media (min-width: 640px) {
+  .str-chat__message-simple-text-inner {
+    max-width: 70% !important;
+    padding: 10px 16px 8px 16px !important;
+    border-radius: 16px !important;
   }
 }
 
-
-
-/* ===== Message Bubble Styling ===== */
-.str-chat__message-simple-text-inner {
-  border-radius: 18px !important;
-  font-size: inherit !important;
-  line-height: 1.5 !important;
-  font-family: 'Inter', sans-serif !important;
-  display: flex !important;
-  flex-direction: column !important;
+/* Specific radius for first/last in group (defined in React but supported here) */
+.bubble-top-left {
+  border-top-left-radius: 4px !important;
 }
 
-/* 
-  🔥 ULTRA AGGRESSIVE OVERRIDE 🔥
-  Stream default styles use 14px !important everywhere.
-  We must force inherit down to the deepest level for Whisper/Shout.
-*/
-.message-scale-container .str-chat__message-simple-text-inner,
-.message-scale-container .str-chat__message-text-inner,
-.message-scale-container .str-chat__message-simple-text-inner p,
-.message-scale-container .str-chat__message-text-inner p,
-.message-scale-container .str-chat__message-text-inner span,
+.bubble-top-right {
+  border-top-right-radius: 4px !important;
+}
+
+.str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  background: oklch(var(--b2)) !important;
+  color: oklch(var(--bc)) !important;
+  border: 1px solid oklch(var(--bc) / 0.05) !important;
+  border-bottom-left-radius: 16px !important;
+}
+
+.str-chat__message-simple--me .str-chat__message-simple-text-inner {
+  background: oklch(var(--p)) !important;
+  color: oklch(var(--pc)) !important;
+  border: none !important;
+  border-bottom-right-radius: 16px !important;
+}
+
+/* Whisper/Shout aggressive override */
 .message-scale-container .str-chat__message-simple-text-inner * {
   font-size: inherit !important;
   line-height: 1.4 !important;
 }
 
-.str-chat__message-simple--others .str-chat__message-simple-text-inner,
-.str-chat__message-simple--others .str-chat__message-text-inner {
-  background: oklch(var(--b3)) !important;
-  color: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid oklch(var(--p) / 0.1) !important;
-  box-shadow: 0 1px 4px -2px rgba(0, 0, 0, 0.2);
+/* Bubble Tail (WhatsApp style) - Only on first message of a group */
+.bubble-tail-others::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-right: 12px solid oklch(var(--b2));
+  border-bottom: 12px solid transparent;
+  z-index: -1;
 }
 
-.str-chat__message-simple--me .str-chat__message-simple-text-inner,
-.str-chat__message-simple--me .str-chat__message-text-inner {
-  background: oklch(var(--p)) !important;
-  color: oklch(var(--pc)) !important;
-  border: 1px solid oklch(var(--p) / 0.5) !important;
-  box-shadow: 0 2px 8px -4px oklch(var(--p) / 0.4);
-}
-
-/* Forcing specific bubble overrides for mobile */
-@media (max-width: 640px) {
-  .str-chat__message-simple-text-inner {
-    padding: 8px 12px !important;
-    margin: 0 !important;
-  }
-
-  .str-chat__message-simple {
-    margin: 4px 0 !important;
-  }
+.bubble-tail-me::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 12px solid oklch(var(--p));
+  border-bottom: 12px solid transparent;
+  z-index: -1;
 }
 
 /* ===== Quoted Message (Reply) Styling ===== */
 .str-chat__quoted-message-preview,
 .str-chat__message-replied {
-  background: rgba(0, 0, 0, 0.2) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
   border-left: 3px solid oklch(var(--p)) !important;
-  padding: 8px 12px !important;
-  margin-bottom: 8px !important;
-  border-radius: 8px !important;
-  font-size: 13px !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.str-chat__quoted-message-preview {
-  color: oklch(var(--bc) / 0.6) !important;
-}
-
-.str-chat__message-replied .str-chat__message-simple-text-inner {
-  background: transparent !important;
-  padding: 0 !important;
-  color: oklch(var(--bc)) !important;
+  padding: 6px 10px !important;
+  margin-bottom: 6px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
 }
 
 .str-chat__message-simple--me .str-chat__quoted-message-preview {
-  background: oklch(var(--pc) / 0.1) !important;
-  color: oklch(var(--pc) / 0.8) !important;
-  border-left-color: oklch(var(--pc) / 0.5) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-left-color: rgba(255, 255, 255, 0.5) !important;
+  color: white !important;
 }
 
 /* ===== Premium Chat Background & Wallpaper ===== */
 .premium-chat-bg {
   background-color: oklch(var(--b1));
-  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
-  /* subtle pattern */
+  background-image:
+    linear-gradient(rgba(var(--b1-rgb), 0.94), rgba(var(--b1-rgb), 0.94)),
+    url("https://w7.pngwing.com/pngs/414/83/png-transparent-whatsapp-social-media-icons-pattern-whatsapp-miscellaneous-monochrome-computer-wallpaper-thumbnail.png");
+  background-size: 400px;
+  background-repeat: repeat;
   background-attachment: fixed;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* For dark mode we might need to invert it */
+[data-theme="dark"] .premium-chat-bg {
+  filter: invert(0.1) brightness(0.8);
 }
 
 .chat-container-glass {
@@ -396,24 +417,27 @@ body {
 }
 
 .chat-input-glass {
-  background: oklch(var(--b2) / 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: oklch(var(--b1) / 0.8);
+  backdrop-filter: blur(25px) saturate(160%);
+  -webkit-backdrop-filter: blur(25px) saturate(160%);
   border-top: 1px solid oklch(var(--bc) / 0.08);
 }
 
-/* Custom Message Bubble Shapes */
-.str-chat__message-simple--others .str-chat__message-simple-text-inner {
-  border-bottom-left-radius: 4px !important;
+/* Custom Message Bubble Shapes (Tails handled by pseudo-elements) */
+.str-chat__message-simple--others .str-chat__message-simple-message {
+  margin-left: 0 !important;
 }
 
-.str-chat__message-simple--me .str-chat__message-simple-text-inner {
-  border-bottom-right-radius: 4px !important;
+.str-chat__message-simple--me .str-chat__message-simple-message {
+  margin-right: 0 !important;
 }
 
 /* ===== Hide default channel header (we use custom) ===== */
-.str-chat__header-livestream {
-  display: none;
+.str-chat__header-livestream,
+.str-chat__message-header,
+.str-chat__message-simple-name,
+.str-chat__message-simple-timestamp {
+  display: none !important;
 }
 
 /* ===== Emotion Badge Animation ===== */

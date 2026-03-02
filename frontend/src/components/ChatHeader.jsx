@@ -146,35 +146,35 @@ function ChatHeader() {
     };
 
     return (
-        <div className="flex items-center justify-between px-2.5 sm:px-4 py-2 sm:py-3 border-b border-base-300/30 bg-base-100 relative z-[100] shadow-sm w-full flex-shrink-0 chat-header-locked select-none overflow-hidden">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 overflow-hidden">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 border-b border-base-300/20 bg-base-100/90 backdrop-blur-md relative z-[100] shadow-sm w-full flex-shrink-0 chat-header-locked select-none overflow-hidden transition-all">
+            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 overflow-hidden">
                 <button
                     onClick={() => navigate("/inbox")}
-                    className="flex-shrink-0 btn btn-ghost btn-xs sm:btn-sm btn-circle hover:bg-base-300"
+                    className="flex-shrink-0 btn btn-ghost btn-xs sm:btn-sm btn-circle hover:bg-primary/10 text-primary transition-colors"
                     aria-label="Go back to inbox"
                 >
-                    <ArrowLeft className="size-5" />
+                    <ArrowLeft className="size-5 sm:size-6" />
                 </button>
 
-                <div className="relative flex-shrink-0">
+                <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/profile/${user?.id}`)}>
                     <div className="avatar">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full ring-2 ring-primary/20 overflow-hidden">
-                            <img src={displayData.image} alt={displayData.name} />
+                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all overflow-hidden bg-base-300">
+                            <img src={displayData.image} alt={displayData.name} className="object-cover" />
                         </div>
                     </div>
                     {isOnline && !isGroup && (
-                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-100 dot-pulse" />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100 shadow-sm dot-pulse" />
                     )}
                 </div>
 
-                <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-sm leading-tight truncate">
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                    <h3 className="font-extrabold text-[14px] sm:text-[16px] leading-tight truncate tracking-tight text-base-content/90">
                         {displayData.name}
                     </h3>
                     <p
-                        className={`text-[10px] sm:text-[11px] font-medium truncate ${isOnline && !isGroup
-                            ? "text-success"
-                            : "text-base-content/40"
+                        className={`text-[10px] sm:text-[12px] font-semibold truncate tracking-wide ${isOnline && !isGroup
+                            ? "text-success animate-pulse"
+                            : "text-base-content/50"
                             }`}
                     >
                         {isGroup
