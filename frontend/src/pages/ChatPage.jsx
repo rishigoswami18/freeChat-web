@@ -27,6 +27,8 @@ import VoiceRecorder from "../components/VoiceRecorder";
 
 
 
+import SmartReply from "../components/SmartReply";
+
 const ChatPage = () => {
   const { id: targetUserId } = useParams();
 
@@ -114,7 +116,10 @@ const ChatPage = () => {
     initChannel();
   }, [chatClient, targetUserId, authUser]);
 
-  // Intercept message sends at Channel level for emotion detection
+  const [fontSize, setFontSize] = useState(1);
+  const [showShoutSlider, setShowShoutSlider] = useState(false);
+
+  // Intercept message sends at Channel level for emotion detection and Allo features
   const doSendMessageRequest = async (channelObj, message) => {
     // If it's already a snap, skip emotion detection
     if (message.isSnap) {
@@ -133,12 +138,31 @@ const ChatPage = () => {
         ...message,
         text: `${emoji} ${message.text}`,
         emotion: emotion,
+        fontSize: fontSize, // Google Allo Whisper/Shout
+        extra_data: {
+          ...message.extra_data,
+          fontSize: fontSize
+        }
       };
+
+      // Reset font size after sending
+      setFontSize(1);
+      setShowShoutSlider(false);
 
       return await channelObj.sendMessage(enrichedMessage);
     } catch (error) {
       console.error("Emotion detection failed, sending plain message:", error);
-      return await channelObj.sendMessage(message);
+      const enrichedMessage = {
+        ...message,
+        fontSize: fontSize,
+        extra_data: {
+          ...message.extra_data,
+          fontSize: fontSize
+        }
+      };
+      setFontSize(1);
+      setShowShoutSlider(false);
+      return await channelObj.sendMessage(enrichedMessage);
     }
   };
 
@@ -158,57 +182,100 @@ const ChatPage = () => {
                 <MessageList Message={EmotionMessage} />
               </div>
 
+              {/* Google Allo Smart Reply */}
+              <div className="mx-auto w-full max-w-5xl px-2 sm:px-4">
+                <SmartReply
+                  channel={channel}
+                  onSelect={(text) => {
+                    channel.sendMessage({ text, fontSize: 1 });
+                  }}
+                />
+              </div>
+
               {/* Premium Input Container */}
               <div className="safe-area-bottom chat-input-glass animate-in slide-in-from-bottom-5 duration-500">
-                <div className="flex items-end gap-2 p-2 sm:p-3 max-w-5xl mx-auto">
-                  <div className="flex-1 min-w-0 bg-base-100/30 rounded-2xl border border-base-300/30 focus-within:border-primary/50 transition-all shadow-sm">
-                    <MessageInput focus grow />
-                  </div>
-
-                  <div className="flex items-center gap-1.5 pb-1">
-                    <div className="flex items-center gap-1 bg-base-300/30 p-1 rounded-full border border-base-300/20">
-                      <VoiceRecorder
-                        onSend={async (data) => {
-                          if (!channel) return;
-                          try {
-                            await channel.sendMessage({
-                              text: "Sent a voice message",
-                              isVoice: true,
-                              mediaUrl: data.url,
-                              mediaType: "audio",
-                              duration: data.duration,
-                            });
-                          } catch (error) {
-                            console.error("Error sending voice message:", error);
-                            toast.error("Failed to send voice message");
-                          }
-                        }}
+                <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-5xl mx-auto">
+                  {/* Whisper/Shout Slider */}
+                  {showShoutSlider && (
+                    <div className="flex items-center gap-4 bg-base-200/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-primary/20 animate-in zoom-in-95 duration-200">
+                      <span className="text-[10px] font-bold text-primary opacity-70 uppercase tracking-widest">Whisper</span>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="2.5"
+                        step="0.1"
+                        value={fontSize}
+                        onChange={(e) => setFontSize(parseFloat(e.target.value))}
+                        className="range range-primary range-xs flex-1"
                       />
-
-                      <button
-                        onClick={handleSnapClick}
-                        disabled={isUploading}
-                        className="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 text-primary transition-all flex items-center justify-center p-0 min-h-0 size-9 active:scale-90"
-                        title="Send a Snap"
+                      <span className="text-[10px] font-bold text-primary opacity-70 uppercase tracking-widest">Shout</span>
+                      <div
+                        className="size-8 flex items-center justify-center font-bold bg-primary text-primary-content rounded-full text-xs shadow-lg transition-all"
+                        style={{ transform: `scale(${fontSize * 0.5 + 0.5})` }}
                       >
-                        {isUploading ? (
-                          <Loader2 className="size-4.5 animate-spin" />
-                        ) : (
-                          <Camera className="size-4.5" />
-                        )}
-                      </button>
+                        A
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1 min-w-0 bg-base-100/30 rounded-2xl border border-base-300/30 focus-within:border-primary/50 transition-all shadow-sm">
+                      <MessageInput focus grow />
+                    </div>
+
+                    <div className="flex items-center gap-1.5 pb-1">
+                      <div className="flex items-center gap-1 bg-base-300/30 p-1 rounded-full border border-base-300/20">
+                        <button
+                          onClick={() => setShowShoutSlider(!showShoutSlider)}
+                          className={`btn btn-circle btn-sm btn-ghost transition-all flex items-center justify-center p-0 min-h-0 size-9 ${showShoutSlider ? 'bg-primary text-white' : 'text-primary hover:bg-primary/20'}`}
+                          title="Whisper or Shout"
+                        >
+                          <span className="font-bold text-xs">A<span className="text-[10px]">A</span></span>
+                        </button>
+
+                        <VoiceRecorder
+                          onSend={async (data) => {
+                            if (!channel) return;
+                            try {
+                              await channel.sendMessage({
+                                text: "Sent a voice message",
+                                isVoice: true,
+                                mediaUrl: data.url,
+                                mediaType: "audio",
+                                duration: data.duration,
+                              });
+                            } catch (error) {
+                              console.error("Error sending voice message:", error);
+                              toast.error("Failed to send voice message");
+                            }
+                          }}
+                        />
+
+                        <button
+                          onClick={handleSnapClick}
+                          disabled={isUploading}
+                          className="btn btn-circle btn-sm btn-ghost hover:bg-primary/20 text-primary transition-all flex items-center justify-center p-0 min-h-0 size-9 active:scale-90"
+                          title="Send a Snap"
+                        >
+                          {isUploading ? (
+                            <Loader2 className="size-4.5 animate-spin" />
+                          ) : (
+                            <Camera className="size-4.5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
-
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*,video/*"
-                    onChange={handleFileChange}
-                  />
                 </div>
               </div>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*,video/*"
+                onChange={handleFileChange}
+              />
             </Window>
             <Thread />
           </div>
