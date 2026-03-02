@@ -169,7 +169,7 @@ const ChatPage = () => {
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-base-100 text-base-content relative overflow-hidden">
+    <div className="flex-1 flex flex-col min-h-0 bg-base-100 text-base-content relative overflow-hidden h-full">
       {/* Premium Wallpaper Overlay */}
       <div className="absolute inset-0 premium-chat-bg opacity-30 pointer-events-none" />
 
