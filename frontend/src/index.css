@@ -245,32 +245,41 @@ body {
 .str-chat__message-simple-text-inner {
   border-radius: 18px !important;
   font-size: inherit !important;
-  /* Changed from 14px to respect scaling */
   line-height: 1.5 !important;
   font-family: 'Inter', sans-serif !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* 
+  🔥 ULTRA AGGRESSIVE OVERRIDE 🔥
+  Stream default styles use 14px !important everywhere.
+  We must force inherit down to the deepest level for Whisper/Shout.
+*/
+.message-scale-container .str-chat__message-simple-text-inner,
+.message-scale-container .str-chat__message-text-inner,
+.message-scale-container .str-chat__message-simple-text-inner p,
+.message-scale-container .str-chat__message-text-inner p,
+.message-scale-container .str-chat__message-text-inner span,
+.message-scale-container .str-chat__message-simple-text-inner * {
+  font-size: inherit !important;
+  line-height: 1.4 !important;
 }
 
 .str-chat__message-simple--others .str-chat__message-simple-text-inner,
-.str-chat__message-simple--others .str-chat__message-text-inner,
-.str-chat__message-simple--others .str-chat__message-simple-text-inner p,
-.str-chat__message-simple--others .str-chat__message-text-inner p {
+.str-chat__message-simple--others .str-chat__message-text-inner {
   background: oklch(var(--b3)) !important;
-  color: #ffffff !important;
   color: rgba(255, 255, 255, 0.95) !important;
   border: 1px solid oklch(var(--p) / 0.1) !important;
   box-shadow: 0 1px 4px -2px rgba(0, 0, 0, 0.2);
-  font-size: inherit !important;
 }
 
 .str-chat__message-simple--me .str-chat__message-simple-text-inner,
-.str-chat__message-simple--me .str-chat__message-text-inner,
-.str-chat__message-simple--me .str-chat__message-simple-text-inner p,
-.str-chat__message-simple--me .str-chat__message-text-inner p {
+.str-chat__message-simple--me .str-chat__message-text-inner {
   background: oklch(var(--p)) !important;
   color: oklch(var(--pc)) !important;
   border: 1px solid oklch(var(--p) / 0.5) !important;
   box-shadow: 0 2px 8px -4px oklch(var(--p) / 0.4);
-  font-size: inherit !important;
 }
 
 /* Forcing specific bubble overrides for mobile */

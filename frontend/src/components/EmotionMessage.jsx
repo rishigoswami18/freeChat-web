@@ -162,8 +162,16 @@ const EmotionMessage = (props) => {
   const isLastInGroup = groupStyles.includes("bottom") || groupStyles.includes("single");
   // isMyMessage is already declared above, just use it.
 
+  const messageFontSize = Number(message?.extra_data?.fontSize || message?.fontSize || 1);
+  // Clamp scale between 0.5 and 2.5 for safety
+  const scale = Math.min(2.5, Math.max(0.5, messageFontSize));
+  const isWhisper = scale < 0.9;
+  const isShout = scale > 1.3;
+
   return (
-    <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}>
+    <div
+      className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}
+    >
       {isSnap ? (
         <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
           {isViewed ? (
@@ -200,8 +208,13 @@ const EmotionMessage = (props) => {
         </div>
       ) : (
         <div
-          className={`transition-all duration-500 ${message?.extra_data?.fontSize < 1 ? 'opacity-60 italic' : ''} ${message?.extra_data?.fontSize > 1.5 ? 'drop-shadow-md font-bold' : ''}`}
-          style={{ fontSize: `${message?.extra_data?.fontSize || message?.fontSize || 1}rem` }}
+          className={`transition-all duration-300 ${isWhisper ? 'opacity-60' : ''} ${isShout ? 'drop-shadow-xl' : ''}`}
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: isMyMessage ? 'right center' : 'left center',
+            marginTop: isShout ? `${(scale - 1) * 12}px` : undefined,
+            marginBottom: isShout ? `${(scale - 1) * 12}px` : undefined,
+          }}
         >
           <MessageSimple
             {...props}
