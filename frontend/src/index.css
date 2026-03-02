@@ -241,6 +241,24 @@ body {
   color: rgba(255, 255, 255, 0.4) !important;
 }
 
+/* ===== Chat Header - Always Fixed on Top (Mobile + Desktop) ===== */
+.chat-header-locked {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background: oklch(var(--b1)) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* Prevent Stream's Window from adding its own scroll to header */
+.str-chat__main-panel-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
 /* ===== Message Bubble Styling ===== */
 .str-chat__message-simple-text-inner {
   border-radius: 18px !important;
