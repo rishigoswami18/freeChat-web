@@ -176,13 +176,13 @@ const ChatPage = () => {
       <Chat client={chatClient} theme="messaging light">
         <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
           <div className="flex-1 flex flex-col min-h-0 relative z-10 glass-panel border-0 rounded-none h-full max-w-full overflow-hidden">
-            {/* Chat Header - FIXED at top, never scrolls */}
-            <div className="flex-shrink-0 sticky top-0 z-[100]">
+            {/* Chat Header - ABSOLUTELY FIXED at top */}
+            <div className="absolute top-0 left-0 right-0 z-[999] bg-base-100 border-b border-base-300/30">
               <ChatHeader />
             </div>
 
             <Window>
-              <div className="flex-1 overflow-hidden relative">
+              <div className="flex-1 overflow-hidden relative mt-[60px] sm:mt-[72px]">
                 <MessageList Message={EmotionMessage} />
               </div>
 
