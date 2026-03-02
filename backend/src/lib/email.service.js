@@ -1,4 +1,10 @@
 import nodemailer from "nodemailer";
+import dns from "dns";
+
+// CRITICAL FIX: Render free tier doesn't support IPv6 outbound connections.
+// Gmail SMTP resolves to IPv6 by default, causing ENETUNREACH error.
+// Force Node.js to prefer IPv4 addresses when resolving DNS.
+dns.setDefaultResultOrder("ipv4first");
 
 /**
  * Send an email notification for a support message
