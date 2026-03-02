@@ -4,65 +4,67 @@ import nodemailer from "nodemailer";
  * Send an email notification for a support message
  */
 export const sendSupportEmail = async (fullName, email, message) => {
-    try {
-        // Log env vars presence (not values) for debugging on production
-        console.log("[Email Debug] SMTP_HOST:", process.env.SMTP_HOST || "(not set, using smtp.gmail.com)");
-        console.log("[Email Debug] SMTP_USER:", process.env.SMTP_USER ? "✅ set" : "❌ MISSING");
-        console.log("[Email Debug] SMTP_PASS:", process.env.SMTP_PASS ? "✅ set" : "❌ MISSING");
-        console.log("[Email Debug] OWNER_EMAIL:", process.env.OWNER_EMAIL || "(not set, fallback to SMTP_USER)");
+    // 1. Primary Configuration (Port 465 - SSL)
+    const config465 = {
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        tls: { rejectUnauthorized: false }
+    };
 
-        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-            console.error("CRITICAL: SMTP_USER or SMTP_PASS is missing! Email cannot be sent.");
-            throw new Error("SMTP credentials missing in environment variables");
-        }
+    // 2. Fallback Configuration (Port 587 - STARTTLS)
+    const config587 = {
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: 587,
+        secure: false, // TLS
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+        tls: { rejectUnauthorized: false }
+    };
 
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || "smtp.gmail.com",
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
-
-        // Verify SMTP connection before sending
-        await transporter.verify();
-        console.log("[Email Debug] SMTP connection verified ✅");
-
+    async function attemptSend(config, label) {
+        console.log(`[Email] Attempting via ${label}...`);
+        const transporter = nodemailer.createTransport(config);
         const recipientEmail = process.env.OWNER_EMAIL || process.env.SMTP_USER;
-        console.log("[Email Debug] Sending to:", recipientEmail);
 
         const mailOptions = {
             from: `"freeChat Support" <${process.env.SMTP_USER}>`,
             to: recipientEmail,
-            replyTo: email, // So you can reply directly to the user
+            replyTo: email,
             subject: `New Support Message from ${fullName}`,
-            text: `You have a new support message:\n\nName: ${fullName}\nEmail: ${email}\nMessage: ${message}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                    <h2 style="color: #6366f1;">New Support Message</h2>
-                    <p><strong>Name:</strong> ${fullName}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <hr />
-                    <p><strong>Message:</strong></p>
-                    <div style="background: #f4f4f4; padding: 15px; border-radius: 5px;">
-                        ${message}
-                    </div>
-                </div>
-            `,
+            text: `Name: ${fullName}\nEmail: ${email}\nMessage: ${message}`,
+            html: `<p><strong>Name:</strong> ${fullName}</p><p><strong>Email:</strong> ${email}</p><hr/><p>${message}</p>`
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully: %s", info.messageId);
+        return await transporter.sendMail(mailOptions);
+    }
+
+    try {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            throw new Error("SMTP_USER or SMTP_PASS missing in env");
+        }
+        // Try 465 first
+        const info = await attemptSend(config465, "Port 465 (SSL)");
+        console.log("Email sent successfully via 465:", info.messageId);
         return info;
     } catch (error) {
-        console.error("Error sending email:", error.message);
-        console.error("Full error:", error);
-        throw error;
+        console.warn("Port 465 failed, trying Port 587 fallback...", error.message);
+        try {
+            const info = await attemptSend(config587, "Port 587 (STARTTLS)");
+            console.log("Email sent successfully via 587:", info.messageId);
+            return info;
+        } catch (fallbackError) {
+            console.error("All email attempts failed.");
+            console.error("Primary Error:", error.message);
+            console.error("Fallback Error:", fallbackError.message);
+            throw fallbackError;
+        }
     }
 };
 
