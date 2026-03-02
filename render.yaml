@@ -11,20 +11,4 @@ services:
         value: 5001
       - key: NODE_ENV
         value: production
-      - key: ML_API_URL
-        fromService:
-          name: freechat-ml
-          type: web
-          property: host
-
-  # Python ML Service for Emotion Detection & Translation
-  - type: web
-    name: freechat-ml
-    env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app:app --host 0.0.0.0 --port 8000
-    rootDir: ml_service
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.0
+      # Note: HF_TOKEN and other secrets should be added via Render Dashboard UI
