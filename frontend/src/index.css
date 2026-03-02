@@ -241,22 +241,61 @@ body {
   color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* ===== Chat Header - Always Fixed on Top (Sticky) ===== */
-.chat-header-locked {
-  position: sticky !important;
-  z-index: 100 !important;
-  background: oklch(var(--b1)) !important;
-}
+/* ===== Professional App-Shell Chat Layout ===== */
+/* This makes the Chat feel like a native app (WhatsApp/Telegram style) */
 
-/* Ensure ChatPage content can grow naturally */
-.str-chat.messaging {
-  height: auto !important;
-  min-height: 100% !important;
-}
-
+/* 1. Reset root containers to be exactly the viewport height */
+.str-chat-channel,
+.str-chat-channel>div,
 .str-chat__container {
-  height: auto !important;
-  min-height: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* 2. Fix the Window/Main Panel layout */
+.str-chat__main-panel,
+.str-chat__main-panel-inner {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 3. The Message List is the ONLY thing that scrolls */
+.str-chat__list {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  background-attachment: fixed !important;
+}
+
+/* 4. Chat Header & Message Input stay pinned */
+.chat-header-locked {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 50 !important;
+}
+
+.str-chat__message-input {
+  flex-shrink: 0 !important;
+  background: transparent !important;
+}
+
+/* Ensure global layout doesn't fight with chat layout */
+.chat-page-root {
+  height: calc(100vh - 4rem) !important;
+  /* PC Height */
+}
+
+@media (max-width: 1024px) {
+  .chat-page-root {
+    height: calc(100dvh - 3.5rem) !important;
+    /* Mobile Height */
+  }
 }
 
 

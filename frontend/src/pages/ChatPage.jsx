@@ -169,19 +169,23 @@ const ChatPage = () => {
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-base-100 text-base-content relative">
+    <div className="chat-page-root flex-1 flex flex-col min-h-0 bg-base-100 text-base-content relative overflow-hidden">
+      {/* Wallpaper */}
       <div className="absolute inset-0 premium-chat-bg opacity-30 pointer-events-none" />
 
       <Chat client={chatClient} theme="messaging light">
         <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
-          <div className="flex-1 flex flex-col min-h-0 relative z-10 glass-panel border-0 rounded-none max-w-full">
-            {/* Chat Header: Sticky right under the global navbar */}
-            <div className="sticky top-14 lg:top-16 z-[100] bg-base-100 border-b border-base-300/30">
-              <ChatHeader />
-            </div>
-
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden h-full z-10 glass-panel border-0 rounded-none max-w-full">
             <Window>
-              <MessageList Message={EmotionMessage} />
+              {/* Chat Header: Fixed at top via CSS flex-shrink-0 */}
+              <div className="flex-shrink-0 chat-header-locked border-b border-base-300/30">
+                <ChatHeader />
+              </div>
+
+              {/* Message List: Middle area that scrolls */}
+              <div className="flex-1 overflow-hidden relative">
+                <MessageList Message={EmotionMessage} />
+              </div>
 
               {/* Google Allo Smart Reply */}
               <div className="mx-auto w-full max-w-5xl px-2 sm:px-4">

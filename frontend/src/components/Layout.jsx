@@ -21,7 +21,7 @@ const Layout = ({ children, showSidebar = false, showFooter = true }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="pt-14 pb-20 lg:pt-16 lg:pb-0 flex-1"
+            className={`flex-1 flex flex-col pt-14 lg:pt-16 ${showFooter ? "pb-20 lg:pb-0" : ""}`}
           >
             {children}
           </motion.main>
