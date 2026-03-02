@@ -5,12 +5,9 @@ import nodemailer from "nodemailer";
  */
 export const sendSupportEmail = async (fullName, email, message) => {
     try {
-        // Create a transporter using SMTP
-        const isSecure = process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465";
-
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: 465, // Use 465 for SSL instead of 587 for Render
+            host: process.env.SMTP_HOST || "smtp.gmail.com",
+            port: 465,
             secure: true,
             auth: {
                 user: process.env.SMTP_USER,
@@ -48,16 +45,15 @@ export const sendSupportEmail = async (fullName, email, message) => {
         throw error;
     }
 };
+
 /**
  * Send an OTP email for account verification
  */
 export const sendOTPEmail = async (email, otp) => {
     try {
-        const isSecure = process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465";
-
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: 465, // Use 465 for SSL instead of 587 for Render
+            host: process.env.SMTP_HOST || "smtp.gmail.com",
+            port: 465,
             secure: true,
             auth: {
                 user: process.env.SMTP_USER,
@@ -102,16 +98,15 @@ export const sendOTPEmail = async (email, otp) => {
         throw error;
     }
 };
+
 /**
  * Send an OTP email for password reset
  */
 export const sendResetPasswordEmail = async (email, otp) => {
     try {
-        const isSecure = process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465";
-
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: 465, // Use 465 for SSL instead of 587 for Render
+            host: process.env.SMTP_HOST || "smtp.gmail.com",
+            port: 465,
             secure: true,
             auth: {
                 user: process.env.SMTP_USER,
