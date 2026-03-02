@@ -5,6 +5,17 @@ import nodemailer from "nodemailer";
  */
 export const sendSupportEmail = async (fullName, email, message) => {
     try {
+        // Log env vars presence (not values) for debugging on production
+        console.log("[Email Debug] SMTP_HOST:", process.env.SMTP_HOST || "(not set, using smtp.gmail.com)");
+        console.log("[Email Debug] SMTP_USER:", process.env.SMTP_USER ? "✅ set" : "❌ MISSING");
+        console.log("[Email Debug] SMTP_PASS:", process.env.SMTP_PASS ? "✅ set" : "❌ MISSING");
+        console.log("[Email Debug] OWNER_EMAIL:", process.env.OWNER_EMAIL || "(not set, fallback to SMTP_USER)");
+
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            console.error("CRITICAL: SMTP_USER or SMTP_PASS is missing! Email cannot be sent.");
+            throw new Error("SMTP credentials missing in environment variables");
+        }
+
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || "smtp.gmail.com",
             port: 465,
@@ -18,9 +29,17 @@ export const sendSupportEmail = async (fullName, email, message) => {
             }
         });
 
+        // Verify SMTP connection before sending
+        await transporter.verify();
+        console.log("[Email Debug] SMTP connection verified ✅");
+
+        const recipientEmail = process.env.OWNER_EMAIL || process.env.SMTP_USER;
+        console.log("[Email Debug] Sending to:", recipientEmail);
+
         const mailOptions = {
             from: `"freeChat Support" <${process.env.SMTP_USER}>`,
-            to: process.env.OWNER_EMAIL || process.env.SMTP_USER, // Send to owner
+            to: recipientEmail,
+            replyTo: email, // So you can reply directly to the user
             subject: `New Support Message from ${fullName}`,
             text: `You have a new support message:\n\nName: ${fullName}\nEmail: ${email}\nMessage: ${message}`,
             html: `
@@ -38,10 +57,11 @@ export const sendSupportEmail = async (fullName, email, message) => {
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent: %s", info.messageId);
+        console.log("Email sent successfully: %s", info.messageId);
         return info;
     } catch (error) {
-        console.error("Error sending email:", error);
+        console.error("Error sending email:", error.message);
+        console.error("Full error:", error);
         throw error;
     }
 };
