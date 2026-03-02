@@ -109,14 +109,12 @@ const ChatPage = () => {
   };
 
   useEffect(() => {
-    // Lock body scroll when entering chat page
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
+    // Lock body scroll when entering chat page using a reliable class
+    document.body.classList.add("is-chat-active");
 
     return () => {
       // Re-enable body scroll when leaving chat page
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+      document.body.classList.remove("is-chat-active");
     };
   }, []);
 
