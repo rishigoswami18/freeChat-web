@@ -5,39 +5,100 @@ const HUGGINGFACE_API_URL = "https://router.huggingface.co/hf-inference/models/m
 
 // ========== LOCAL KEYWORD-BASED FALLBACK ==========
 // This ensures emotion detection ALWAYS works, even without Hugging Face API
+// Supports: English, Hindi (Devanagari), and Hinglish (Romanized Hindi)
 const emotionKeywords = {
   joy: [
+    // English
     "happy", "glad", "excited", "awesome", "amazing", "great", "wonderful", "fantastic",
     "joy", "delighted", "cheerful", "thrilled", "yay", "haha", "lol", "lmao", "rofl",
     "nice", "good", "best", "love it", "perfect", "brilliant", "excellent", "superb",
-    "khush", "maza", "badhiya", "shandar", "zabardast", "mast", "accha", "sahi"
+    "blessed", "grateful", "celebrate", "congrats", "congratulations", "winning", "won",
+    // Hindi (Devanagari)
+    "खुश", "खुशी", "मज़ा", "बहुत अच्छा", "शानदार", "ज़बरदस्त", "मस्त", "बढ़िया",
+    "वाह", "जीत", "धन्यवाद", "शुक्रिया", "आनंद", "हर्ष", "प्रसन्न", "उत्साह",
+    // Hinglish (Romanized Hindi)
+    "khush", "khushi", "maza", "mazaa", "badhiya", "shandar", "zabardast", "mast",
+    "accha", "achha", "sahi", "shandaar", "badiya", "kamaal", "jeet", "bohot accha",
+    "bahut accha", "dhamaal", "balle balle", "wahh", "waah", "yaar maza aaya",
+    "😄", "😊", "🎉", "😁", "🥳", "✨"
   ],
   love: [
+    // English
     "love", "heart", "adore", "darling", "sweetheart", "babe", "baby", "miss you",
     "crush", "beautiful", "gorgeous", "handsome", "cute", "kiss", "hug", "romantic",
-    "pyaar", "mohabbat", "ishq", "dil", "jaanu", "jaan", "😘", "❤️", "💕", "💖", "😍"
+    "soulmate", "forever", "marry", "beloved", "affection", "caring",
+    // Hindi (Devanagari)
+    "प्यार", "मोहब्बत", "इश्क़", "दिल", "जान", "जानू", "चाहत", "प्रेम",
+    "सुंदर", "खूबसूरत", "प्यारा", "प्यारी", "दिलरुबा", "माशूक", "महबूब",
+    "चुम्मा", "गले लगा", "याद आती है",
+    // Hinglish
+    "pyaar", "pyar", "mohabbat", "ishq", "ishk", "dil", "jaanu", "jaan",
+    "chahat", "prem", "sundar", "khoobsurat", "pyaara", "pyaari", "dilruba",
+    "mashook", "mehboob", "chumma", "gale laga", "yaad aati hai", "i love u",
+    "luv u", "luv you", "tumse pyaar", "tujhse pyar", "dil se",
+    "😘", "❤️", "💕", "💖", "😍", "🥰", "💗", "💞", "💓", "😻"
   ],
   sadness: [
+    // English
     "sad", "cry", "depressed", "lonely", "heartbroken", "miss", "sorry", "unhappy",
     "pain", "hurt", "tears", "broken", "lost", "alone", "suffering", "grief",
-    "dukh", "rona", "udaas", "tanha", "😢", "😭", "💔"
+    "miserable", "hopeless", "helpless", "disappointed", "regret", "sorrow",
+    // Hindi (Devanagari)
+    "दुख", "दुखी", "रोना", "उदास", "तन्हा", "अकेला", "अकेली", "दर्द",
+    "तकलीफ", "पीड़ा", "आंसू", "टूटा", "टूटी", "बिछड़", "ग़म", "गम",
+    "मायूस", "निराश", "बेबस", "लाचार",
+    // Hinglish
+    "dukh", "dukhi", "rona", "ro raha", "ro rahi", "udaas", "udas", "tanha",
+    "akela", "akeli", "dard", "takleef", "taklif", "peeda", "aansu", "aansuon",
+    "toota", "tooti", "gam", "gham", "mayus", "nirash", "bebas", "laachaar",
+    "bahut bura", "bohot bura", "dil toota", "dil tut gaya", "koi nahi hai",
+    "😢", "😭", "💔", "😞", "😥", "🥺"
   ],
   anger: [
+    // English
     "angry", "mad", "furious", "hate", "annoyed", "frustrated", "rage", "pissed",
     "stupid", "idiot", "shut up", "damn", "hell", "disgusted", "irritated",
-    "gussa", "naraz", "pagal", "bakwas", "😡", "🤬"
+    "terrible", "worst", "horrible", "trash", "rubbish", "useless",
+    // Hindi (Devanagari)
+    "गुस्सा", "नाराज़", "नाराज", "पागल", "बकवास", "चिढ़", "क्रोध", "गाली",
+    "बेवकूफ", "मूर्ख", "कमीना", "कमीनी", "हरामी", "साला", "चुप",
+    "नफरत", "घृणा", "जलन", "बदतमीज़",
+    // Hinglish
+    "gussa", "naraz", "naraaz", "pagal", "bakwas", "chidh", "krodh", "gaali",
+    "bewakoof", "bewkoof", "murkh", "kameena", "kameeni", "harami", "saala",
+    "chup", "chup kar", "nafrat", "ghrina", "jalan", "badtameez",
+    "kutta", "kutti", "gadha", "ullu", "tatti", "band kar",
+    "😡", "🤬", "😤", "💢"
   ],
   fear: [
+    // English
     "scared", "afraid", "terrified", "horror", "nightmare", "panic", "anxious",
     "nervous", "worried", "creepy", "spooky", "danger", "threat", "frightened",
-    "darr", "bhoot", "😨", "😰", "😱"
+    "phobia", "dread", "shiver", "tremble",
+    // Hindi (Devanagari)
+    "डर", "डरा", "डरी", "भूत", "भयानक", "खतरा", "खौफ", "घबराहट",
+    "चिंता", "परेशान", "फिक्र", "हॉरर", "डरावना", "डरावनी", "भय",
+    // Hinglish
+    "darr", "dar", "dara", "dari", "bhoot", "bhayanak", "khatra", "khauf",
+    "ghabrahat", "chinta", "pareshan", "fikr", "fikar", "horror", "daravna",
+    "daravni", "bhay", "dar lag raha", "darr lagta hai", "gabhra gaya",
+    "😨", "😰", "😱", "🫣", "😟"
   ],
   surprise: [
+    // English
     "wow", "omg", "oh my god", "what", "really", "seriously", "no way", "unbelievable",
-    "incredible", "shocked", "unexpected", "surprise", "damn", "whoa",
-    "kya", "sach", "arey", "😲", "😮", "🤯"
+    "incredible", "shocked", "unexpected", "surprise", "whoa", "insane", "crazy",
+    // Hindi (Devanagari)
+    "क्या", "सच", "अरे", "ओह", "हैरान", "हैरानी", "चौंक", "अचानक",
+    "अविश्वसनीय", "यकीन नहीं", "सच में", "ये कैसे",
+    // Hinglish
+    "kya", "sach", "sachme", "sach me", "arey", "aree", "are", "ohh",
+    "hairan", "hairani", "chaunk", "achanak", "yakeen nahi", "yaqeen nahi",
+    "kya baat", "kya baat hai", "sach mein", "ye kaise", "matlab", "pagal hai kya",
+    "😲", "😮", "🤯", "😳", "🫢"
   ]
 };
+
 
 function localEmotionDetect(text) {
   if (!text) return "neutral";
