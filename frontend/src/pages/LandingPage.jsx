@@ -383,6 +383,11 @@ const LandingPage = () => {
                             <h4 className="font-bold mb-3">Quick Links</h4>
                             <ul className="space-y-2 text-sm opacity-70">
                                 <li>
+                                    <Link to="/about" className="hover:text-primary transition">
+                                        About Us
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link to="/signup" className="hover:text-primary transition">
                                         Sign Up
                                     </Link>

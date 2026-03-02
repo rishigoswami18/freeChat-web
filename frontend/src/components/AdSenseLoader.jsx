@@ -3,23 +3,18 @@ import { useLocation } from "react-router-dom";
 
 const ADSENSE_CLIENT = "ca-pub-4421164590159929";
 
-// Pages that have enough publisher content for AdSense
+// Pages that have enough textual content for AdSense bots to analyze
 const CONTENT_PAGES = [
     "/",
-    "/posts",
-    "/friends",
-    "/search",
-    "/reels",
-    "/notifications",
-    "/couple",
-    "/games",
-    "/membership",
-    "/inbox",
-    "/profile",
+    "/about",
+    "/privacy-policy",
+    "/terms",
+    "/refund-policy",
+    "/contact",
 ];
 
-// Pages where ads should NOT load (auth screens, loading, empty states)
-const BLOCKED_PAGES = ["/login", "/signup", "/onboarding", "/call"];
+// Pages to strictly block (Auth, Logic, Transient screens)
+const BLOCKED_PAGES = ["/login", "/signup", "/onboarding", "/call", "/reset-password", "/forgot-password", "/game/"];
 
 let adsenseLoaded = false;
 
@@ -29,16 +24,18 @@ const AdSenseLoader = () => {
     useEffect(() => {
         const path = location.pathname;
 
-        // Don't load AdSense on blocked pages
-        if (BLOCKED_PAGES.some((p) => path.startsWith(p))) return;
+        // 1. Check if definitely blocked
+        const isBlocked = BLOCKED_PAGES.some((p) => path.startsWith(p));
+        if (isBlocked) return;
 
-        // Only load on content pages
+        // 2. Check if it's a content page
         const isContentPage = CONTENT_PAGES.some(
             (p) => path === p || (p !== "/" && path.startsWith(p))
         );
-        if (!isContentPage && path !== "/") return;
 
-        // Load AdSense script only once
+        if (!isContentPage) return;
+
+        // Load AdSense script only once and only on valid pages
         if (!adsenseLoaded) {
             const script = document.createElement("script");
             script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
@@ -49,7 +46,7 @@ const AdSenseLoader = () => {
         }
     }, [location.pathname]);
 
-    return null; // This component renders nothing
+    return null;
 };
 
 export default AdSenseLoader;

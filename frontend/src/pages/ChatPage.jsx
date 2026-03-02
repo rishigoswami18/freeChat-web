@@ -108,6 +108,18 @@ const ChatPage = () => {
     }
   };
 
+  useEffect(() => {
+    // Lock body scroll when entering chat page
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    return () => {
+      // Re-enable body scroll when leaving chat page
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
+
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (

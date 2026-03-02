@@ -1,28 +1,46 @@
 const RefundPolicyPage = () => {
     return (
         <div className="min-h-screen bg-base-100 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto prose prose-sm sm:prose-base">
-                <h1 className="text-3xl font-bold mb-8">Refund and Cancellation Policy</h1>
-                <p className="opacity-70 text-sm mb-6 font-medium">Last Updated: February 22, 2026</p>
+            <div className="max-w-4xl mx-auto prose prose-sm sm:prose-base dark:prose-invert">
+                <h1 className="text-4xl font-black mb-10 tracking-tight italic uppercase text-primary">Refund & Cancellation Policy</h1>
+                <p className="opacity-70 text-sm mb-12 font-bold tracking-widest uppercase">Last Updated: March 03, 2026</p>
 
-                <section className="mb-8">
-                    <h2 className="text-xl font-bold mb-4">1. Cancellations</h2>
-                    <p>You may cancel your freeChat Premium membership at any time. To cancel, navigate to the Membership page in your account settings and click "Cancel Membership". Your premium access will continue until the end of the current billing period.</p>
+                <section className="mb-12">
+                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">1. Subscription Cancellation</h2>
+                    <p className="leading-relaxed">
+                        Users can cancel their <strong>freeChat Premium</strong> subscription at any time through their membership dashboard.
+                        Upon cancellation, your premium features will remain active until the end of the current billing cycle.
+                    </p>
                 </section>
 
-                <section className="mb-8">
-                    <h2 className="text-xl font-bold mb-4">2. Refunds</h2>
-                    <p>Since freeChat Premium provides immediate access to digital features (including Couple Profiles), we generally do not offer refunds once a payment has been processed. However, if you believe there has been a billing error, please contact us at freechatweb00@gmail.com within 7 days of the charge.</p>
+                <section className="mb-12">
+                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">2. Refund Eligibility</h2>
+                    <div className="space-y-4">
+                        <p>We offer a <strong>7-day money-back guarantee</strong> for new premium subscriptions if you are unsatisfied with our service. To be eligible for a refund:</p>
+                        <ul className="list-disc pl-5 space-y-2 opacity-80">
+                            <li>The request must be made within 7 days of the initial purchase.</li>
+                            <li>You must provide a valid reason for the refund to help us improve our service.</li>
+                            <li>Refunds are not applicable to renewals or subsequent months of service.</li>
+                        </ul>
+                    </div>
                 </section>
 
-                <section className="mb-8">
-                    <h2 className="text-xl font-bold mb-4">3. Refund Processing</h2>
-                    <p>In cases where a refund is approved, it will be processed and credited back to your original payment method (via Razorpay) within 5-7 business days.</p>
+                <section className="mb-12">
+                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">3. Processing Refunds</h2>
+                    <p className="leading-relaxed">
+                        Once your refund request is received and inspected, we will notify you of the approval or rejection of your refund.
+                        If approved, your refund will be processed via <strong>Razorpay</strong>, and a credit will automatically be applied to
+                        your original method of payment within 5-7 working days.
+                    </p>
                 </section>
 
-                <section className="mb-8">
-                    <h2 className="text-xl font-bold mb-4">4. Changes to This Policy</h2>
-                    <p>We reserve the right to modify this Refund and Cancellation Policy at any time. Any changes will be posted on this page with an updated revision date.</p>
+                <section className="mb-12">
+                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">4. Contact Us for Refunds</h2>
+                    <p className="bg-base-200 p-6 rounded-2xl border border-base-300">
+                        For any refund or cancellation queries, please email our support team:
+                        <br />
+                        <span className="font-bold text-lg text-primary">freechatweb00@gmail.com</span>
+                    </p>
                 </section>
             </div>
         </div>

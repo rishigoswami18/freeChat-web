@@ -54,7 +54,7 @@ const MobileDrawer = () => {
     <>
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
       {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-2.5 flex items-center justify-between safe-area-top">
+      <div className={`lg:hidden fixed top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-2.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""}`}>
         <div className="flex items-center gap-2">
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
             <Menu className="size-5" />
@@ -90,7 +90,7 @@ const MobileDrawer = () => {
         </div>
       </div>
 
-      {/* Slide-out Drawer */}
+      {/* Slide-out Drawer Same logic */}
       <div
         className={`fixed inset-y-0 left-0 w-72 bg-base-100 border-r border-base-300 z-[60] transform ${isOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col`}
