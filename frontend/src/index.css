@@ -244,7 +244,8 @@ body {
 /* ===== Message Bubble Styling ===== */
 .str-chat__message-simple-text-inner {
   border-radius: 18px !important;
-  font-size: 14px !important;
+  font-size: inherit !important;
+  /* Changed from 14px to respect scaling */
   line-height: 1.5 !important;
   font-family: 'Inter', sans-serif !important;
 }
