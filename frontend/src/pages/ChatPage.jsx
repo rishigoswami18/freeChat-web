@@ -195,10 +195,13 @@ const ChatPage = () => {
               {/* Premium Input Container */}
               <div className="safe-area-bottom chat-input-glass animate-in slide-in-from-bottom-5 duration-500">
                 <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-5xl mx-auto">
-                  {/* Whisper/Shout Slider */}
+                  {/* Whisper/Shout Slider - Google Allo Style */}
                   {showShoutSlider && (
-                    <div className="flex items-center gap-4 bg-base-200/80 backdrop-blur-md px-4 py-2 rounded-2xl border border-primary/20 animate-in zoom-in-95 duration-200">
-                      <span className="text-[10px] font-bold text-primary opacity-70 uppercase tracking-widest">Whisper</span>
+                    <div className="flex items-center gap-4 bg-base-100/90 backdrop-blur-xl px-6 py-4 rounded-3xl border-2 border-primary/30 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] font-black text-primary/50 uppercase tracking-[0.2em]">Whisper</span>
+                        <span className="text-xs opacity-50">i</span>
+                      </div>
                       <input
                         type="range"
                         min="0.5"
@@ -206,12 +209,18 @@ const ChatPage = () => {
                         step="0.1"
                         value={fontSize}
                         onChange={(e) => setFontSize(parseFloat(e.target.value))}
-                        className="range range-primary range-xs flex-1"
+                        className="range range-primary range-sm flex-1 accent-primary h-2 cursor-pointer"
                       />
-                      <span className="text-[10px] font-bold text-primary opacity-70 uppercase tracking-widest">Shout</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Shout</span>
+                        <span className="text-lg font-black text-primary">A</span>
+                      </div>
+
+                      {/* Live Scale Preview */}
+                      <div className="divider divider-horizontal mx-1"></div>
                       <div
-                        className="size-8 flex items-center justify-center font-bold bg-primary text-primary-content rounded-full text-xs shadow-lg transition-all"
-                        style={{ transform: `scale(${fontSize * 0.5 + 0.5})` }}
+                        className="size-12 flex items-center justify-center font-black bg-primary text-primary-content rounded-2xl shadow-lg ring-4 ring-primary/20 transition-all duration-200 ease-out"
+                        style={{ transform: `scale(${fontSize * 0.4 + 0.6})`, fontSize: `${fontSize}rem` }}
                       >
                         A
                       </div>

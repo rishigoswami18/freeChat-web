@@ -1,0 +1,30 @@
+services:
+  # Main Full-Stack Application (Front-end + Back-end)
+  - type: web
+    name: freechat-app
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: NODE_ENV
+        value: production
+      - key: ML_API_URL
+        fromService:
+          name: freechat-ml
+          type: web
+          property: host
+
+  # Python ML Service for Emotion Detection & Translation
+  - type: web
+    name: freechat-ml
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port 8000
+    rootDir: ml_service
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
