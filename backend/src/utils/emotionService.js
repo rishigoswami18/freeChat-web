@@ -3,14 +3,19 @@ import axios from "axios";
 // Access the AI Inference Token from environment variables (Local .env or Render Vars)
 const HF_TOKEN = process.env.HF_TOKEN;
 
-// Switching to a more stable and accurate model optimized for the Inference API
-const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/j-hartmann/emotion-english-distilroberta-base";
+// Using a high-performance model with guaranteed uptime on HF Inference API
+// Models from 'dair-ai' are the industry standard for emotion (contains: joy, love, sadness, anger, fear, surprise)
+const HUGGINGFACE_API_URL = "https://api-inference.huggingface.co/models/michellejieli/emotion_text_classifier";
 
 export const detectEmotion = async (text) => {
   if (!text || text.trim().length === 0) return "neutral";
 
+  if (!HF_TOKEN) {
+    console.warn("AI Emotion Alert: HF_TOKEN is missing in environment variables!");
+    return "neutral";
+  }
+
   try {
-    // Calling Hugging Face's DistilRoBERTa model for high-accuracy emotion classification
     const response = await axios.post(
       HUGGINGFACE_API_URL,
       { inputs: text },
@@ -19,49 +24,48 @@ export const detectEmotion = async (text) => {
           Authorization: `Bearer ${HF_TOKEN}`,
           "Content-Type": "application/json"
         },
-        timeout: 8000 // Extended timeout for first-time model loading
+        timeout: 10000
       }
     );
 
-    // The Inference API can return:
-    // 1. [[{label: "joy", score: 0.9}, ...]]
-    // 2. {error: "Model is loading", estimated_time: 20}
-    if (response.data.error) {
-      console.warn("AI Model Loading...", response.data.error);
+    // Initial load handling
+    if (response.data.error && response.data.error.includes("loading")) {
+      console.log("AI Model warming up... (estimated time: " + response.data.estimated_time + "s)");
       return "neutral";
     }
 
     if (Array.isArray(response.data) && response.data[0]?.length > 0) {
       const results = response.data[0];
-      // Sort results to ensure the highest score is first (just in case)
       const sorted = results.sort((a, b) => b.score - a.score);
       const topResult = sorted[0];
       const detectedLabel = topResult.label.toLowerCase();
 
-      // Mapping DistilRoBERTa labels to our app labels
+      // Reliable mapping for the 'dair-ai' / 'emotion' dataset labels
       const mapping = {
         joy: "joy",
+        love: "love",
         sadness: "sadness",
         anger: "anger",
         fear: "fear",
         surprise: "surprise",
-        disgust: "anger", // Disgust usually maps to anger in common chat context
         neutral: "neutral"
       };
-
-      // Handle 'love' mapping if the model uses slightly different naming or if we see it
-      if (detectedLabel === 'love') return 'love';
 
       return mapping[detectedLabel] || "neutral";
     }
 
     return "neutral";
   } catch (error) {
-    // If we've got a 410 or other API errors, log them clearly for debugging
     if (error.response) {
-      console.error(`AI API Error (${error.response.status}):`, error.response.data);
+      // Log the specific status code to find out why it's failing
+      console.error(`AI Detection Error [${error.response.status}]:`, error.response.data);
+
+      // If 410, it means the model is no longer available on this specific endpoint
+      if (error.response.status === 410) {
+        console.error("Critical: Hugging Face model endpoint is deprecated. Need to choose another model.");
+      }
     } else {
-      console.error("AI Emotion Detection Connection Error:", error.message);
+      console.error("AI Detection Connection Failure:", error.message);
     }
     return "neutral";
   }
