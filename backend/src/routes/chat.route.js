@@ -41,5 +41,21 @@ router.post("/send", protectRoute, sendMessage);
 // DIAGNOSTIC routes (run these in browser to check connection status)
 router.get("/test-ml", testMLConnection);
 router.get("/test-stream", testStreamConnection);
+router.get("/test-email", protectRoute, async (req, res) => {
+  try {
+    const { sendSupportEmail } = await import("../lib/email.service.js");
+    const info = await sendSupportEmail("System Test", "test@example.com", "This is a diagnostic test from the server.");
+    res.status(200).json({ status: "success", messageId: info.messageId });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      stack: error.stack
+    });
+  }
+});
 
 export default router;
