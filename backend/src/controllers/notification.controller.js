@@ -23,23 +23,31 @@ export const broadcastSystemNotification = async (req, res) => {
         }
 
         // 1. Fetch all users from database
-        const users = await User.find({}, "_id fullName");
+        const users = await User.find({}, "_id fullName email");
         const adminId = req.user._id.toString();
 
-        console.log(`🚀 Starting system broadcast to ${users.length} users...`);
+        console.log(`🚀 Starting system broadcast to ${users.length} users. Admin: ${adminId}`);
 
-        // 2. Loop through users and send message via Stream
-        // Using Promise.all with chunks or simple loop for reliability
+        if (!streamClient) {
+            console.error("❌ Stream client is NULL during broadcast attempt.");
+            return res.status(500).json({ message: "Stream client not initialized" });
+        }
+
         let successCount = 0;
         let failCount = 0;
+        const errors = [];
 
         for (const targetUser of users) {
             const targetId = targetUser._id.toString();
 
-            // Don't send notification to self (the admin)
-            if (targetId === adminId) continue;
+            if (targetId === adminId) {
+                console.log(`- Skipping admin user: ${targetUser.email}`);
+                continue;
+            }
 
             try {
+                console.log(`- Preparing message for ${targetUser.email} (${targetId})`);
+
                 // Create or get the 1-on-1 channel between admin and user
                 const channel = streamClient.channel("messaging", {
                     members: [adminId, targetId],
@@ -48,23 +56,28 @@ export const broadcastSystemNotification = async (req, res) => {
                 await channel.create();
 
                 // Send the system message
-                await channel.sendMessage({
+                const response = await channel.sendMessage({
                     text: `📢 SYSTEM NOTIFICATION: ${message}`,
                     user_id: adminId,
                     silent: false, // Ensure they get a push/notification bubble
                     is_system: true // Custom flag for UI if needed
                 });
 
+                console.log(`  ✅ Message sent. SID: ${response.message.id}`);
                 successCount++;
             } catch (err) {
-                console.error(`Failed to notify user ${targetId}:`, err.message);
+                console.error(`  ❌ Failed for ${targetUser.email}:`, err.message);
                 failCount++;
+                errors.push({ email: targetUser.email, error: err.message });
             }
         }
+
+        console.log(`🏁 Broadcast finished. Success: ${successCount}, Failed: ${failCount}`);
 
         res.status(200).json({
             success: true,
             message: `Broadcast complete. Sent to ${successCount} users. Errors: ${failCount}`,
+            errors: failCount > 0 ? errors : undefined
         });
     } catch (error) {
         console.error("Error in broadcastSystemNotification:", error);
