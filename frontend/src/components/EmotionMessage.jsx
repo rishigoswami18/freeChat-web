@@ -236,7 +236,7 @@ const EmotionMessage = (props) => {
                 MessageFooter={() => (
                   <div className="absolute bottom-1 right-2 flex items-center gap-1 select-none pointer-events-none z-10">
                     <span className={`text-[9.5px] font-bold tracking-tight ${isMyMessage ? 'text-white/80' : 'text-base-content/40'}`}>
-                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                      {new Date(message.created_at).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false })}
                     </span>
                     {isMyMessage && (
                       <div className="flex -space-x-1.5 translate-y-[1px]">

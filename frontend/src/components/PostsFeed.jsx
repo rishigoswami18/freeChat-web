@@ -149,7 +149,7 @@ const PostCard = ({ post, setPosts }) => {
     if (hours < 24) return `${hours}h`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}d`;
-    return new Date(date).toLocaleDateString();
+    return new Date(date).toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" });
   };
 
   return (

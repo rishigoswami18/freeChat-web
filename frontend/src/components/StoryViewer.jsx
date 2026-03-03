@@ -89,7 +89,7 @@ const StoryViewer = ({ group, onClose }) => {
                         <div>
                             <p className="font-bold text-sm tracking-tight">{group.fullName}</p>
                             <p className="text-[10px] font-medium opacity-60">
-                                {new Date(story.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(story.createdAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
                             </p>
                         </div>
                     </div>
@@ -257,7 +257,7 @@ const StoryViewer = ({ group, onClose }) => {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-sm tracking-tight">{viewer.fullName}</p>
-                                                    <p className="text-[10px] opacity-60">Viewed {new Date(viewer.viewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                    <p className="text-[10px] opacity-60">Viewed {new Date(viewer.viewedAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}</p>
                                                 </div>
                                             </div>
                                             <button className="btn btn-primary btn-sm btn-ghost group-hover:bg-primary group-hover:text-primary-content transition-all rounded-xl text-xs font-bold">Profile</button>

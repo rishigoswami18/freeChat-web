@@ -5,14 +5,19 @@ import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import toast from "react-hot-toast";
 
 // Format "Last seen" like WhatsApp
+// Format "Last seen" like WhatsApp using Delhi (IST) time zone
 function formatLastSeen(lastActive) {
     if (!lastActive) return "Offline";
 
+    const tz = "Asia/Kolkata";
     const now = new Date();
     const last = new Date(lastActive);
+
+    // Helper to get date string in Delhi TZ for comparison
+    const getDelhiDate = (d) => d.toLocaleDateString("en-US", { timeZone: tz });
+
     const diffMs = now - last;
     const diffMin = Math.floor(diffMs / 60000);
-    const diffHrs = Math.floor(diffMs / 3600000);
 
     // Less than 1 minute ago
     if (diffMin < 1) return "Last seen just now";
@@ -20,21 +25,35 @@ function formatLastSeen(lastActive) {
     // Less than 60 minutes ago
     if (diffMin < 60) return `Last seen ${diffMin}m ago`;
 
-    // Today
-    const isToday = now.toDateString() === last.toDateString();
-    if (isToday) {
-        return `Last seen today at ${last.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    }
+    // Today/Yesterday logic using Delhi time
+    const todayStr = getDelhiDate(now);
+    const lastStr = getDelhiDate(last);
 
-    // Yesterday
     const yesterday = new Date(now);
     yesterday.setDate(now.getDate() - 1);
-    if (yesterday.toDateString() === last.toDateString()) {
-        return `Last seen yesterday at ${last.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    const yesterdayStr = getDelhiDate(yesterday);
+
+    const timeOptions = {
+        timeZone: tz,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    };
+
+    if (todayStr === lastStr) {
+        return `Last seen today at ${last.toLocaleTimeString("en-US", timeOptions)}`;
+    }
+
+    if (yesterdayStr === lastStr) {
+        return `Last seen yesterday at ${last.toLocaleTimeString("en-US", timeOptions)}`;
     }
 
     // Older
-    return `Last seen ${last.toLocaleDateString([], { day: "numeric", month: "short" })}`;
+    return `Last seen ${last.toLocaleDateString("en-US", {
+        timeZone: tz,
+        day: "numeric",
+        month: "short"
+    })}`;
 }
 
 function ChatHeader() {
