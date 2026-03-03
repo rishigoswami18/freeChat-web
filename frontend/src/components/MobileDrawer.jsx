@@ -54,7 +54,7 @@ const MobileDrawer = () => {
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
-  const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[12]];
+  const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[11]];
 
   return (
     <>
