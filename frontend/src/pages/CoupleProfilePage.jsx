@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import {
     getCoupleStatus,
@@ -45,7 +45,6 @@ import { isPremiumUser } from "../lib/premium";
 const CoupleProfilePage = () => {
     const { authUser } = useAuthUser();
     const queryClient = useQueryClient();
-    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditingNote, setIsEditingNote] = useState(false);
     const [noteDraft, setNoteDraft] = useState("");
@@ -343,22 +342,20 @@ const CoupleProfilePage = () => {
                 </motion.div>
                 {/* WALLET DASHBOARD - MONETIZATION HUB */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="card bg-base-200 border border-yellow-500/10 p-4 rounded-3xl shadow-sm group hover:border-yellow-500/30 transition-all">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Gem className="size-4 text-yellow-500" />
-                            <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">My Gems</span>
+                    <Link
+                        to="/gem-shop"
+                        className="card bg-base-200 border border-yellow-500/10 p-4 rounded-3xl shadow-sm group hover:border-yellow-500/30 transition-all active:scale-95"
+                    >
+                        <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                                <Gem className="size-4 text-yellow-500" />
+                                <span className="text-[10px] font-black opacity-40 uppercase tracking-widest text-base-content">My Gems</span>
+                            </div>
+                            <ArrowRight className="size-3 text-primary opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                         </div>
                         <p className="text-2xl font-black italic">{authUser?.gems || 0}</p>
-                        <button
-                            onClick={() => {
-                                toast.success("Redirecting to Gem Shop...");
-                                setTimeout(() => navigate("/gem-shop"), 500);
-                            }}
-                            className="text-[9px] text-primary font-bold uppercase mt-2 hover:underline"
-                        >
-                            Top Up -&gt;
-                        </button>
-                    </div>
+                        <span className="text-[9px] text-primary font-bold uppercase mt-2 group-hover:underline">Top Up &rarr;</span>
+                    </Link>
                     <div className="card bg-base-200 border border-success/10 p-4 rounded-3xl shadow-sm group hover:border-success/30 transition-all">
                         <div className="flex items-center gap-2 mb-1">
                             <TrendingUp className="size-4 text-success" />

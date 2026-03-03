@@ -108,15 +108,6 @@ const ChatPage = () => {
     }
   };
 
-  useEffect(() => {
-    // Lock body scroll when entering chat page using a reliable class
-    document.body.classList.add("is-chat-active");
-
-    return () => {
-      // Re-enable body scroll when leaving chat page
-      document.body.classList.remove("is-chat-active");
-    };
-  }, []);
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
@@ -168,18 +159,39 @@ const ChatPage = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0 bg-base-100/50 rounded-2xl border border-base-300/50 px-1 shadow-inner">
-                        <MessageInput focus grow />
+                    <div className="flex flex-col gap-2">
+                      {/* Action Toolbar - Now above the input for more typing space */}
+                      <div className="flex items-center gap-2 px-1">
+                        <div className="flex items-center gap-1.5 p-1 bg-base-200/30 rounded-2xl border border-base-300/30">
+                          <button
+                            onClick={() => setShowShoutSlider(!showShoutSlider)}
+                            className={`btn btn-circle btn-xs size-8 border-none transition-all ${showShoutSlider ? 'bg-primary text-white shadow-md' : 'btn-ghost text-primary opacity-70 hover:opacity-100'}`}
+                            title="Text size"
+                          >
+                            <span className="font-bold text-[10px]">AA</span>
+                          </button>
+
+                          <div className="w-[1px] h-4 bg-base-300/50 mx-0.5" />
+
+                          <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
+
+                          <button
+                            onClick={handleSnapClick}
+                            className="btn btn-circle btn-xs btn-ghost text-primary opacity-70 hover:opacity-100 size-8 transition-all"
+                            title="Send snap"
+                          >
+                            <Camera className="size-4" />
+                          </button>
+                        </div>
+
+                        {/* Optional: Add a placeholder for more tools if needed */}
+                        <div className="flex-1" />
                       </div>
-                      <div className="flex items-center gap-1 bg-primary/5 p-1 rounded-full border border-primary/10">
-                        <button onClick={() => setShowShoutSlider(!showShoutSlider)} className={`btn btn-circle btn-sm size-9 border-none ${showShoutSlider ? 'bg-primary text-white' : 'btn-ghost text-primary'}`}>
-                          AA
-                        </button>
-                        <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
-                        <button onClick={handleSnapClick} className="btn btn-circle btn-sm btn-ghost text-primary size-9">
-                          <Camera className="size-4.5" />
-                        </button>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0 bg-base-100/50 rounded-2xl border border-base-300/50 px-1 shadow-inner focus-within:border-primary/30 transition-all">
+                          <MessageInput focus grow />
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -6,11 +6,9 @@
 
 /* ===== Global Typography & Defaults ===== */
 html {
-  height: 100%;
+  min-height: 100%;
   overflow-x: clip;
-  /* clip prevents horizontal scroll without breaking vertical scroll/anchors */
   scrollbar-gutter: stable;
-  /* Reserve space for scrollbar to prevent 'shrinking' layout shifts */
 }
 
 body {
@@ -19,10 +17,8 @@ body {
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  /* Use auto with scrollbar-gutter for stable layout */
   overflow-x: clip;
   -webkit-overflow-scrolling: touch;
-  -webkit-tap-highlight-color: transparent;
   scrollbar-gutter: stable;
 }
 

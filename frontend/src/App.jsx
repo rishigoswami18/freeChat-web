@@ -54,6 +54,15 @@ const App = () => {
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;
 
+  useEffect(() => {
+    const isScrollLockedPage = location.pathname.startsWith("/chat/") || location.pathname.startsWith("/reels");
+    if (isScrollLockedPage) {
+      document.body.classList.add("is-chat-active");
+    } else {
+      document.body.classList.remove("is-chat-active");
+    }
+  }, [location.pathname]);
+
   if (isLoading) return <PageLoader />;
 
   return (
