@@ -22,17 +22,13 @@ router.get("/all", getAllUsers);
 // apply auth middleware to all routes
 router.use(protectRoute);
 
-
 router.get("/", getRecommendedUsers);
 router.get("/friends", getMyFriends);
-router.get("/:id", getUserProfile);
-router.get("/:id/friends", getUserFriends);
+router.get("/friend-requests", getFriendRequests);
+router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.post("/friend-request/:id", sendFriendRequest);
 router.put("/friend-request/:id/accept", acceptFriendRequest);
-
-router.get("/friend-requests", getFriendRequests);
-router.get("/outgoing-friend-requests", getOutgoingFriendReqs);
 
 router.put("/profile", updateProfile);
 router.put("/buy-verification", buyVerification);
@@ -41,5 +37,9 @@ router.delete("/unfriend/:id", unfriend);
 
 // Migration route (Temporary)
 router.post("/migrate-usernames", migrateUsernames);
+
+// Wildcard routes MUST be last to avoid catching specific routes like /friends, /friend-requests
+router.get("/:id", getUserProfile);
+router.get("/:id/friends", getUserFriends);
 
 export default router;
