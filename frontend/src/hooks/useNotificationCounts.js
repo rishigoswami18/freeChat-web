@@ -22,18 +22,45 @@ const useNotificationCounts = () => {
     useEffect(() => {
         if (!chatClient) return;
 
-        // Set initial count
-        setUnreadMessages(chatClient.total_unread_count || 0);
+        const updateCount = () => {
+            const count = chatClient.user?.total_unread_count ?? chatClient.total_unread_count ?? 0;
+            setUnreadMessages(count);
+        };
 
-        // Listen for message events to update count
-        const handleEvent = (event) => {
+        // Initial check
+        updateCount();
+
+        // Specific events that always affect unread counts
+        const events = [
+            'message.new',
+            'notification.message_new',
+            'notification.mark_read',
+            'message.read',
+            'connection.changed',
+            'user.updated'
+        ];
+
+        const handleChatEvent = (event) => {
             if (event.total_unread_count !== undefined) {
                 setUnreadMessages(event.total_unread_count);
+            } else {
+                updateCount();
             }
         };
 
-        chatClient.on(handleEvent);
-        return () => chatClient.off(handleEvent);
+        events.forEach(eventName => {
+            chatClient.on(eventName, handleChatEvent);
+        });
+
+        // Failsafe: Sync every 10 seconds in case events are missed
+        const interval = setInterval(updateCount, 10000);
+
+        return () => {
+            events.forEach(eventName => {
+                chatClient.off(eventName, handleChatEvent);
+            });
+            clearInterval(interval);
+        };
     }, [chatClient]);
 
     return {
