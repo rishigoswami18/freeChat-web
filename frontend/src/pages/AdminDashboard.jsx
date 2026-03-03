@@ -12,7 +12,8 @@ import {
     Send,
     Loader2,
     RefreshCcw,
-    CheckCircle2
+    CheckCircle2,
+    Sparkles
 } from "lucide-react";
 import {
     getAdminStats,
@@ -21,7 +22,8 @@ import {
     deleteUserAdmin,
     toggleUserRole,
     broadcastNotification,
-    deletePost
+    deletePost,
+    clearAdminInbox
 } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +37,7 @@ const AdminDashboard = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [broadcastMsg, setBroadcastMsg] = useState("");
     const [isBroadcasting, setIsBroadcasting] = useState(false);
+    const [isCleaning, setIsCleaning] = useState(false);
 
     useEffect(() => {
         fetchStats();
@@ -93,6 +96,19 @@ const AdminDashboard = () => {
             toast.error("Broadcast failed");
         } finally {
             setIsBroadcasting(false);
+        }
+    };
+
+    const handleClearInbox = async () => {
+        if (!window.confirm("This will hide all individual chats from your admin inbox to clean up after the broadcast. History is not deleted. Proceed?")) return;
+        setIsCleaning(true);
+        try {
+            const res = await clearAdminInbox();
+            toast.success(res.message);
+        } catch (err) {
+            toast.error("Cleanup failed");
+        } finally {
+            setIsCleaning(false);
         }
     };
 
@@ -162,8 +178,8 @@ const AdminDashboard = () => {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`btn btn-sm rounded-xl gap-2 border-none px-6 transition-all ${activeTab === tab.id
-                                ? "bg-primary text-primary-content shadow-lg shadow-primary/20"
-                                : "bg-base-200 text-base-content/60 hover:bg-base-300"
+                            ? "bg-primary text-primary-content shadow-lg shadow-primary/20"
+                            : "bg-base-200 text-base-content/60 hover:bg-base-300"
                             }`}
                     >
                         <tab.icon className="size-4" />
@@ -388,6 +404,20 @@ const AdminDashboard = () => {
                                         )}
                                     </button>
                                 </div>
+                            </div>
+
+                            {/* Clean Inbox Helper */}
+                            <div className="mt-8 bg-base-200/50 p-6 rounded-[32px] border border-dashed border-base-content/10 text-center">
+                                <p className="text-[10px] uppercase font-black tracking-widest opacity-40 mb-4">Inbox flooded after broadcast?</p>
+                                <button
+                                    onClick={handleClearInbox}
+                                    disabled={isCleaning}
+                                    className="btn btn-outline btn-sm rounded-xl gap-2 hover:bg-primary hover:border-primary transition-all active:scale-95"
+                                >
+                                    {isCleaning ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+                                    <span className="font-bold uppercase tracking-tight text-[10px]">Clean My Admin Inbox</span>
+                                </button>
+                                <p className="text-[9px] opacity-30 mt-3 italic">This hides empty/old 1-on-1 threads. It won't delete messages.</p>
                             </div>
                         </motion.div>
                     )}

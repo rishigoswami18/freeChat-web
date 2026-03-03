@@ -76,6 +76,9 @@ export const broadcastSystemNotification = async (req, res) => {
                     is_system: true
                 });
 
+                // HIDE the channel for the Admin so it doesn't clutter their inbox
+                await channel.hide(adminId);
+
                 return { success: true, email: targetUser.email, msgId: response.message.id };
             } catch (err) {
                 console.error(`  ❌ Broadcast failed for ${targetUser.email}:`, err.message);
@@ -104,5 +107,49 @@ export const broadcastSystemNotification = async (req, res) => {
     } catch (error) {
         console.error("Error in broadcastSystemNotification:", error);
         res.status(500).json({ message: "Internal Server Error during broadcast" });
+    }
+};
+
+/**
+ * Hides all channels for the admin to clean up the inbox.
+ */
+export const clearAdminChats = async (req, res) => {
+    try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        if (!streamClient) {
+            return res.status(500).json({ message: "Stream service not initialized" });
+        }
+
+        const adminId = req.user._id.toString();
+
+        // Query all channels where the admin is a member
+        const filter = {
+            type: "messaging",
+            members: { $in: [adminId] }
+        };
+
+        const channels = await streamClient.queryChannels(filter);
+
+        console.log(`🧹 Cleaning up ${channels.length} channels for Admin ${adminId}`);
+
+        let count = 0;
+        for (const channel of channels) {
+            // Don't hide group chats if they exist
+            if (channel.id.startsWith("group_")) continue;
+
+            await channel.hide(adminId);
+            count++;
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Cleaned up ${count} channels from your inbox.`
+        });
+    } catch (error) {
+        console.error("Error in clearAdminChats:", error);
+        res.status(500).json({ message: "Internal Server Error during cleanup" });
     }
 };

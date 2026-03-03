@@ -1,6 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
-import { broadcastSystemNotification } from "../controllers/notification.controller.js";
+import { broadcastSystemNotification, clearAdminChats } from "../controllers/notification.controller.js";
 
 const router = express.Router();
 
@@ -10,5 +10,12 @@ const router = express.Router();
  * @access Private (Admin only)
  */
 router.post("/broadcast", protectRoute, broadcastSystemNotification);
+
+/**
+ * @route POST /api/notifications/clear-chats
+ * @desc  Hide all admin chats to clear clutter
+ * @access Private (Admin only)
+ */
+router.post("/clear-chats", protectRoute, clearAdminChats);
 
 export default router;

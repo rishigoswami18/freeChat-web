@@ -350,3 +350,8 @@ export const broadcastNotification = async (message) => {
   return response.data;
 };
 
+export const clearAdminInbox = async () => {
+  const response = await axiosInstance.post("/notifications/clear-chats");
+  return response.data;
+};
+
