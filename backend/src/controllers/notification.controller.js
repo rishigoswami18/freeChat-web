@@ -33,11 +33,13 @@ export const broadcastSystemNotification = async (req, res) => {
             return res.status(500).json({ message: "Stream client not initialized" });
         }
 
-        // SAFETY: Sync the admin user themselves first
+        // SAFETY: Sync the admin user with the name "Announcement" for the broadcast
         await streamClient.upsertUsers([{
             id: adminId,
-            name: req.user.fullName,
-            image: req.user.profilePic || "",
+            name: "Announcement",
+            image: "https://img.icons8.com/color/96/megaphone.png",
+            role: "admin",
+            isVerified: true
         }]);
 
         let successCount = 0;
