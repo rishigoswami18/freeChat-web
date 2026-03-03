@@ -116,27 +116,34 @@ export const broadcastEmail = async (req, res) => {
         const { sendBroadcastEmail } = await import("../lib/email.service.js");
 
         console.log(`[Admin] Starting broadcast email to ${total} users...`);
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        // Send emails sequentially to avoid rate limits/spam filters
-        // but for a small/medium app this is fine. 
-        // For large apps, use a queue like Bull/Redis.
         let successCount = 0;
         let failCount = 0;
 
-        for (const user of users) {
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
             try {
+                // Add a small delay between emails to avoid hitting burst rate limits
+                if (i > 0) await sleep(500);
+
                 await sendBroadcastEmail(user.email, subject, message);
                 successCount++;
+                if (successCount % 10 === 0) console.log(`[Admin] Progress: ${successCount}/${total} emails sent...`);
             } catch (err) {
-                console.error(`Failed to send email to ${user.email}:`, err.message);
+                console.error(`[Admin] Failed to send email to ${user.email}:`, err.message);
                 failCount++;
             }
         }
 
+        console.log(`[Admin] Broadcast complete. Success: ${successCount}, Failed: ${failCount}`);
+
         res.status(200).json({
             success: true,
             message: `Broadcast complete. Sent to ${successCount} users. Failed for ${failCount} users.`,
-            total
+            total,
+            successCount,
+            failCount
         });
     } catch (error) {
         console.error("Error in broadcastEmail:", error);

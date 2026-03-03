@@ -53,6 +53,7 @@ const PostsFeed = ({ posts, setPosts }) => {
       {likedByPostId && (
         <LikedByModal
           postId={likedByPostId}
+          isOpen={true}
           onClose={() => setLikedByPostId(null)}
         />
       )}

@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { Heart, MessageCircle, Share2, Play, Pause, Music, Send, X, Loader2, FastForward, Rewind, Settings, Maximize, Minimize, Gift, CheckCircle, ExternalLink } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { likePost, commentOnPost, sharePost, sendGift } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import LikedByModal from "./LikedByModal";
+import useAuthUser from "../hooks/useAuthUser";
 
 const ReelPost = ({ post, isActive }) => {
+    const { authUser } = useAuthUser();
     const videoRef = useRef(null);
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -15,9 +19,10 @@ const ReelPost = ({ post, isActive }) => {
     const [showSpeedMenu, setShowSpeedMenu] = useState(false);
     const [showGifts, setShowGifts] = useState(false);
     const [seekFeedback, setSeekFeedback] = useState(null); // 'forward' | 'backward' | null
-    const [liked, setLiked] = useState(post.likes.includes(post.userId));
+    const [liked, setLiked] = useState(post.likes.includes(authUser?._id));
     const [likesCount, setLikesCount] = useState(post.likes.length);
     const [showComments, setShowComments] = useState(false);
+    const [showLikes, setShowLikes] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [isCommenting, setIsCommenting] = useState(false);
     const queryClient = useQueryClient();
@@ -216,7 +221,12 @@ const ReelPost = ({ post, isActive }) => {
                             <Heart className={`size-7 ${liked ? 'fill-current' : ''}`} />
                         </motion.div>
                     </button>
-                    <span className="text-white text-xs font-bold drop-shadow-md">{likesCount}</span>
+                    <span
+                        onClick={() => likesCount > 0 && setShowLikes(true)}
+                        className="text-white text-xs font-bold drop-shadow-md cursor-pointer hover:underline"
+                    >
+                        {likesCount}
+                    </span>
                 </div>
 
                 <div className="flex flex-col items-center gap-1">
@@ -252,16 +262,33 @@ const ReelPost = ({ post, isActive }) => {
             {/* INFO SECTION */}
             <div className="absolute left-4 bottom-8 right-16 z-30 text-white flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                    <div className="avatar size-10 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-black">
-                        <img src={post.profilePic || "/avatar.png"} alt="" className="rounded-full" />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-1">
-                            <h3 className="font-bold text-base drop-shadow-md">@{post.fullName.replace(/\s+/g, '').toLowerCase()}</h3>
-                            {(post.isVerified || post.isAd) && <CheckCircle className="size-4 text-primary fill-white" />}
+                    {post.isAd ? (
+                        <div className="flex items-center gap-3">
+                            <div className="avatar size-10 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-black">
+                                <img src={post.profilePic || "/avatar.png"} alt="" className="rounded-full" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-1">
+                                    <h3 className="font-bold text-base drop-shadow-md">@{post.fullName.replace(/\s+/g, '').toLowerCase()}</h3>
+                                    <CheckCircle className="size-4 text-primary fill-white" />
+                                </div>
+                                <span className="text-[10px] text-primary font-black uppercase tracking-widest pl-0.5">Sponsored</span>
+                            </div>
                         </div>
-                        {post.isAd && <span className="text-[10px] text-primary font-black uppercase tracking-widest pl-0.5">Sponsored</span>}
-                    </div>
+                    ) : (
+                        <Link to={`/user/${post.userId}`} className="flex items-center gap-3 active:scale-95 transition-transform group">
+                            <div className="avatar size-10 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-black group-hover:ring-offset-1 transition-all">
+                                <img src={post.profilePic || "/avatar.png"} alt="" className="rounded-full" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-1">
+                                    <h3 className="font-bold text-base drop-shadow-md group-hover:text-primary transition-colors">@{post.fullName.replace(/\s+/g, '').toLowerCase()}</h3>
+                                    {post.isVerified && <CheckCircle className="size-4 text-primary fill-white" />}
+                                </div>
+                                <p className="text-[10px] opacity-60 font-medium">View Profile</p>
+                            </div>
+                        </Link>
+                    )}
                 </div>
 
                 {post.isAd && post.adLink && (
@@ -310,6 +337,14 @@ const ReelPost = ({ post, isActive }) => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showLikes && (
+                <LikedByModal
+                    postId={post._id}
+                    isOpen={true}
+                    onClose={() => setShowLikes(false)}
+                />
             )}
         </div>
     );
