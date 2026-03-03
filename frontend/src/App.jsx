@@ -31,6 +31,7 @@ import LandingPage from "./pages/LandingPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -279,7 +280,6 @@ const App = () => {
                   }
                 />
 
-                {/* Fallback Game Route for multi-segment IDs (e.g. /game/userId/sessionId) */}
                 <Route
                   path="/game/:param1/:sessionId"
                   element={
@@ -293,14 +293,25 @@ const App = () => {
                   }
                 />
 
-                {/* Public Support & Legal Pages (Required for Razorpay compliance) */}
                 <Route path="/about" element={<Layout showSidebar={false}><AboutPage /></Layout>} />
                 <Route path="/contact" element={<Layout showSidebar={false}><ContactPage /></Layout>} />
                 <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
                 <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
                 <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
 
-                {/* Catch-all route to prevent blank screens */}
+                <Route
+                  path="/admin"
+                  element={
+                    isAuthenticated && authUser?.role === "admin" ? (
+                      <Layout showSidebar={true}>
+                        <AdminDashboard />
+                      </Layout>
+                    ) : (
+                      <Navigate to="/" />
+                    )
+                  }
+                />
+
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </AnimatePresence>

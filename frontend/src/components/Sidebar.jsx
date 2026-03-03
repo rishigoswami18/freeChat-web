@@ -13,6 +13,7 @@ import {
   Film,
   MessageSquare,
   Smartphone,
+  ShieldAlert,
 } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
@@ -68,6 +69,21 @@ const Sidebar = () => {
             </Link>
           );
         })}
+
+        {/* Admin Link if role is admin */}
+        {authUser?.role === "admin" && (
+          <Link
+            to="/admin"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 mt-6 border border-primary/20 bg-primary/5
+              ${currentPath === "/admin"
+                ? "bg-primary text-primary-content"
+                : "text-primary hover:bg-primary/10"
+              }`}
+          >
+            <ShieldAlert className="size-[18px]" />
+            <span>Admin Command</span>
+          </Link>
+        )}
       </nav>
 
       <div className="px-3 py-2">

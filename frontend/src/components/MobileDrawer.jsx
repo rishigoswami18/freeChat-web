@@ -17,6 +17,7 @@ import {
   Flame,
   MessageSquare,
   Smartphone,
+  ShieldAlert,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -130,6 +131,22 @@ const MobileDrawer = () => {
             <Smartphone className="size-5" />
             Download Android App
           </a>
+
+          {/* Admin Link */}
+          {authUser?.role === "admin" && (
+            <Link
+              to="/admin"
+              onClick={toggleDrawer}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 mt-4 border border-primary/20 bg-primary/5
+                ${location.pathname === "/admin"
+                  ? "bg-primary text-primary-content"
+                  : "text-primary hover:bg-primary/10"
+                }`}
+            >
+              <ShieldAlert className="size-5" />
+              Admin Command
+            </Link>
+          )}
         </nav>
 
         {/* User Profile + Logout */}

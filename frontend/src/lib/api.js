@@ -314,6 +314,39 @@ export const getDailyInsight = async () => {
 };
 
 export const updateMood = async (mood) => {
-  const response = await axiosInstance.put("/bond/mood", { mood });
+  const response = await axiosInstance.put("/bond/mood", mood);
   return response.data;
 };
+
+// ----------------- ADMIN -----------------
+
+export const getAdminStats = async () => {
+  const response = await axiosInstance.get("/admin/stats");
+  return response.data;
+};
+
+export const getAdminUsers = async (query = "") => {
+  const response = await axiosInstance.get("/admin/users", { params: { q: query } });
+  return response.data;
+};
+
+export const getAdminPosts = async () => {
+  const response = await axiosInstance.get("/admin/posts");
+  return response.data;
+};
+
+export const deleteUserAdmin = async (userId) => {
+  const response = await axiosInstance.delete(`/admin/users/${userId}`);
+  return response.data;
+};
+
+export const toggleUserRole = async (userId) => {
+  const response = await axiosInstance.put(`/admin/users/${userId}/role`);
+  return response.data;
+};
+
+export const broadcastNotification = async (message) => {
+  const response = await axiosInstance.post("/notifications/broadcast", { message });
+  return response.data;
+};
+

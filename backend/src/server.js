@@ -25,6 +25,7 @@ import supportRoutes from "./routes/support.route.js";
 import gemRoutes from "./routes/gem.route.js";
 import bondRoutes from "./routes/bond.route.js";
 import notificationRoutes from "./routes/notification.route.js";
+import adminRoutes from "./routes/admin.route.js";
 import { seedQuestions } from "./controllers/bond.controller.js";
 import { connectDB } from "./lib/db.js";
 
@@ -84,6 +85,7 @@ app.use("/api/support", supportRoutes);
 app.use("/api/gems", gemRoutes);
 app.use("/api/bond", bondRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin", adminRoutes);
 
 
 if (process.env.NODE_ENV === "production") {
