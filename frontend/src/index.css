@@ -158,6 +158,17 @@ body.is-chat-active {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
+
+
 /* ===== Gradient Text Utility ===== */
 .gradient-text {
   background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));

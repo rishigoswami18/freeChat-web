@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
 import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCheck, Mic } from "lucide-react";
 import SnapViewer from "./SnapViewer";
@@ -168,6 +169,56 @@ const EmotionMessage = (props) => {
   const isWhisper = scale < 0.9;
   const isShout = scale > 1.3;
 
+  const isSystem = message?.user?.id === "system_announcement" || message?.text?.startsWith("📢 SYSTEM NOTIFICATION");
+
+  if (isSystem) {
+    return (
+      <div className="flex flex-col items-center my-6 px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="w-full max-w-sm sm:max-w-md overflow-hidden rounded-3xl border border-primary/20 bg-base-100 shadow-2xl shadow-primary/10 transition-all hover:shadow-primary/20"
+        >
+          {/* Header Card */}
+          <div className="bg-gradient-to-r from-primary via-indigo-600 to-violet-600 p-4 sm:p-5 flex items-center justify-between relative overflow-hidden">
+            {/* Animated light beam */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+
+            <div className="flex items-center gap-3 relative z-10">
+              <div className="size-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <Mic className="size-6 text-white animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-white font-black italic uppercase tracking-tighter text-sm sm:text-base leading-none">System Notification</h3>
+                <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">Official Broadcast</p>
+              </div>
+            </div>
+            <Star className="size-5 text-amber-300 fill-amber-300 animate-bounce relative z-10" />
+          </div>
+
+          {/* Content Body */}
+          <div className="p-5 sm:p-7 space-y-4 bg-gradient-to-b from-primary/5 to-transparent">
+            <div className="text-sm sm:text-base font-medium leading-relaxed text-base-content/80 whitespace-pre-wrap">
+              {message.text.replace("📢 SYSTEM NOTIFICATION: \n\n", "").replace("📢 SYSTEM NOTIFICATION:", "").trim()}
+            </div>
+
+            <div className="pt-4 border-t border-base-content/5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+                <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center">
+                  <CheckCheck className="size-3 text-primary" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest italic">Verified System Message</span>
+              </div>
+              <span className="text-[10px] font-bold opacity-30 tabular-nums">
+                {new Date(message.created_at).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false })}
+              </span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}
@@ -249,7 +300,9 @@ const EmotionMessage = (props) => {
             </div>
           </div>
         </div>
-      )}
+      )
+      }
+
 
       <div className={`flex flex-col ${isMyMessage ? "items-end mr-14" : "items-start ml-14"} -mt-1.5 mb-1 gap-1`}>
         {/* Emotion Badge & Translation - Single Row */}
