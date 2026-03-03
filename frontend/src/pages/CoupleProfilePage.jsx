@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import {
     getCoupleStatus,
@@ -44,6 +44,7 @@ import { isPremiumUser } from "../lib/premium";
 const CoupleProfilePage = () => {
     const { authUser } = useAuthUser();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditingNote, setIsEditingNote] = useState(false);
     const [noteDraft, setNoteDraft] = useState("");
@@ -325,7 +326,15 @@ const CoupleProfilePage = () => {
                             <span className="text-[10px] font-black opacity-40 uppercase tracking-widest">My Gems</span>
                         </div>
                         <p className="text-2xl font-black italic">{authUser?.gems || 0}</p>
-                        <button onClick={() => toast("Redirecting to Gem Shop...")} className="text-[9px] text-primary font-bold uppercase mt-2 hover:underline">Top Up -&gt;</button>
+                        <button
+                            onClick={() => {
+                                toast.success("Redirecting to Gem Shop...");
+                                setTimeout(() => navigate("/gem-shop"), 500);
+                            }}
+                            className="text-[9px] text-primary font-bold uppercase mt-2 hover:underline"
+                        >
+                            Top Up -&gt;
+                        </button>
                     </div>
                     <div className="card bg-base-200 border border-success/10 p-4 rounded-3xl shadow-sm group hover:border-success/30 transition-all">
                         <div className="flex items-center gap-2 mb-1">
