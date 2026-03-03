@@ -304,29 +304,30 @@ const EmotionMessage = (props) => {
       }
 
 
-      <div className={`flex flex-col ${isMyMessage ? "items-end mr-14" : "items-start ml-14"} -mt-1.5 mb-1 gap-1`}>
+      <div className={`flex flex-col ${isMyMessage ? "items-end mr-14" : "items-start ml-14"} -mt-1 mb-1 gap-1.5`}>
         {/* Emotion Badge & Translation - Single Row */}
-        <div className="flex items-center gap-2">
-          {emotion && emotionColors[emotion] && (
-            <span
-              className={`text-[8px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-sm border shadow-sm ${emotionColors[emotion]}`}
-            >
-              {emotion}
-            </span>
+        <div className="flex items-center gap-3">
+          {emotion && emotion !== 'neutral' && emotionColors[emotion] && (
+            <div className="flex items-center gap-1.5 opacity-70">
+              <div className={`size-1.5 rounded-full ${emotionColors[emotion].split(' ')[0]} animate-pulse`} />
+              <span className="text-[9px] uppercase tracking-widest font-black italic text-base-content/60">
+                {emotion}
+              </span>
+            </div>
           )}
 
           {message.text && !translatedText && (
             <button
               onClick={handleTranslate}
-              className="text-[9px] flex items-center gap-1 opacity-40 hover:opacity-100 transition-opacity text-primary font-bold"
+              className="group/t flex items-center gap-1.5 transition-all opacity-20 hover:opacity-100 text-primary"
               disabled={isTranslating}
+              title="Translate message"
             >
               {isTranslating ? (
-                <Loader2 className="size-2.5 animate-spin" />
+                <Loader2 className="size-3 animate-spin" />
               ) : (
                 <>
-                  <Languages className="size-2.5" />
-                  Translate
+                  <Languages className="size-3.5 transition-transform group-hover/t:scale-110" />
                   {!isPremium && <Star className="size-2 text-warning fill-warning" />}
                 </>
               )}
@@ -336,14 +337,14 @@ const EmotionMessage = (props) => {
 
         {/* Translation Result */}
         {translatedText && (
-          <div className="bg-base-200/80 backdrop-blur-sm px-2.5 py-1.5 rounded-xl border border-base-300 max-w-[220px] animate-in slide-in-from-top-1 duration-300 shadow-sm relative group/trans">
-            <p className="text-[10px] italic text-base-content leading-tight pr-4">
-              <Languages className="size-2.5 inline mr-1 text-primary" />
+          <div className="bg-base-200/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-base-300 max-w-[240px] animate-in slide-in-from-top-1 duration-300 shadow-lg relative group/trans">
+            <p className="text-[11px] italic text-base-content/90 leading-tight pr-5">
+              <Languages className="size-3 inline mr-2 text-primary opacity-60" />
               {translatedText}
             </p>
             <button
               onClick={() => setTranslatedText("")}
-              className="absolute top-1 right-1 text-primary hover:scale-110"
+              className="absolute top-1.5 right-1.5 size-4 flex items-center justify-center rounded-full hover:bg-base-300 transition-colors text-base-content/40 hover:text-base-content"
               title="Hide"
             >
               ×
