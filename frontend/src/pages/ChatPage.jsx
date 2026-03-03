@@ -140,40 +140,50 @@ const ChatPage = () => {
                 <MessageList Message={EmotionMessage} DateSeparator={() => null} />
 
                 {/* Smart replies float above input */}
-                <div className="flex-shrink-0 px-2 z-20">
-                  <SmartReply channel={channel} onSelect={(text) => channel.sendMessage({ text, fontSize: 1 })} />
-                </div>
+                {targetUserId !== "system_announcement" && (
+                  <div className="flex-shrink-0 px-2 z-20">
+                    <SmartReply channel={channel} onSelect={(text) => channel.sendMessage({ text, fontSize: 1 })} />
+                  </div>
+                )}
               </div>
 
               {/* FIXED INPUT AREA */}
               <div className="flex-shrink-0 z-50 chat-input-glass pb-safe">
-                <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-5xl mx-auto w-full">
-                  {showShoutSlider && (
-                    <div className="flex items-center gap-4 bg-base-100/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-primary/20 shadow-2xl mb-2">
-                      <input
-                        type="range" min="0.5" max="2.5" step="0.1" value={fontSize}
-                        onChange={(e) => setFontSize(parseFloat(e.target.value))}
-                        className="range range-primary range-xs flex-1"
-                      />
-                      <span className="font-bold text-primary text-xs">{(fontSize * 100).toFixed(0)}%</span>
-                    </div>
-                  )}
+                {targetUserId === "system_announcement" ? (
+                  <div className="p-4 text-center">
+                    <p className="text-xs font-black uppercase tracking-[0.2em] opacity-40 italic">
+                      Official Announcement (Read-Only)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-5xl mx-auto w-full">
+                    {showShoutSlider && (
+                      <div className="flex items-center gap-4 bg-base-100/95 backdrop-blur-xl px-4 py-3 rounded-2xl border border-primary/20 shadow-2xl mb-2">
+                        <input
+                          type="range" min="0.5" max="2.5" step="0.1" value={fontSize}
+                          onChange={(e) => setFontSize(parseFloat(e.target.value))}
+                          className="range range-primary range-xs flex-1"
+                        />
+                        <span className="font-bold text-primary text-xs">{(fontSize * 100).toFixed(0)}%</span>
+                      </div>
+                    )}
 
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 min-w-0 bg-base-100/50 rounded-2xl border border-base-300/50 px-1 shadow-inner">
-                      <MessageInput focus grow />
-                    </div>
-                    <div className="flex items-center gap-1 bg-primary/5 p-1 rounded-full border border-primary/10">
-                      <button onClick={() => setShowShoutSlider(!showShoutSlider)} className={`btn btn-circle btn-sm size-9 border-none ${showShoutSlider ? 'bg-primary text-white' : 'btn-ghost text-primary'}`}>
-                        AA
-                      </button>
-                      <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
-                      <button onClick={handleSnapClick} className="btn btn-circle btn-sm btn-ghost text-primary size-9">
-                        <Camera className="size-4.5" />
-                      </button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0 bg-base-100/50 rounded-2xl border border-base-300/50 px-1 shadow-inner">
+                        <MessageInput focus grow />
+                      </div>
+                      <div className="flex items-center gap-1 bg-primary/5 p-1 rounded-full border border-primary/10">
+                        <button onClick={() => setShowShoutSlider(!showShoutSlider)} className={`btn btn-circle btn-sm size-9 border-none ${showShoutSlider ? 'bg-primary text-white' : 'btn-ghost text-primary'}`}>
+                          AA
+                        </button>
+                        <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
+                        <button onClick={handleSnapClick} className="btn btn-circle btn-sm btn-ghost text-primary size-9">
+                          <Camera className="size-4.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
             </div>

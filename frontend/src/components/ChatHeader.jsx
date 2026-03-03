@@ -208,7 +208,7 @@ function ChatHeader() {
                 </div>
             </div>
 
-            {!isGroup && (
+            {!isGroup && user?.id !== "system_announcement" && (
                 <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-1">
                     <button
                         onClick={handleCoolDown}
