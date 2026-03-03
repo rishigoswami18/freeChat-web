@@ -159,38 +159,32 @@ const ChatPage = () => {
                       </div>
                     )}
 
-                    <div className="flex flex-col gap-2">
-                      {/* Action Toolbar - Now above the input for more typing space */}
-                      <div className="flex items-center gap-2 px-1">
-                        <div className="flex items-center gap-1.5 p-1 bg-base-200/30 rounded-2xl border border-base-300/30">
+                    <div className="flex flex-col gap-1.5">
+                      {/* Integrated Action Toolbar */}
+                      <div className="flex items-center gap-4 px-2.5 pb-0.5">
+                        <div className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => setShowShoutSlider(!showShoutSlider)}
-                            className={`btn btn-circle btn-xs size-8 border-none transition-all ${showShoutSlider ? 'bg-primary text-white shadow-md' : 'btn-ghost text-primary opacity-70 hover:opacity-100'}`}
-                            title="Text size"
+                            className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter ${showShoutSlider ? 'text-primary opacity-100' : ''}`}
                           >
-                            <span className="font-bold text-[10px]">AA</span>
+                            <span className="text-xs">AA</span> Size
                           </button>
-
-                          <div className="w-[1px] h-4 bg-base-300/50 mx-0.5" />
-
-                          <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
-
                           <button
                             onClick={handleSnapClick}
-                            className="btn btn-circle btn-xs btn-ghost text-primary opacity-70 hover:opacity-100 size-8 transition-all"
-                            title="Send snap"
+                            className="flex items-center gap-1 text-[10px] font-black uppercase tracking-tighter hover:text-primary transition-colors"
                           >
-                            <Camera className="size-4" />
+                            <Camera className="size-3" /> Snap
                           </button>
                         </div>
-
-                        {/* Optional: Add a placeholder for more tools if needed */}
-                        <div className="flex-1" />
+                        <div className="flex-1 h-[1px] bg-base-content/5" />
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 min-w-0 bg-base-100/50 rounded-2xl border border-base-300/50 px-1 shadow-inner focus-within:border-primary/30 transition-all">
+                      <div className="flex items-center gap-1.5">
+                        <div className="flex-1 bg-base-200/60 rounded-[28px] border border-base-content/5 shadow-inner focus-within:bg-base-100 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
                           <MessageInput focus grow />
+                        </div>
+                        <div className="flex-shrink-0">
+                          <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
                         </div>
                       </div>
                     </div>
