@@ -101,3 +101,46 @@ export const toggleUserRole = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const broadcastEmail = async (req, res) => {
+    try {
+        const { subject, message } = req.body;
+        if (!subject || !message) {
+            return res.status(400).json({ message: "Subject and message are required" });
+        }
+
+        const users = await User.find({ isOnboarded: true }, "email");
+        const total = users.length;
+
+        // Use the new service
+        const { sendBroadcastEmail } = await import("../lib/email.service.js");
+
+        console.log(`[Admin] Starting broadcast email to ${total} users...`);
+
+        // Send emails sequentially to avoid rate limits/spam filters
+        // but for a small/medium app this is fine. 
+        // For large apps, use a queue like Bull/Redis.
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const user of users) {
+            try {
+                await sendBroadcastEmail(user.email, subject, message);
+                successCount++;
+            } catch (err) {
+                console.error(`Failed to send email to ${user.email}:`, err.message);
+                failCount++;
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Broadcast complete. Sent to ${successCount} users. Failed for ${failCount} users.`,
+            total
+        });
+    } catch (error) {
+        console.error("Error in broadcastEmail:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+

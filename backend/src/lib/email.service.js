@@ -166,3 +166,29 @@ export const sendResetPasswordEmail = async (email, otp) => {
         </div>`
     );
 };
+
+/**
+ * Send a broadcast email to users
+ */
+export const sendBroadcastEmail = async (email, subject, message) => {
+    return await sendEmail(
+        email,
+        undefined, // replyTo
+        subject,
+        message,
+        `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:10px;background:#fff;">
+            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">freeChat</h1></div>
+            <div style="padding:20px;border-top:2px solid #6366f1;">
+                <h2 style="color:#333;margin-top:0;">Special Announcement</h2>
+                <div style="color:#444;line-height:1.6;font-size:16px;">
+                    ${message.replace(/\n/g, '<br/>')}
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee;">
+                <p style="color:#aaa;font-size:12px;">You received this because you are a registered member of freeChat.</p>
+                <p style="color:#aaa;font-size:12px;">© 2026 freeChat. All rights reserved.</p>
+            </div>
+        </div>`
+    );
+};
+

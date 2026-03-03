@@ -13,7 +13,8 @@ import {
     Loader2,
     RefreshCcw,
     CheckCircle2,
-    Sparkles
+    Sparkles,
+    Mail
 } from "lucide-react";
 import {
     getAdminStats,
@@ -22,6 +23,7 @@ import {
     deleteUserAdmin,
     toggleUserRole,
     broadcastNotification,
+    broadcastEmail,
     deletePost,
     clearAdminInbox
 } from "../lib/api";
@@ -37,6 +39,9 @@ const AdminDashboard = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [broadcastMsg, setBroadcastMsg] = useState("");
     const [isBroadcasting, setIsBroadcasting] = useState(false);
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailBody, setEmailBody] = useState("");
+    const [isEmailSending, setIsEmailSending] = useState(false);
     const [isCleaning, setIsCleaning] = useState(false);
 
     useEffect(() => {
@@ -96,6 +101,23 @@ const AdminDashboard = () => {
             toast.error("Broadcast failed");
         } finally {
             setIsBroadcasting(false);
+        }
+    };
+
+    const handleEmailBroadcast = async () => {
+        if (!emailSubject.trim() || !emailBody.trim()) return toast.error("Subject and message are required");
+        if (!window.confirm(`Send this email to all registered users? This cannot be undone.`)) return;
+
+        setIsEmailSending(true);
+        try {
+            const res = await broadcastEmail(emailSubject, emailBody);
+            toast.success(res.message);
+            setEmailSubject("");
+            setEmailBody("");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Email broadcast failed");
+        } finally {
+            setIsEmailSending(false);
         }
     };
 
@@ -399,6 +421,58 @@ const AdminDashboard = () => {
                                         ) : (
                                             <>
                                                 <span className="font-black italic uppercase tracking-tighter text-lg">Transmit signal</span>
+                                                <Send className="size-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Mass Email Section */}
+                            <div className="card bg-base-200 p-8 rounded-[40px] border-2 border-primary/10 shadow-xl shadow-primary/5 mt-8">
+                                <div className="text-center mb-8">
+                                    <div className="size-20 bg-primary/10 text-primary rounded-[28px] flex items-center justify-center mx-auto mb-4 border-2 border-primary/5">
+                                        <Mail className="size-10" />
+                                    </div>
+                                    <h2 className="text-3xl font-black italic tracking-tighter uppercase">Mass Email</h2>
+                                    <p className="text-xs font-bold opacity-40 mt-1 uppercase tracking-widest">Send specialized HTML mail to all registers</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <input
+                                        type="text"
+                                        placeholder="Email Subject..."
+                                        className="input input-bordered w-full rounded-2xl bg-base-100 ring-1 ring-base-content/5"
+                                        value={emailSubject}
+                                        onChange={(e) => setEmailSubject(e.target.value)}
+                                    />
+
+                                    <div className="bg-base-100 p-4 rounded-3xl ring-1 ring-base-content/5">
+                                        <textarea
+                                            className="textarea textarea-ghost w-full bg-transparent resize-none text-base font-medium placeholder:italic p-0 min-h-[120px] focus:ring-0"
+                                            placeholder="Type your official email body here..."
+                                            value={emailBody}
+                                            onChange={(e) => setEmailBody(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="p-4 bg-primary/5 rounded-2xl flex items-start gap-3">
+                                        <Mail className="size-5 text-primary flex-shrink-0 mt-0.5" />
+                                        <p className="text-[10px] font-bold text-primary italic leading-relaxed uppercase">
+                                            Warning: This sends an email directly to every user's inbox. Ensure the content is accurate and professional.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={handleEmailBroadcast}
+                                        disabled={isEmailSending || !emailSubject.trim() || !emailBody.trim()}
+                                        className="btn btn-primary btn-lg w-full rounded-[24px] shadow-lg shadow-primary/20 gap-3 group active:scale-95 transition-all"
+                                    >
+                                        {isEmailSending ? (
+                                            <Loader2 className="size-6 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <span className="font-black italic uppercase tracking-tighter text-lg">Send Mass Email</span>
                                                 <Send className="size-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                                             </>
                                         )}

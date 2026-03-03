@@ -5,7 +5,8 @@ import {
     getAdminUsers,
     getAdminPosts,
     deleteUser,
-    toggleUserRole
+    toggleUserRole,
+    broadcastEmail
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get("/users", getAdminUsers);
 router.get("/posts", getAdminPosts);
 router.delete("/users/:id", deleteUser);
 router.put("/users/:id/role", toggleUserRole);
+router.post("/broadcast-email", broadcastEmail);
 
 export default router;

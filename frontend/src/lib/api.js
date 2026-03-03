@@ -371,4 +371,7 @@ export const clearAdminInbox = async () => {
   const response = await axiosInstance.post("/notifications/clear-chats");
   return response.data;
 };
-
+export const broadcastEmail = async (subject, message) => {
+  const response = await axiosInstance.post("/admin/broadcast-email", { subject, message });
+  return response.data;
+};
