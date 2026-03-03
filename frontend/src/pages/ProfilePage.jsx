@@ -19,17 +19,20 @@ const ProfilePage = () => {
 
     const [userPosts, setUserPosts] = useState([]);
 
-    // Fetch user specific posts
-    const { isLoading: isLoadingPosts } = useQuery({
+    // Fetch user specific posts with caching
+    const { data: serverPosts, isLoading: isLoadingPosts } = useQuery({
         queryKey: ["userPosts", authUser?._id],
-        queryFn: async () => {
-            if (!authUser?._id) return [];
-            const data = await getUserPosts(authUser._id);
-            setUserPosts(data);
-            return data;
-        },
+        queryFn: () => getUserPosts(authUser._id),
         enabled: !!authUser?._id,
+        staleTime: 1000 * 60 * 5,
+        placeholderData: (prev) => prev,
     });
+
+    useEffect(() => {
+        if (serverPosts) {
+            setUserPosts(serverPosts);
+        }
+    }, [serverPosts]);
 
     const [formData, setFormData] = useState({
         fullName: "",

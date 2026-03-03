@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getUserProfile, getUserPosts, getOtherUserFriends } from "../lib/api";
@@ -18,17 +18,23 @@ const UserProfilePage = () => {
         queryKey: ["userProfile", userId],
         queryFn: () => getUserProfile(userId),
         enabled: !!userId,
+        staleTime: 1000 * 60 * 5,
+        placeholderData: (prev) => prev,
     });
 
-    const { isLoading: isPostsLoading } = useQuery({
+    const { data: serverPosts, isLoading: isPostsLoading } = useQuery({
         queryKey: ["userPosts", userId],
-        queryFn: async () => {
-            const data = await getUserPosts(userId);
-            setUserPosts(data);
-            return data;
-        },
+        queryFn: () => getUserPosts(userId),
         enabled: !!userId,
+        staleTime: 1000 * 60 * 5,
+        placeholderData: (prev) => prev,
     });
+
+    useEffect(() => {
+        if (serverPosts) {
+            setUserPosts(serverPosts);
+        }
+    }, [serverPosts]);
 
     if (isUserLoading) {
         return (

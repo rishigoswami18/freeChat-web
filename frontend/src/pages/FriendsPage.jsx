@@ -9,12 +9,9 @@ const FriendsPage = () => {
   const queryClient = useQueryClient();
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
-    queryFn: async () => {
-      const res = await getFriends();
-      return res;
-    },
-    staleTime: 0,
-    refetchOnWindowFocus: true,
+    queryFn: getFriends,
+    staleTime: 1000 * 60 * 5, // 5 mins cache
+    placeholderData: (prev) => prev,
   });
 
   const { mutate: doUnfriend, variables: pendingId } = useMutation({
