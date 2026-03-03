@@ -16,8 +16,10 @@ import {
     Languages,
     Film,
     Smartphone,
+    Crown
 } from "lucide-react";
 import Logo from "../components/Logo";
+import AdSense from "../components/AdSense";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 30 },
@@ -274,6 +276,31 @@ const LandingPage = () => {
                                 </div>
                             </motion.div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Landing Page Ad Break */}
+            <section className="py-12 bg-base-100 overflow-hidden">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-4xl mx-auto bg-base-200/50 rounded-[2.5rem] p-8 border border-base-300 relative">
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+                            <div className="flex-1 space-y-4">
+                                <div className="badge badge-primary gap-2 p-3 font-bold">
+                                    <Crown className="size-3" />
+                                    Ad Partner
+                                </div>
+                                <h3 className="text-2xl font-bold italic uppercase tracking-tight">Support freeChat</h3>
+                                <p className="opacity-70 text-sm">
+                                    We keep freeChat free for everyone through community support and relevant ads.
+                                    Want to go ad-free? Join our premium membership!
+                                </p>
+                                <Link to="/membership" className="btn btn-primary btn-sm rounded-xl">Upgrade to Premium</Link>
+                            </div>
+                            <div className="w-full md:w-auto min-w-[300px] flex justify-center">
+                                <AdSense slot="5566778899" format="rectangle" responsive="true" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

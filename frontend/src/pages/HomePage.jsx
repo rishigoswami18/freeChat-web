@@ -14,6 +14,7 @@ import { capitialize } from "../lib/utils";
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
 import Logo from "../components/Logo";
+import AdSense from "../components/AdSense";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -76,6 +77,15 @@ const HomePage = () => {
             ))}
           </div>
         )}
+
+        {/* Home Page Banner Ad */}
+        <section className="bg-base-200/50 rounded-3xl p-4 border border-base-content/5 overflow-hidden">
+          <div className="flex justify-between items-center mb-2 px-2">
+            <span className="text-[10px] font-black uppercase opacity-30 tracking-widest">Sponsored</span>
+            <Link to="/membership" className="text-[10px] text-primary font-bold hover:underline">Remove Ads</Link>
+          </div>
+          <AdSense slot="1234567890" format="horizontal" responsive="true" />
+        </section>
 
         <section>
           <div className="mb-6 sm:mb-8">

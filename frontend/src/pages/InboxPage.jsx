@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useChatClient } from "../components/ChatProvider";
 import useAuthUser from "../hooks/useAuthUser";
 import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
+import AdSense from "../components/AdSense";
 
 // Removed mock data for real integration
 
@@ -249,6 +250,16 @@ const InboxPage = () => {
                     onClose={() => setViewingDP(null)}
                 />
             )}
+
+            {/* Inbox Ad Banner */}
+            <div className="mt-8 px-4">
+                <div className="bg-base-200/50 rounded-2xl p-4 border border-base-content/5 overflow-hidden">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-black uppercase opacity-30 tracking-widest">Sponsored</span>
+                    </div>
+                    <AdSense slot="0987654321" format="horizontal" responsive="true" />
+                </div>
+            </div>
         </div>
     );
 };
