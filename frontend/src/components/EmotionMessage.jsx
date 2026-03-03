@@ -208,10 +208,10 @@ const EmotionMessage = (props) => {
         </div>
       ) : (
         <div
-          className={`relative w-full ${isShout ? 'drop-shadow-xl' : ''} ${isMyMessage ? 'flex justify-end' : 'flex justify-start'}`}
+          className={`relative w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} ${isShout ? 'drop-shadow-xl' : ''}`}
         >
           <div
-            className={`message-scale-container w-fit flex-shrink-0 transition-all duration-300 ${isWhisper ? 'opacity-60' : ''}`}
+            className={`message-scale-container flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} flex-shrink-0 transition-all duration-300 ${isWhisper ? 'opacity-60' : ''}`}
             style={{
               transform: `scale(${scale})`,
               transformOrigin: isMyMessage ? 'right bottom' : 'left bottom',
