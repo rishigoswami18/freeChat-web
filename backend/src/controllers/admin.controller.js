@@ -124,19 +124,19 @@ export const broadcastEmail = async (req, res) => {
         for (let i = 0; i < users.length; i++) {
             const user = users[i];
             try {
-                // Add a small delay between emails to avoid hitting burst rate limits
+                // Burst limit protection
                 if (i > 0) await sleep(500);
 
                 await sendBroadcastEmail(user.email, subject, message);
                 successCount++;
-                if (successCount % 10 === 0) console.log(`[Admin] Progress: ${successCount}/${total} emails sent...`);
+                console.log(`[Admin] [${successCount}/${total}] ✅ Sent to: ${user.email}`);
             } catch (err) {
-                console.error(`[Admin] Failed to send email to ${user.email}:`, err.message);
+                console.error(`[Admin] [ERROR] ❌ Failed for ${user.email}:`, err.message);
                 failCount++;
             }
         }
 
-        console.log(`[Admin] Broadcast complete. Success: ${successCount}, Failed: ${failCount}`);
+        console.log(`[Admin] 📢 Broadcast Finished. Total: ${total}, ✅ Success: ${successCount}, ❌ Failed: ${failCount}`);
 
         res.status(200).json({
             success: true,
