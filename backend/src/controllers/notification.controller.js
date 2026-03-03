@@ -25,21 +25,26 @@ export const broadcastSystemNotification = async (req, res) => {
         // 1. Fetch all users from database
         const users = await User.find({}, "_id fullName email profilePic");
         const adminId = req.user._id.toString();
+        const SYSTEM_ID = "system_announcement";
 
-        console.log(`🚀 Starting system broadcast to ${users.length} users. Admin: ${adminId}`);
+        console.log(`🚀 Starting system broadcast to ${users.length} users. System ID: ${SYSTEM_ID}`);
 
-        if (!streamClient) {
-            console.error("❌ Stream client is NULL during broadcast attempt.");
-            return res.status(500).json({ message: "Stream client not initialized" });
-        }
-
-        // SAFETY: Sync the admin user with the name "Announcement" for the broadcast
+        // SAFETY: Sync the dedication Announcement account
         await streamClient.upsertUsers([{
-            id: adminId,
+            id: SYSTEM_ID,
             name: "Announcement",
             image: "https://img.icons8.com/color/96/megaphone.png",
             role: "admin",
             isVerified: true
+        }]);
+
+        // ALSO: Restore the Admin's personal profile name in case it was overwritten in the previous step
+        await streamClient.upsertUsers([{
+            id: adminId,
+            name: req.user.fullName,
+            image: req.user.profilePic || "",
+            role: "admin",
+            isVerified: req.user.isVerified
         }]);
 
         let successCount = 0;
@@ -50,36 +55,38 @@ export const broadcastSystemNotification = async (req, res) => {
         const broadcastTasks = users.map(async (targetUser) => {
             const targetId = targetUser._id.toString();
 
-            if (targetId === adminId) return { skip: true };
+            // Skip the admin themselves and the system ID
+            if (targetId === adminId || targetId === SYSTEM_ID) return { skip: true };
 
             try {
-                // SAFETY: Upsert user to Stream right before messaging 
-                // ensures they exist on the chat server even if login sync failed
+                // SAFETY: Sync target user
                 await streamClient.upsertUsers([{
                     id: targetId,
                     name: targetUser.fullName,
                     image: targetUser.profilePic || "",
+                    role: targetUser.role || "user",
+                    isVerified: targetUser.isVerified || false
                 }]);
 
-                // Match the frontend's channel ID logic: [id1, id2].sort().join("-")
-                const channelId = [adminId, targetId].sort().join("-");
+                // Create a channel between the SYSTEM and the User
+                const channelId = [SYSTEM_ID, targetId].sort().join("-");
 
                 const channel = streamClient.channel("messaging", channelId, {
-                    members: [adminId, targetId],
-                    created_by_id: adminId,
+                    members: [SYSTEM_ID, targetId],
+                    created_by_id: SYSTEM_ID,
                 });
 
                 await channel.create();
 
                 const response = await channel.sendMessage({
                     text: `📢 SYSTEM NOTIFICATION: \n\n${message}`,
-                    user_id: adminId,
+                    user_id: SYSTEM_ID,
                     silent: false,
                     is_system: true
                 });
 
-                // HIDE the channel for the Admin so it doesn't clutter their inbox
-                await channel.hide(adminId);
+                // NO need to hide for admin anymore, because the admin is NO LONGER a member of this specific channel!
+                // The channel is between "Announcement" and "User".
 
                 return { success: true, email: targetUser.email, msgId: response.message.id };
             } catch (err) {
