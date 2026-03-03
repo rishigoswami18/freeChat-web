@@ -19,6 +19,7 @@ import {
   Smartphone,
   ShieldAlert,
   BadgeCheck,
+  Gem,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -48,11 +49,12 @@ const MobileDrawer = () => {
     { to: "/posts", icon: Pencil, label: "Posts" },
     { to: "/couple", icon: Heart, label: "Couple" },
     { to: "/games", icon: Gamepad2, label: "Games" },
+    { to: "/gem-shop", icon: Gem, label: "Gem Shop" },
     { to: "/membership", icon: Crown, label: "Premium" },
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
-  const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[10]];
+  const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[12]];
 
   return (
     <>

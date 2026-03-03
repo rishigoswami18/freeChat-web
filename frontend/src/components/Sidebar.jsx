@@ -15,6 +15,7 @@ import {
   Smartphone,
   ShieldAlert,
   BadgeCheck,
+  Gem,
 } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
@@ -30,6 +31,7 @@ const navItems = [
   { to: "/notifications", icon: Bell, label: "Notifications" },
   { to: "/couple", icon: HeartHandshake, label: "Bond Dashboard" },
   { to: "/games", icon: Gamepad2, label: "Games" },
+  { to: "/gem-shop", icon: Gem, label: "Gem Shop" },
   { to: "/membership", icon: Crown, label: "Premium" },
 ];
 

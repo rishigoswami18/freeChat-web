@@ -33,6 +33,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
+import GemShopPage from "./pages/GemShopPage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -274,6 +275,19 @@ const App = () => {
                     isAuthenticated && isOnboarded ? (
                       <Layout showSidebar={true}>
                         <GameDashboard />
+                      </Layout>
+                    ) : (
+                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                    )
+                  }
+                />
+
+                <Route
+                  path="/gem-shop"
+                  element={
+                    isAuthenticated && isOnboarded ? (
+                      <Layout showSidebar={true}>
+                        <GemShopPage />
                       </Layout>
                     ) : (
                       <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
