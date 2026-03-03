@@ -320,3 +320,47 @@ export async function buyVerification(req, res) {
     res.status(500).json({ message: error.message });
   }
 }
+
+export async function getUserProfile(req, res) {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id).select("-password").lean();
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Calculate friend count
+    const friendCount = user.friends?.length || 0;
+
+    res.status(200).json({ ...user, friendCount });
+  } catch (error) {
+    console.error("Error in getUserProfile controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function getUserFriends(req, res) {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if profile is public or if the requester is the user themselves or a friend
+    const isPublic = user.isPublic;
+    const isSelf = req.user.id === id;
+    const isFriend = user.friends.includes(req.user.id);
+
+    if (!isPublic && !isSelf && !isFriend) {
+      return res.status(403).json({ message: "This profile is private" });
+    }
+
+    const populatedUser = await User.findById(id)
+      .select("friends")
+      .populate("friends", "fullName profilePic username nativeLanguage learningLanguage role isVerified");
+
+    res.status(200).json(populatedUser.friends);
+  } catch (error) {
+    console.error("Error in getUserFriends controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+

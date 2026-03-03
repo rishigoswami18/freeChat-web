@@ -76,7 +76,7 @@ const SearchPage = () => {
                                     <img src={user.profilePic || "/avatar.png"} alt={user.fullName} />
                                 </div>
                             </div>
-                            <div className="flex-1 min-w-0">
+                            <Link to={`/user/${user._id}`} className="flex-1 min-w-0 group-hover:text-primary transition-colors">
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-bold text-base tracking-tight">{user.fullName}</h3>
                                     {user.isTandemMatch && (
@@ -87,12 +87,12 @@ const SearchPage = () => {
                                     )}
                                 </div>
                                 {user.username && (
-                                    <p className="text-xs font-mono font-semibold text-primary/70">@{user.username}</p>
+                                    <p className="text-xs font-mono font-semibold opacity-70">@{user.username}</p>
                                 )}
                                 <p className="text-xs text-base-content/50 font-medium truncate">
                                     {user.nativeLanguage} • Learning {user.learningLanguage}
                                 </p>
-                            </div>
+                            </Link>
                             <button
                                 onClick={() => addFriend(user._id)}
                                 disabled={pendingUserId === user._id}

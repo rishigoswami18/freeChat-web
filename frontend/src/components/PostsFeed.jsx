@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Heart,
   MessageCircle,
@@ -198,12 +199,14 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm truncate flex items-center gap-1">
-              {post.fullName || "Unknown User"}
-              {(post.role === "admin" || post.isVerified) && (
-                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
-              )}
-            </h3>
+            <Link to={`/user/${post.userId}`} className="hover:text-primary transition-colors">
+              <h3 className="font-semibold text-sm truncate flex items-center gap-1">
+                {post.fullName || "Unknown User"}
+                {(post.role === "admin" || post.isVerified) && (
+                  <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+                )}
+              </h3>
+            </Link>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] text-base-content/40 font-medium">
                 {timeAgo(post.createdAt)}

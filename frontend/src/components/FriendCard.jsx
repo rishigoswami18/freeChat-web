@@ -24,14 +24,14 @@ const FriendCard = ({ friend }) => {
             </div>
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-200" />
           </div>
-          <div className="flex-1 min-w-0">
+          <Link to={`/user/${friend._id}`} className="flex-1 min-w-0 hover:text-primary transition-colors">
             <h3 className="font-semibold text-sm truncate">
               {friend.fullName}
             </h3>
             <p className="text-[11px] text-base-content/40 font-medium">
               @{friend.username || "user"}
             </p>
-          </div>
+          </Link>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mb-3">

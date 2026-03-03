@@ -57,7 +57,7 @@ const FriendsPage = () => {
                 <div className="card-body p-3 sm:p-4">
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
-                    <div className="avatar w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-base-300 overflow-hidden flex-shrink-0">
+                    <Link to={`/user/${friend._id}`} className="avatar w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-base-300 overflow-hidden flex-shrink-0 hover:ring-2 ring-primary/20 transition-all active:scale-95">
                       {friend.profilePic ? (
                         <img
                           src={friend.profilePic}
@@ -69,11 +69,13 @@ const FriendsPage = () => {
                           <User className="w-5 h-5 text-base-content opacity-40" />
                         </div>
                       )}
-                    </div>
+                    </Link>
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm sm:text-base truncate">{friend.fullName}</h3>
+                      <Link to={`/user/${friend._id}`} className="hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-sm sm:text-base truncate">{friend.fullName}</h3>
+                      </Link>
                       <div className="flex flex-wrap gap-1 mt-0.5">
                         <span className="badge badge-xs sm:badge-sm badge-outline">
                           {friend.nativeLanguage}

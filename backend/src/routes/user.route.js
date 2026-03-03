@@ -11,6 +11,8 @@ import {
   updateProfile,
   unfriend,
   buyVerification,
+  getUserProfile,
+  getUserFriends,
 } from "../controllers/user.controller.js";
 import { migrateUsernames } from "../controllers/migration.controller.js";
 
@@ -23,6 +25,8 @@ router.use(protectRoute);
 
 router.get("/", getRecommendedUsers);
 router.get("/friends", getMyFriends);
+router.get("/:id", getUserProfile);
+router.get("/:id/friends", getUserFriends);
 
 router.post("/friend-request/:id", sendFriendRequest);
 router.put("/friend-request/:id/accept", acceptFriendRequest);

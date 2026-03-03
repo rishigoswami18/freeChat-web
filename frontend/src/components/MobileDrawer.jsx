@@ -27,15 +27,16 @@ import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
-const MobileDrawer = ({ isOpen, onClose }) => {
+const MobileDrawer = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
   const navigate = useNavigate();
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const { logoutMutation, isPending: isLoggingOut } = useLogout();
 
-  const toggleDrawer = () => onClose();
+  const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
     { to: "/", icon: Home, label: "Feed" },
@@ -117,8 +118,8 @@ const MobileDrawer = ({ isOpen, onClose }) => {
               to={to}
               onClick={toggleDrawer}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] ${location.pathname === to
-                  ? "bg-primary text-primary-content shadow-md shadow-primary/20"
-                  : "hover:bg-base-200 active:bg-base-300"
+                ? "bg-primary text-primary-content shadow-md shadow-primary/20"
+                : "hover:bg-base-200 active:bg-base-300"
                 }`}
             >
               <Icon className="size-5" />
@@ -141,8 +142,8 @@ const MobileDrawer = ({ isOpen, onClose }) => {
               to="/admin"
               onClick={toggleDrawer}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 mt-4 border border-primary/20 bg-primary/5 ${location.pathname === "/admin"
-                  ? "bg-primary text-primary-content"
-                  : "text-primary hover:bg-primary/10"
+                ? "bg-primary text-primary-content"
+                : "text-primary hover:bg-primary/10"
                 }`}
             >
               <ShieldAlert className="size-5" />

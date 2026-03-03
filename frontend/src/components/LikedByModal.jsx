@@ -54,12 +54,14 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                                         </div>
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-sm block truncate flex items-center gap-1">
-                                            {user.fullName}
-                                            {(user.role === "admin" || user.isVerified) && (
-                                                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
-                                            )}
-                                        </p>
+                                        <Link to={`/user/${user._id}`} onClick={onClose} className="hover:text-primary transition-colors">
+                                            <p className="font-bold text-sm block truncate flex items-center gap-1">
+                                                {user.fullName}
+                                                {(user.role === "admin" || user.isVerified) && (
+                                                    <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+                                                )}
+                                            </p>
+                                        </Link>
                                         <div className="flex items-center gap-1.5 overflow-hidden">
                                             <span className="text-[10px] opacity-40 truncate">@{user.username || 'user'}</span>
                                             {user.learningLanguage && (

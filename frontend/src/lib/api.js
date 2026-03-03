@@ -92,6 +92,17 @@ export const unfriend = async (friendId) => {
   return response.data;
 };
 
+export const getUserProfile = async (userId) => {
+  const response = await axiosInstance.get(`/users/${userId}`);
+  return response.data;
+};
+
+export const getOtherUserFriends = async (userId) => {
+  const response = await axiosInstance.get(`/users/${userId}/friends`);
+  return response.data;
+};
+
+
 // ----------------- POSTS -----------------
 
 export const createPost = async (postData) => {

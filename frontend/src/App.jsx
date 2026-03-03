@@ -32,6 +32,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import UserProfilePage from "./pages/UserProfilePage.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -234,6 +235,19 @@ const App = () => {
                     isAuthenticated && isOnboarded ? (
                       <Layout showSidebar={true}>
                         <ProfilePage />
+                      </Layout>
+                    ) : (
+                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                    )
+                  }
+                />
+
+                <Route
+                  path="/user/:userId"
+                  element={
+                    isAuthenticated && isOnboarded ? (
+                      <Layout showSidebar={true}>
+                        <UserProfilePage />
                       </Layout>
                     ) : (
                       <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
