@@ -44,7 +44,7 @@ import VideoProvider from "./components/VideoProvider.jsx";
 import { ChatProvider } from "./components/ChatProvider.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
 import StealthOverlay from "./components/StealthOverlay.jsx";
-import AdSenseLoader from "./components/AdSenseLoader.jsx";
+
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
@@ -68,7 +68,7 @@ const App = () => {
   return (
     <div className="min-h-screen" data-theme={theme}>
       <StealthOverlay>
-        <AdSenseLoader />
+
         <ChatProvider>
           <VideoProvider>
             <AnimatePresence mode="wait">
