@@ -6,27 +6,28 @@
 
 /* ===== Global Typography & Defaults ===== */
 html {
-  height: -webkit-fill-available;
-  overflow-x: hidden;
+  height: 100%;
+  overflow-x: clip;
+  /* clip prevents horizontal scroll without breaking vertical scroll/anchors */
 }
 
 body {
   width: 100%;
   min-height: 100%;
-  min-height: -webkit-fill-available;
   margin: 0;
   padding: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: visible;
+  /* Default visible allows natural window scrolling */
+  overflow-x: clip;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: none;
+  /* overscroll-behavior-y: none; removed as it often breaks scrolling flow on trackpads/mobile */
 }
 
 /* When chat is active, we lock the main body scroll */
 body.is-chat-active {
   overflow: hidden !important;
-  position: fixed;
+  /* position: fixed; removed to avoid jumpiness on some browsers, overflow: hidden is usually enough */
   width: 100%;
   height: 100%;
 }

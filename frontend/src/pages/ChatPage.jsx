@@ -135,15 +135,12 @@ const ChatPage = () => {
                 <ChatHeader />
               </div>
 
-              {/* SCROLLABLE CONTENT */}
-              <div className="flex-1 overflow-hidden relative flex flex-col">
-                <div className="flex-1 overflow-y-auto no-scrollbar">
-                  <MessageList Message={EmotionMessage} DateSeparator={() => null} />
-                </div>
+              {/* SCROLLABLE CONTENT area */}
+              <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
+                <MessageList Message={EmotionMessage} DateSeparator={() => null} />
 
-                {/* Smart replies float above input but move with scroll if needed, 
-                    actually better to keep them just above the input pinned area */}
-                <div className="flex-shrink-0 px-2">
+                {/* Smart replies float above input */}
+                <div className="flex-shrink-0 px-2 z-20">
                   <SmartReply channel={channel} onSelect={(text) => channel.sendMessage({ text, fontSize: 1 })} />
                 </div>
               </div>
