@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Smartphone,
   ShieldAlert,
+  BadgeCheck,
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
@@ -158,7 +159,12 @@ const MobileDrawer = () => {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-base truncate">{authUser?.fullName}</p>
+              <p className="font-bold text-base truncate flex items-center gap-1">
+                {authUser?.fullName}
+                {(authUser?.role === "admin" || authUser?.isVerified) && (
+                  <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
+                )}
+              </p>
               <p className="text-xs text-success flex items-center gap-1 font-medium">
                 <span className="size-2 rounded-full bg-success animate-pulse" />
                 Active Now

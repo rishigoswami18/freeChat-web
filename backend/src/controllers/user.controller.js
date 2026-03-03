@@ -254,6 +254,8 @@ export async function updateProfile(req, res) {
         id: updatedUser._id.toString(),
         name: updatedUser.fullName,
         image: updatedUser.profilePic || "",
+        role: updatedUser.role, // Sync role
+        isVerified: updatedUser.isVerified // Sync verification
       });
     } catch (error) {
       console.log("Error syncing Stream user during profile update:", error.message);
@@ -301,6 +303,17 @@ export async function buyVerification(req, res) {
     user.gems -= COST;
     user.isVerified = true;
     await user.save();
+
+    // Sync with Stream
+    try {
+      await upsertStreamUser({
+        id: user._id.toString(),
+        name: user.fullName,
+        image: user.profilePic || "",
+        role: user.role,
+        isVerified: true
+      });
+    } catch (e) { }
 
     res.status(200).json({ success: true, message: "Verification badge activated! 🎉", user });
   } catch (error) {

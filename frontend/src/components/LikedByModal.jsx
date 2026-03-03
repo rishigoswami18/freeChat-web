@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPostLikes } from "../lib/api";
-import { X, Heart, Loader2, MessageSquare } from "lucide-react";
+import { X, Heart, Loader2, MessageSquare, BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const LikedByModal = ({ isOpen, onClose, postId }) => {
@@ -51,8 +51,11 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                                         </div>
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-bold text-sm block truncate">
+                                        <p className="font-bold text-sm block truncate flex items-center gap-1">
                                             {user.fullName}
+                                            {(user.role === "admin" || user.isVerified) && (
+                                                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+                                            )}
                                         </p>
                                         <div className="flex items-center gap-1.5 overflow-hidden">
                                             <span className="text-[10px] opacity-40 truncate">@{user.username || 'user'}</span>

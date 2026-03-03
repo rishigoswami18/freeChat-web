@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MessageSquare, Search, ArrowRight, X, Loader2 } from "lucide-react";
+import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatClient } from "../components/ChatProvider";
 import useAuthUser from "../hooks/useAuthUser";
@@ -72,7 +72,9 @@ const InboxPage = () => {
                         partner = {
                             name: otherMember?.user?.name || "Deleted User",
                             avatar: otherMember?.user?.image || "/avatar.png",
-                            id: otherMember?.user?.id || "unknown"
+                            id: otherMember?.user?.id || "unknown",
+                            role: otherMember?.user?.role,
+                            isVerified: otherMember?.user?.isVerified
                         };
                     }
 
@@ -201,8 +203,11 @@ const InboxPage = () => {
 
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-baseline gap-2 mb-1.5">
-                                        <h2 className="font-bold italic text-base uppercase tracking-tight text-base-content truncate">
+                                        <h2 className="font-bold italic text-base uppercase tracking-tight text-base-content truncate flex items-center gap-1">
                                             {conv.partner.name}
+                                            {(conv.partner.role === "admin" || conv.partner.isVerified) && (
+                                                <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
+                                            )}
                                         </h2>
                                         <span className="text-[10px] uppercase font-black opacity-25 whitespace-nowrap">
                                             {timeAgo(conv.timestamp)}

@@ -62,6 +62,7 @@ export async function googleLogin(req, res) {
           id: user._id.toString(),
           name: user.fullName,
           image: user.profilePic || "",
+          role: user.role, // Sync role
         });
       } catch (error) {
         console.log("Error syncing Stream user (Google):", error);
@@ -171,6 +172,7 @@ export async function googleLoginWithAccessToken(req, res) {
           id: user._id.toString(),
           name: user.fullName,
           image: user.profilePic || "",
+          role: user.role, // Sync role
         });
       } catch (streamErr) {
         console.error("Stream Sync Error:", streamErr.message);
@@ -249,6 +251,7 @@ export async function syncFirebaseUser(req, res) {
           id: user._id.toString(),
           name: user.fullName,
           image: user.profilePic || "",
+          role: user.role, // Sync role
         });
       } catch (error) {
         console.log("Error syncing Stream user:", error);
@@ -351,6 +354,7 @@ export async function signup(req, res) {
         id: newUser._id.toString(),
         name: newUser.fullName,
         image: newUser.profilePic || "",
+        role: newUser.role, // Sync role
       });
     } catch (error) {
       console.log("Error creating Stream user:", error);
@@ -457,6 +461,7 @@ export async function onboard(req, res) {
         id: updatedUser._id.toString(),
         name: updatedUser.fullName,
         image: updatedUser.profilePic || "",
+        role: updatedUser.role, // Sync role
       });
     } catch (streamError) {
       console.log("Error updating Stream user during onboarding:", streamError.message);

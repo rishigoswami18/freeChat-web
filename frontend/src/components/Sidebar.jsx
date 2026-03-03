@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Smartphone,
   ShieldAlert,
+  BadgeCheck,
 } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
@@ -119,8 +120,11 @@ const Sidebar = () => {
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-200 dot-pulse" />
           </div>
           <div className="flex-1 overflow-hidden">
-            <h3 className="font-semibold text-sm truncate">
+            <h3 className="font-semibold text-sm truncate flex items-center gap-1">
               {authUser?.fullName}
+              {(authUser?.role === "admin" || authUser?.isVerified) && (
+                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+              )}
             </h3>
             <p className="text-[11px] text-success font-medium">Online</p>
           </div>

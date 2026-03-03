@@ -7,6 +7,7 @@ import {
   User,
   MessageSquare,
   Trash2,
+  BadgeCheck
 } from "lucide-react";
 import { likePost, commentOnPost, sharePost, deletePost } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
@@ -171,8 +172,11 @@ const PostCard = ({ post, setPosts }) => {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm truncate">
+            <h3 className="font-semibold text-sm truncate flex items-center gap-1">
               {post.fullName || "Unknown User"}
+              {(post.role === "admin" || post.isVerified) && (
+                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+              )}
             </h3>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] text-base-content/40 font-medium">
@@ -309,7 +313,12 @@ const PostCard = ({ post, setPosts }) => {
                 </div>
                 <div className="bg-base-300 rounded-2xl px-3 py-2 flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="font-semibold text-xs">{comment.fullName}</p>
+                    <p className="font-semibold text-xs flex items-center gap-1">
+                      {comment.fullName}
+                      {(comment.role === "admin" || comment.isVerified) && (
+                        <BadgeCheck className="size-3 text-amber-500 fill-amber-500/10" />
+                      )}
+                    </p>
                     {comment.caption && (
                       <span className="badge badge-xs badge-outline gap-0.5 capitalize">
                         {emotionEmoji[comment.caption.toLowerCase()] || "💬"} {comment.caption}

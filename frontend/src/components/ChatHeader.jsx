@@ -1,5 +1,5 @@
 import { useChannelStateContext } from "stream-chat-react";
-import { Video, Phone, ArrowLeft, Wind } from "lucide-react";
+import { Video, Phone, ArrowLeft, Wind, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import toast from "react-hot-toast";
@@ -187,8 +187,11 @@ function ChatHeader() {
                 </div>
 
                 <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <h3 className="font-extrabold text-[14px] sm:text-[16px] leading-tight truncate tracking-tight text-base-content/90">
+                    <h3 className="font-extrabold text-[14px] sm:text-[16px] leading-tight truncate tracking-tight text-base-content/90 flex items-center gap-1">
                         {displayData.name}
+                        {(user?.role === "admin" || user?.isVerified) && (
+                            <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
+                        )}
                     </h3>
                     <p
                         className={`text-[10px] sm:text-[12px] font-semibold truncate tracking-wide ${isOnline && !isGroup
