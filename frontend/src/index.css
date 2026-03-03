@@ -9,6 +9,8 @@ html {
   height: 100%;
   overflow-x: clip;
   /* clip prevents horizontal scroll without breaking vertical scroll/anchors */
+  scrollbar-gutter: stable;
+  /* Reserve space for scrollbar to prevent 'shrinking' layout shifts */
 }
 
 body {
@@ -16,12 +18,12 @@ body {
   min-height: 100%;
   margin: 0;
   padding: 0;
-  overflow-y: visible;
-  /* Default visible allows natural window scrolling */
+  overflow-y: auto;
+  /* Use auto with scrollbar-gutter for stable layout */
   overflow-x: clip;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
-  /* overscroll-behavior-y: none; removed as it often breaks scrolling flow on trackpads/mobile */
+  scrollbar-gutter: stable;
 }
 
 /* When chat is active, we lock the main body scroll */
