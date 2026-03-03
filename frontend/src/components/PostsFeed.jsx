@@ -14,8 +14,12 @@ import useAuthUser from "../hooks/useAuthUser";
 import toast from "react-hot-toast";
 import PostAd from "./PostAd";
 import LikedByModal from "./LikedByModal";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
 const PostsFeed = ({ posts, setPosts }) => {
+  const [likedByPostId, setLikedByPostId] = useState(null);
+  const [viewingDP, setViewingDP] = useState(null); // { url, name }
+
   if (!posts || posts.length === 0) {
     return (
       <div className="text-center py-16 opacity-60">
@@ -30,7 +34,12 @@ const PostsFeed = ({ posts, setPosts }) => {
     <div className="space-y-4 sm:space-y-5">
       {posts.map((post, index) => (
         <div key={post._id}>
-          <PostCard post={post} setPosts={setPosts} />
+          <PostCard
+            post={post}
+            setPosts={setPosts}
+            setLikedByPostId={setLikedByPostId}
+            setViewingDP={setViewingDP}
+          />
           {/* Show an ad after every 3 posts */}
           {(index + 1) % 3 === 0 && (
             <div className="mt-4 sm:mt-5">
@@ -39,6 +48,21 @@ const PostsFeed = ({ posts, setPosts }) => {
           )}
         </div>
       ))}
+
+      {likedByPostId && (
+        <LikedByModal
+          postId={likedByPostId}
+          onClose={() => setLikedByPostId(null)}
+        />
+      )}
+
+      {viewingDP && (
+        <ProfilePhotoViewer
+          imageUrl={viewingDP.url}
+          fullName={viewingDP.name}
+          onClose={() => setViewingDP(null)}
+        />
+      )}
     </div>
   );
 };
@@ -56,7 +80,7 @@ const emotionEmoji = {
   neutral: "😐",
 };
 
-const PostCard = ({ post, setPosts }) => {
+const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
   const { authUser } = useAuthUser();
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -64,7 +88,6 @@ const PostCard = ({ post, setPosts }) => {
   const [isCommenting, setIsCommenting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [likeAnim, setLikeAnim] = useState(false);
-  const [showLikesModal, setShowLikesModal] = useState(false);
 
   const isLiked = post.likes?.includes(authUser?._id);
   const likeCount = post.likes?.length || 0;
@@ -158,7 +181,10 @@ const PostCard = ({ post, setPosts }) => {
       <div className="card-body p-3 sm:p-5">
         {/* Header */}
         <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5">
-          <div className="avatar w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-base-300 flex-shrink-0">
+          <div
+            className="avatar w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-base-300 flex-shrink-0 cursor-pointer hover:ring-4 ring-primary/20 transition-all active:scale-95"
+            onClick={() => setViewingDP({ url: post.profilePic, name: post.fullName })}
+          >
             {post.profilePic ? (
               <img
                 src={post.profilePic}
@@ -239,7 +265,7 @@ const PostCard = ({ post, setPosts }) => {
           <div className="flex items-center justify-between text-[11px] text-base-content/40 px-0.5 mb-1.5 font-medium">
             <span
               className="cursor-pointer hover:underline hover:text-primary transition-colors active:scale-95"
-              onClick={() => likeCount > 0 && setShowLikesModal(true)}
+              onClick={() => likeCount > 0 && setLikedByPostId(post._id)}
             >
               {likeCount > 0 && `${likeCount} like${likeCount !== 1 ? "s" : ""}`}
             </span>
@@ -359,12 +385,6 @@ const PostCard = ({ post, setPosts }) => {
             </div>
           </div>
         )}
-
-        <LikedByModal
-          isOpen={showLikesModal}
-          onClose={() => setShowLikesModal(false)}
-          postId={post._id}
-        />
       </div>
     </div>
   );

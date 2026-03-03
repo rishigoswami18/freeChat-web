@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Users,
@@ -25,15 +25,17 @@ import useLogout from "../hooks/useLogout";
 import ThemeSelector from "./ThemeSelector";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
-const MobileDrawer = () => {
+const MobileDrawer = ({ isOpen, onClose }) => {
   const { authUser } = useAuthUser();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [viewingDP, setViewingDP] = useState(null);
+  const navigate = useNavigate();
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const { logoutMutation, isPending: isLoggingOut } = useLogout();
 
-  const toggleDrawer = () => setIsOpen(!isOpen);
+  const toggleDrawer = () => onClose();
 
   const navItems = [
     { to: "/", icon: Home, label: "Feed" },
@@ -49,14 +51,15 @@ const MobileDrawer = () => {
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
-  // Bottom tab items: Feed, Inbox, Reels, Search, Profile
   const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[10]];
 
   return (
     <>
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
+
       {/* Mobile Top Bar */}
-      <div className={`lg:hidden fixed top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-2.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""}`}>
+      <div className={`lg:hidden fixed top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-2.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
+        }`}>
         <div className="flex items-center gap-2">
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
             <Menu className="size-5" />
@@ -84,28 +87,29 @@ const MobileDrawer = () => {
               <LogOut className="size-4 opacity-70 group-hover:opacity-100 group-active:scale-90 transition-transform" />
             )}
           </button>
-          <Link to="/profile" className="avatar ring-2 ring-primary/20 rounded-full p-0.5">
+          <div
+            className="avatar ring-2 ring-primary/20 rounded-full p-0.5 cursor-pointer"
+            onClick={() => setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+          >
             <div className="w-7 h-7 rounded-full overflow-hidden">
               <img src={authUser?.profilePic || "/avatar.png"} alt="You" className="object-cover w-full h-full" />
             </div>
-          </Link>
+          </div>
         </div>
       </div>
 
-      {/* Slide-out Drawer Same logic */}
+      {/* Slide-out Drawer */}
       <div
         className={`fixed inset-y-0 left-0 w-72 bg-base-100 border-r border-base-300 z-[60] transform ${isOpen ? "translate-x-0" : "-translate-x-full"
           } transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col`}
       >
-        {/* Drawer Header */}
         <div className="p-4 flex justify-between items-center border-b border-base-300">
-          <Logo className="size-6" fontSize="text-lg" streak={authUser?.streak} />
+          <Logo className="size-6" fontSize="text-lg" />
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
             <X className="size-5" />
           </button>
         </div>
 
-        {/* Nav Links */}
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto no-scrollbar overscroll-contain">
           {navItems.map(({ to, icon: Icon, label }) => (
             <Link
@@ -113,8 +117,8 @@ const MobileDrawer = () => {
               to={to}
               onClick={toggleDrawer}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] ${location.pathname === to
-                ? "bg-primary text-primary-content shadow-md shadow-primary/20"
-                : "hover:bg-base-200 active:bg-base-300"
+                  ? "bg-primary text-primary-content shadow-md shadow-primary/20"
+                  : "hover:bg-base-200 active:bg-base-300"
                 }`}
             >
               <Icon className="size-5" />
@@ -122,7 +126,6 @@ const MobileDrawer = () => {
             </Link>
           ))}
 
-          {/* Download APK Link */}
           <a
             href="/freechat.apk"
             download
@@ -133,13 +136,11 @@ const MobileDrawer = () => {
             Download Android App
           </a>
 
-          {/* Admin Link */}
           {authUser?.role === "admin" && (
             <Link
               to="/admin"
               onClick={toggleDrawer}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 mt-4 border border-primary/20 bg-primary/5
-                ${location.pathname === "/admin"
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 mt-4 border border-primary/20 bg-primary/5 ${location.pathname === "/admin"
                   ? "bg-primary text-primary-content"
                   : "text-primary hover:bg-primary/10"
                 }`}
@@ -150,10 +151,12 @@ const MobileDrawer = () => {
           )}
         </nav>
 
-        {/* User Profile + Logout */}
         <div className="p-4 border-t border-base-300 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="avatar">
+            <div
+              className="avatar cursor-pointer active:scale-95 transition-transform"
+              onClick={() => setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+            >
               <div className="w-12 h-12 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
                 <img src={authUser?.profilePic || "/avatar.png"} alt="User Avatar" className="object-cover w-full h-full" />
               </div>
@@ -195,8 +198,9 @@ const MobileDrawer = () => {
         />
       )}
 
-      {/* Bottom Tab Bar with improved mobile UX */}
-      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""}`}>
+      {/* Bottom Tab Bar */}
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
+        }`}>
         <div className="flex items-center justify-around py-1.5 px-1">
           {bottomTabs.map(({ to, icon: Icon, label }) => {
             const isActive = location.pathname === to;
@@ -204,9 +208,7 @@ const MobileDrawer = () => {
               <Link
                 key={to}
                 to={to}
-                className={`relative flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 active:scale-90 ${isActive
-                  ? "text-primary"
-                  : "text-base-content/40"
+                className={`relative flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 active:scale-90 ${isActive ? "text-primary" : "text-base-content/40"
                   }`}
               >
                 {isActive && (
@@ -219,6 +221,14 @@ const MobileDrawer = () => {
           })}
         </div>
       </div>
+
+      {viewingDP && (
+        <ProfilePhotoViewer
+          imageUrl={viewingDP.url}
+          fullName={viewingDP.name}
+          onClose={() => setViewingDP(null)}
+        />
+      )}
     </>
   );
 };

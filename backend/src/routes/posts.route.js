@@ -93,11 +93,30 @@ router.get("/videos", async (req, res) => {
     console.log("Fetching video posts for Reels...");
     const isPremium = hasPremiumAccess(req.user);
 
-    // Fetch real video posts
-    let posts = await Post.find({
-      mediaType: "video",
-      isAd: false, // Exclude ads from regular posts
-    });
+    // Fetch real video posts with author status
+    let posts = await Post.aggregate([
+      { $match: { mediaType: "video", isAd: false } }, // Exclude ads
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "authorInfo",
+        },
+      },
+      {
+        $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true }
+      },
+      {
+        $addFields: {
+          role: { $ifNull: ["$role", "$authorInfo.role"] },
+          isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+          fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+          profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+        }
+      },
+      { $project: { authorInfo: 0 } }
+    ]);
     console.log(`Found ${posts.length} non-ad video posts.`);
 
     // Sort by popularity/recency
@@ -231,6 +250,14 @@ router.get("/", async (req, res) => {
         $sort: { createdAt: -1 },
       },
       {
+        $addFields: {
+          role: { $ifNull: ["$role", "$authorInfo.role"] },
+          isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+          fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+          profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+        }
+      },
+      {
         $project: {
           authorInfo: 0, // Remove the joined data to keep response structure identical
         },
@@ -339,7 +366,30 @@ router.put("/:id/share", async (req, res) => {
 // Get user specific posts
 router.get("/user/:userId", async (req, res) => {
   try {
-    const posts = await Post.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    const posts = await Post.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.params.userId) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "authorInfo",
+        },
+      },
+      {
+        $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true }
+      },
+      {
+        $addFields: {
+          role: { $ifNull: ["$role", "$authorInfo.role"] },
+          isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+          fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+          profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $project: { authorInfo: 0 } }
+    ]);
     res.json(posts);
   } catch (err) {
     console.error("Error fetching user posts:", err.message);

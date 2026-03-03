@@ -1,15 +1,21 @@
 import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
+import { useState } from "react";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import { LANGUAGE_TO_FLAG } from "../constants";
 
 const FriendCard = ({ friend }) => {
+  const [viewingDP, setViewingDP] = useState(null);
   return (
     <div className="card bg-base-200/80 border border-base-300/50 card-hover rounded-2xl overflow-hidden">
       <div className="card-body p-4">
         {/* USER INFO */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative">
-            <div className="avatar w-12 h-12 rounded-full overflow-hidden ring-2 ring-base-300">
+            <div
+              className="avatar w-12 h-12 rounded-full overflow-hidden ring-2 ring-base-300 cursor-pointer active:scale-95 transition-transform"
+              onClick={() => setViewingDP({ url: friend.profilePic, name: friend.fullName })}
+            >
               <img
                 src={friend.profilePic}
                 alt={friend.fullName}
@@ -47,9 +53,18 @@ const FriendCard = ({ friend }) => {
           Message
         </Link>
       </div>
+
+      {viewingDP && (
+        <ProfilePhotoViewer
+          imageUrl={viewingDP.url}
+          fullName={viewingDP.name}
+          onClose={() => setViewingDP(null)}
+        />
+      )}
     </div>
   );
 };
+
 export default FriendCard;
 
 export function getLanguageFlag(language) {

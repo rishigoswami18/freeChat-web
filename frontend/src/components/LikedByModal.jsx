@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getPostLikes } from "../lib/api";
 import { X, Heart, Loader2, MessageSquare, BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
 const LikedByModal = ({ isOpen, onClose, postId }) => {
     const { data: users, isLoading } = useQuery({
@@ -9,6 +11,7 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
         queryFn: () => getPostLikes(postId),
         enabled: isOpen && !!postId,
     });
+    const [viewingDP, setViewingDP] = useState(null);
 
     if (!isOpen) return null;
 
@@ -45,7 +48,7 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                                     key={user._id}
                                     className="flex items-center gap-3 p-3 rounded-2xl transition-all hover:bg-base-200 active:scale-[0.98] group"
                                 >
-                                    <div className="avatar">
+                                    <div className="avatar cursor-pointer" onClick={() => setViewingDP({ url: user.profilePic || "/avatar.png", name: user.fullName })}>
                                         <div className="size-12 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/40 transition-all overflow-hidden bg-base-300">
                                             <img src={user.profilePic || "/avatar.png"} alt={user.fullName} className="object-cover w-full h-full" />
                                         </div>
@@ -84,6 +87,14 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                     )}
                 </div>
             </div>
+
+            {viewingDP && (
+                <ProfilePhotoViewer
+                    imageUrl={viewingDP.url}
+                    fullName={viewingDP.name}
+                    onClose={() => setViewingDP(null)}
+                />
+            )}
         </div>
     );
 };

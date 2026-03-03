@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
 import {
@@ -17,6 +17,7 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import CreateStoryModal from "./CreateStoryModal";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import Logo from "./Logo";
 
 const navItems = [
@@ -37,7 +38,9 @@ const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [viewingDP, setViewingDP] = useState(null);
 
+  const navigate = useNavigate();
   return (
     <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0 font-outfit">
       {/* Brand */}
@@ -111,13 +114,17 @@ const Sidebar = () => {
           to="/profile"
           className="flex items-center gap-3 p-2.5 hover:bg-base-300/50 rounded-xl transition-all duration-200 group"
         >
-          <div className="relative">
+          <div className="relative" onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName });
+          }}>
             <img
               src={authUser?.profilePic || "/avatar.png"}
-              alt="User Avatar"
-              className="size-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
+              alt="Profile"
+              className="size-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary transition-all cursor-pointer"
             />
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-200 dot-pulse" />
+            <div className="absolute bottom-0 right-0 size-3 bg-success rounded-full border-2 border-base-100" />
           </div>
           <div className="flex-1 overflow-hidden">
             <h3 className="font-semibold text-sm truncate flex items-center gap-1">
@@ -136,6 +143,14 @@ const Sidebar = () => {
           Powered by freechatweb.in
         </div>
       </div>
+
+      {viewingDP && (
+        <ProfilePhotoViewer
+          imageUrl={viewingDP.url}
+          fullName={viewingDP.name}
+          onClose={() => setViewingDP(null)}
+        />
+      )}
     </aside>
   );
 };

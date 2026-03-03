@@ -2,18 +2,19 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import useAuthUser from "../hooks/useAuthUser";
 import { updateProfile, getUserPosts } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid } from "lucide-react";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid, Flame } from "lucide-react";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 import BadgeIcon from "../components/BadgeIcon";
 import PostsFeed from "../components/PostsFeed";
-import { Flame } from "lucide-react";
 import { isPremiumUser } from "../lib/premium";
+import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
 
 const ProfilePage = () => {
     const { authUser, isLoading } = useAuthUser();
     const queryClient = useQueryClient();
     const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
+    const [viewingDP, setViewingDP] = useState(null);
     const isPremium = isPremiumUser(authUser);
 
     const [userPosts, setUserPosts] = useState([]);
@@ -151,11 +152,14 @@ const ProfilePage = () => {
                 <div className="flex flex-col items-center gap-4 mb-8">
                     <div className="relative group">
                         <div className="avatar">
-                            <div className="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300">
+                            <div
+                                className="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300 cursor-pointer active:scale-95 transition-transform"
+                                onClick={() => setViewingDP({ url: selectedImg || authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+                            >
                                 <img
                                     src={selectedImg || authUser?.profilePic || "/avatar.png"}
                                     alt="Profile"
-                                    className="object-cover"
+                                    className="object-cover w-full h-full"
                                 />
                             </div>
                         </div>
@@ -424,6 +428,14 @@ const ProfilePage = () => {
             <p className="text-center text-xs opacity-40 mt-8 italic pb-10">
                 All changes are saved instantly to your global profile.
             </p>
+
+            {viewingDP && (
+                <ProfilePhotoViewer
+                    imageUrl={viewingDP.url}
+                    fullName={viewingDP.name}
+                    onClose={() => setViewingDP(null)}
+                />
+            )}
         </div>
     );
 };

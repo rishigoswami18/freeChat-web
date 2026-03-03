@@ -1,23 +1,44 @@
-import { useState, useEffect, useRef } from "react";
-import { X, ChevronLeft, ChevronRight, Music, Send, Heart, Eye, User } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, Trash2, ChevronLeft, ChevronRight, Eye, MoreVertical } from "lucide-react";
+import toast from "react-hot-toast";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import { viewStory } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 
-const StoryViewer = ({ group, onClose }) => {
+const StoryViewer = ({ group, onClose, onDelete }) => {
     const { authUser } = useAuthUser();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [isLiked, setIsLiked] = useState(false);
-    const [comment, setComment] = useState("");
     const [showViewers, setShowViewers] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [viewingDP, setViewingDP] = useState(null);
+
     const story = group.stories[currentIndex];
+    const isOwner = authUser?._id === group.userId;
     const audioRef = useRef(null);
 
-    const isOwner = authUser?._id === group.userId;
+    const handleNext = useCallback(() => {
+        setIsPaused(false);
+        if (currentIndex < group.stories.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+            setProgress(0);
+        } else {
+            onClose();
+        }
+    }, [currentIndex, group.stories.length, onClose]);
+
+    const handlePrev = useCallback(() => {
+        setIsPaused(false);
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1);
+            setProgress(0);
+        }
+    }, [currentIndex]);
 
     useEffect(() => {
-        setProgress(0);
+        if (isPaused || viewingDP) return;
+
         const interval = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 100) {
@@ -26,94 +47,102 @@ const StoryViewer = ({ group, onClose }) => {
                 }
                 return prev + 1;
             });
-        }, 50); // 5 seconds total
+        }, 50);
 
         return () => clearInterval(interval);
-    }, [currentIndex]);
+    }, [handleNext, isPaused, viewingDP]);
 
     useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => { });
+            if (isPaused || viewingDP) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(() => { });
+            }
         }
 
-        // Record view if not owner
-        if (authUser && authUser._id !== group.userId) {
+        if (!isOwner && story?._id) {
             viewStory(story._id).catch(err => console.error("Error recording view", err));
         }
-    }, [currentIndex]);
+    }, [currentIndex, isOwner, story?._id, isPaused, viewingDP]);
 
-    const handleNext = () => {
-        if (currentIndex < group.stories.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-        } else {
-            onClose();
-        }
-    };
-
-    const handlePrev = () => {
-        if (currentIndex > 0) {
-            setCurrentIndex(currentIndex - 1);
-        } else {
-            setCurrentIndex(0);
+    const handleDeleteStory = async () => {
+        if (window.confirm("Are you sure you want to delete this story?")) {
+            await onDelete(story._id);
+            toast.success("Story deleted!");
+            if (group.stories.length === 1) {
+                onClose();
+            } else {
+                handleNext();
+            }
         }
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center sm:p-4 backdrop-blur-md overflow-hidden">
+        <div className="fixed inset-0 z-[100] bg-black/98 flex flex-col items-center justify-center sm:p-4 backdrop-blur-xl overflow-hidden">
             {story.audioUrl && (
-                <audio ref={audioRef} src={story.audioUrl} loop className="hidden" />
+                <audio ref={audioRef} src={story.audioUrl} loop />
             )}
 
-            {/* Header / Info */}
-            <div className="absolute top-0 inset-x-0 p-4 z-50 bg-gradient-to-b from-black/80 via-black/40 to-transparent pt-10 sm:pt-6">
-                {/* Progress Bars */}
-                <div className="flex gap-1.5 mb-5 px-1">
-                    {group.stories.map((_, idx) => (
-                        <div key={idx} className="h-0.5 flex-1 bg-white/20 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-white transition-all duration-100 ease-linear"
-                                style={{
-                                    width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? "100%" : "0%",
-                                }}
-                            />
-                        </div>
-                    ))}
-                </div>
-
-                <div className="flex items-center justify-between text-white">
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full p-[1.5px] bg-gradient-to-tr from-orange-400 to-rose-600">
-                            <img src={group.profilePic || "/avatar.png"} alt="" className="size-full rounded-full object-cover border-2 border-black" />
-                        </div>
-                        <div>
-                            <p className="font-bold text-sm tracking-tight">{group.fullName}</p>
-                            <p className="text-[10px] font-medium opacity-60">
-                                {new Date(story.createdAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                        </div>
+            {/* Top Bar Controls */}
+            <div className="absolute top-0 inset-x-0 z-50 p-4 sm:p-6 bg-gradient-to-b from-black/80 to-transparent">
+                <div className="max-w-md mx-auto">
+                    {/* Progress Bars */}
+                    <div className="flex gap-1.5 mb-5 px-1">
+                        {group.stories.map((_, idx) => (
+                            <div key={idx} className="h-0.5 flex-1 bg-white/20 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-white transition-all duration-100 ease-linear"
+                                    style={{
+                                        width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? "100%" : "0%",
+                                    }}
+                                />
+                            </div>
+                        ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                        {isOwner && (
-                            <button
-                                onClick={() => setShowViewers(true)}
-                                className="flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2 py-1 rounded-full text-[11px] font-bold"
+
+                    <div className="flex items-center justify-between text-white">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="size-10 rounded-full p-[1.5px] bg-gradient-to-tr from-orange-400 to-rose-600 cursor-pointer active:scale-95 transition-transform"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsPaused(true);
+                                    setViewingDP({ url: group.profilePic || "/avatar.png", name: group.fullName });
+                                }}
                             >
-                                <Eye className="size-3.5" />
-                                {story.views?.length || 0}
+                                <img src={group.profilePic || "/avatar.png"} alt="" className="size-full rounded-full object-cover border-2 border-black" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-sm tracking-tight">{group.fullName}</p>
+                                <p className="text-[10px] font-medium opacity-60">
+                                    {new Date(story.createdAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {isOwner && (
+                                <button
+                                    onClick={() => setShowViewers(true)}
+                                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2 py-1 rounded-full text-[11px] font-bold"
+                                >
+                                    <Eye className="size-3.5" />
+                                    {story.views?.length || 0}
+                                </button>
+                            )}
+                            <button
+                                onClick={onClose}
+                                className="p-1.5 hover:bg-white/10 rounded-full transition-colors active:scale-90"
+                            >
+                                <X className="size-6 text-white" />
                             </button>
-                        )}
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-white/10 active:scale-90 rounded-full transition-all"
-                        >
-                            <X className="size-6 text-white" />
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Story Container */}
+            {/* Story Content */}
             <div className="relative w-full h-full sm:h-auto sm:max-w-md sm:aspect-[9/16] bg-black sm:rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center">
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -124,7 +153,6 @@ const StoryViewer = ({ group, onClose }) => {
                         transition={{ duration: 0.4 }}
                         className="absolute inset-0 flex items-center justify-center"
                     >
-                        {/* Background Blur */}
                         <div className="absolute inset-0 z-0">
                             <img src={story.imageUrl} alt="" className="w-full h-full object-cover blur-3xl opacity-30 scale-150" />
                         </div>
@@ -138,171 +166,73 @@ const StoryViewer = ({ group, onClose }) => {
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Interaction Areas */}
-                <div className="absolute inset-y-0 left-0 w-1/4 z-30 cursor-pointer group/nav" onClick={handlePrev}>
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 backdrop-blur-md rounded-full opacity-0 group-hover/nav:opacity-100 transition-opacity">
-                        <ChevronLeft className="size-6 text-white" />
-                    </div>
+                {/* Interaction Overlay */}
+                <div className="absolute inset-0 z-30 flex">
+                    <div className="flex-1 cursor-pointer" onClick={handlePrev} />
+                    <div className="flex-1 cursor-pointer" onClick={handleNext} />
                 </div>
-                <div className="absolute inset-y-0 right-0 w-1/4 z-30 cursor-pointer group/nav" onClick={handleNext}>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/20 backdrop-blur-md rounded-full opacity-0 group-hover/nav:opacity-100 transition-opacity">
-                        <ChevronRight className="size-6 text-white" />
-                    </div>
-                </div>
-
-                {/* Overlays */}
-                <div className="absolute bottom-40 inset-x-0 p-6 z-30 text-center pointer-events-none">
-                    {story.caption && (
-                        <motion.p
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            className="text-white text-lg font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
-                        >
-                            {story.caption}
-                        </motion.p>
-                    )}
-                </div>
-
-                {/* Bottom Bar Interaction */}
-                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/80 to-transparent z-40 flex items-center gap-4">
-                    {!isOwner ? (
-                        <>
-                            <div className="flex-1 relative">
-                                <input
-                                    type="text"
-                                    placeholder="Send message"
-                                    className="w-full bg-transparent border border-white/40 rounded-full py-2.5 px-5 text-white text-sm outline-none focus:border-white transition-colors"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                />
-                            </div>
-                            <button
-                                onClick={() => setIsLiked(!isLiked)}
-                                className={`transition-all active:scale-125 ${isLiked ? 'text-rose-500' : 'text-white'}`}
-                            >
-                                <Heart className={`size-7 ${isLiked ? 'fill-current' : ''}`} />
-                            </button>
-                            <button className="text-white active:scale-90 transition-transform">
-                                <Send className="size-6" />
-                            </button>
-                        </>
-                    ) : (
-                        <div className="w-full flex justify-center pb-2">
-                            <button
-                                onClick={() => setShowViewers(true)}
-                                className="flex flex-col items-center gap-1 group"
-                            >
-                                <div className="size-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                                    <Eye className="size-6 text-white" />
-                                </div>
-                                <span className="text-[10px] text-white font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100">See Viewers</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                {/* Song Sticker Layout */}
-                <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    className="absolute bottom-24 left-6 z-30 flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20"
-                >
-                    <div className="size-6 rounded bg-primary flex items-center justify-center animate-spin-slow">
-                        <Music className="size-3 text-white" />
-                    </div>
-                    <div className="overflow-hidden w-24 sm:w-32">
-                        <p className="text-white text-[10px] font-bold whitespace-nowrap animate-marquee-story">
-                            {story.songName || "Original Audio"}
-                        </p>
-                    </div>
-                </motion.div>
             </div>
 
-            {/* Viewers List Drawer */}
+            {/* Owner Actions */}
+            {isOwner && (
+                <div className="absolute bottom-10 inset-x-0 flex justify-center z-50">
+                    <button
+                        onClick={handleDeleteStory}
+                        className="btn btn-error btn-sm rounded-full gap-2 px-5 shadow-lg shadow-error/20"
+                    >
+                        <Trash2 className="size-4" />
+                        Delete Story
+                    </button>
+                </div>
+            )}
+
+            {/* Viewer List Modal */}
             <AnimatePresence>
                 {showViewers && (
                     <motion.div
-                        initial={{ y: "100%" }}
-                        animate={{ y: 0 }}
-                        exit={{ y: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-x-0 bottom-0 z-[150] h-[60%] sm:h-[400px] bg-base-100 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.5)] flex flex-col"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+                        onClick={() => setShowViewers(false)}
                     >
-                        <div className="flex items-center justify-between p-5 border-b sticky top-0 bg-base-100 rounded-t-3xl z-10">
-                            <div className="flex items-center gap-2">
-                                <h3 className="font-black text-lg">Story Views</h3>
-                                <span className="badge badge-primary badge-sm font-bold">{story.views?.length || 0}</span>
+                        <div
+                            className="bg-base-100 w-full max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden border border-base-300 flex flex-col max-h-[60vh]"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="p-4 border-b flex justify-between items-center bg-base-200/50">
+                                <h3 className="font-bold uppercase tracking-widest text-xs opacity-50">Viewed by</h3>
+                                <button onClick={() => setShowViewers(false)}><X className="size-4" /></button>
                             </div>
-                            <button onClick={() => setShowViewers(false)} className="btn btn-ghost btn-circle btn-sm">
-                                <X className="size-5" />
-                            </button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                            {(!story.views || story.views.length === 0) ? (
-                                <div className="h-48 flex flex-col items-center justify-center gap-2 opacity-30">
-                                    <Eye className="size-12" />
-                                    <p className="font-bold">No views yet</p>
-                                    <p className="text-xs">Views will appear here once friends see your story.</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {story.views.map((viewer, i) => (
-                                        <div key={i} className="flex items-center justify-between group">
-                                            <div className="flex items-center gap-3">
-                                                <div className="avatar">
-                                                    <div className="size-11 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2">
-                                                        <img src={viewer.profilePic || "/avatar.png"} alt={viewer.fullName} />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-sm tracking-tight">{viewer.fullName}</p>
-                                                    <p className="text-[10px] opacity-60">Viewed {new Date(viewer.viewedAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}</p>
-                                                </div>
+                            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                                {story.views?.length > 0 ? (
+                                    story.views.map((viewer, idx) => (
+                                        <div key={idx} className="flex items-center gap-3 p-2 hover:bg-base-200 rounded-xl transition-colors">
+                                            <div className="size-8 rounded-full overflow-hidden bg-base-300">
+                                                <img src={viewer.profilePic} alt="" className="size-full object-cover" />
                                             </div>
-                                            <button className="btn btn-primary btn-sm btn-ghost group-hover:bg-primary group-hover:text-primary-content transition-all rounded-xl text-xs font-bold">Profile</button>
+                                            <p className="font-bold text-sm">{viewer.fullName}</p>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    ))
+                                ) : (
+                                    <div className="py-10 text-center opacity-30 italic text-sm">No views yet</div>
+                                )}
+                            </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <style>{`
-                @keyframes marquee-story {
-                    0% { transform: translateX(100%); }
-                    100% { transform: translateX(-100%); }
-                }
-                .animate-marquee-story {
-                    animation: marquee-story 8s linear infinite;
-                }
-                .animate-spin-slow {
-                    animation: spin 4s linear infinite;
-                }
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(var(--p), 0.2);
-                    border-radius: 10px;
-                }
-            `}</style>
-
-            {/* Desktop Controls */}
-            <button
-                onClick={handlePrev}
-                className="hidden lg:flex absolute left-12 top-1/2 -translate-y-1/2 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all backdrop-blur-md"
-            >
-                <ChevronLeft className="size-8" />
-            </button>
-            <button
-                onClick={handleNext}
-                className="hidden lg:flex absolute right-12 top-1/2 -translate-y-1/2 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all backdrop-blur-md"
-            >
-                <ChevronRight className="size-8" />
-            </button>
+            {viewingDP && (
+                <ProfilePhotoViewer
+                    imageUrl={viewingDP.url}
+                    fullName={viewingDP.name}
+                    onClose={() => {
+                        setViewingDP(null);
+                        setIsPaused(false);
+                    }}
+                />
+            )}
         </div>
     );
 };

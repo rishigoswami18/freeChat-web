@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatClient } from "../components/ChatProvider";
 import useAuthUser from "../hooks/useAuthUser";
+import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
 
 // Removed mock data for real integration
 
@@ -24,6 +25,7 @@ const InboxPage = () => {
     const [conversations, setConversations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [viewingDP, setViewingDP] = useState(null);
 
     useEffect(() => {
         if (!chatClient?.userID || !authUser) return;
@@ -192,8 +194,11 @@ const InboxPage = () => {
                                 to={`/chat/${conv.targetUserId}`}
                                 className="group flex items-center gap-4 px-4 py-5 hover:bg-base-200/50 transition-all active:bg-base-200"
                             >
-                                <div className="relative flex-shrink-0">
-                                    <div className="avatar ring-2 ring-primary/15 rounded-full p-0.5">
+                                <div className="relative flex-shrink-0" onClick={(e) => {
+                                    e.stopPropagation();
+                                    setViewingDP({ url: conv.partner.avatar, name: conv.partner.name });
+                                }}>
+                                    <div className="avatar ring-2 ring-primary/15 rounded-full p-0.5 cursor-pointer hover:ring-primary/40 transition-all active:scale-95">
                                         <div className="w-14 h-14 rounded-full overflow-hidden shadow-sm group-active:scale-95 transition-transform">
                                             <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
                                         </div>
@@ -236,6 +241,14 @@ const InboxPage = () => {
                     </div>
                 )}
             </div>
+
+            {viewingDP && (
+                <ProfilePhotoViewer
+                    imageUrl={viewingDP.url}
+                    fullName={viewingDP.name}
+                    onClose={() => setViewingDP(null)}
+                />
+            )}
         </div>
     );
 };

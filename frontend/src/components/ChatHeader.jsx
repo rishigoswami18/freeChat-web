@@ -1,7 +1,9 @@
 import { useChannelStateContext } from "stream-chat-react";
 import { Video, Phone, ArrowLeft, Wind, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import toast from "react-hot-toast";
 
 // Format "Last seen" like WhatsApp
@@ -60,6 +62,7 @@ function ChatHeader() {
     const { channel } = useChannelStateContext();
     const navigate = useNavigate();
     const videoClient = useVideoClient();
+    const [viewingDP, setViewingDP] = useState(null);
 
     const isGroup = channel.id.startsWith("group_");
 
@@ -175,8 +178,8 @@ function ChatHeader() {
                     <ArrowLeft className="size-5 sm:size-6" />
                 </button>
 
-                <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/profile/${user?.id}`)}>
-                    <div className="avatar">
+                <div className="relative flex-shrink-0 group cursor-pointer">
+                    <div className="avatar" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name })}>
                         <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all overflow-hidden bg-base-300">
                             <img src={displayData.image} alt={displayData.name} className="object-cover" />
                         </div>
@@ -186,7 +189,7 @@ function ChatHeader() {
                     )}
                 </div>
 
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/profile/${user?.id}`)}>
                     <h3 className="font-extrabold text-[14px] sm:text-[16px] leading-tight truncate tracking-tight text-base-content/90 flex items-center gap-1">
                         {displayData.name}
                         {(user?.role === "admin" || user?.isVerified) && (
@@ -232,6 +235,14 @@ function ChatHeader() {
                         <Phone className="size-4.5 sm:size-5" />
                     </button>
                 </div>
+            )}
+
+            {viewingDP && (
+                <ProfilePhotoViewer
+                    imageUrl={viewingDP.url}
+                    fullName={viewingDP.name}
+                    onClose={() => setViewingDP(null)}
+                />
             )}
         </div>
     );
