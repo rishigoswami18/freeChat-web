@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getWalletBalance, purchaseGems, buyVerification } from "../lib/api";
+import { getWalletBalance, createGemOrder, verifyGemPayment, buyVerification, getRazorpayKey } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -79,23 +79,18 @@ const GemShopPage = () => {
     const { authUser } = useAuthUser();
     const [purchasing, setPurchasing] = useState(null);
 
+    // Load Razorpay script
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => document.body.removeChild(script);
+    }, []);
+
     const { data: wallet, isLoading: isWalletLoading } = useQuery({
         queryKey: ["walletBalance"],
         queryFn: getWalletBalance,
-    });
-
-    const purchaseMutation = useMutation({
-        mutationFn: (amount) => purchaseGems(amount),
-        onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["walletBalance"] });
-            queryClient.invalidateQueries({ queryKey: ["authUser"] });
-            toast.success(`💎 ${data.gems} gems in your wallet now!`);
-            setPurchasing(null);
-        },
-        onError: (err) => {
-            toast.error(err.response?.data?.message || "Purchase failed");
-            setPurchasing(null);
-        },
     });
 
     const verifyMutation = useMutation({
@@ -110,14 +105,69 @@ const GemShopPage = () => {
         },
     });
 
-    const handleBuyPack = (pack) => {
+    const handleBuyPack = async (pack) => {
         if (pack.price === "Free") {
+            toast.error("Free gems are not yet available!");
+            return;
+        }
+
+        try {
             setPurchasing(pack.id);
-            purchaseMutation.mutate(pack.amount + pack.bonus);
-        } else {
-            // For paid packs — mock purchase for now
-            setPurchasing(pack.id);
-            purchaseMutation.mutate(pack.amount + pack.bonus);
+            const price = parseInt(pack.price.replace("₹", ""));
+
+            // 1. Get Razorpay key
+            const { key } = await getRazorpayKey();
+
+            // 2. Create order
+            const { order } = await createGemOrder(price, pack.id);
+
+            // 3. Open Checkout
+            const options = {
+                key,
+                amount: order.amount,
+                currency: order.currency,
+                name: "freeChat Gems",
+                description: `${pack.amount} Gems + ${pack.bonus} Bonus`,
+                order_id: order.id,
+                handler: async (response) => {
+                    try {
+                        await verifyGemPayment({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            gemAmount: pack.amount + pack.bonus
+                        });
+                        toast.success(`💎 Success! ${pack.amount + pack.bonus} gems added.`);
+                        queryClient.invalidateQueries({ queryKey: ["walletBalance"] });
+                        queryClient.invalidateQueries({ queryKey: ["authUser"] });
+                    } catch (err) {
+                        toast.error("Payment verification failed");
+                    } finally {
+                        setPurchasing(null);
+                    }
+                },
+                prefill: {
+                    name: authUser?.fullName || "",
+                    email: authUser?.email || "",
+                },
+                theme: { color: "#8b5cf6" },
+                modal: {
+                    ondismiss: () => {
+                        setPurchasing(null);
+                        toast.error("Payment cancelled");
+                    },
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on("payment.failed", (res) => {
+                toast.error(`Payment failed: ${res.error.description}`);
+                setPurchasing(null);
+            });
+            rzp.open();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to initiate payment");
+            setPurchasing(null);
         }
     };
 

@@ -312,10 +312,16 @@ export const sendGift = async (creatorId, giftAmount, giftName) => {
   return response.data;
 };
 
-export const purchaseGems = async (amount) => {
-  const response = await axiosInstance.post("/gems/purchase", { amount });
+export const createGemOrder = async (amount, packId) => {
+  const response = await axiosInstance.post("/gems/create-order", { amount, packId });
   return response.data;
 };
+
+export const verifyGemPayment = async (paymentData) => {
+  const response = await axiosInstance.post("/gems/verify-payment", paymentData);
+  return response.data;
+};
+
 
 // ----------------- BONDBEYOND / RELATIONSHIP -----------------
 

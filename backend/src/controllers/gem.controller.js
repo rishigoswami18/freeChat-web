@@ -50,18 +50,78 @@ export const getWalletBalance = async (req, res) => {
     }
 };
 
-// Purchase gems (Mock for now, would integrate with payment gateway)
-export const purchaseGems = async (req, res) => {
+import Razorpay from "razorpay";
+import crypto from "crypto";
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+// Create Razorpay order for gems
+export const createGemOrder = async (req, res) => {
     try {
-        const { amount } = req.body;
-        const user = await User.findById(req.user._id);
+        const { amount, packId } = req.body; // price in INR
 
-        // In real app, verify payment signature here
-        user.gems += amount;
-        await user.save();
+        if (!amount || amount < 0) {
+            return res.status(400).json({ message: "Invalid amount" });
+        }
 
-        res.status(200).json({ success: true, gems: user.gems });
+        const options = {
+            amount: amount * 100, // convert to paise
+            currency: "INR",
+            receipt: `gem_rcpt_${req.user._id.toString().slice(-10)}_${Date.now()}`,
+            notes: {
+                userId: req.user._id.toString(),
+                packId: packId?.toString() || "custom",
+            },
+        };
+
+        const order = await razorpay.orders.create(options);
+
+        res.status(200).json({
+            success: true,
+            order,
+        });
     } catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Error creating gem order:", error);
+        res.status(500).json({ message: "Failed to initiate payment" });
     }
 };
+
+// Verify payment and credit gems
+export const verifyGemPayment = async (req, res) => {
+    try {
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+            gemAmount
+        } = req.body;
+
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body)
+            .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ message: "Payment verification failed" });
+        }
+
+        const user = await User.findById(req.user._id);
+        user.gems += gemAmount;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Successfully credited ${gemAmount} gems! 💎`,
+            gems: user.gems
+        });
+    } catch (error) {
+        console.error("Error verifying gem payment:", error);
+        res.status(500).json({ message: "Verification failed" });
+    }
+};
+
