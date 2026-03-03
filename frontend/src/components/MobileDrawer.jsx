@@ -129,13 +129,13 @@ const MobileDrawer = () => {
               <div className="relative">
                 <Icon className="size-5" />
                 {label === "Inbox" && unreadMessages > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-white text-primary text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-primary">
-                    {unreadMessages}
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-white text-primary text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary">
+                    {unreadMessages > 9 ? "9+" : unreadMessages}
                   </span>
                 )}
                 {label === "Notifications" && notificationCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-error text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-100">
-                    {notificationCount}
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
+                    {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
               </div>
@@ -234,13 +234,13 @@ const MobileDrawer = () => {
                 <div className="relative">
                   <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />
                   {label === "Inbox" && unreadMessages > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 size-3.5 bg-primary text-primary-content text-[9px] font-black rounded-full flex items-center justify-center ring-1 ring-base-100">
-                      {unreadMessages}
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-primary text-primary-content text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
+                      {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
                   {label === "Notifications" && notificationCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 size-3.5 bg-error text-error-content text-[9px] font-black rounded-full flex items-center justify-center ring-1 ring-base-100">
-                      {notificationCount}
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-error text-error-content text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
+                      {notificationCount > 9 ? "9+" : notificationCount}
                     </span>
                   )}
                 </div>

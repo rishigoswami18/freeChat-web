@@ -44,8 +44,8 @@ const Navbar = () => {
                     <Bell className="size-[18px] text-base-content/60" />
                   </button>
                   {notificationCount > 0 && (
-                    <span className="absolute top-0 right-0 size-4 bg-error text-error-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-100 group-hover/notif:scale-110 transition-transform">
-                      {notificationCount}
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-error text-error-content text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100 group-hover/notif:scale-110 transition-transform">
+                      {notificationCount > 9 ? "9+" : notificationCount}
                     </span>
                   )}
                 </Link>
@@ -56,8 +56,8 @@ const Navbar = () => {
                     <MessageSquare className="size-[18px] text-base-content/60" />
                   </button>
                   {unreadMessages > 0 && (
-                    <span className="absolute top-0 right-0 size-4 bg-primary text-primary-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-100 group-hover/inbox:scale-110 transition-transform">
-                      {unreadMessages}
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-primary text-primary-content text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100 group-hover/inbox:scale-110 transition-transform">
+                      {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
                 </Link>

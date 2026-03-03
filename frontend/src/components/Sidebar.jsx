@@ -73,12 +73,12 @@ const Sidebar = () => {
                     }`}
                 />
                 {label === "Inbox" && unreadMessages > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-primary text-primary-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-200">
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-primary text-primary-content text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-200">
                     {unreadMessages > 9 ? "9+" : unreadMessages}
                   </span>
                 )}
                 {label === "Notifications" && notificationCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-error text-error-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-200">
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-error text-error-content text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-200">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
