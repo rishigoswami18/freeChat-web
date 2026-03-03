@@ -1,4 +1,5 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import useNotificationCounts from "../hooks/useNotificationCounts";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
 import {
@@ -41,8 +42,10 @@ const Sidebar = () => {
   const currentPath = location.pathname;
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
+  const { unreadMessages, notificationCount } = useNotificationCounts();
 
   const navigate = useNavigate();
+
   return (
     <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0 font-outfit">
       {/* Brand */}
@@ -64,10 +67,22 @@ const Sidebar = () => {
                   : "text-base-content/70 hover:text-base-content hover:bg-base-300/50"
                 }`}
             >
-              <Icon
-                className={`size-[18px] flex-shrink-0 ${isActive ? "text-primary" : "opacity-60"
-                  }`}
-              />
+              <div className="relative">
+                <Icon
+                  className={`size-[18px] flex-shrink-0 ${isActive ? "text-primary" : "opacity-60"
+                    }`}
+                />
+                {label === "Inbox" && unreadMessages > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-primary text-primary-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-200">
+                    {unreadMessages > 9 ? "9+" : unreadMessages}
+                  </span>
+                )}
+                {label === "Notifications" && notificationCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-error text-error-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-200">
+                    {notificationCount > 9 ? "9+" : notificationCount}
+                  </span>
+                )}
+              </div>
               <span>{label}</span>
               {isActive && (
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />

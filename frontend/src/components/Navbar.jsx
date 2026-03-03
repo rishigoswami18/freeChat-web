@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { Bell, LogOut, Pencil, Flame } from "lucide-react";
+import { Bell, LogOut, Pencil, Flame, MessageSquare } from "lucide-react";
+import useNotificationCounts from "../hooks/useNotificationCounts";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
 import Logo from "./Logo";
@@ -11,6 +12,7 @@ const Navbar = () => {
   const isChatPage = location.pathname?.startsWith("/chat");
 
   const { logoutMutation, isPending: isLoggingOut } = useLogout();
+  const { unreadMessages, notificationCount } = useNotificationCounts();
 
   return (
     <nav className="glass-panel-solid border-b border-base-300/50 sticky top-0 z-30 h-14 hidden lg:flex items-center">
@@ -37,10 +39,27 @@ const Navbar = () => {
                 )}
 
                 {/* Notifications */}
-                <Link to="/notifications">
+                <Link to="/notifications" className="relative group/notif">
                   <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
                     <Bell className="size-[18px] text-base-content/60" />
                   </button>
+                  {notificationCount > 0 && (
+                    <span className="absolute top-0 right-0 size-4 bg-error text-error-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-100 group-hover/notif:scale-110 transition-transform">
+                      {notificationCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Inbox */}
+                <Link to="/inbox" className="relative group/inbox">
+                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
+                    <MessageSquare className="size-[18px] text-base-content/60" />
+                  </button>
+                  {unreadMessages > 0 && (
+                    <span className="absolute top-0 right-0 size-4 bg-primary text-primary-content text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-100 group-hover/inbox:scale-110 transition-transform">
+                      {unreadMessages}
+                    </span>
+                  )}
                 </Link>
 
                 <ThemeSelector />

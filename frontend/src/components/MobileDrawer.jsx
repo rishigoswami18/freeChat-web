@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
+import useNotificationCounts from "../hooks/useNotificationCounts";
 import ThemeSelector from "./ThemeSelector";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
@@ -36,6 +37,7 @@ const MobileDrawer = () => {
   const navigate = useNavigate();
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const { logoutMutation, isPending: isLoggingOut } = useLogout();
+  const { unreadMessages, notificationCount } = useNotificationCounts();
 
   const toggleDrawer = () => setIsOpen(!isOpen);
 
@@ -124,7 +126,19 @@ const MobileDrawer = () => {
                 : "hover:bg-base-200 active:bg-base-300"
                 }`}
             >
-              <Icon className="size-5" />
+              <div className="relative">
+                <Icon className="size-5" />
+                {label === "Inbox" && unreadMessages > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-white text-primary text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-primary">
+                    {unreadMessages}
+                  </span>
+                )}
+                {label === "Notifications" && notificationCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 size-4 bg-error text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-base-100">
+                    {notificationCount}
+                  </span>
+                )}
+              </div>
               {label}
             </Link>
           ))}
@@ -217,7 +231,19 @@ const MobileDrawer = () => {
                 {isActive && (
                   <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-primary rounded-full" />
                 )}
-                <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />
+                <div className="relative">
+                  <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />
+                  {label === "Inbox" && unreadMessages > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 size-3.5 bg-primary text-primary-content text-[9px] font-black rounded-full flex items-center justify-center ring-1 ring-base-100">
+                      {unreadMessages}
+                    </span>
+                  )}
+                  {label === "Notifications" && notificationCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 size-3.5 bg-error text-error-content text-[9px] font-black rounded-full flex items-center justify-center ring-1 ring-base-100">
+                      {notificationCount}
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{label}</span>
               </Link>
             );

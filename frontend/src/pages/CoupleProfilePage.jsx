@@ -33,6 +33,7 @@ import {
     Waves,
     Globe,
     MessageCircle,
+    MessageSquare,
     Gem,
     TrendingUp,
     Shield,
@@ -297,25 +298,47 @@ const CoupleProfilePage = () => {
                     )}
                 </motion.div>
 
-                {/* DAILY QUESTION/INSIGHT */}
+                {/* TOPIC DISCUSSION BUBBLE */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-2 border-primary/20 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+                    className="relative px-2 py-4"
                 >
-                    <div className="absolute -right-4 -top-4 opacity-5 pointer-events-none">
-                        <Globe className="size-32" />
-                    </div>
-                    <div className="relative z-10 flex flex-col items-center text-center gap-4">
-                        <div className="badge badge-primary font-black text-[10px] uppercase tracking-widest px-4 py-3">Today's Reflection</div>
-                        <h2 className="text-xl sm:text-2xl font-black italic text-base-content leading-tight">
-                            "{insightData?.question?.text || "What's one thing you appreciate about your partner today?"}"
-                        </h2>
-                        <Link to="/inbox" className="btn btn-primary rounded-xl font-bold uppercase gap-2 shadow-lg shadow-primary/20">
-                            <MessageCircle className="size-4" />
-                            Discuss in Chat
-                        </Link>
+                    <div className="absolute top-0 left-8 size-4 bg-primary rotate-45 -translate-y-1/2" />
+                    <div className="card bg-base-100 border-2 border-primary/20 rounded-[32px] p-6 shadow-xl relative overflow-hidden group">
+                        <div className="absolute -right-10 -bottom-10 size-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+
+                        <div className="flex flex-col gap-5 relative z-10">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <MessageCircle className="size-4 text-primary" />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Topic of the Day</span>
+                                </div>
+                                <div className="flex -space-x-2">
+                                    <img src={authUser?.profilePic} className="size-6 rounded-full border-2 border-base-100" />
+                                    <img src={insightData?.partner?.profilePic || "/avatar.png"} className="size-6 rounded-full border-2 border-base-100" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <h3 className="text-lg sm:text-xl font-bold italic leading-tight text-base-content">
+                                    {insightData?.question?.text || "What's one thing you appreciate about your partner today?"}
+                                </h3>
+                                <p className="text-[10px] font-medium opacity-40 uppercase tracking-wider">Start a meaningful conversation with your partner</p>
+                            </div>
+
+                            <Link
+                                to="/inbox"
+                                className="btn btn-primary btn-md rounded-2xl font-bold uppercase gap-2 shadow-lg shadow-primary/20 group/btn"
+                            >
+                                <MessageSquare className="size-4 group-hover:scale-110 transition-transform" />
+                                Discuss in Bubble Chat
+                                <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
                     </div>
                 </motion.div>
                 {/* WALLET DASHBOARD - MONETIZATION HUB */}
