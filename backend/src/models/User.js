@@ -146,6 +146,14 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  coupleStreak: {
+    type: Number,
+    default: 0,
+  },
+  lastCoupleStreakDate: {
+    type: Date,
+    default: null,
+  },
 }
   , { timestamps: true });
 

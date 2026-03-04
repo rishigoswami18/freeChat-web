@@ -38,6 +38,7 @@ import {
     TrendingUp,
     Shield,
 } from "lucide-react";
+import { Flame } from "lucide-react";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { isPremiumUser } from "../lib/premium";
@@ -59,7 +60,7 @@ const CoupleProfilePage = () => {
         mutationFn: updateMood,
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["dailyInsight"] });
-            queryClient.setQueryData(["authUser"], (old) => ({ ...old, user: { ...old.user, mood: data.user.mood } }));
+            queryClient.setQueryData(["authUser"], (old) => ({ ...old, user: { ...old.user, mood: data.user.mood, coupleStreak: data.user.coupleStreak } }));
             toast.success("Mood shared with your partner! ✨");
         }
     });
@@ -237,14 +238,78 @@ const CoupleProfilePage = () => {
 
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto pb-24 sm:pb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 flex items-center gap-2">
-                <HeartHandshake className="text-primary" />
-                Bond Dashboard
-                <span className="text-[10px] bg-primary text-primary-content px-2 py-0.5 rounded-full animate-pulse ml-2 uppercase">BondBeyond v1.0</span>
-            </h1>
+            <div className="flex items-center justify-between mb-1">
+                <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                    <HeartHandshake className="text-primary" />
+                    Bond Dashboard
+                    <span className="text-[10px] bg-primary text-primary-content px-2 py-0.5 rounded-full animate-pulse ml-2 uppercase">BondBeyond v2.0</span>
+                </h1>
+                {/* Inline streak badge in header */}
+                {insightData?.coupleStreak > 0 && (
+                    <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1.5 rounded-full shadow-lg shadow-orange-500/30 animate-pulse">
+                        <Flame className="size-4 fill-current" />
+                        <span className="text-sm font-black">{insightData.coupleStreak}</span>
+                    </div>
+                )}
+            </div>
             <p className="text-[10px] opacity-30 mb-6 uppercase font-black tracking-widest">Strengthen your connection every day</p>
 
             <div className="space-y-6">
+                {/* 🔥 COUPLE STREAK CARD */}
+                {coupleStatus === "coupled" && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                        className={`card border-2 rounded-3xl p-6 shadow-2xl relative overflow-hidden ${(insightData?.coupleStreak || 0) > 0
+                            ? 'bg-gradient-to-br from-orange-500/10 via-red-500/10 to-yellow-500/10 border-orange-500/30'
+                            : 'bg-base-200 border-base-300'
+                            }`}
+                    >
+                        {/* Glowing background effect for active streaks */}
+                        {(insightData?.coupleStreak || 0) > 0 && (
+                            <div className="absolute -top-20 -right-20 size-60 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+                        )}
+
+                        <div className="relative z-10 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className={`size-16 rounded-2xl flex items-center justify-center text-3xl ${(insightData?.coupleStreak || 0) > 0
+                                    ? 'bg-gradient-to-br from-orange-500 to-red-500 shadow-xl shadow-orange-500/30'
+                                    : 'bg-base-300'
+                                    }`}>
+                                    {(insightData?.coupleStreak || 0) > 0 ? '🔥' : '❄️'}
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-xs uppercase tracking-widest opacity-60">Couple Streak</h3>
+                                    <p className={`text-4xl font-black italic tracking-tighter ${(insightData?.coupleStreak || 0) > 0 ? 'text-orange-500' : 'opacity-30'
+                                        }`}>
+                                        {insightData?.coupleStreak || 0} {(insightData?.coupleStreak || 0) === 1 ? 'Day' : 'Days'}
+                                    </p>
+                                    <p className="text-[9px] font-bold uppercase opacity-40 mt-0.5">
+                                        {(insightData?.coupleStreak || 0) > 0
+                                            ? 'Both of you checked in today! Keep it going!'
+                                            : 'Check in daily with your partner to build your streak!'
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Milestone badges */}
+                            <div className="flex flex-col gap-1 items-end">
+                                {(insightData?.coupleStreak || 0) >= 7 && (
+                                    <span className="badge badge-warning badge-sm font-bold gap-1 text-[9px]">🏆 7 Day</span>
+                                )}
+                                {(insightData?.coupleStreak || 0) >= 30 && (
+                                    <span className="badge badge-error badge-sm font-bold gap-1 text-[9px]">💎 30 Day</span>
+                                )}
+                                {(insightData?.coupleStreak || 0) >= 100 && (
+                                    <span className="badge badge-primary badge-sm font-bold gap-1 text-[9px]">👑 100 Day</span>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* DAILY CHECK-IN SECTION */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -258,7 +323,7 @@ const CoupleProfilePage = () => {
                         </div>
                         <div>
                             <h3 className="font-black text-xs uppercase tracking-widest opacity-60">Daily Check-in</h3>
-                            <p className="text-[9px] opacity-40 font-bold uppercase">How's your mood right now?</p>
+                            <p className="text-[9px] opacity-40 font-bold uppercase">How's your mood right now? Share to keep your streak! 🔥</p>
                         </div>
                     </div>
 
