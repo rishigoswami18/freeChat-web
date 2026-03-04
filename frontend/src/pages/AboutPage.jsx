@@ -143,6 +143,50 @@ const AboutPage = () => {
                 </div>
             </section>
 
+            {/* Meet our Founder - CRITICAL FOR SEO */}
+            <section className="py-20 container mx-auto px-4">
+                <div className="max-w-5xl mx-auto">
+                    <div className="bg-gradient-to-br from-base-200 to-base-300 rounded-[3rem] p-8 md:p-12 shadow-2xl border border-base-content/5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:rotate-12 transition-transform duration-700">
+                            <Logo className="size-64" />
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-12 items-center relative z-10">
+                            <div className="w-48 h-48 md:w-64 md:h-64 rounded-[2.5rem] overflow-hidden rotate-3 hover:rotate-0 transition-all duration-500 shadow-xl flex-shrink-0 bg-primary/10">
+                                <img
+                                    src="/avatar.png"
+                                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                                    alt="Hrishikesh Giri - Founder of BondBeyond"
+                                />
+                            </div>
+
+                            <div className="flex-1 text-center md:text-left">
+                                <div className="badge badge-primary badge-outline mb-4 font-black uppercase tracking-widest text-[10px] p-3">The Visionary</div>
+                                <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter uppercase italic">
+                                    Hrishikesh <span className="text-primary">Giri</span>
+                                </h2>
+                                <h3 className="text-xl font-bold opacity-60 mb-6 uppercase tracking-widest text-sm">Founder & Owner, BondBeyond</h3>
+
+                                <p className="text-lg opacity-80 leading-relaxed mb-8 italic">
+                                    "I built freeChat and BondBeyond because I believe that in an era of digital noise,
+                                    everyone deserves a private, secure, and beautiful space to nurture their most
+                                    important relationships. Our mission is to strengthen bonds, one conversation at a time."
+                                </p>
+
+                                <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                    <a href="https://www.instagram.com/rishigoswami18/" target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm rounded-xl gap-2 hover:bg-primary/10 transition-colors">
+                                        <span className="font-bold text-xs uppercase opacity-60">Follow Journey</span>
+                                    </a>
+                                    <a href="https://www.linkedin.com/in/hrishikesh-giri/" target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm rounded-xl gap-2 hover:bg-primary/10 transition-colors">
+                                        <span className="font-bold text-xs uppercase opacity-60">Professional Profile</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Footer-like CTA */}
             <section className="py-24 text-center">
                 <div className="container mx-auto px-4">

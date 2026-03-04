@@ -400,10 +400,14 @@ const LandingPage = () => {
                             <div className="mb-3">
                                 <Logo className="size-6" fontSize="text-xl" />
                             </div>
-                            <p className="text-sm opacity-70 max-w-xs">
+                            <p className="text-sm opacity-70 max-w-xs mb-4">
                                 freeChat is a free chat app and social networking platform for
                                 real human connection. Messaging, video calls, reels, and more.
                             </p>
+                            <div className="flex flex-col gap-1">
+                                <p className="text-[10px] uppercase font-black tracking-widest opacity-40">Founded & Owned by</p>
+                                <p className="text-sm font-bold italic text-primary">Hrishikesh Giri</p>
+                            </div>
                         </div>
 
                         <div>
