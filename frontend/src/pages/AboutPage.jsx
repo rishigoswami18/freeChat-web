@@ -195,9 +195,17 @@ const AboutPage = () => {
                         Join the thousands of users already building stronger relationships on freeChat.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
-                        <button className="btn btn-primary btn-lg rounded-2xl px-8 italic font-black uppercase">
+                        <Link to="/signup" className="btn btn-primary btn-lg rounded-2xl px-8 italic font-black uppercase">
                             Join Now
-                        </button>
+                        </Link>
+                        <a
+                            href="https://drive.google.com/uc?export=download&id=1GJDX7Hn2Zq0T8LHLSJogo9yyeQCX574X"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-outline btn-lg rounded-2xl px-8 italic font-black uppercase border-secondary text-secondary"
+                        >
+                            Download App
+                        </a>
                     </div>
                 </div>
             </section>
