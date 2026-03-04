@@ -154,8 +154,8 @@ const AboutPage = () => {
                         <div className="flex flex-col md:flex-row gap-12 items-center relative z-10">
                             <div className="w-48 h-48 md:w-64 md:h-64 rounded-[2.5rem] overflow-hidden rotate-3 hover:rotate-0 transition-all duration-500 shadow-xl flex-shrink-0 bg-primary/10">
                                 <img
-                                    src="/avatar.png"
-                                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                                    src="/founder.jpg"
+                                    className="w-full h-full object-cover hover:scale-105 transition-all duration-500"
                                     alt="Hrishikesh Giri - Founder of BondBeyond"
                                 />
                             </div>

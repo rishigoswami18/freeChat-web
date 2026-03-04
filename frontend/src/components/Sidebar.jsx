@@ -47,7 +47,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen fixed top-0 left-0 z-40 font-outfit">
+    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0 font-outfit">
       {/* Brand */}
       <div className="px-5 py-5 border-b border-base-300/50">
         <Logo className="size-9" fontSize="text-2xl" />

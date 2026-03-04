@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, Mail, Shield, Scale, RefreshCcw } from "lucide-react";
+import { Heart, Mail, Shield, Scale, RefreshCcw, Info } from "lucide-react";
 import Logo from "./Logo";
 
 const Footer = () => {
@@ -19,6 +19,9 @@ const Footer = () => {
                     <div className="space-y-4">
                         <h3 className="font-bold uppercase text-xs tracking-widest opacity-40">Support</h3>
                         <div className="flex flex-col gap-2">
+                            <Link to="/about" className="text-sm hover:text-primary flex items-center gap-2 transition-colors">
+                                <Info className="size-4" /> About Us
+                            </Link>
                             <Link to="/contact" className="text-sm hover:text-primary flex items-center gap-2 transition-colors">
                                 <Mail className="size-4" /> Contact Us
                             </Link>
