@@ -41,14 +41,19 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
             const failedTokens = [];
             response.responses.forEach((resp, idx) => {
                 if (!resp.success) {
-                    failedTokens.push(user.fcmTokens[idx]);
+                    const token = user.fcmTokens[idx];
+                    const errorCode = resp.error?.code || "unknown";
+                    const errorMsg = resp.error?.message || "No message";
+
+                    console.error(`[Push] ❌ Token Error [${errorCode}]: ${errorMsg}`);
+                    failedTokens.push(token);
                 }
             });
 
             if (failedTokens.length > 0) {
                 user.fcmTokens = user.fcmTokens.filter(t => !failedTokens.includes(t));
                 await user.save();
-                console.log(`[Push] Cleaned up ${failedTokens.length} invalid tokens`);
+                console.log(`[Push] Cleaned up ${failedTokens.length} invalid tokens from database`);
             }
         }
 
