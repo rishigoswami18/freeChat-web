@@ -4,7 +4,7 @@
  */
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import HomePage from "./pages/HomePage.jsx";
 import SignUpPage from "./pages/SignUpPage.jsx";
@@ -63,43 +63,56 @@ const App = () => {
     }
   }, [location.pathname]);
 
+  // Use a ref to always have the latest auth state inside the bridge callback
+  const authRef = React.useRef({ isAuthenticated, isOnboarded });
   useEffect(() => {
-    // 1. Android WebView Bridge (Global Listener)
-    // Setup this early so Android can call it as soon as the page loads
-    window.receiveAndroidToken = async (token) => {
-      console.log("[FCM] Received token from Android app:", token);
-      localStorage.setItem("android_fcm_token", token); // Store it locally as backup
+    authRef.current = { isAuthenticated, isOnboarded };
+  }, [isAuthenticated, isOnboarded]);
 
-      // If user is already logged in, save it to backend now
-      if (isAuthenticated && isOnboarded) {
+  useEffect(() => {
+    // 1. Setup Global Android Bridge Listener (Once on mount)
+    window.receiveAndroidToken = async (token) => {
+      console.log("[FCM] Bridge: Received token from Android:", token);
+      if (!token) return;
+
+      localStorage.setItem("android_fcm_token", token);
+
+      // If user is already logged in, sync now
+      if (authRef.current.isAuthenticated && authRef.current.isOnboarded) {
         try {
           const { saveFcmToken } = await import("./lib/api");
           await saveFcmToken(token);
-          console.log("[FCM] Android token saved to backend");
+          console.log("[FCM] Bridge: Token synced to backend successfully");
         } catch (err) {
-          console.error("[FCM] Failed to save Android token:", err);
+          console.error("[FCM] Bridge: Failed to sync token to backend:", err);
         }
       }
     };
 
+    // 2. Periodic Sync Check (for cases where token arrived before login)
     if (isAuthenticated && isOnboarded) {
-      const setupPush = async () => {
-        try {
-          // 2. Standard Web Push (for browsers)
-          const { requestNotificationPermission } = await import("./lib/firebase");
-          await requestNotificationPermission();
-
-          // 3. Check if we have a stored android token and save it if needed
-          const storedToken = localStorage.getItem("android_fcm_token");
-          if (storedToken) {
+      const syncStoredToken = async () => {
+        const storedToken = localStorage.getItem("android_fcm_token");
+        if (storedToken) {
+          try {
             const { saveFcmToken } = await import("./lib/api");
             await saveFcmToken(storedToken);
+            console.log("[FCM] Auto-sync: Stored token sent to backend");
+          } catch (err) {
+            console.error("[FCM] Auto-sync failed:", err);
           }
+        }
+
+        // Also setup standard web messaging for desktop/browsers
+        try {
+          const { requestNotificationPermission } = await import("./lib/firebase");
+          await requestNotificationPermission();
         } catch (err) {
-          console.error("FCM Setup failed:", err);
+          console.error("[FCM] Web permission check failed:", err);
         }
       };
-      setupPush();
+
+      syncStoredToken();
     }
   }, [isAuthenticated, isOnboarded]);
 
