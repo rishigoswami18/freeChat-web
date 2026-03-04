@@ -8,24 +8,25 @@ const Layout = ({ children, showSidebar = false, showFooter = true, showNavbar =
   return (
     <div className="min-h-screen">
       <MobileDrawer />
-      <div className="flex">
-        {showSidebar && <Sidebar />}
 
-        <div className="flex-1 flex flex-col min-h-screen">
-          {showNavbar && <Navbar />}
+      {/* Fixed sidebar on desktop */}
+      {showSidebar && <Sidebar />}
 
-          {/* If navbar is hidden, remove top padding to allow full-screen content */}
-          <motion.main
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className={`flex-1 flex flex-col ${showNavbar ? "pt-14 lg:pt-16" : "pt-0"} ${showFooter ? "pb-20 lg:pb-0" : ""}`}
-          >
-            {children}
-          </motion.main>
-          {showFooter && <Footer />}
-        </div>
+      {/* Main content area — pushed right by sidebar width on desktop */}
+      <div className={`flex flex-col min-h-screen ${showSidebar ? "lg:ml-[260px]" : ""}`}>
+        {showNavbar && <Navbar />}
+
+        {/* If navbar is hidden, remove top padding to allow full-screen content */}
+        <motion.main
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className={`flex-1 flex flex-col ${showNavbar ? "pt-14 lg:pt-16" : "pt-0"} ${showFooter ? "pb-20 lg:pb-0" : ""}`}
+        >
+          {children}
+        </motion.main>
+        {showFooter && <Footer />}
       </div>
     </div>
   );
