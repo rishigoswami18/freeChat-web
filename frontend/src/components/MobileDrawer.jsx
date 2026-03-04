@@ -63,7 +63,7 @@ const MobileDrawer = () => {
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
 
       {/* Mobile Top Bar */}
-      <div className={`lg:hidden fixed top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-2.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
+      <div className={`lg:hidden sticky top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-3.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
         }`}>
         <div className="flex items-center gap-2">
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">

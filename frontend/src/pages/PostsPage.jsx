@@ -43,7 +43,9 @@ const PostsPage = () => {
 
   return (
     <div className="px-2 py-3 sm:p-6 lg:p-8 max-w-3xl mx-auto w-full">
-      <StoryTray />
+      <div className="mt-2 sm:mt-0">
+        <StoryTray />
+      </div>
       <div className="mt-5 mb-4 sm:mt-8 sm:mb-6 px-1">
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-base-content/90">Feed</h1>
       </div>

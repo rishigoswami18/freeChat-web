@@ -64,20 +64,37 @@ const App = () => {
   }, [location.pathname]);
 
   useEffect(() => {
+    // 1. Android WebView Bridge (Global Listener)
+    // Setup this early so Android can call it as soon as the page loads
+    window.receiveAndroidToken = async (token) => {
+      console.log("[FCM] Received token from Android app:", token);
+      localStorage.setItem("android_fcm_token", token); // Store it locally as backup
+
+      // If user is already logged in, save it to backend now
+      if (isAuthenticated && isOnboarded) {
+        try {
+          const { saveFcmToken } = await import("./lib/api");
+          await saveFcmToken(token);
+          console.log("[FCM] Android token saved to backend");
+        } catch (err) {
+          console.error("[FCM] Failed to save Android token:", err);
+        }
+      }
+    };
+
     if (isAuthenticated && isOnboarded) {
       const setupPush = async () => {
         try {
-          // 1. Standard Web Push (for browsers)
+          // 2. Standard Web Push (for browsers)
           const { requestNotificationPermission } = await import("./lib/firebase");
           await requestNotificationPermission();
 
-          // 2. Android WebView Bridge Listener
-          // If the Android app sends a token via window.receiveAndroidToken(token)
-          window.receiveAndroidToken = async (token) => {
-            console.log("[FCM] Received token from Android app:", token);
+          // 3. Check if we have a stored android token and save it if needed
+          const storedToken = localStorage.getItem("android_fcm_token");
+          if (storedToken) {
             const { saveFcmToken } = await import("./lib/api");
-            await saveFcmToken(token);
-          };
+            await saveFcmToken(storedToken);
+          }
         } catch (err) {
           console.error("FCM Setup failed:", err);
         }
