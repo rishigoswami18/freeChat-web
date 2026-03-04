@@ -435,8 +435,9 @@ const LandingPage = () => {
                                 </li>
                                 <li>
                                     <a
-                                        href="/freechat.apk"
-                                        download
+                                        href="https://drive.google.com/uc?export=download&id=1hQDoYN1n0cc9lWl7wmTJs2UloVlauOp2"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="flex items-center gap-2 hover:text-primary transition font-bold text-accent"
                                     >
                                         <Smartphone className="size-4" />

@@ -109,8 +109,9 @@ const Sidebar = () => {
 
       <div className="px-3 py-2">
         <a
-          href="/freechat.apk"
-          download
+          href="https://drive.google.com/uc?export=download&id=1hQDoYN1n0cc9lWl7wmTJs2UloVlauOp2"
+          target="_blank"
+          rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"
         >
           <div className="size-6 rounded-lg bg-secondary/20 flex items-center justify-center group-hover/apk:rotate-12 transition-transform">
