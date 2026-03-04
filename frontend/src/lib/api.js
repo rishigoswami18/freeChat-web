@@ -401,6 +401,16 @@ export const sweepPendingActions = async () => {
   return response.data;
 };
 
+export const sendEmailToUser = async (userId, subject, body) => {
+  const response = await axiosInstance.post("/admin/send-email", { userId, subject, body });
+  return response.data;
+};
+
+export const sendNotificationToUser = async (userId, title, body) => {
+  const response = await axiosInstance.post("/admin/send-notification", { userId, title, body });
+  return response.data;
+};
+
 // ----------------- INVITE SYSTEM -----------------
 
 export const getFirebaseNonUsers = async () => {

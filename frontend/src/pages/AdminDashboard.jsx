@@ -20,7 +20,8 @@ import {
     Square,
     UserCheck,
     LifeBuoy,
-    Star
+    Star,
+    X
 } from "lucide-react";
 import {
     getAdminStats,
@@ -36,7 +37,9 @@ import {
     sendInvites,
     sweepPendingActions,
     getAdminSupportMessages,
-    deleteSupportMessage
+    deleteSupportMessage,
+    sendEmailToUser,
+    sendNotificationToUser
 } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,6 +60,13 @@ const AdminDashboard = () => {
     const [isSweeping, setIsSweeping] = useState(false);
     const [supportMessages, setSupportMessages] = useState([]);
     const [isSupportLoading, setIsSupportLoading] = useState(false);
+
+    // Individual Targeted Modal State
+    const [targetedUser, setTargetedUser] = useState(null); // The user being targeted
+    const [targetedType, setTargetedType] = useState(null); // 'email' or 'notification'
+    const [targetedSubject, setTargetedSubject] = useState("");
+    const [targetedBody, setTargetedBody] = useState("");
+    const [isTargetedSending, setIsTargetedSending] = useState(false);
 
     // Invite system state
     const [firebaseUsers, setFirebaseUsers] = useState([]);
@@ -228,6 +238,30 @@ const AdminDashboard = () => {
             toast.error(err.response?.data?.message || "Email broadcast failed");
         } finally {
             setIsEmailSending(false);
+        }
+    };
+
+    const handleSendTargeted = async () => {
+        if (!targetedUser || !targetedBody.trim()) return toast.error("Message is required");
+        if (targetedType === 'email' && !targetedSubject.trim()) return toast.error("Subject is required");
+
+        setIsTargetedSending(true);
+        try {
+            if (targetedType === 'email') {
+                await sendEmailToUser(targetedUser._id, targetedSubject, targetedBody);
+                toast.success(`Email sent to ${targetedUser.fullName}`);
+            } else {
+                await sendNotificationToUser(targetedUser._id, targetedSubject || "BondBeyond Update", targetedBody);
+                toast.success(`Notification sent to ${targetedUser.fullName}`);
+            }
+            setTargetedUser(null);
+            setTargetedType(null);
+            setTargetedSubject("");
+            setTargetedBody("");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Action failed");
+        } finally {
+            setIsTargetedSending(false);
         }
     };
 
@@ -459,6 +493,28 @@ const AdminDashboard = () => {
                                                     <span className="font-mono text-xs font-bold">{u.gems || 0}</span>
                                                 </td>
                                                 <td className="text-right space-x-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setTargetedUser(u);
+                                                            setTargetedType('notification');
+                                                            setTargetedSubject("Important Update 🚀");
+                                                        }}
+                                                        className="btn btn-ghost btn-xs btn-circle text-primary"
+                                                        title="Send Direct Push Notification"
+                                                    >
+                                                        <Megaphone className="size-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setTargetedUser(u);
+                                                            setTargetedType('email');
+                                                            setTargetedSubject("Message from BondBeyond Admin");
+                                                        }}
+                                                        className="btn btn-ghost btn-xs btn-circle text-secondary"
+                                                        title="Send Direct Email"
+                                                    >
+                                                        <Mail className="size-4" />
+                                                    </button>
                                                     <button
                                                         onClick={() => handleToggleRole(u._id)}
                                                         className="btn btn-ghost btn-xs btn-circle text-info"
@@ -920,6 +976,74 @@ const AdminDashboard = () => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+            )}
+
+            {/* Targeted Communication Modal */}
+            {targetedUser && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="bg-base-100 rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl ring-1 ring-base-content/5"
+                    >
+                        <div className={`p-6 bg-gradient-to-r ${targetedType === 'email' ? 'from-secondary/20 to-primary/20' : 'from-primary/20 to-secondary/20'} flex items-center justify-between`}>
+                            <div className="flex items-center gap-4">
+                                <div className={`size-12 rounded-2xl flex items-center justify-center ${targetedType === 'email' ? 'bg-secondary text-secondary-content' : 'bg-primary text-primary-content'}`}>
+                                    {targetedType === 'email' ? <Mail className="size-6" /> : <Megaphone className="size-6" />}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black uppercase tracking-tight italic">
+                                        Direct <span className={targetedType === 'email' ? 'text-secondary' : 'text-primary'}>{targetedType}</span>
+                                    </h3>
+                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Targeting: {targetedUser.fullName}</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setTargetedUser(null)} className="btn btn-ghost btn-sm btn-circle opacity-50 hover:opacity-100">
+                                <X className="size-5" />
+                            </button>
+                        </div>
+
+                        <div className="p-8 space-y-6">
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">{targetedType === 'email' ? 'Email Subject' : 'Notification Title'}</label>
+                                    <input
+                                        type="text"
+                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-bold"
+                                        placeholder={targetedType === 'email' ? "Enter subject..." : "Enter short title..."}
+                                        value={targetedSubject}
+                                        onChange={(e) => setTargetedSubject(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Message Body</label>
+                                    <textarea
+                                        className="textarea textarea-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 min-h-[150px] font-medium leading-relaxed"
+                                        placeholder={`Write your ${targetedType} message here...`}
+                                        value={targetedBody}
+                                        onChange={(e) => setTargetedBody(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleSendTargeted}
+                                disabled={isTargetedSending || !targetedBody.trim()}
+                                className={`btn btn-lg w-full rounded-[2rem] gap-3 shadow-xl ${targetedType === 'email' ? 'btn-secondary shadow-secondary/20' : 'btn-primary shadow-primary/20'} transition-all active:scale-95`}
+                            >
+                                {isTargetedSending ? (
+                                    <Loader2 className="size-6 animate-spin" />
+                                ) : (
+                                    <>
+                                        <span className="font-black italic uppercase tracking-tighter">Release Command</span>
+                                        <Send className="size-5" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
             )}
         </div>
     );

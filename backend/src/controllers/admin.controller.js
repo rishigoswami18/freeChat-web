@@ -1,5 +1,7 @@
 import User from "../models/User.js";
 import Post from "../models/Post.js";
+import { sendPushNotification } from "../lib/push.service.js";
+import { sendNotificationEmail } from "../lib/email.service.js";
 
 export const getAdminStats = async (req, res) => {
     try {
@@ -168,6 +170,50 @@ export const deleteSupportMessage = async (req, res) => {
         const { id } = req.params;
         await SupportMessage.findByIdAndDelete(id);
         res.status(200).json({ success: true, message: "Support message deleted" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+/**
+ * Sends a direct HTML email to a specific user
+ */
+export const sendEmailToUser = async (req, res) => {
+    try {
+        const { userId, subject, body } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        await sendNotificationEmail(user.email, {
+            emoji: "📢",
+            title: subject,
+            body: body,
+            ctaText: "Open App",
+            ctaUrl: "https://freechatweb.in"
+        });
+
+        res.status(200).json({ success: true, message: `Email sent to ${user.email}` });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+/**
+ * Sends a direct push notification to a specific user via FCM
+ */
+export const sendNotificationToUser = async (req, res) => {
+    try {
+        const { userId, title, body } = req.body;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        await sendPushNotification(userId, {
+            title: title || "New Notification",
+            body: body,
+            icon: "https://freechatweb.in/logo.png"
+        });
+
+        res.status(200).json({ success: true, message: `Push notification sent to ${user.fullName}` });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
