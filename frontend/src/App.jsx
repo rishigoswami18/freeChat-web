@@ -67,8 +67,17 @@ const App = () => {
     if (isAuthenticated && isOnboarded) {
       const setupPush = async () => {
         try {
+          // 1. Standard Web Push (for browsers)
           const { requestNotificationPermission } = await import("./lib/firebase");
           await requestNotificationPermission();
+
+          // 2. Android WebView Bridge Listener
+          // If the Android app sends a token via window.receiveAndroidToken(token)
+          window.receiveAndroidToken = async (token) => {
+            console.log("[FCM] Received token from Android app:", token);
+            const { saveFcmToken } = await import("./lib/api");
+            await saveFcmToken(token);
+          };
         } catch (err) {
           console.error("FCM Setup failed:", err);
         }

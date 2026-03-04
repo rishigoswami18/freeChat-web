@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 import { streamClient } from "../lib/stream.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
+import { sendPushNotification } from "../lib/push.service.js"; // Added import
 
 /**
  * Broadcasts a system notification to all registered users via Stream Chat.
@@ -85,6 +86,13 @@ export const broadcastSystemNotification = async (req, res) => {
                     user_id: SYSTEM_ID,
                     silent: false,
                     is_system: true
+                });
+
+                // 2. ALSO: Send Native Push Notification via FCM
+                await sendPushNotification(targetId, {
+                    title: "BondBeyond Announcement 📢",
+                    body: message,
+                    icon: "https://www.freechatweb.in/logo.png"
                 });
 
                 // NO need to hide for admin anymore, because the admin is NO LONGER a member of this specific channel!
