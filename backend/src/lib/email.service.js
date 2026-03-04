@@ -255,3 +255,43 @@ export const sendInviteEmail = async (email, customSubject, customMessage) => {
     );
 };
 
+/**
+ * Send a notification email (friend request, message, mood share, romantic note, etc.)
+ * This is fire-and-forget — errors are logged but never block the main flow.
+ */
+export const sendNotificationEmail = async (toEmail, { emoji, title, body, ctaText, ctaUrl }) => {
+    const appUrl = ctaUrl || process.env.CLIENT_URL || "https://freechatweb.in";
+    const buttonText = ctaText || "Open freeChat";
+
+    try {
+        await sendEmail(
+            toEmail,
+            undefined,
+            `${emoji || '🔔'} ${title}`,
+            body,
+            `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
+                <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);padding:30px 24px;text-align:center;">
+                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-style:italic;font-weight:900;letter-spacing:-1px;">freeChat</h1>
+                </div>
+                <div style="padding:32px 24px;">
+                    <div style="text-align:center;margin-bottom:20px;">
+                        <span style="font-size:48px;line-height:1;">${emoji || '🔔'}</span>
+                    </div>
+                    <h2 style="color:#1f2937;margin:0 0 12px 0;font-size:20px;font-weight:800;text-align:center;">${title}</h2>
+                    <p style="color:#4b5563;line-height:1.7;font-size:15px;margin:0 0 28px 0;text-align:center;">${body}</p>
+                    <div style="text-align:center;">
+                        <a href="${appUrl}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:50px;font-size:15px;font-weight:700;box-shadow:0 4px 15px rgba(99,102,241,0.3);">
+                            ${buttonText} →
+                        </a>
+                    </div>
+                </div>
+                <div style="background:#f9fafb;padding:16px 24px;text-align:center;border-top:1px solid #e5e7eb;">
+                    <p style="color:#9ca3af;font-size:10px;margin:0;">You received this because you're a member of freeChat. <a href="${appUrl}" style="color:#6366f1;">Manage preferences</a></p>
+                </div>
+            </div>`
+        );
+        console.log(`[Notification Email] ✅ Sent "${title}" to ${toEmail}`);
+    } catch (err) {
+        console.error(`[Notification Email] ❌ Failed "${title}" to ${toEmail}:`, err.message);
+    }
+};

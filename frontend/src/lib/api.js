@@ -242,6 +242,11 @@ export const commentOnStory = async (storyId, text) => {
   return response.data;
 };
 
+export const notifyMessage = async (recipientId) => {
+  const response = await axiosInstance.post("/chat/notify-message", { recipientId });
+  return response.data;
+};
+
 // ----------------- MEMBERSHIP -----------------
 
 export const getMembershipStatus = async () => {

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
 import { axiosInstance } from "../lib/axios";
+import { notifyMessage } from "../lib/api";
 import { Camera, Loader2 } from "lucide-react";
 
 import {
@@ -102,7 +103,14 @@ const ChatPage = () => {
       };
       setFontSize(1);
       setShowShoutSlider(false);
-      return await channelObj.sendMessage(enrichedMessage);
+      const result = await channelObj.sendMessage(enrichedMessage);
+
+      // Email notification (fire-and-forget, rate-limited on backend)
+      if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement") {
+        notifyMessage(targetUserId).catch(() => { });
+      }
+
+      return result;
     } catch (error) {
       return await channelObj.sendMessage({ ...message, fontSize, extra_data: { fontSize } });
     }

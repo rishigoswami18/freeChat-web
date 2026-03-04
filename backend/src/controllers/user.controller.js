@@ -133,6 +133,16 @@ export async function sendFriendRequest(req, res) {
       recipient: recipientId,
     });
 
+    // Send notification email (fire-and-forget)
+    const { sendNotificationEmail } = await import("../lib/email.service.js");
+    sendNotificationEmail(recipient.email, {
+      emoji: "👋",
+      title: "New Friend Request!",
+      body: `<strong>${req.user.fullName}</strong> wants to be your friend on freeChat! Log in to accept or decline their request.`,
+      ctaText: "View Request",
+      ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/notifications`,
+    });
+
     res.status(201).json(friendRequest);
   } catch (error) {
     console.error("Error in sendFriendRequest controller", error.message);

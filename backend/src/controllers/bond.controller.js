@@ -1,5 +1,11 @@
 import User from "../models/User.js";
 import Question from "../models/Question.js";
+import { sendNotificationEmail } from "../lib/email.service.js";
+
+const moodLabels = {
+    happy: "😊 Happy", neutral: "😐 Neutral", sad: "😢 Sad",
+    angry: "😠 Angry", tired: "😴 Tired", excited: "🤩 Excited", romantic: "😍 Romantic"
+};
 
 /**
  * Helper: Check and update couple streak when a user checks in.
@@ -60,6 +66,21 @@ export const updateMood = async (req, res) => {
 
         // Update couple streak after mood update
         await updateCoupleStreak(user);
+
+        // Notify partner about mood (fire-and-forget)
+        if (user.partnerId && user.coupleStatus === "coupled") {
+            const partner = await User.findById(user.partnerId).select("email fullName");
+            if (partner?.email) {
+                const moodText = moodLabels[mood] || mood;
+                sendNotificationEmail(partner.email, {
+                    emoji: "💕",
+                    title: `${user.fullName.split(' ')[0]} shared their mood!`,
+                    body: `Your partner is feeling <strong>${moodText}</strong> right now. Check in and share your mood too to keep your streak going! 🔥`,
+                    ctaText: "Share Your Mood",
+                    ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/couple`,
+                });
+            }
+        }
 
         // Re-fetch updated user to get latest streak
         const updatedUser = await User.findById(req.user._id);

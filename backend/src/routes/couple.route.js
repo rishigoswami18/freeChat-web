@@ -2,6 +2,7 @@ import express from "express";
 import User from "../models/User.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { calculateAge } from "../utils/dateUtils.js";
+import { sendNotificationEmail } from "../lib/email.service.js";
 
 const router = express.Router();
 
@@ -58,6 +59,20 @@ router.put("/note", async (req, res) => {
         );
 
         res.json({ message: "Romantic note updated! ❤️", note, lastUpdated: now });
+
+        // Notify partner about romantic note (fire-and-forget)
+        if (me.partnerId && note) {
+            const partner = await User.findById(me.partnerId).select("email");
+            if (partner?.email) {
+                sendNotificationEmail(partner.email, {
+                    emoji: "💌",
+                    title: `${req.user.fullName.split(' ')[0]} left you a love note!`,
+                    body: `Your special someone wrote something just for you on BondBeyond. Open the app to read their romantic note! 💕`,
+                    ctaText: "Read the Note",
+                    ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/couple`,
+                });
+            }
+        }
     } catch (err) {
         console.error("Error updating romantic note:", err.message);
         res.status(500).json({ message: "Internal Server Error" });

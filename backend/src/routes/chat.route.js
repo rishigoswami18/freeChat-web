@@ -6,8 +6,9 @@ import {
   testMLConnection,
   testStreamConnection,
 } from "../controllers/chat.controller.js";
-
 import cloudinary from "../lib/cloudinary.js";
+import User from "../models/User.js";
+import { sendNotificationEmail } from "../lib/email.service.js";
 
 const router = express.Router();
 
@@ -69,6 +70,44 @@ router.get("/test-email", async (req, res) => {
         OWNER_EMAIL: process.env.OWNER_EMAIL || "NOT SET",
       }
     });
+  }
+});
+
+
+// Rate-limit: one notification email per recipient per 10 minutes
+const messageNotifCooldown = new Map();
+const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+
+router.post("/notify-message", protectRoute, async (req, res) => {
+  try {
+    const { recipientId } = req.body;
+    if (!recipientId) return res.status(400).json({ message: "recipientId required" });
+
+    // Rate limit check
+    const cooldownKey = `${req.user._id}_${recipientId}`;
+    const lastSent = messageNotifCooldown.get(cooldownKey);
+    if (lastSent && Date.now() - lastSent < COOLDOWN_MS) {
+      return res.json({ sent: false, reason: "cooldown" });
+    }
+
+    const recipient = await User.findById(recipientId).select("email fullName");
+    if (!recipient?.email) return res.json({ sent: false, reason: "no_email" });
+
+    messageNotifCooldown.set(cooldownKey, Date.now());
+
+    // Fire-and-forget
+    sendNotificationEmail(recipient.email, {
+      emoji: "💬",
+      title: `New message from ${req.user.fullName.split(' ')[0]}!`,
+      body: `<strong>${req.user.fullName}</strong> sent you a message on freeChat. Open the app to read and reply!`,
+      ctaText: "Open Chat",
+      ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/inbox`,
+    });
+
+    res.json({ sent: true });
+  } catch (err) {
+    console.error("Error in message notification:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
