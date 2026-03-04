@@ -17,6 +17,18 @@ const storySchema = new mongoose.Schema(
                 viewedAt: { type: Date, default: Date.now }
             }
         ],
+        likes: [
+            { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+        ],
+        comments: [
+            {
+                userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+                fullName: String,
+                profilePic: String,
+                text: { type: String, required: true },
+                createdAt: { type: Date, default: Date.now }
+            }
+        ],
         createdAt: { type: Date, default: Date.now, index: { expires: "24h" } },
     },
     { timestamps: true }

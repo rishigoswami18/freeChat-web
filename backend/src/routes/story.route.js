@@ -101,4 +101,60 @@ router.post("/view/:storyId", async (req, res) => {
     }
 });
 
+// Like / Unlike a story
+router.post("/like/:storyId", async (req, res) => {
+    try {
+        const { storyId } = req.params;
+        const story = await Story.findById(storyId);
+
+        if (!story) return res.status(404).json({ message: "Story not found" });
+
+        const userId = req.user._id.toString();
+        const alreadyLiked = story.likes.some(id => id.toString() === userId);
+
+        if (alreadyLiked) {
+            story.likes = story.likes.filter(id => id.toString() !== userId);
+        } else {
+            story.likes.push(req.user._id);
+        }
+
+        await story.save();
+        res.json({ likes: story.likes, liked: !alreadyLiked });
+    } catch (err) {
+        console.error("Error toggling story like:", err);
+        res.status(500).json({ message: "Error toggling like" });
+    }
+});
+
+// Comment on a story
+router.post("/comment/:storyId", async (req, res) => {
+    try {
+        const { storyId } = req.params;
+        const { text } = req.body;
+
+        if (!text || !text.trim()) {
+            return res.status(400).json({ message: "Comment text is required" });
+        }
+
+        const story = await Story.findById(storyId);
+        if (!story) return res.status(404).json({ message: "Story not found" });
+
+        const comment = {
+            userId: req.user._id,
+            fullName: req.user.fullName,
+            profilePic: req.user.profilePic || "",
+            text: text.trim(),
+            createdAt: new Date(),
+        };
+
+        story.comments.push(comment);
+        await story.save();
+
+        res.json({ comments: story.comments });
+    } catch (err) {
+        console.error("Error commenting on story:", err);
+        res.status(500).json({ message: "Error adding comment" });
+    }
+});
+
 export default router;

@@ -232,6 +232,16 @@ export const viewStory = async (storyId) => {
   return response.data;
 };
 
+export const likeStory = async (storyId) => {
+  const response = await axiosInstance.post(`/stories/like/${storyId}`);
+  return response.data;
+};
+
+export const commentOnStory = async (storyId, text) => {
+  const response = await axiosInstance.post(`/stories/comment/${storyId}`, { text });
+  return response.data;
+};
+
 // ----------------- MEMBERSHIP -----------------
 
 export const getMembershipStatus = async () => {
