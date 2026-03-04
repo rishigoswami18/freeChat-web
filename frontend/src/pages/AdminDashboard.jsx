@@ -57,6 +57,8 @@ const AdminDashboard = () => {
     const [inviteLoading, setInviteLoading] = useState(false);
     const [isSendingInvites, setIsSendingInvites] = useState(false);
     const [inviteSearch, setInviteSearch] = useState("");
+    const [inviteSubject, setInviteSubject] = useState("");
+    const [inviteMessage, setInviteMessage] = useState("");
 
     useEffect(() => {
         fetchStats();
@@ -135,9 +137,15 @@ const AdminDashboard = () => {
 
         setIsSendingInvites(true);
         try {
-            const res = await sendInvites(Array.from(selectedEmails));
+            const res = await sendInvites(
+                Array.from(selectedEmails),
+                inviteSubject.trim() || undefined,
+                inviteMessage.trim() || undefined
+            );
             toast.success(res.message);
             setSelectedEmails(new Set());
+            setInviteSubject("");
+            setInviteMessage("");
             // Refresh list to remove any that might have been registered
             fetchFirebaseUsers();
         } catch (err) {
@@ -640,12 +648,41 @@ const AdminDashboard = () => {
                                         </button>
                                     </div>
 
+                                    {/* Email Composer */}
+                                    {selectedEmails.size > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            className="card bg-base-100 border-2 border-violet-500/20 shadow-xl p-6 mt-4"
+                                        >
+                                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                                                <Mail className="size-5 text-violet-500" />
+                                                Compose Custom Invitation
+                                            </h3>
+                                            <div className="space-y-4">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Subject (Leave empty for default)"
+                                                    className="input input-bordered w-full rounded-xl bg-base-200"
+                                                    value={inviteSubject}
+                                                    onChange={(e) => setInviteSubject(e.target.value)}
+                                                />
+                                                <textarea
+                                                    className="textarea textarea-bordered w-full bg-base-200 min-h-[120px] rounded-xl text-base"
+                                                    placeholder="Write your custom message here (Leave empty for default)..."
+                                                    value={inviteMessage}
+                                                    onChange={(e) => setInviteMessage(e.target.value)}
+                                                />
+                                            </div>
+                                        </motion.div>
+                                    )}
+
                                     {/* Selected Count + Send Button */}
                                     {selectedEmails.size > 0 && (
                                         <motion.div
                                             initial={{ opacity: 0, y: -10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className="sticky top-4 z-10 card bg-violet-500 text-white p-4 rounded-2xl flex flex-row items-center justify-between shadow-xl shadow-violet-500/30"
+                                            className="sticky top-4 z-10 card bg-violet-500 text-white p-4 rounded-2xl flex flex-row items-center justify-between shadow-xl shadow-violet-500/30 mt-4"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -681,13 +718,13 @@ const AdminDashboard = () => {
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={() => toggleEmailSelection(u.email)}
                                                 className={`card p-4 rounded-2xl cursor-pointer transition-all border-2 flex flex-row items-center gap-4 ${selectedEmails.has(u.email)
-                                                        ? "bg-violet-500/10 border-violet-500/40 shadow-lg shadow-violet-500/10"
-                                                        : "bg-base-200 border-transparent hover:border-base-content/10 hover:bg-base-300/50"
+                                                    ? "bg-violet-500/10 border-violet-500/40 shadow-lg shadow-violet-500/10"
+                                                    : "bg-base-200 border-transparent hover:border-base-content/10 hover:bg-base-300/50"
                                                     }`}
                                             >
                                                 <div className={`size-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${selectedEmails.has(u.email)
-                                                        ? "bg-violet-500 text-white"
-                                                        : "bg-base-300 text-base-content/30"
+                                                    ? "bg-violet-500 text-white"
+                                                    : "bg-base-300 text-base-content/30"
                                                     }`}>
                                                     {selectedEmails.has(u.email)
                                                         ? <CheckSquare className="size-5" />

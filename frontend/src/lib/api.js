@@ -383,7 +383,7 @@ export const getFirebaseNonUsers = async () => {
   return response.data;
 };
 
-export const sendInvites = async (emails) => {
-  const response = await axiosInstance.post("/admin/invite", { emails });
+export const sendInvites = async (emails, subject, message) => {
+  const response = await axiosInstance.post("/admin/invite", { emails, subject, message });
   return response.data;
 };

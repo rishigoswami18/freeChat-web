@@ -195,13 +195,18 @@ export const sendBroadcastEmail = async (email, subject, message) => {
 /**
  * Send invitation email to a non-registered Firebase user
  */
-export const sendInviteEmail = async (email) => {
+export const sendInviteEmail = async (email, customSubject, customMessage) => {
     const appUrl = process.env.CLIENT_URL || "https://freechatweb.in";
+
+    const subject = customSubject || "🎉 You're Invited to freeChat — Connect, Share, and Bond!";
+    const bodyContent = customMessage
+        ? customMessage.replace(/\n/g, '<br/>')
+        : `Someone special wants you on <strong style="color:#6366f1;">freeChat</strong> — the next-gen social platform where you can chat, share stories, post reels, play couple games, and so much more!`;
 
     return await sendEmail(
         email,
         undefined,
-        "🎉 You're Invited to freeChat — Connect, Share, and Bond!",
+        subject,
         `You've been personally invited to join freeChat! Visit ${appUrl} to get started.`,
         `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
             <!-- Header -->
@@ -213,9 +218,9 @@ export const sendInviteEmail = async (email) => {
             <!-- Body -->
             <div style="padding:40px 30px;">
                 <h2 style="color:#1f2937;margin:0 0 16px 0;font-size:24px;font-weight:800;">Hey there! 👋</h2>
-                <p style="color:#4b5563;line-height:1.8;font-size:16px;margin:0 0 24px 0;">
-                    Someone special wants you on <strong style="color:#6366f1;">freeChat</strong> — the next-gen social platform where you can chat, share stories, post reels, play couple games, and so much more!
-                </p>
+                <div style="color:#4b5563;line-height:1.8;font-size:16px;margin:0 0 24px 0;">
+                    ${bodyContent}
+                </div>
 
                 <div style="background:#f8fafc;border-radius:12px;padding:24px;margin:24px 0;border:1px solid #e5e7eb;">
                     <p style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;">What you'll get:</p>

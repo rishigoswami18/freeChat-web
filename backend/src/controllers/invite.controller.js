@@ -62,7 +62,7 @@ export const getFirebaseNonUsers = async (req, res) => {
  */
 export const sendInvites = async (req, res) => {
     try {
-        const { emails } = req.body;
+        const { emails, subject, message } = req.body;
         if (!emails || !Array.isArray(emails) || emails.length === 0) {
             return res.status(400).json({ message: "No emails provided" });
         }
@@ -86,7 +86,7 @@ export const sendInvites = async (req, res) => {
         for (let i = 0; i < toInvite.length; i++) {
             try {
                 if (i > 0) await sleep(500); // Rate limit protection
-                await sendInviteEmail(toInvite[i]);
+                await sendInviteEmail(toInvite[i], subject, message);
                 successCount++;
                 console.log(`[Admin] [${successCount}/${toInvite.length}] ✅ Invite sent to: ${toInvite[i]}`);
             } catch (err) {
