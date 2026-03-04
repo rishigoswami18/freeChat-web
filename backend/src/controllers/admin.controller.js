@@ -151,3 +151,24 @@ export const broadcastEmail = async (req, res) => {
     }
 };
 
+import SupportMessage from "../models/SupportMessage.js";
+
+export const getAdminSupportMessages = async (req, res) => {
+    try {
+        const messages = await SupportMessage.find().sort({ createdAt: -1 }).limit(100);
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error("Error fetching support messages:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const deleteSupportMessage = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await SupportMessage.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: "Support message deleted" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

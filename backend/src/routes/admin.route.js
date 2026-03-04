@@ -6,7 +6,9 @@ import {
     getAdminPosts,
     deleteUser,
     toggleUserRole,
-    broadcastEmail
+    broadcastEmail,
+    getAdminSupportMessages,
+    deleteSupportMessage
 } from "../controllers/admin.controller.js";
 import { getFirebaseNonUsers, sendInvites } from "../controllers/invite.controller.js";
 
@@ -21,6 +23,10 @@ router.get("/posts", getAdminPosts);
 router.delete("/users/:id", deleteUser);
 router.put("/users/:id/role", toggleUserRole);
 router.post("/broadcast-email", broadcastEmail);
+
+// Support Messages
+router.get("/support", getAdminSupportMessages);
+router.delete("/support/:id", deleteSupportMessage);
 
 // Invite system
 router.get("/firebase-users", getFirebaseNonUsers);

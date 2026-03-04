@@ -18,7 +18,9 @@ import {
     UserPlus,
     CheckSquare,
     Square,
-    UserCheck
+    UserCheck,
+    LifeBuoy,
+    Star
 } from "lucide-react";
 import {
     getAdminStats,
@@ -32,7 +34,9 @@ import {
     clearAdminInbox,
     getFirebaseNonUsers,
     sendInvites,
-    sweepPendingActions
+    sweepPendingActions,
+    getAdminSupportMessages,
+    deleteSupportMessage
 } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -51,6 +55,8 @@ const AdminDashboard = () => {
     const [isEmailSending, setIsEmailSending] = useState(false);
     const [isCleaning, setIsCleaning] = useState(false);
     const [isSweeping, setIsSweeping] = useState(false);
+    const [supportMessages, setSupportMessages] = useState([]);
+    const [isSupportLoading, setIsSupportLoading] = useState(false);
 
     // Invite system state
     const [firebaseUsers, setFirebaseUsers] = useState([]);
@@ -99,6 +105,29 @@ const AdminDashboard = () => {
             toast.error("Failed to load posts");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchSupportMessages = async () => {
+        setIsSupportLoading(true);
+        try {
+            const data = await getAdminSupportMessages();
+            setSupportMessages(data || []);
+        } catch (err) {
+            toast.error("Failed to load support messages");
+        } finally {
+            setIsSupportLoading(false);
+        }
+    };
+
+    const handleDeleteSupport = async (id) => {
+        if (!window.confirm("Delete this support request?")) return;
+        try {
+            await deleteSupportMessage(id);
+            toast.success("Support request deleted");
+            fetchSupportMessages();
+        } catch (err) {
+            toast.error("Failed to delete request");
         }
     };
 
@@ -168,6 +197,7 @@ const AdminDashboard = () => {
         if (activeTab === "posts") fetchPosts();
         if (activeTab === "stats") fetchStats();
         if (activeTab === "invite") fetchFirebaseUsers();
+        if (activeTab === "support") fetchSupportMessages();
     }, [activeTab]);
 
     const handleBroadcast = async () => {
@@ -260,46 +290,63 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="p-4 sm:p-8 max-w-7xl mx-auto min-h-screen">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <div>
-                    <h1 className="text-4xl font-black tracking-tighter italic uppercase flex items-center gap-3">
-                        <ShieldAlert className="size-10 text-primary" />
-                        Admin Command
-                    </h1>
-                    <p className="text-base-content/50 font-medium uppercase tracking-widest text-[10px] mt-1">
-                        System Control & User Management
-                    </p>
+        <div className="p-4 sm:p-8 max-w-7xl mx-auto min-h-screen font-outfit">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
+                <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative flex items-center gap-4 bg-base-100 rounded-2xl p-4 ring-1 ring-base-content/5">
+                        <div className="p-3 bg-primary/10 rounded-xl text-primary animate-pulse-slow">
+                            <ShieldAlert className="size-8" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-black tracking-tight uppercase italic leading-none">
+                                Admin <span className="text-primary">Command</span>
+                            </h1>
+                            <p className="text-[10px] font-bold text-base-content/40 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-2">
+                                <span className="size-1.5 rounded-full bg-success"></span>
+                                Secure System Access
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <button
-                    onClick={() => activeTab === 'stats' ? fetchStats() : activeTab === 'users' ? fetchUsers() : fetchPosts()}
-                    className="btn btn-primary btn-sm rounded-xl gap-2 active:scale-95 transition-transform"
-                >
-                    <RefreshCcw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh Data
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => {
+                            if (activeTab === 'stats') fetchStats();
+                            else if (activeTab === 'users') fetchUsers(searchQuery);
+                            else if (activeTab === 'posts') fetchPosts();
+                            else if (activeTab === 'support') fetchSupportMessages();
+                            else if (activeTab === 'invite') fetchFirebaseUsers();
+                        }}
+                        className="btn btn-primary btn-md rounded-2xl gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 px-6"
+                    >
+                        <RefreshCcw className={`size-4 ${loading || isSupportLoading || inviteLoading ? 'animate-spin' : ''}`} />
+                        <span className="font-bold uppercase tracking-tight text-xs">Refresh Core</span>
+                    </button>
+                </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            {/* Premium Tabs */}
+            <div className="flex gap-1.5 mb-12 p-1.5 bg-base-200 rounded-[2rem] border border-base-content/5 overflow-x-auto no-scrollbar max-w-fit mx-auto lg:mx-0 shadow-inner">
                 {[
                     { id: "stats", label: "Overview", icon: BarChart3 },
                     { id: "users", label: "Users", icon: Users },
                     { id: "posts", label: "Posts", icon: FileText },
-                    { id: "broadcast", label: "Announce", icon: Megaphone },
-                    { id: "invite", label: "Invite", icon: UserPlus },
+                    { id: "support", label: "Support", icon: LifeBuoy },
+                    { id: "broadcast", label: "Mass Broadcast", icon: Megaphone },
+                    { id: "invite", label: "Invite System", icon: UserPlus },
                 ].map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`btn btn-sm rounded-xl gap-2 border-none px-6 transition-all ${activeTab === tab.id
-                            ? "bg-primary text-primary-content shadow-lg shadow-primary/20"
-                            : "bg-base-200 text-base-content/60 hover:bg-base-300"
+                        className={`btn btn-sm rounded-[1.5rem] gap-2 border-none px-6 h-10 transition-all duration-300 ${activeTab === tab.id
+                            ? "bg-primary text-primary-content shadow-md shadow-primary/25 scale-105"
+                            : "bg-transparent text-base-content/50 hover:text-base-content hover:bg-base-300/50"
                             }`}
                     >
-                        <tab.icon className="size-4" />
-                        <span className="font-bold uppercase tracking-tight text-xs">{tab.label}</span>
+                        <tab.icon className={`size-4 ${activeTab === tab.id ? 'animate-bounce-short' : ''}`} />
+                        <span className="font-black uppercase tracking-tight text-[10px]">{tab.label}</span>
                     </button>
                 ))}
             </div>
@@ -313,27 +360,36 @@ const AdminDashboard = () => {
                 <AnimatePresence mode="wait">
                     {activeTab === "stats" && stats && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
                         >
                             {[
-                                { label: "Total Users", val: stats.totalUsers, icon: Users, color: "text-blue-500", bg: "bg-blue-50" },
-                                { label: "Onboarded", val: stats.onboardedUsers, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50" },
-                                { label: "Members", val: stats.memberUsers, icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
-                                { label: "Total Posts", val: stats.totalPosts, icon: FileText, color: "text-purple-500", bg: "bg-purple-50" },
-                                { label: "Users (24h)", val: `+${stats.newUsers}`, icon: Users, color: "text-indigo-500", bg: "bg-indigo-50" },
-                                { label: "Posts (24h)", val: `+${stats.newPosts}`, icon: FileText, color: "text-rose-500", bg: "bg-rose-50" },
+                                { label: "Total Users", val: stats.totalUsers, icon: Users, color: "from-blue-500 to-indigo-600", light: "bg-blue-500/10 text-blue-600" },
+                                { label: "Onboarded", val: stats.onboardedUsers, icon: CheckCircle2, color: "from-emerald-500 to-teal-600", light: "bg-emerald-500/10 text-emerald-600" },
+                                { label: "Members", val: stats.memberUsers, icon: Star, color: "from-amber-400 to-orange-500", light: "bg-amber-500/10 text-amber-600" },
+                                { label: "Total Posts", val: stats.totalPosts, icon: FileText, color: "from-purple-500 to-fuchsia-600", light: "bg-purple-500/10 text-purple-600" },
+                                { label: "Users (24h)", val: `+${stats.newUsers}`, icon: Users, color: "from-rose-500 to-pink-600", light: "bg-rose-500/10 text-rose-600" },
+                                { label: "Posts (24h)", val: `+${stats.newPosts}`, icon: FileText, color: "from-sky-500 to-blue-600", light: "bg-sky-500/10 text-sky-600" },
                             ].map((s, i) => (
-                                <div key={i} className="card bg-base-200 shadow-sm border border-base-content/5 p-6 rounded-3xl group hover:shadow-md transition-shadow">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-4 rounded-2xl ${s.bg} ${s.color}`}>
-                                            <s.icon className="size-8" />
+                                <div key={i} className="relative group perspective-1000">
+                                    <div className={`absolute -inset-0.5 bg-gradient-to-br ${s.color} rounded-[2.5rem] opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-500`}></div>
+                                    <div className="relative card bg-base-100/50 backdrop-blur-xl shadow-sm border border-base-content/5 p-8 rounded-[2.5rem] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-primary/5">
+                                        <div className="flex flex-col gap-6">
+                                            <div className={`size-14 rounded-2xl ${s.light} flex items-center justify-center transition-transform duration-500 group-hover:rotate-12`}>
+                                                <s.icon className="size-7" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-1.5">{s.label}</p>
+                                                <div className="flex items-baseline gap-2">
+                                                    <h4 className="text-4xl font-black tracking-tight">{s.val}</h4>
+                                                    {s.label.includes('24h') && <span className="text-[10px] font-bold text-success uppercase">Growth</span>}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{s.label}</p>
-                                            <h4 className="text-3xl font-black tracking-tight">{s.val}</h4>
+                                        <div className="absolute top-6 right-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <s.icon className="size-16" />
                                         </div>
                                     </div>
                                 </div>
@@ -807,15 +863,67 @@ const AdminDashboard = () => {
                             )}
                         </motion.div>
                     )}
+                    {activeTab === "support" && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            className="space-y-6"
+                        >
+                            {isSupportLoading ? (
+                                <div className="flex flex-col items-center justify-center py-32 gap-4">
+                                    <Loader2 className="size-10 animate-spin text-primary" />
+                                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Loading support tickets...</p>
+                                </div>
+                            ) : supportMessages.length === 0 ? (
+                                <div className="card bg-base-200 p-12 rounded-[2.5rem] border border-base-content/5 text-center">
+                                    <CheckCircle2 className="size-16 text-success mx-auto mb-4 opacity-30" />
+                                    <h3 className="text-2xl font-black uppercase italic tracking-tight">Zero Tickets</h3>
+                                    <p className="text-sm opacity-40 mt-2">All users seem happy! No support messages found.</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {supportMessages.map((msg) => (
+                                        <motion.div
+                                            key={msg._id}
+                                            layout
+                                            className="card bg-base-100 border border-base-content/5 rounded-[2.5rem] p-6 group hover:shadow-xl transition-all duration-300"
+                                        >
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black">
+                                                        {msg.fullName?.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-sm tracking-tight">{msg.fullName}</h4>
+                                                        <p className="text-[10px] opacity-40 font-mono italic">{msg.email}</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteSupport(msg._id)}
+                                                    className="btn btn-ghost btn-xs btn-circle text-error group-hover:bg-error/10 transition-colors"
+                                                >
+                                                    <Trash2 className="size-4" />
+                                                </button>
+                                            </div>
+                                            <div className="bg-base-200/50 p-4 rounded-2xl border border-base-content/5 flex-1 shadow-inner">
+                                                <p className="text-sm leading-relaxed">{msg.message}</p>
+                                            </div>
+                                            <div className="mt-4 flex items-center justify-between text-[9px] font-bold uppercase tracking-widest opacity-30">
+                                                <span>Ticket #{msg._id.slice(-6).toUpperCase()}</span>
+                                                <span>{new Date(msg.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
                 </AnimatePresence>
             )}
         </div>
     );
 };
 
-// Simple Star icon as it was missing from lucide imports in my brain but it might be there
-const Star = ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-);
-
 export default AdminDashboard;
+

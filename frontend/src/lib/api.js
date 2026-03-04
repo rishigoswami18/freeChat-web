@@ -412,3 +412,14 @@ export const sendInvites = async (emails, subject, message) => {
   const response = await axiosInstance.post("/admin/invite", { emails, subject, message });
   return response.data;
 };
+
+export const getAdminSupportMessages = async () => {
+  const response = await axiosInstance.get("/admin/support");
+  return response.data;
+};
+
+export const deleteSupportMessage = async (messageId) => {
+  const response = await axiosInstance.delete(`/admin/support/${messageId}`);
+  return response.data;
+};
+
