@@ -192,3 +192,61 @@ export const sendBroadcastEmail = async (email, subject, message) => {
     );
 };
 
+/**
+ * Send invitation email to a non-registered Firebase user
+ */
+export const sendInviteEmail = async (email) => {
+    const appUrl = process.env.CLIENT_URL || "https://freechatweb.in";
+
+    return await sendEmail(
+        email,
+        undefined,
+        "🎉 You're Invited to freeChat — Connect, Share, and Bond!",
+        `You've been personally invited to join freeChat! Visit ${appUrl} to get started.`,
+        `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);padding:40px 30px;text-align:center;">
+                <h1 style="color:#ffffff;margin:0;font-size:36px;font-style:italic;font-weight:900;letter-spacing:-1px;">freeChat</h1>
+                <p style="color:rgba(255,255,255,0.8);margin:8px 0 0 0;font-size:13px;text-transform:uppercase;letter-spacing:3px;font-weight:600;">You're Invited</p>
+            </div>
+
+            <!-- Body -->
+            <div style="padding:40px 30px;">
+                <h2 style="color:#1f2937;margin:0 0 16px 0;font-size:24px;font-weight:800;">Hey there! 👋</h2>
+                <p style="color:#4b5563;line-height:1.8;font-size:16px;margin:0 0 24px 0;">
+                    Someone special wants you on <strong style="color:#6366f1;">freeChat</strong> — the next-gen social platform where you can chat, share stories, post reels, play couple games, and so much more!
+                </p>
+
+                <div style="background:#f8fafc;border-radius:12px;padding:24px;margin:24px 0;border:1px solid #e5e7eb;">
+                    <p style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;">What you'll get:</p>
+                    <table style="width:100%;border-collapse:collapse;">
+                        <tr><td style="padding:6px 0;font-size:15px;color:#4b5563;">💬 Real-time chat with friends</td></tr>
+                        <tr><td style="padding:6px 0;font-size:15px;color:#4b5563;">📸 Share stories & posts</td></tr>
+                        <tr><td style="padding:6px 0;font-size:15px;color:#4b5563;">🎬 Watch & create reels</td></tr>
+                        <tr><td style="padding:6px 0;font-size:15px;color:#4b5563;">🎮 Play couple games</td></tr>
+                        <tr><td style="padding:6px 0;font-size:15px;color:#4b5563;">💎 Earn gems & rewards</td></tr>
+                        <tr><td style="padding:6px 0;font-size:15px;color:#4b5563;">🌐 Multi-language translation</td></tr>
+                    </table>
+                </div>
+
+                <!-- CTA Button -->
+                <div style="text-align:center;margin:32px 0;">
+                    <a href="${appUrl}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;padding:16px 48px;border-radius:50px;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
+                        Join freeChat Now →
+                    </a>
+                </div>
+
+                <p style="color:#9ca3af;font-size:13px;text-align:center;margin:24px 0 0 0;line-height:1.6;">
+                    It's completely free to join. Sign up with your email or Google account in seconds!
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div style="background:#f9fafb;padding:20px 30px;text-align:center;border-top:1px solid #e5e7eb;">
+                <p style="color:#9ca3af;font-size:11px;margin:0;">This invitation was sent from freeChat. If you didn't expect this, you can safely ignore it.</p>
+                <p style="color:#d1d5db;font-size:11px;margin:8px 0 0 0;">© 2026 freeChat. All rights reserved.</p>
+            </div>
+        </div>`
+    );
+};
+

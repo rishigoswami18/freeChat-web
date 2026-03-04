@@ -14,7 +14,11 @@ import {
     RefreshCcw,
     CheckCircle2,
     Sparkles,
-    Mail
+    Mail,
+    UserPlus,
+    CheckSquare,
+    Square,
+    UserCheck
 } from "lucide-react";
 import {
     getAdminStats,
@@ -25,7 +29,9 @@ import {
     broadcastNotification,
     broadcastEmail,
     deletePost,
-    clearAdminInbox
+    clearAdminInbox,
+    getFirebaseNonUsers,
+    sendInvites
 } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +49,14 @@ const AdminDashboard = () => {
     const [emailBody, setEmailBody] = useState("");
     const [isEmailSending, setIsEmailSending] = useState(false);
     const [isCleaning, setIsCleaning] = useState(false);
+
+    // Invite system state
+    const [firebaseUsers, setFirebaseUsers] = useState([]);
+    const [firebaseStats, setFirebaseStats] = useState({ total: 0, registered: 0 });
+    const [selectedEmails, setSelectedEmails] = useState(new Set());
+    const [inviteLoading, setInviteLoading] = useState(false);
+    const [isSendingInvites, setIsSendingInvites] = useState(false);
+    const [inviteSearch, setInviteSearch] = useState("");
 
     useEffect(() => {
         fetchStats();
@@ -84,10 +98,66 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchFirebaseUsers = async () => {
+        setInviteLoading(true);
+        try {
+            const data = await getFirebaseNonUsers();
+            setFirebaseUsers(data.nonUsers || []);
+            setFirebaseStats({ total: data.total, registered: data.registered });
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to fetch Firebase users");
+        } finally {
+            setInviteLoading(false);
+        }
+    };
+
+    const toggleEmailSelection = (email) => {
+        setSelectedEmails((prev) => {
+            const next = new Set(prev);
+            if (next.has(email)) next.delete(email);
+            else next.add(email);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        const filtered = filteredFirebaseUsers;
+        if (selectedEmails.size === filtered.length) {
+            setSelectedEmails(new Set());
+        } else {
+            setSelectedEmails(new Set(filtered.map((u) => u.email)));
+        }
+    };
+
+    const handleSendInvites = async () => {
+        if (selectedEmails.size === 0) return toast.error("No users selected");
+        if (!window.confirm(`Send invite emails to ${selectedEmails.size} users?`)) return;
+
+        setIsSendingInvites(true);
+        try {
+            const res = await sendInvites(Array.from(selectedEmails));
+            toast.success(res.message);
+            setSelectedEmails(new Set());
+            // Refresh list to remove any that might have been registered
+            fetchFirebaseUsers();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to send invites");
+        } finally {
+            setIsSendingInvites(false);
+        }
+    };
+
+    const filteredFirebaseUsers = firebaseUsers.filter(
+        (u) =>
+            u.email.toLowerCase().includes(inviteSearch.toLowerCase()) ||
+            (u.displayName && u.displayName.toLowerCase().includes(inviteSearch.toLowerCase()))
+    );
+
     useEffect(() => {
         if (activeTab === "users") fetchUsers(searchQuery);
         if (activeTab === "posts") fetchPosts();
         if (activeTab === "stats") fetchStats();
+        if (activeTab === "invite") fetchFirebaseUsers();
     }, [activeTab]);
 
     const handleBroadcast = async () => {
@@ -195,6 +265,7 @@ const AdminDashboard = () => {
                     { id: "users", label: "Users", icon: Users },
                     { id: "posts", label: "Posts", icon: FileText },
                     { id: "broadcast", label: "Announce", icon: Megaphone },
+                    { id: "invite", label: "Invite", icon: UserPlus },
                 ].map((tab) => (
                     <button
                         key={tab.id}
@@ -493,6 +564,161 @@ const AdminDashboard = () => {
                                 </button>
                                 <p className="text-[9px] opacity-30 mt-3 italic">This hides empty/old 1-on-1 threads. It won't delete messages.</p>
                             </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === "invite" && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="max-w-4xl mx-auto space-y-6"
+                        >
+                            {/* Header Card */}
+                            <div className="card bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/20 p-8 rounded-[40px] shadow-xl text-center">
+                                <div className="size-20 bg-violet-500/20 text-violet-500 rounded-[28px] flex items-center justify-center mx-auto mb-4 border-2 border-violet-500/10">
+                                    <UserPlus className="size-10" />
+                                </div>
+                                <h2 className="text-3xl font-black italic tracking-tighter uppercase">Invite Firebase Users</h2>
+                                <p className="text-xs font-bold opacity-40 mt-1 uppercase tracking-widest">Send personalized invitations to people who haven't joined yet</p>
+
+                                {/* Stats Row */}
+                                <div className="flex justify-center gap-6 mt-6">
+                                    <div className="text-center">
+                                        <p className="text-2xl font-black">{firebaseStats.total}</p>
+                                        <p className="text-[9px] font-bold uppercase opacity-40 tracking-widest">Firebase Users</p>
+                                    </div>
+                                    <div className="w-px bg-base-content/10" />
+                                    <div className="text-center">
+                                        <p className="text-2xl font-black text-success">{firebaseStats.registered}</p>
+                                        <p className="text-[9px] font-bold uppercase opacity-40 tracking-widest">Already Joined</p>
+                                    </div>
+                                    <div className="w-px bg-base-content/10" />
+                                    <div className="text-center">
+                                        <p className="text-2xl font-black text-violet-500">{firebaseUsers.length}</p>
+                                        <p className="text-[9px] font-bold uppercase opacity-40 tracking-widest">To Invite</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {inviteLoading ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                    <Loader2 className="size-10 animate-spin text-violet-500" />
+                                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Fetching Firebase users...</p>
+                                </div>
+                            ) : firebaseUsers.length === 0 ? (
+                                <div className="card bg-base-200 p-12 rounded-3xl text-center border border-base-content/5">
+                                    <UserCheck className="size-12 text-success mx-auto mb-4 opacity-50" />
+                                    <h3 className="text-xl font-black uppercase italic tracking-tight">All Caught Up!</h3>
+                                    <p className="text-sm opacity-50 mt-2">Every Firebase user has already joined freeChat. 🎉</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Search + Actions Bar */}
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
+                                            <input
+                                                type="text"
+                                                placeholder="Search by name or email..."
+                                                className="input input-bordered w-full pl-12 rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5"
+                                                value={inviteSearch}
+                                                onChange={(e) => setInviteSearch(e.target.value)}
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={toggleSelectAll}
+                                            className="btn btn-outline btn-sm rounded-xl gap-2 px-6"
+                                        >
+                                            {selectedEmails.size === filteredFirebaseUsers.length && filteredFirebaseUsers.length > 0
+                                                ? <CheckSquare className="size-4" />
+                                                : <Square className="size-4" />
+                                            }
+                                            <span className="font-bold uppercase text-[10px] tracking-tight">
+                                                {selectedEmails.size === filteredFirebaseUsers.length && filteredFirebaseUsers.length > 0 ? "Deselect All" : "Select All"}
+                                            </span>
+                                        </button>
+                                    </div>
+
+                                    {/* Selected Count + Send Button */}
+                                    {selectedEmails.size > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="sticky top-4 z-10 card bg-violet-500 text-white p-4 rounded-2xl flex flex-row items-center justify-between shadow-xl shadow-violet-500/30"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                                    <Mail className="size-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black uppercase tracking-tight">{selectedEmails.size} Selected</p>
+                                                    <p className="text-[10px] opacity-70 font-bold">Ready to send invite emails</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={handleSendInvites}
+                                                disabled={isSendingInvites}
+                                                className="btn btn-sm bg-white text-violet-600 border-none rounded-xl font-black uppercase gap-2 hover:bg-white/90 active:scale-95 transition-all"
+                                            >
+                                                {isSendingInvites ? (
+                                                    <Loader2 className="size-4 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <Send className="size-4" />
+                                                        Send Invites
+                                                    </>
+                                                )}
+                                            </button>
+                                        </motion.div>
+                                    )}
+
+                                    {/* User Cards Grid */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto no-scrollbar">
+                                        {filteredFirebaseUsers.map((u) => (
+                                            <motion.div
+                                                key={u.uid}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={() => toggleEmailSelection(u.email)}
+                                                className={`card p-4 rounded-2xl cursor-pointer transition-all border-2 flex flex-row items-center gap-4 ${selectedEmails.has(u.email)
+                                                        ? "bg-violet-500/10 border-violet-500/40 shadow-lg shadow-violet-500/10"
+                                                        : "bg-base-200 border-transparent hover:border-base-content/10 hover:bg-base-300/50"
+                                                    }`}
+                                            >
+                                                <div className={`size-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${selectedEmails.has(u.email)
+                                                        ? "bg-violet-500 text-white"
+                                                        : "bg-base-300 text-base-content/30"
+                                                    }`}>
+                                                    {selectedEmails.has(u.email)
+                                                        ? <CheckSquare className="size-5" />
+                                                        : <Square className="size-5" />
+                                                    }
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-sm tracking-tight truncate">
+                                                        {u.displayName || "Unknown User"}
+                                                    </p>
+                                                    <p className="text-[10px] opacity-40 italic truncate">{u.email}</p>
+                                                </div>
+                                                {u.photoURL && (
+                                                    <img
+                                                        src={u.photoURL}
+                                                        alt=""
+                                                        className="size-9 rounded-full ring-2 ring-base-content/10 flex-shrink-0"
+                                                        onError={(e) => e.target.style.display = 'none'}
+                                                    />
+                                                )}
+                                            </motion.div>
+                                        ))}
+                                    </div>
+
+                                    {filteredFirebaseUsers.length === 0 && inviteSearch && (
+                                        <div className="text-center py-12 opacity-40 font-bold uppercase italic tracking-widest">
+                                            No matching users found
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>

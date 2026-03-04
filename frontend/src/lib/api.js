@@ -375,3 +375,15 @@ export const broadcastEmail = async (subject, message) => {
   const response = await axiosInstance.post("/admin/broadcast-email", { subject, message });
   return response.data;
 };
+
+// ----------------- INVITE SYSTEM -----------------
+
+export const getFirebaseNonUsers = async () => {
+  const response = await axiosInstance.get("/admin/firebase-users");
+  return response.data;
+};
+
+export const sendInvites = async (emails) => {
+  const response = await axiosInstance.post("/admin/invite", { emails });
+  return response.data;
+};

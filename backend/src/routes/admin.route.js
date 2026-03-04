@@ -8,6 +8,7 @@ import {
     toggleUserRole,
     broadcastEmail
 } from "../controllers/admin.controller.js";
+import { getFirebaseNonUsers, sendInvites } from "../controllers/invite.controller.js";
 
 const router = express.Router();
 
@@ -21,4 +22,9 @@ router.delete("/users/:id", deleteUser);
 router.put("/users/:id/role", toggleUserRole);
 router.post("/broadcast-email", broadcastEmail);
 
+// Invite system
+router.get("/firebase-users", getFirebaseNonUsers);
+router.post("/invite", sendInvites);
+
 export default router;
+
