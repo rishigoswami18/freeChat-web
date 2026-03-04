@@ -464,7 +464,12 @@ body.is-chat-active {
   flex: 1 !important;
   overflow-y: auto !important;
   min-height: 0 !important;
-  background-attachment: fixed !important;
+  -webkit-overflow-scrolling: touch !important;
+  /* Smooth scrolling for iOS Safari */
+  will-change: transform !important;
+  /* Performance boost */
+  overscroll-behavior-y: contain !important;
+  /* Prevent page bounce */
 }
 
 /* 4. Chat Header & Message Input stay pinned */
@@ -504,6 +509,8 @@ body.is-chat-active {
   position: relative !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
   transition: transform 0.2s ease;
+  transform: translateZ(0);
+  /* Force GPU acceleration */
   max-width: 85% !important;
   width: fit-content !important;
   min-width: max-content !important;
@@ -596,7 +603,7 @@ body.is-chat-active {
     url("https://w7.pngwing.com/pngs/414/83/png-transparent-whatsapp-social-media-icons-pattern-whatsapp-miscellaneous-monochrome-computer-wallpaper-thumbnail.png");
   background-size: 400px;
   background-repeat: repeat;
-  background-attachment: fixed;
+  /* background-attachment: fixed; removed for mobile performance */
   z-index: 0;
   pointer-events: none;
 }
@@ -613,9 +620,9 @@ body.is-chat-active {
 }
 
 .chat-input-glass {
-  background: oklch(var(--b1) / 0.8);
-  backdrop-filter: blur(25px) saturate(160%);
-  -webkit-backdrop-filter: blur(25px) saturate(160%);
+  background: oklch(var(--b1) / 0.85);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   border-top: 1px solid oklch(var(--bc) / 0.08);
 }
 
