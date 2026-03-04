@@ -331,7 +331,7 @@ export const getDailyInsight = async () => {
 };
 
 export const updateMood = async (mood) => {
-  const response = await axiosInstance.put("/bond/mood", mood);
+  const response = await axiosInstance.put("/bond/mood", { mood });
   return response.data;
 };
 
