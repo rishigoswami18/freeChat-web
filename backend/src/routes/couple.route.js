@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { calculateAge } from "../utils/dateUtils.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
+import { sendPushNotification } from "../lib/push.service.js";
 
 const router = express.Router();
 
@@ -71,6 +72,14 @@ router.put("/note", async (req, res) => {
                     ctaText: "Read the Note",
                     ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/couple`,
                 });
+
+                // Send push notification (fire-and-forget)
+                sendPushNotification(me.partnerId, {
+                    title: `💌 ${req.user.fullName.split(' ')[0]} left you a love note!`,
+                    body: `Your special someone wrote something just for you. Tap to read it!`,
+                    icon: req.user.profilePic,
+                    data: { url: "/couple" }
+                }).catch(err => console.error("[Push] Romantic note notification failed:", err.message));
             }
         }
     } catch (err) {

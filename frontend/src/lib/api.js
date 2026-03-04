@@ -315,6 +315,11 @@ export const buyVerification = async () => {
   return response.data;
 };
 
+export const saveFcmToken = async (token) => {
+  const response = await axiosInstance.put("/users/fcm-token", { token });
+  return response.data;
+};
+
 // ----------------- GEMS / MONETIZATION -----------------
 
 export const getWalletBalance = async () => {

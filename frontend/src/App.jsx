@@ -63,6 +63,20 @@ const App = () => {
     }
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (isAuthenticated && isOnboarded) {
+      const setupPush = async () => {
+        try {
+          const { requestNotificationPermission } = await import("./lib/firebase");
+          await requestNotificationPermission();
+        } catch (err) {
+          console.error("FCM Setup failed:", err);
+        }
+      };
+      setupPush();
+    }
+  }, [isAuthenticated, isOnboarded]);
+
   if (isLoading) return <PageLoader />;
 
   return (

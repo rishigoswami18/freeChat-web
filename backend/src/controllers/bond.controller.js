@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Question from "../models/Question.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
+import { sendPushNotification } from "../lib/push.service.js";
 
 const moodLabels = {
     happy: "😊 Happy", neutral: "😐 Neutral", sad: "😢 Sad",
@@ -79,6 +80,14 @@ export const updateMood = async (req, res) => {
                     ctaText: "Share Your Mood",
                     ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/couple`,
                 });
+
+                // Send push notification (fire-and-forget)
+                sendPushNotification(user.partnerId, {
+                    title: `💕 ${user.fullName.split(' ')[0]} shared their mood!`,
+                    body: `They are feeling ${moodText} right now. Tap to check in!`,
+                    icon: user.profilePic,
+                    data: { url: "/couple" }
+                }).catch(err => console.error("[Push] Mood notification failed:", err.message));
             }
         }
 

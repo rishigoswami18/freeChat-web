@@ -9,6 +9,7 @@ import {
 import cloudinary from "../lib/cloudinary.js";
 import User from "../models/User.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
+import { sendPushNotification } from "../lib/push.service.js";
 
 const router = express.Router();
 
@@ -103,6 +104,14 @@ router.post("/notify-message", protectRoute, async (req, res) => {
       ctaText: "Open Chat",
       ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/inbox`,
     });
+
+    // Send push notification (fire-and-forget)
+    sendPushNotification(recipientId, {
+      title: `💬 New message from ${req.user.fullName.split(' ')[0]}!`,
+      body: `They sent you a message on freeChat. Tap to reply!`,
+      icon: req.user.profilePic,
+      data: { url: "/inbox" }
+    }).catch(err => console.error("[Push] Message notification failed:", err.message));
 
     res.json({ sent: true });
   } catch (err) {

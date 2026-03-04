@@ -143,6 +143,19 @@ export async function sendFriendRequest(req, res) {
       ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/notifications`,
     });
 
+    // Send push notification (fire-and-forget)
+    try {
+      const { sendPushNotification } = await import("../lib/push.service.js");
+      sendPushNotification(recipientId, {
+        title: "👋 New Friend Request!",
+        body: `${req.user.fullName} wants to be your friend on freeChat!`,
+        icon: req.user.profilePic,
+        data: { url: "/notifications" }
+      });
+    } catch (pushErr) {
+      console.error("[Push] Request notification failed:", pushErr.message);
+    }
+
     res.status(201).json(friendRequest);
   } catch (error) {
     console.error("Error in sendFriendRequest controller", error.message);

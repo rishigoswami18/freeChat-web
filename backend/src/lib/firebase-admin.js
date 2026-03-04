@@ -26,4 +26,5 @@ try {
 }
 
 export const firebaseAuth = firebaseApp ? admin.auth() : null;
+export const firebaseMessaging = firebaseApp ? admin.messaging() : null;
 export default admin;
