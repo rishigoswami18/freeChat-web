@@ -391,6 +391,11 @@ export const broadcastEmail = async (subject, message) => {
   return response.data;
 };
 
+export const sweepPendingActions = async () => {
+  const response = await axiosInstance.post("/notifications/sweep-pending");
+  return response.data;
+};
+
 // ----------------- INVITE SYSTEM -----------------
 
 export const getFirebaseNonUsers = async () => {

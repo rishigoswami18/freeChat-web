@@ -31,7 +31,8 @@ import {
     deletePost,
     clearAdminInbox,
     getFirebaseNonUsers,
-    sendInvites
+    sendInvites,
+    sweepPendingActions
 } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,6 +50,7 @@ const AdminDashboard = () => {
     const [emailBody, setEmailBody] = useState("");
     const [isEmailSending, setIsEmailSending] = useState(false);
     const [isCleaning, setIsCleaning] = useState(false);
+    const [isSweeping, setIsSweeping] = useState(false);
 
     // Invite system state
     const [firebaseUsers, setFirebaseUsers] = useState([]);
@@ -209,6 +211,19 @@ const AdminDashboard = () => {
             toast.error("Cleanup failed");
         } finally {
             setIsCleaning(false);
+        }
+    };
+
+    const handleSweepPending = async () => {
+        if (!window.confirm("This will search for all users who have BOTH pending friend requests and unread messages, and send them a catch-up email. Proceed?")) return;
+        setIsSweeping(true);
+        try {
+            const res = await sweepPendingActions();
+            toast.success(res.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Sweep failed");
+        } finally {
+            setIsSweeping(false);
         }
     };
 
@@ -553,6 +568,40 @@ const AdminDashboard = () => {
                                             <>
                                                 <span className="font-black italic uppercase tracking-tighter text-lg">Send Mass Email</span>
                                                 <Send className="size-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Catch-up Sweep Section */}
+                            <div className="card bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-8 rounded-[40px] border-2 border-amber-500/10 shadow-xl shadow-amber-500/5 mt-8">
+                                <div className="text-center mb-6">
+                                    <div className="size-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/5">
+                                        <RefreshCcw className="size-8" />
+                                    </div>
+                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase">Activity Catch-up</h2>
+                                    <p className="text-[10px] font-bold opacity-40 mt-1 uppercase tracking-widest">WAKE UP INACTIVE USERS</p>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-white/5 rounded-2xl border border-dashed border-amber-500/20">
+                                        <p className="text-xs font-medium opacity-70 leading-relaxed text-center">
+                                            This tool identifies users who have <strong>unread messages</strong> AND <strong>pending requests</strong> but haven't logged in recently. It sends them a personalized "Rocket" email to bring them back.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={handleSweepPending}
+                                        disabled={isSweeping}
+                                        className="btn btn-warning btn-md w-full rounded-2xl gap-2 font-black uppercase text-xs tracking-widest active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+                                    >
+                                        {isSweeping ? (
+                                            <Loader2 className="size-4 animate-spin" />
+                                        ) : (
+                                            <>
+                                                <Sparkles className="size-4" />
+                                                Run Activity Sweep
                                             </>
                                         )}
                                     </button>

@@ -1,5 +1,7 @@
 import User from "../models/User.js";
+import FriendRequest from "../models/FriendRequest.js";
 import { streamClient } from "../lib/stream.js";
+import { sendNotificationEmail } from "../lib/email.service.js";
 
 /**
  * Broadcasts a system notification to all registered users via Stream Chat.
@@ -160,5 +162,80 @@ export const clearAdminChats = async (req, res) => {
     } catch (error) {
         console.error("Error in clearAdminChats:", error);
         res.status(500).json({ message: "Internal Server Error during cleanup" });
+    }
+};
+
+/**
+ * Sweeps all users and notifies those who have BOTH pending friend requests
+ * AND unread messages. This is an admin trigger to re-engage users.
+ */
+export const notifyPendingActions = async (req, res) => {
+    try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        if (!streamClient) {
+            return res.status(500).json({ message: "Stream service not initialized" });
+        }
+
+        console.log("🔍 Starting sweep for users with pending requests and unread messages...");
+
+        // 1. Get all pending friend requests grouped by recipient
+        const pendingReqs = await FriendRequest.find({ status: "pending" }).select("recipient").lean();
+        const usersWithPendingReqs = new Set(pendingReqs.map(r => r.recipient.toString()));
+
+        if (usersWithPendingReqs.size === 0) {
+            return res.status(200).json({ success: true, message: "No users with pending requests found." });
+        }
+
+        // 2. Fetch all users from MongoDB (only those with pending reqs to save time)
+        const users = await User.find({ _id: { $in: Array.from(usersWithPendingReqs) } }, "email fullName _id").lean();
+
+        const userIds = users.map(u => u._id.toString());
+
+        // 3. Query Stream for unread counts
+        // Note: Querying users returns the public profile. For total_unread_count, we might need a specific filter.
+        // Actually, as admin we can see unread counts for channels or use queryUsers.
+        const streamUsersResponse = await streamClient.queryUsers({ id: { $in: userIds } });
+        const streamUsersMap = new Map(streamUsersResponse.users.map(u => [u.id, u.total_unread_count || 0]));
+
+        let notifiedCount = 0;
+        let failCount = 0;
+
+        for (const user of users) {
+            const userId = user._id.toString();
+            const unreadCount = streamUsersMap.get(userId) || 0;
+
+            // Condition: Has pending friend request AND unread messages
+            if (unreadCount > 0) {
+                try {
+                    await sendNotificationEmail(user.email, {
+                        emoji: "🚀",
+                        title: "You have unread activity!",
+                        body: `Hey <strong>${user.fullName.split(' ')[0]}</strong>, you have <strong>${unreadCount} unread messages</strong> and <strong>pending friend requests</strong> waiting for you! Log in now to catch up.`,
+                        ctaText: "Open Inbox",
+                        ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/inbox`
+                    });
+                    notifiedCount++;
+                    // Rate limiting sleep to avoid SMTP pressure
+                    await new Promise(r => setTimeout(r, 300));
+                } catch (err) {
+                    console.error(`  ❌ Failed to notify ${user.email}:`, err.message);
+                    failCount++;
+                }
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Sweep complete. Notified ${notifiedCount} users. Errors: ${failCount}`,
+            scanned: users.length,
+            notified: notifiedCount
+        });
+
+    } catch (error) {
+        console.error("Error in notifyPendingActions:", error);
+        res.status(500).json({ message: "Internal Server Error during sweep" });
     }
 };
