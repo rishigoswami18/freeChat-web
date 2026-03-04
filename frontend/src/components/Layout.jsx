@@ -22,7 +22,7 @@ const Layout = ({ children, showSidebar = false, showFooter = true, showNavbar =
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className={`flex-1 flex flex-col ${showNavbar ? "pt-14 lg:pt-16" : "pt-0"} ${showFooter ? "pb-20 lg:pb-0" : ""}`}
+          className={`flex-1 flex flex-col pt-14 lg:pt-0 ${showFooter ? "pb-20 lg:pb-0" : ""}`}
         >
           {children}
         </motion.main>

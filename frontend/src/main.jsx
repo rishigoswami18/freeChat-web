@@ -10,20 +10,39 @@ import 'stream-chat-react/dist/css/v2/index.css';
 import "./index.css";
 import App from "./App.jsx";
 
-// ❌ OLD: import { BrowserRouter } from "react-router";
-// ✅ NEW: 
 import { BrowserRouter } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </BrowserRouter>
-  </StrictMode>
-);
+// Global error handlers to catch silent crashes
+window.addEventListener('error', (event) => {
+  console.error('🔴 GLOBAL ERROR:', event.error?.message || event.message, event.error?.stack);
+  document.getElementById('root').innerHTML = `<div style="padding:40px;font-family:monospace;color:red;"><h2>App Crashed</h2><pre>${event.error?.message || event.message}\n${event.error?.stack || ''}</pre></div>`;
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('🔴 UNHANDLED PROMISE:', event.reason);
+});
+
+console.log("🚀 Initializing BondBeyond App...");
+
+try {
+  const root = createRoot(document.getElementById("root"));
+  console.log("✅ React root created");
+
+  root.render(
+    <StrictMode>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </BrowserRouter>
+    </StrictMode>
+  );
+  console.log("✅ React render called");
+} catch (err) {
+  console.error("🔴 FATAL: React failed to mount:", err);
+  document.getElementById('root').innerHTML = `<div style="padding:40px;font-family:monospace;color:red;"><h2>Mount Failed</h2><pre>${err.message}\n${err.stack}</pre></div>`;
+}

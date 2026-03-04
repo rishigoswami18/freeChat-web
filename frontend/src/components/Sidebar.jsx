@@ -47,24 +47,24 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   return (
-    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen sticky top-0 font-outfit">
+    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen fixed top-0 left-0 font-outfit z-40">
       {/* Brand */}
       <div className="px-5 py-5 border-b border-base-300/50">
         <Logo className="size-9" fontSize="text-2xl" />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
         {navItems.map(({ to, icon: Icon, label }) => {
           const isActive = currentPath === to;
           return (
             <Link
               key={to}
               to={to}
-              className={`sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+              className={`sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group/navlink
                 ${isActive
-                  ? "sidebar-link-active bg-primary/10 text-primary font-semibold"
-                  : "text-base-content/70 hover:text-base-content hover:bg-base-300/50"
+                  ? "sidebar-link-active bg-primary/10 text-primary font-semibold shadow-sm shadow-primary/5"
+                  : "text-base-content/70 hover:text-base-content hover:bg-base-300/50 hover:translate-x-0.5"
                 }`}
             >
               <div className="relative">
@@ -83,7 +83,7 @@ const Sidebar = () => {
                   </span>
                 )}
               </div>
-              <span>{label}</span>
+              <span className="group-hover/navlink:translate-x-0.5 transition-transform duration-200">{label}</span>
               {isActive && (
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
               )}
@@ -140,7 +140,7 @@ const Sidebar = () => {
             <img
               src={authUser?.profilePic || "/avatar.png"}
               alt="Profile"
-              className="size-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary transition-all cursor-pointer"
+              className="size-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all cursor-pointer"
             />
             <div className="absolute bottom-0 right-0 size-3 bg-success rounded-full border-2 border-base-100" />
           </div>

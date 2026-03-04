@@ -183,9 +183,12 @@ const InboxPage = () => {
                         <p className="font-bold uppercase tracking-widest text-xs">Loading chats...</p>
                     </div>
                 ) : filtered.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 opacity-30 gap-3">
-                        <MessageSquare className="size-12" />
-                        <p className="font-bold uppercase tracking-widest text-xs font-black">No active chats</p>
+                    <div className="flex flex-col items-center justify-center py-32 gap-4">
+                        <div className="empty-state-icon">
+                            <MessageSquare className="size-8 text-primary/50" />
+                        </div>
+                        <p className="font-bold uppercase tracking-widest text-xs opacity-30">No active chats</p>
+                        <p className="text-xs opacity-40 max-w-xs text-center">Start a conversation from your Friends page</p>
                     </div>
                 ) : (
                     <div className="flex flex-col divide-y divide-base-content/5">
@@ -193,7 +196,7 @@ const InboxPage = () => {
                             <Link
                                 key={conv.id}
                                 to={`/chat/${conv.targetUserId}`}
-                                className="group flex items-center gap-4 px-4 py-5 hover:bg-base-200/50 transition-all active:bg-base-200"
+                                className="group flex items-center gap-4 px-4 py-5 hover:bg-base-200/50 transition-all active:bg-base-200 stagger-item rounded-xl mx-1 hover:scale-[1.005]"
                             >
                                 <div className="relative flex-shrink-0" onClick={(e) => {
                                     e.stopPropagation();

@@ -114,10 +114,11 @@ const ProfilePage = () => {
 
     return (
         <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-8 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-2 section-heading">
                 <User className="text-primary" />
                 Update Profile
             </h1>
+            <p className="text-sm opacity-50 mt-4">Customize your profile and make it uniquely yours</p>
 
             {authUser?.username && (
                 <div className="mb-8 p-4 bg-base-200 rounded-2xl border border-primary/10 flex flex-col gap-4">
@@ -150,9 +151,9 @@ const ProfilePage = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 mt-8">
                 {/* Profile Picture Section */}
-                <div className="flex flex-col items-center gap-4 mb-8">
+                <div className="flex flex-col items-center gap-4 mb-8 profile-cover-gradient rounded-2xl py-10 px-4 relative">
                     <div className="relative group">
                         <div className="avatar">
                             <div
@@ -326,8 +327,9 @@ const ProfilePage = () => {
                 </div>
             </form>
 
-            <div className="mt-12 pt-8 border-t">
-                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+            <div className="mt-12 pt-8">
+                <div className="section-divider" />
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2 section-heading">
                     <Shield className="text-secondary" />
                     Stealth Mode Settings
                 </h2>
@@ -411,8 +413,9 @@ const ProfilePage = () => {
                 </div>
             </div>
 
-            <div className="mt-12 pt-8 border-t">
-                <h2 className="text-2xl font-black mb-6 flex items-center gap-3 italic tracking-tight uppercase">
+            <div className="mt-12 pt-8">
+                <div className="section-divider" />
+                <h2 className="text-2xl font-black mb-6 flex items-center gap-3 italic tracking-tight uppercase section-heading">
                     <Grid className="text-primary size-7" />
                     Your Posts
                 </h2>

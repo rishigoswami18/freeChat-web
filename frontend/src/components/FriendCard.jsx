@@ -7,13 +7,13 @@ import { LANGUAGE_TO_FLAG } from "../constants";
 const FriendCard = ({ friend }) => {
   const [viewingDP, setViewingDP] = useState(null);
   return (
-    <div className="card bg-base-200/80 border border-base-300/50 card-hover rounded-2xl overflow-hidden">
+    <div className="card bg-base-200/80 border border-base-300/50 hover:border-primary/20 card-hover rounded-2xl overflow-hidden group/friendcard transition-all duration-300">
       <div className="card-body p-4">
         {/* USER INFO */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative">
             <div
-              className="avatar w-12 h-12 rounded-full overflow-hidden ring-2 ring-base-300 cursor-pointer active:scale-95 transition-transform"
+              className="avatar w-12 h-12 rounded-full overflow-hidden ring-2 ring-base-300 group-hover/friendcard:ring-primary/30 transition-all cursor-pointer active:scale-95"
               onClick={() => setViewingDP({ url: friend.profilePic, name: friend.fullName })}
             >
               <img
@@ -47,7 +47,7 @@ const FriendCard = ({ friend }) => {
 
         <Link
           to={`/chat/${friend._id}`}
-          className="btn btn-primary btn-sm w-full rounded-xl gap-2 shadow-sm shadow-primary/20 hover:shadow-primary/30 transition-shadow"
+          className="btn btn-primary btn-sm w-full rounded-xl gap-2 shadow-sm shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] transition-all duration-300"
         >
           <MessageCircle className="size-4" />
           Message

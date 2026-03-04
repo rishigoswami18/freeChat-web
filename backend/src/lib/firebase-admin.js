@@ -9,6 +9,9 @@ let firebaseApp;
 try {
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+        if (serviceAccount.private_key) {
+            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+        }
         firebaseApp = admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
         });

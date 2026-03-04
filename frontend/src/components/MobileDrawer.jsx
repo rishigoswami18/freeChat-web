@@ -226,11 +226,11 @@ const MobileDrawer = () => {
               <Link
                 key={to}
                 to={to}
-                className={`relative flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 active:scale-90 ${isActive ? "text-primary" : "text-base-content/40"
+                className={`relative flex flex-col items-center gap-0.5 py-2 px-4 rounded-2xl transition-all duration-200 active:scale-90 ${isActive ? "text-primary bg-primary/8" : "text-base-content/40"
                   }`}
               >
                 {isActive && (
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-primary rounded-full" />
+                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-7 h-1 bg-primary rounded-full shadow-sm shadow-primary/40" />
                 )}
                 <div className="relative">
                   <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />

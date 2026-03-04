@@ -129,9 +129,10 @@ const LoginPage = () => {
 
         {/* IMAGE SECTION */}
         <div className="hidden lg:flex w-full lg:w-1/2 bg-gradient-to-br from-primary/5 via-primary/10 to-secondary/5 items-center justify-center relative overflow-hidden">
-          {/* Decorative blobs */}
-          <div className="absolute top-10 right-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 left-10 w-40 h-40 bg-secondary/10 rounded-full blur-3xl" />
+          {/* Animated decorative blobs */}
+          <div className="absolute top-10 right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 bg-secondary/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-accent/5 rounded-full blur-[100px]" />
 
           <div className="max-w-md p-8 relative z-10">
             <div className="relative aspect-square max-w-sm mx-auto">
@@ -142,14 +143,21 @@ const LoginPage = () => {
               />
             </div>
 
-            <div className="text-center space-y-3 mt-6">
+            <div className="text-center space-y-4 mt-6">
               <h2 className="text-xl font-bold">
                 Connect with people worldwide
               </h2>
-              <p className="opacity-60 text-sm leading-relaxed">
+              <p className="opacity-50 text-sm leading-relaxed">
                 Secure messaging, crystal-clear video calls, and a community
                 built on real connection
               </p>
+
+              {/* Feature badges */}
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
+                <span className="badge badge-sm badge-outline gap-1 py-2.5"><span className="text-primary">✦</span> Free Messaging</span>
+                <span className="badge badge-sm badge-outline gap-1 py-2.5"><span className="text-primary">✦</span> HD Video</span>
+                <span className="badge badge-sm badge-outline gap-1 py-2.5"><span className="text-primary">✦</span> Community</span>
+              </div>
             </div>
           </div>
         </div>

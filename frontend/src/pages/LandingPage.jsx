@@ -16,7 +16,9 @@ import {
     Languages,
     Film,
     Smartphone,
-    Crown
+    Crown,
+    Zap,
+    ChevronRight,
 } from "lucide-react";
 import Logo from "../components/Logo";
 import AdSense from "../components/AdSense";
@@ -30,91 +32,105 @@ const fadeUp = {
     }),
 };
 
+const staggerContainer = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+};
+
 const features = [
     {
         icon: MessageCircle,
-        title: "Free Real-Time Messaging",
+        title: "Real-Time Messaging",
         description:
-            "Send unlimited messages instantly. freeChat delivers fast, reliable, and secure messaging — always free.",
-        color: "text-blue-400",
+            "Send unlimited messages instantly with fast, reliable, and secure delivery — always free.",
+        gradient: "from-blue-500/20 to-cyan-500/20",
+        iconColor: "text-blue-400",
     },
     {
         icon: Video,
         title: "HD Video Calls",
         description:
-            "Crystal-clear video calls with friends, groups, or new connections. No limits, no fees.",
-        color: "text-green-400",
+            "Crystal-clear video calls with friends or groups. No limits, no fees, just connection.",
+        gradient: "from-green-500/20 to-emerald-500/20",
+        iconColor: "text-green-400",
     },
     {
         icon: Image,
         title: "Photo Sharing & Posts",
         description:
-            "Share your moments through beautiful posts with your community. Express yourself freely.",
-        color: "text-pink-400",
+            "Share moments through beautiful posts with your community. Express yourself freely.",
+        gradient: "from-pink-500/20 to-rose-500/20",
+        iconColor: "text-pink-400",
     },
     {
         icon: Film,
         title: "Reels & Stories",
         description:
-            "Create and watch short-form reels and stories. Entertainment and self-expression at your fingertips.",
-        color: "text-purple-400",
+            "Create and watch short-form reels and stories. Entertainment and self-expression combined.",
+        gradient: "from-purple-500/20 to-violet-500/20",
+        iconColor: "text-purple-400",
     },
     {
         icon: Shield,
-        title: "Stealth Mode Hidden Chat App",
+        title: "Stealth Mode",
         description:
-            "Activate Stealth Mode to instantly hide your screen. The perfect hidden chat app and cool couple app for the couple whose parent are strict.",
-        color: "text-yellow-400",
+            "Activate Stealth Mode to instantly hide your screen — the ultimate privacy companion for your relationship.",
+        gradient: "from-yellow-500/20 to-amber-500/20",
+        iconColor: "text-yellow-400",
     },
     {
         icon: Languages,
         title: "Language Exchange",
         description:
             "Connect with native speakers worldwide. Learn languages naturally through real conversation.",
-        color: "text-cyan-400",
+        gradient: "from-cyan-500/20 to-teal-500/20",
+        iconColor: "text-cyan-400",
     },
     {
         icon: Gamepad2,
         title: "Fun Games",
         description:
             "Play compatibility quizzes and interactive games with friends. Make connections fun!",
-        color: "text-orange-400",
+        gradient: "from-orange-500/20 to-red-500/20",
+        iconColor: "text-orange-400",
     },
     {
         icon: Heart,
-        title: "Romantic Note App & Couple Profiles",
+        title: "Couple Profiles & Notes",
         description:
-            "A dedicated romantic note app or website feature. Create shared couple profiles, play games, and celebrate your connection.",
-        color: "text-red-400",
+            "Create shared couple profiles, play relationship games, and celebrate your connection together.",
+        gradient: "from-red-500/20 to-pink-500/20",
+        iconColor: "text-red-400",
     },
     {
         icon: Sparkles,
         title: "AI Emotion Detection",
         description:
-            "Our AI understands the emotion behind your messages, making conversations more meaningful.",
-        color: "text-indigo-400",
+            "Our AI understands the emotion behind your messages, making every conversation more meaningful.",
+        gradient: "from-indigo-500/20 to-blue-500/20",
+        iconColor: "text-indigo-400",
     },
 ];
 
 const stats = [
-    { value: "1K+", label: "Active Users" },
-    { value: "Free", label: "Forever" },
-    { value: "HD", label: "Video Calls" },
-    { value: "24/7", label: "Available" },
+    { value: "1K+", label: "Active Users", icon: Users },
+    { value: "Free", label: "Forever", icon: Zap },
+    { value: "HD", label: "Video Calls", icon: Video },
+    { value: "24/7", label: "Available", icon: Globe },
 ];
 
 const LandingPage = () => {
     return (
         <div className="min-h-screen bg-base-100" data-theme="forest">
             {/* ===== NAVIGATION ===== */}
-            <nav className="navbar bg-base-100/80 backdrop-blur-lg border-b border-base-300 sticky top-0 z-50">
+            <nav className="navbar bg-base-100/80 backdrop-blur-lg border-b border-base-300/50 sticky top-0 z-50">
                 <div className="container mx-auto flex items-center justify-between px-4">
                     <Logo className="size-8" fontSize="text-2xl" />
                     <div className="flex items-center gap-3">
-                        <Link to="/login" className="btn btn-ghost btn-sm">
+                        <Link to="/login" className="btn btn-ghost btn-sm rounded-xl hover:bg-base-200 transition-all">
                             Login
                         </Link>
-                        <Link to="/signup" className="btn btn-primary btn-sm">
+                        <Link to="/signup" className="btn btn-primary btn-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
                             Sign Up Free
                         </Link>
                     </div>
@@ -123,8 +139,13 @@ const LandingPage = () => {
 
             {/* ===== HERO SECTION ===== */}
             <header className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
-                <div className="container mx-auto px-4 py-16 sm:py-24 lg:py-32 relative">
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 animated-gradient-bg" />
+                {/* Decorative blobs */}
+                <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-[100px]" />
+                <div className="absolute bottom-10 right-10 w-96 h-96 bg-secondary/8 rounded-full blur-[120px]" />
+
+                <div className="container mx-auto px-4 py-20 sm:py-28 lg:py-36 relative">
                     <div className="max-w-4xl mx-auto text-center">
                         <motion.div
                             initial="hidden"
@@ -132,9 +153,10 @@ const LandingPage = () => {
                             variants={fadeUp}
                             custom={0}
                         >
-                            <span className="badge badge-primary badge-outline badge-lg mb-6 gap-2">
+                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-semibold mb-8">
                                 <Sparkles className="size-4" />
                                 100% Free — No Hidden Charges
+                                <ChevronRight className="size-3.5 opacity-60" />
                             </span>
                         </motion.div>
 
@@ -151,20 +173,21 @@ const LandingPage = () => {
                             <div className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 -mt-1 mb-4 flex justify-center">
                                 Powered by freechatweb.in
                             </div>
-                            <span className="text-base-content text-3xl sm:text-4xl lg:text-5xl">
-                                Your Relationship, Stronger Every Day.
+                            <span className="text-base-content text-3xl sm:text-4xl lg:text-5xl block mt-2">
+                                Your Relationship, <br className="hidden sm:block" />Stronger Every Day.
                             </span>
                         </motion.h1>
 
                         <motion.p
-                            className="text-lg sm:text-xl opacity-80 mb-8 max-w-2xl mx-auto leading-relaxed"
+                            className="text-lg sm:text-xl opacity-70 mb-10 max-w-2xl mx-auto leading-relaxed"
                             initial="hidden"
                             animate="visible"
                             variants={fadeUp}
                             custom={2}
                         >
-                            <strong>freechatweb</strong> is the ultimate <strong>couple app with game</strong> and social network. Featuring
-                            <strong> BondBeyond</strong> technology — a cool couple app that makes your relationship strong. Express feelings, leave notes in our romantic note app feature, and communicate privately.
+                            The ultimate social app for couples and friends. Chat freely,
+                            make video calls, share reels, play games, and build deeper
+                            connections — all in one beautiful platform.
                         </motion.p>
 
                         <motion.div
@@ -176,12 +199,12 @@ const LandingPage = () => {
                         >
                             <Link
                                 to="/signup"
-                                className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 rounded-2xl"
+                                className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 rounded-2xl hover:shadow-primary/40 hover:scale-[1.02] transition-all duration-300"
                             >
                                 Start Chatting Today
                                 <ArrowRight className="size-5" />
                             </Link>
-                            <Link to="/login" className="btn btn-outline btn-lg gap-2 rounded-2xl">
+                            <Link to="/login" className="btn btn-outline btn-lg gap-2 rounded-2xl hover:scale-[1.02] transition-all duration-300">
                                 <Users className="size-5" />
                                 I Already Have an Account
                             </Link>
@@ -191,23 +214,26 @@ const LandingPage = () => {
             </header>
 
             {/* ===== STATS ROW ===== */}
-            <section className="py-12 border-y border-base-300 bg-base-200/50">
+            <section className="py-14 border-y border-base-300/50 bg-base-200/30">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, i) => (
                             <motion.div
                                 key={i}
-                                className="text-center"
+                                className="text-center group"
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true }}
                                 variants={fadeUp}
                                 custom={i}
                             >
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/10 mb-3 group-hover:scale-110 transition-transform">
+                                    <stat.icon className="size-5 text-primary" />
+                                </div>
                                 <div className="text-3xl sm:text-4xl font-extrabold text-primary">
                                     {stat.value}
                                 </div>
-                                <div className="text-sm opacity-70 mt-1">{stat.label}</div>
+                                <div className="text-sm opacity-60 mt-1 font-medium">{stat.label}</div>
                             </motion.div>
                         ))}
                     </div>
@@ -215,7 +241,7 @@ const LandingPage = () => {
             </section>
 
             {/* ===== WHAT IS FREECHAT ===== */}
-            <section className="py-16 sm:py-24">
+            <section className="py-20 sm:py-28">
                 <div className="container mx-auto px-4">
                     <motion.div
                         className="text-center max-w-3xl mx-auto mb-16"
@@ -224,20 +250,21 @@ const LandingPage = () => {
                         viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                            What is <span className="text-primary">freechatweb</span>?
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-4 section-heading section-heading-center">
+                            What is <span className="text-primary">BondBeyond</span>?
                         </h2>
-                        <p className="text-lg opacity-80 leading-relaxed">
-                            <strong>freechat</strong> is a free messenger, <strong>bondbeyond app that make relationship strong</strong>, and hidden chat app rolled into one.
-                            It is built for real human connection. Whether you're using our <strong>cool couple app</strong> features, playing a <strong>couple app with game</strong>,
-                            using it as an <strong>app for the couple whose parent are strict</strong> through Stealth Mode, or sharing a <strong>romantic note</strong> to your partner, freechatweb is where real bonds happen.
+                        <p className="text-lg opacity-70 leading-relaxed mt-6">
+                            BondBeyond is a free social platform built for real human connection.
+                            Whether you're chatting with friends, playing couple games,
+                            sharing stories, or learning a new language — BondBeyond makes
+                            every interaction meaningful.
                         </p>
                     </motion.div>
                 </div>
             </section>
 
             {/* ===== FEATURES GRID ===== */}
-            <section className="py-16 sm:py-24 bg-base-200/30">
+            <section className="py-20 sm:py-28 bg-base-200/20">
                 <div className="container mx-auto px-4">
                     <motion.div
                         className="text-center mb-16"
@@ -246,81 +273,64 @@ const LandingPage = () => {
                         viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-4 section-heading section-heading-center">
                             Everything You Need,{" "}
                             <span className="text-primary">Totally Free</span>
                         </h2>
-                        <p className="text-lg opacity-70 max-w-2xl mx-auto">
-                            freeChat is packed with features that other apps charge for. Here,
-                            it's all free, forever.
+                        <p className="text-lg opacity-60 max-w-2xl mx-auto mt-6">
+                            Packed with features that other apps charge for.
+                            Here, it's all free — forever.
                         </p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <motion.div
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
                         {features.map((feature, i) => (
                             <motion.div
                                 key={i}
-                                className="card bg-base-100 shadow-md hover:shadow-xl border border-base-300 transition-all duration-300 hover:-translate-y-1"
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
+                                className="card bg-base-100 shadow-md hover:shadow-xl border border-base-300/50 transition-all duration-300 hover:-translate-y-1 group overflow-hidden"
                                 variants={fadeUp}
-                                custom={i}
                             >
                                 <div className="card-body">
-                                    <feature.icon
-                                        className={`size-10 ${feature.color} mb-2`}
-                                    />
+                                    <div className={`feature-icon-wrap bg-gradient-to-br ${feature.gradient} mb-3`}>
+                                        <feature.icon
+                                            className={`size-6 ${feature.iconColor}`}
+                                        />
+                                    </div>
                                     <h3 className="card-title text-lg">{feature.title}</h3>
-                                    <p className="opacity-70 text-sm">{feature.description}</p>
+                                    <p className="opacity-60 text-sm leading-relaxed">{feature.description}</p>
                                 </div>
+                                {/* Hover accent line */}
+                                <div className="h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-primary to-secondary transition-all duration-500" />
                             </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
-            {/* Landing Page Ad Break */}
-            <section className="py-12 bg-base-100 overflow-hidden">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto bg-base-200/50 rounded-[2.5rem] p-8 border border-base-300 relative">
-                        <div className="flex flex-col md:flex-row items-center gap-8">
-                            <div className="flex-1 space-y-4">
-                                <div className="badge badge-primary gap-2 p-3 font-bold">
-                                    <Crown className="size-3" />
-                                    Ad Partner
-                                </div>
-                                <h3 className="text-2xl font-bold italic uppercase tracking-tight">Support freeChat</h3>
-                                <p className="opacity-70 text-sm">
-                                    We keep freeChat free for everyone through community support and relevant ads.
-                                    Want to go ad-free? Join our premium membership!
-                                </p>
-                                <Link to="/membership" className="btn btn-primary btn-sm rounded-xl">Upgrade to Premium</Link>
-                            </div>
-                            <div className="w-full md:w-auto min-w-[300px] flex justify-center">
-                                <AdSense slot="5566778899" format="rectangle" responsive="true" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* Ad Break Removed */}
 
             {/* ===== WHY FREECHAT ===== */}
-            <section className="py-16 sm:py-24">
+            <section className="py-20 sm:py-28">
                 <div className="container mx-auto px-4">
                     <motion.div
-                        className="text-center max-w-3xl mx-auto mb-12"
+                        className="text-center max-w-3xl mx-auto mb-14"
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                            Why Choose <span className="text-primary">freeChat</span>?
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-4 section-heading section-heading-center">
+                            Why Choose <span className="text-primary">BondBeyond</span>?
                         </h2>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                         {[
                             {
                                 icon: Eye,
@@ -330,7 +340,7 @@ const LandingPage = () => {
                             {
                                 icon: Shield,
                                 title: "Your Data Stays Yours",
-                                desc: "We don't sell your data. freeChat is built on trust and user privacy.",
+                                desc: "We don't sell your data. BondBeyond is built on trust and user privacy.",
                             },
                             {
                                 icon: Globe,
@@ -340,24 +350,24 @@ const LandingPage = () => {
                             {
                                 icon: Star,
                                 title: "Premium Features, Zero Cost",
-                                desc: "What other apps lock behind paywalls, freeChat gives you for free. Always.",
+                                desc: "What other apps lock behind paywalls, BondBeyond gives you for free. Always.",
                             },
                         ].map((item, i) => (
                             <motion.div
                                 key={i}
-                                className="flex gap-4 items-start"
+                                className="flex gap-4 items-start p-5 rounded-2xl bg-base-200/40 border border-base-300/40 hover:border-primary/20 hover:bg-base-200/70 transition-all duration-300 group"
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true }}
                                 variants={fadeUp}
                                 custom={i}
                             >
-                                <div className="bg-primary/10 p-3 rounded-xl flex-shrink-0">
+                                <div className="bg-primary/10 p-3 rounded-xl flex-shrink-0 group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
                                     <item.icon className="size-6 text-primary" />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg mb-1">{item.title}</h3>
-                                    <p className="opacity-70 text-sm">{item.desc}</p>
+                                    <p className="opacity-60 text-sm leading-relaxed">{item.desc}</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -366,8 +376,12 @@ const LandingPage = () => {
             </section>
 
             {/* ===== CTA SECTION ===== */}
-            <section className="py-16 sm:py-24 bg-gradient-to-r from-primary/10 via-accent/5 to-secondary/10">
-                <div className="container mx-auto px-4 text-center">
+            <section className="py-20 sm:py-28 relative overflow-hidden">
+                <div className="absolute inset-0 animated-gradient-bg" />
+                <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
+                <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-secondary/10 rounded-full blur-[100px]" />
+
+                <div className="container mx-auto px-4 text-center relative">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -375,15 +389,15 @@ const LandingPage = () => {
                         variants={fadeUp}
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                            Ready to Try <span className="text-primary">freeChat</span>?
+                            Ready to Try <span className="text-primary">BondBeyond</span>?
                         </h2>
-                        <p className="text-lg opacity-80 mb-8 max-w-xl mx-auto">
-                            Join thousands of people who've switched to freeChat for real,
-                            meaningful connections. It's free. It's fast. It's you.
+                        <p className="text-lg opacity-70 mb-10 max-w-xl mx-auto leading-relaxed">
+                            Join thousands of people who've switched to BondBeyond for real,
+                            meaningful connections. It's free. It's fast. It's yours.
                         </p>
                         <Link
                             to="/signup"
-                            className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25"
+                            className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 rounded-2xl hover:shadow-primary/40 hover:scale-[1.02] transition-all duration-300"
                         >
                             Create Your Free Account
                             <ArrowRight className="size-5" />
@@ -393,16 +407,16 @@ const LandingPage = () => {
             </section>
 
             {/* ===== FOOTER ===== */}
-            <footer className="py-12 border-t border-base-300 bg-base-200/50">
+            <footer className="py-14 border-t border-base-300/50 bg-base-200/30">
                 <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                         <div>
-                            <div className="mb-3">
+                            <div className="mb-4">
                                 <Logo className="size-6" fontSize="text-xl" />
                             </div>
-                            <p className="text-sm opacity-70 max-w-xs mb-4">
-                                freeChat is a free chat app and social networking platform for
-                                real human connection. Messaging, video calls, reels, and more.
+                            <p className="text-sm opacity-60 max-w-xs mb-5 leading-relaxed">
+                                BondBeyond is a free social platform for
+                                real human connection — messaging, video calls, reels, and more.
                             </p>
                             <div className="flex flex-col gap-1">
                                 <p className="text-[10px] uppercase font-black tracking-widest opacity-40">Founded & Owned by</p>
@@ -411,25 +425,25 @@ const LandingPage = () => {
                         </div>
 
                         <div>
-                            <h4 className="font-bold mb-3">Quick Links</h4>
-                            <ul className="space-y-2 text-sm opacity-70">
+                            <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-50">Quick Links</h4>
+                            <ul className="space-y-3 text-sm opacity-70">
                                 <li>
-                                    <Link to="/about" className="hover:text-primary transition">
+                                    <Link to="/about" className="hover:text-primary transition-colors link-hover-underline">
                                         About Us
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/signup" className="hover:text-primary transition">
+                                    <Link to="/signup" className="hover:text-primary transition-colors link-hover-underline">
                                         Sign Up
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/login" className="hover:text-primary transition">
+                                    <Link to="/login" className="hover:text-primary transition-colors link-hover-underline">
                                         Login
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/contact" className="hover:text-primary transition">
+                                    <Link to="/contact" className="hover:text-primary transition-colors link-hover-underline">
                                         Contact Us
                                     </Link>
                                 </li>
@@ -448,25 +462,25 @@ const LandingPage = () => {
                         </div>
 
                         <div>
-                            <h4 className="font-bold mb-3">Legal</h4>
-                            <ul className="space-y-2 text-sm opacity-70">
+                            <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-50">Legal</h4>
+                            <ul className="space-y-3 text-sm opacity-70">
                                 <li>
                                     <Link
                                         to="/privacy-policy"
-                                        className="hover:text-primary transition"
+                                        className="hover:text-primary transition-colors link-hover-underline"
                                     >
                                         Privacy Policy
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link to="/terms" className="hover:text-primary transition">
+                                    <Link to="/terms" className="hover:text-primary transition-colors link-hover-underline">
                                         Terms of Service
                                     </Link>
                                 </li>
                                 <li>
                                     <Link
                                         to="/refund-policy"
-                                        className="hover:text-primary transition"
+                                        className="hover:text-primary transition-colors link-hover-underline"
                                     >
                                         Refund Policy
                                     </Link>
@@ -475,10 +489,10 @@ const LandingPage = () => {
                         </div>
                     </div>
 
-                    <div className="divider my-8" />
-                    <div className="text-center text-sm opacity-60">
+                    <div className="section-divider" />
+                    <div className="text-center text-sm opacity-50">
                         <p>
-                            © {new Date().getFullYear()} freeChat — freechatweb.in | Free Chat
+                            © {new Date().getFullYear()} BondBeyond — freechatweb.in | Free Chat
                             App for Messaging, Video Calls & Social Networking
                         </p>
                     </div>

@@ -11,7 +11,6 @@ import {
     getMembershipStatus,
     updateRomanticNote,
     buyVerification,
-    purchaseGems,
     getDailyInsight,
     updateMood,
 } from "../lib/api";

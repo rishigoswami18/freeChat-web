@@ -53,15 +53,22 @@ const HomePage = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto space-y-10">
-        {/* Logo */}
-        <Logo className="size-10" fontSize="text-3xl" />
-
+        {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Friends</h2>
-          <Link to="/notifications" className="btn btn-outline btn-sm">
-            <Users className="mr-2 size-4" />
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Welcome back <span className="opacity-80">👋</span>
+            </h1>
+            <p className="text-sm opacity-50 mt-1">See what's happening with your friends</p>
+          </div>
+          <Link to="/notifications" className="btn btn-outline btn-sm rounded-xl gap-2 hover:scale-[1.02] transition-transform">
+            <Users className="size-4" />
             Friend Requests
           </Link>
+        </div>
+
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading mb-6">Your Friends</h2>
         </div>
 
         {loadingFriends ? (
@@ -72,27 +79,22 @@ const HomePage = () => {
           <NoFriendsFound />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {friends.map((friend) => (
-              <FriendCard key={friend._id} friend={friend} />
+            {friends.map((friend, idx) => (
+              <div key={friend._id} className="stagger-item">
+                <FriendCard friend={friend} />
+              </div>
             ))}
           </div>
         )}
 
-        {/* Home Page Banner Ad */}
-        <section className="bg-base-200/50 rounded-3xl p-4 border border-base-content/5 overflow-hidden">
-          <div className="flex justify-between items-center mb-2 px-2">
-            <span className="text-[10px] font-black uppercase opacity-30 tracking-widest">Sponsored</span>
-            <Link to="/membership" className="text-[10px] text-primary font-bold hover:underline">Remove Ads</Link>
-          </div>
-          <AdSense slot="1234567890" format="horizontal" responsive="true" />
-        </section>
+        {/* Sponsored content temporary hidden to fix layout */}
 
         <section>
           <div className="mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Meet New Learners</h2>
-                <p className="opacity-70">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading">Meet New Learners</h2>
+                <p className="opacity-60 text-sm mt-4">
                   Discover perfect language exchange partners based on your profile
                 </p>
               </div>
@@ -112,13 +114,13 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recommendedUsers.map((user) => {
+              {recommendedUsers.map((user, idx) => {
                 const hasRequestBeenSent = outgoingRequestsIds.has(user._id);
 
                 return (
                   <div
                     key={user._id}
-                    className="card bg-base-200 hover:shadow-lg transition-all duration-300"
+                    className="card bg-base-200 hover:shadow-lg transition-all duration-300 stagger-item border border-transparent hover:border-primary/10"
                   >
                     <div className="card-body p-5 space-y-4">
                       <div className="flex items-center gap-3">

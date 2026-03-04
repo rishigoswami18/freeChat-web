@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 
 const AdSense = ({ slot, style = { display: 'block' }, format = 'auto', responsive = 'true' }) => {
+    // Temporarily disabled to debug blank screen issue
+    return null;
+
     useEffect(() => {
         try {
             (window.adsbygoogle = window.adsbygoogle || []).push({});

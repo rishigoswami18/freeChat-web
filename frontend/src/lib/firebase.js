@@ -11,8 +11,13 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+let app;
+if (firebaseConfig.projectId) {
+    app = initializeApp(firebaseConfig);
+} else {
+    console.warn("[FCM] Firebase initialization skipped: Missing project configuration.");
+}
+const messaging = app ? getMessaging(app) : null;
 
 export const requestNotificationPermission = async () => {
     try {

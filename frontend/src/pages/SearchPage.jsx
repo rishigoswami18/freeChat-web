@@ -112,8 +112,8 @@ const SearchPage = () => {
                     ))
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                        <div className="size-20 bg-base-200 rounded-full flex items-center justify-center opacity-50">
-                            <Search className="size-10 text-base-content/40" />
+                        <div className="empty-state-icon">
+                            <Search className="size-8 text-primary/50" />
                         </div>
                         <div className="space-y-1">
                             <p className="text-lg font-bold text-base-content/60">No users found</p>

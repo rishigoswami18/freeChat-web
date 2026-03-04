@@ -25,7 +25,7 @@ const NotificationsPage = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto max-w-4xl space-y-8">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">Notifications</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-8 section-heading">Notifications</h1>
 
         {isLoading ? (
           <div className="flex justify-center py-12">
@@ -45,7 +45,7 @@ const NotificationsPage = () => {
                   {incomingRequests.map((request) => (
                     <div
                       key={request._id}
-                      className="card bg-base-200 shadow-sm hover:shadow-md transition-shadow"
+                      className="card bg-base-200 shadow-sm hover:shadow-md transition-all notification-card rounded-2xl stagger-item"
                     >
                       <div className="card-body p-4">
                         <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ const NotificationsPage = () => {
                           </div>
 
                           <button
-                            className="btn btn-primary btn-sm"
+                            className="btn btn-primary btn-sm rounded-xl hover:scale-[1.02] transition-transform"
                             onClick={() => acceptRequestMutation(request._id)}
                             disabled={isPending}
                           >
@@ -91,7 +91,7 @@ const NotificationsPage = () => {
 
                 <div className="space-y-3">
                   {acceptedRequests.map((notification) => (
-                    <div key={notification._id} className="card bg-base-200 shadow-sm">
+                    <div key={notification._id} className="card bg-base-200 shadow-sm notification-card rounded-2xl stagger-item">
                       <div className="card-body p-4">
                         <div className="flex items-start gap-3">
                           <div className="avatar mt-1 size-10 rounded-full">
