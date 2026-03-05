@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Heart, Shield, Zap, Users, Sparkles, Globe } from "lucide-react";
 import Logo from "../components/Logo";
 
