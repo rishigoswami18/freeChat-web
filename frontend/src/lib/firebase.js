@@ -11,32 +11,53 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Validate config
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.messagingSenderId;
+
 let app;
-if (firebaseConfig.projectId) {
-    app = initializeApp(firebaseConfig);
+if (isConfigValid) {
+    try {
+        app = initializeApp(firebaseConfig);
+        console.log("[FCM] Firebase initialized successfully.");
+    } catch (err) {
+        console.error("[FCM] Initialization error:", err);
+    }
 } else {
-    console.warn("[FCM] Firebase initialization skipped: Missing project configuration.");
+    console.warn("[FCM] Firebase initialization skipped: Missing essential config keys in production environment.");
 }
+
 const messaging = app ? getMessaging(app) : null;
 
 export const requestNotificationPermission = async () => {
+    if (!messaging) {
+        console.error("[FCM] Cannot request permission: Messaging not initialized. Check your VITE_FIREBASE environment variables.");
+        return null;
+    }
+
     try {
+        console.log("[FCM] Requesting notification permission...");
         const permission = await Notification.requestPermission();
+
         if (permission === 'granted') {
+            const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+            console.log("[FCM] Permission granted. Fetching token with VAPID Key:", vapidKey ? "PRESENT" : "MISSING");
+
             const token = await getToken(messaging, {
-                vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+                vapidKey: vapidKey || undefined
             });
 
             if (token) {
-                console.log("[FCM] Token acquired:", token);
+                console.log("[FCM] Token acquired successfully:", token.substring(0, 10) + "...");
                 await saveFcmToken(token);
                 return token;
             } else {
-                console.log("[FCM] No registration token available. Request permission to generate one.");
+                console.warn("[FCM] No registration token received. Ensure the Service Worker is correctly installed.");
             }
+        } else {
+            console.warn("[FCM] Permission denied by user.");
         }
     } catch (error) {
-        console.error("[FCM] Notification permission error:", error);
+        console.error("[FCM] Permission/Token error:", error);
     }
 };
 
