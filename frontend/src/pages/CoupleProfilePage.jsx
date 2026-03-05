@@ -254,60 +254,72 @@ const CoupleProfilePage = () => {
             <p className="text-[10px] opacity-30 mb-6 uppercase font-black tracking-widest">Strengthen your connection every day</p>
 
             <div className="space-y-6">
-                {/* 🔥 COUPLE STREAK CARD */}
+                {/* 🔥 HERO COUPLE STREAK CARD (PROMOTED TO TOP) */}
                 {coupleStatus === "coupled" && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        className={`card border-2 rounded-3xl p-6 shadow-2xl relative overflow-hidden ${(insightData?.coupleStreak || 0) > 0
-                            ? 'bg-gradient-to-br from-orange-500/10 via-red-500/10 to-yellow-500/10 border-orange-500/30'
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`card border-2 rounded-[32px] p-8 shadow-2xl relative overflow-hidden transition-all duration-500 ${(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0
+                            ? 'bg-gradient-to-br from-orange-600 via-red-600 to-amber-600 border-white/20'
                             : 'bg-base-200 border-base-300'
                             }`}
                     >
-                        {/* Glowing background effect for active streaks */}
-                        {(insightData?.coupleStreak || 0) > 0 && (
-                            <div className="absolute -top-20 -right-20 size-60 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+                        {/* High-end visual effects */}
+                        {(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0 && (
+                            <>
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-[80px] animate-pulse" />
+                                <div className="absolute bottom-0 left-0 w-32 h-32 bg-yellow-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-[40px]" />
+                            </>
                         )}
 
-                        <div className="relative z-10 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className={`size-16 rounded-2xl flex items-center justify-center text-3xl ${(insightData?.coupleStreak || 0) > 0
-                                    ? 'bg-gradient-to-br from-orange-500 to-red-500 shadow-xl shadow-orange-500/30'
-                                    : 'bg-base-300'
-                                    }`}>
-                                    {(insightData?.coupleStreak || 0) > 0 ? '🔥' : '❄️'}
-                                </div>
-                                <div>
-                                    <h3 className="font-black text-xs uppercase tracking-widest opacity-60">Couple Streak</h3>
-                                    <p className={`text-4xl font-black italic tracking-tighter ${(insightData?.coupleStreak || 0) > 0 ? 'text-orange-500' : 'opacity-30'
+                        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div className="flex items-center gap-6">
+                                <motion.div
+                                    animate={(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0 ? {
+                                        scale: [1, 1.1, 1],
+                                        rotate: [0, 5, -5, 0]
+                                    } : {}}
+                                    transition={{ repeat: Infinity, duration: 3 }}
+                                    className={`size-20 rounded-3xl flex items-center justify-center text-4xl ${(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0
+                                        ? 'bg-white/20 backdrop-blur-md shadow-2xl'
+                                        : 'bg-base-300'
                                         }`}>
-                                        {insightData?.coupleStreak || 0} {(insightData?.coupleStreak || 0) === 1 ? 'Day' : 'Days'}
+                                    {(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0 ? '🔥' : '❄️'}
+                                </motion.div>
+                                <div className="text-center sm:text-left">
+                                    <h3 className={`font-black text-[10px] uppercase tracking-[0.3em] ${(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0 ? 'text-white/70' : 'opacity-40'}`}>
+                                        Relationship Streak
+                                    </h3>
+                                    <p className={`text-6xl font-black italic tracking-tighter ${(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0 ? 'text-white' : 'opacity-20'
+                                        }`}>
+                                        {insightData?.coupleStreak || authUser?.coupleStreak || 0}
                                     </p>
-                                    <p className="text-[9px] font-bold uppercase opacity-40 mt-0.5">
-                                        {(insightData?.coupleStreak || 0) > 0
-                                            ? 'Both of you checked in today! Keep it going!'
-                                            : 'Check in daily with your partner to build your streak!'
+                                    <p className={`text-[10px] font-bold uppercase mt-1 ${(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0 ? 'text-white/60' : 'opacity-30'}`}>
+                                        {(insightData?.coupleStreak || authUser?.coupleStreak || 0) > 0
+                                            ? "You're both doing amazing! Keep the fire alive."
+                                            : "Check in daily to start your streak!"
                                         }
                                     </p>
                                 </div>
                             </div>
 
-                            {/* Milestone badges */}
-                            <div className="flex flex-col gap-1 items-end">
-                                {(insightData?.coupleStreak || 0) >= 7 && (
-                                    <span className="badge badge-warning badge-sm font-bold gap-1 text-[9px]">🏆 7 Day</span>
+                            {/* Milestone Badges with Premium Look */}
+                            <div className="flex flex-wrap sm:flex-col gap-2 justify-center">
+                                {(insightData?.coupleStreak || authUser?.coupleStreak || 0) >= 1 && (
+                                    <div className="px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-[9px] font-black text-white uppercase tracking-wider">
+                                        Active
+                                    </div>
                                 )}
-                                {(insightData?.coupleStreak || 0) >= 30 && (
-                                    <span className="badge badge-error badge-sm font-bold gap-1 text-[9px]">💎 30 Day</span>
-                                )}
-                                {(insightData?.coupleStreak || 0) >= 100 && (
-                                    <span className="badge badge-primary badge-sm font-bold gap-1 text-[9px]">👑 100 Day</span>
+                                {(insightData?.coupleStreak || authUser?.coupleStreak || 0) >= 7 && (
+                                    <div className="px-3 py-1 bg-amber-400 text-amber-950 rounded-full text-[9px] font-black uppercase tracking-wider shadow-lg">
+                                        🏆 Weekly Pro
+                                    </div>
                                 )}
                             </div>
                         </div>
                     </motion.div>
                 )}
+
 
                 {/* DAILY CHECK-IN SECTION */}
                 <motion.div

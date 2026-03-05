@@ -1,15 +1,34 @@
 import admin from "firebase-admin";
 
 // Project 1 (Auth & Invites): book-app
-let authApp;
-try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+const parseServiceAccount = (jsonString) => {
+    if (!jsonString) return null;
+    try {
+        // Fix for common env variable quoting issues (e.g. Render/Docker)
+        let cleanJson = jsonString.trim();
+        if ((cleanJson.startsWith("'") && cleanJson.endsWith("'")) ||
+            (cleanJson.startsWith('"') && cleanJson.endsWith('"'))) {
+            cleanJson = cleanJson.slice(1, -1);
+        }
+
+        const serviceAccount = JSON.parse(cleanJson);
         if (serviceAccount.private_key) {
             serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
         }
+        return serviceAccount;
+    } catch (e) {
+        console.error("JSON Parse Error details:", e.message);
+        return null;
+    }
+};
+
+// Project 1 (Auth & Invites): book-app
+let authApp;
+try {
+    const authSvc = parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    if (authSvc) {
         authApp = admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
+            credential: admin.credential.cert(authSvc),
         }, "auth-app");
         console.log("✅ Firebase Auth Project (book-app) initialized");
     }
@@ -21,15 +40,12 @@ try {
 let pushApp;
 try {
     const pushSvcJson = process.env.FIREBASE_PUSH_SERVICE_ACCOUNT_JSON || process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    if (pushSvcJson) {
-        const serviceAccount = JSON.parse(pushSvcJson);
-        if (serviceAccount.private_key) {
-            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-        }
+    const pushSvc = parseServiceAccount(pushSvcJson);
+    if (pushSvc) {
         pushApp = admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
+            credential: admin.credential.cert(pushSvc),
         }, "push-app");
-        console.log(`✅ Firebase Push Project (${serviceAccount.project_id}) initialized`);
+        console.log(`✅ Firebase Push Project (${pushSvc.project_id}) initialized`);
     }
 } catch (error) {
     console.error("❌ Firebase Push Project init failed:", error.message);
