@@ -77,11 +77,11 @@ router.get("/test-email", async (req, res) => {
 
 // Rate-limit: one notification email per recipient per 10 minutes
 const messageNotifCooldown = new Map();
-const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+const COOLDOWN_MS = 60 * 1000; // 1 minute (reduced from 10m for better responsive notifications)
 
 router.post("/notify-message", protectRoute, async (req, res) => {
   try {
-    const { recipientId } = req.body;
+    const { recipientId, text } = req.body;
     if (!recipientId) return res.status(400).json({ message: "recipientId required" });
 
     // Rate limit check
@@ -92,24 +92,26 @@ router.post("/notify-message", protectRoute, async (req, res) => {
     }
 
     const recipient = await User.findById(recipientId).select("email fullName");
-    if (!recipient?.email) return res.json({ sent: false, reason: "no_email" });
+    if (!recipient) return res.json({ sent: false, reason: "no_user" });
 
     messageNotifCooldown.set(cooldownKey, Date.now());
 
-    // Fire-and-forget
-    sendNotificationEmail(recipient.email, {
-      emoji: "💬",
-      title: `New message from ${req.user.fullName.split(' ')[0]}!`,
-      body: `<strong>${req.user.fullName}</strong> sent you a message on freeChat. Open the app to read and reply!`,
-      ctaText: "Open Chat",
-      ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/inbox`,
-    });
+    // Fire-and-forget Email
+    if (recipient.email) {
+      sendNotificationEmail(recipient.email, {
+        emoji: "💬",
+        title: `New message from ${req.user.fullName.split(' ')[0]}!`,
+        body: `<strong>${req.user.fullName}</strong> sent you a message: <br/><br/><i>"${text || "New message"}"</i><br/><br/>Open the app to read and reply!`,
+        ctaText: "Open Chat",
+        ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/inbox`,
+      });
+    }
 
     // Send push notification (fire-and-forget)
     sendPushNotification(recipientId, {
-      title: `💬 New message from ${req.user.fullName.split(' ')[0]}!`,
-      body: `They sent you a message on freeChat. Tap to reply!`,
-      icon: req.user.profilePic,
+      title: `${req.user.fullName.split(' ')[0]} 💬`,
+      body: text || `New message from ${req.user.fullName.split(' ')[0]}`,
+      icon: req.user.profilePic || "https://www.freechatweb.in/logo.png",
       data: { url: "/inbox" }
     }).catch(err => console.error("[Push] Message notification failed:", err.message));
 

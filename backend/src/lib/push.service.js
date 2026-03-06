@@ -27,7 +27,7 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
         };
 
         if (icon) {
-            message.notification.imageUrl = icon;
+            message.notification.image = icon;
         }
 
         console.log(`[Push] Sending notification to ${user.fullName} (${user.fcmTokens.length} tokens)...`);

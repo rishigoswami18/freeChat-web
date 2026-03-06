@@ -242,8 +242,8 @@ export const commentOnStory = async (storyId, text) => {
   return response.data;
 };
 
-export const notifyMessage = async (recipientId) => {
-  const response = await axiosInstance.post("/chat/notify-message", { recipientId });
+export const notifyMessage = async (recipientId, text) => {
+  const response = await axiosInstance.post("/chat/notify-message", { recipientId, text });
   return response.data;
 };
 

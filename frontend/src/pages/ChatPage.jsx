@@ -58,6 +58,12 @@ const ChatPage = () => {
           mediaType: type,
           isViewed: false,
         });
+
+        // Push notification
+        if (targetUserId && !targetUserId.startsWith("group_")) {
+          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(() => { });
+        }
+
         toast.success("Snap sent! 📸");
       } catch (error) {
         toast.error("Failed to send snap");
@@ -105,9 +111,9 @@ const ChatPage = () => {
       setShowShoutSlider(false);
       const result = await channelObj.sendMessage(enrichedMessage);
 
-      // Email notification (fire-and-forget, rate-limited on backend)
+      // Push/Email notification (fire-and-forget, rate-limited on backend)
       if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement") {
-        notifyMessage(targetUserId).catch(() => { });
+        notifyMessage(targetUserId, message.text).catch(() => { });
       }
 
       return result;
@@ -192,7 +198,12 @@ const ChatPage = () => {
                           <MessageInput focus grow />
                         </div>
                         <div className="flex-shrink-0">
-                          <VoiceRecorder onSend={(data) => channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" })} />
+                          <VoiceRecorder onSend={(data) => {
+                            channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" });
+                            if (targetUserId && !targetUserId.startsWith("group_")) {
+                              notifyMessage(targetUserId, "🎤 Sent a voice message").catch(() => { });
+                            }
+                          }} />
                         </div>
                       </div>
                     </div>
