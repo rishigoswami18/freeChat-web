@@ -2,15 +2,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useVideoClient } from "../components/VideoProvider";
 import {
-    Users,
-    Zap,
     Video,
     VideoOff,
     Mic,
     MicOff,
     PhoneOff,
     Eye,
-    MessageCircle,
     Share2,
     Heart,
     Maximize2,
@@ -21,9 +18,6 @@ import {
     Check,
     Clock,
     Signal,
-    Camera,
-    CameraOff,
-    Loader2,
 } from "lucide-react";
 
 import {
@@ -56,7 +50,9 @@ const LiveStreamPage = () => {
             joiningRef.current = true;
 
             try {
-                const callInstance = videoClient.call("livestream", streamId);
+                // Using "default" call type — the "livestream" type enforces backstage
+                // which requires admin/host roles that our users don't have.
+                const callInstance = videoClient.call("default", streamId);
 
                 const state = callInstance.state.callingState;
                 if (state !== CallingState.JOINED && state !== CallingState.JOINING) {
@@ -103,7 +99,7 @@ const LiveStreamContent = () => {
         useMicrophoneState,
         useCameraState,
         useParticipantCount,
-        useIsCallLive,
+        useCallCreatedBy,
     } = useCallStateHooks();
 
     const callingState = useCallCallingState();
@@ -112,71 +108,70 @@ const LiveStreamContent = () => {
     const participantCount = useParticipantCount();
     const { isMuted: micMuted } = useMicrophoneState();
     const { isMuted: cameraMuted } = useCameraState();
-    const isLive = useIsCallLive();
+    const createdBy = useCallCreatedBy();
     const navigate = useNavigate();
 
-    const [isGoingLive, setIsGoingLive] = useState(false);
+    const [isStreaming, setIsStreaming] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [linkCopied, setLinkCopied] = useState(false);
     const [showReaction, setShowReaction] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
 
-    // The host is usually the local participant if they created the call
-    const isHost = localParticipant && (localParticipant.role === 'admin' || localParticipant.role === 'host');
+    // Host = the person who created the call (works with default call type)
+    const isHost = localParticipant && createdBy && localParticipant.userId === createdBy.id;
 
-    // For the UI, we prioritize showing the host
+    // For the UI, we prioritize showing the host/creator
     const hostParticipant = isHost
         ? localParticipant
-        : (remoteParticipants.find(p => p.role === 'host' || p.role === 'admin') || remoteParticipants[0]);
+        : (remoteParticipants.find(p => createdBy && p.userId === createdBy.id) || remoteParticipants[0]);
 
     const notificationSent = useRef(false);
 
-    // Auto-enable camera & mic when host joins, then go live
+    // Auto-enable camera & mic when host joins
     useEffect(() => {
         if (!isHost || callingState !== CallingState.JOINED) return;
 
-        const setupAndGoLive = async () => {
+        const setupStream = async () => {
             try {
                 // Enable camera and microphone for the host
                 await call.camera.enable();
                 await call.microphone.enable();
-                console.log("🎥 Camera & mic enabled for host");
-
-                // Check if already live
-                if (!isLive) {
-                    setIsGoingLive(true);
-                    await call.goLive();
-                    console.log("🔴 Stream is now LIVE!");
-                    setIsGoingLive(false);
-                }
+                setIsStreaming(true);
+                console.log("🎥 Camera & mic enabled — stream is live!");
 
                 // Notify followers (once)
                 if (!notificationSent.current) {
                     notificationSent.current = true;
                     try {
                         await notifyLiveStreamStart();
-                        toast.success("Followers notified! 🚀");
+                        toast.success("You're live! Followers notified 🚀");
                     } catch (error) {
                         console.error("Failed to notify followers:", error);
                     }
                 }
             } catch (error) {
                 console.error("Failed to setup stream:", error);
-                setIsGoingLive(false);
             }
         };
 
-        setupAndGoLive();
-    }, [isHost, callingState, call, isLive]);
+        setupStream();
+    }, [isHost, callingState, call]);
 
-    // Timer for live duration
+    // Timer for stream duration
     useEffect(() => {
-        if (!isLive) return;
+        if (!isStreaming) return;
         const interval = setInterval(() => {
             setElapsedTime(prev => prev + 1);
         }, 1000);
         return () => clearInterval(interval);
-    }, [isLive]);
+    }, [isStreaming]);
+
+    // Mark stream as active when we detect the host participant has video
+    useEffect(() => {
+        if (!isHost && hostParticipant) {
+            setIsStreaming(true);
+        }
+    }, [isHost, hostParticipant]);
 
     useEffect(() => {
         if (callingState === CallingState.LEFT) {
@@ -186,32 +181,11 @@ const LiveStreamContent = () => {
 
     const handleExit = async () => {
         try {
-            if (isHost && isLive) {
-                await call.stopLive();
-            }
             await call.leave();
         } catch (e) {
             console.error("Error leaving stream:", e);
         }
         navigate("/");
-    };
-
-    const handleToggleLive = async () => {
-        try {
-            setIsGoingLive(true);
-            if (isLive) {
-                await call.stopLive();
-                toast("Stream paused", { icon: "⏸️" });
-            } else {
-                await call.goLive();
-                toast.success("You're live! 🔴");
-            }
-        } catch (error) {
-            console.error("Error toggling live:", error);
-            toast.error("Failed to toggle live status.");
-        } finally {
-            setIsGoingLive(false);
-        }
     };
 
     const handleCopyLink = useCallback(() => {
@@ -260,17 +234,10 @@ const LiveStreamContent = () => {
                         </button>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2">
-                                {isLive ? (
-                                    <div className="flex items-center gap-1.5 bg-red-600/90 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase shadow-lg shadow-red-600/30">
-                                        <Radio className="size-3 animate-pulse" />
-                                        LIVE
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-1.5 bg-amber-500/90 text-black text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase">
-                                        <Clock className="size-3" />
-                                        BACKSTAGE
-                                    </div>
-                                )}
+                                <div className="flex items-center gap-1.5 bg-red-600/90 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-wider uppercase shadow-lg shadow-red-600/30">
+                                    <Radio className="size-3 animate-pulse" />
+                                    LIVE
+                                </div>
                                 <h3 className="text-sm sm:text-base font-bold text-white max-w-[140px] sm:max-w-none truncate">
                                     {isHost ? "Your Stream" : `${hostParticipant?.name || "Host"}'s Live`}
                                 </h3>
@@ -280,7 +247,7 @@ const LiveStreamContent = () => {
                                     <Eye className="size-3.5" />
                                     <span>{participantCount} {participantCount === 1 ? 'viewer' : 'viewers'}</span>
                                 </div>
-                                {isLive && (
+                                {isStreaming && (
                                     <div className="flex items-center gap-1.5 text-white/50 text-[11px] font-medium">
                                         <Clock className="size-3.5" />
                                         <span>{formatTime(elapsedTime)}</span>
@@ -319,48 +286,13 @@ const LiveStreamContent = () => {
 
                 {/* ===== MAIN VIDEO AREA ===== */}
                 <div className="flex-1 relative flex items-center justify-center">
-                    {hostParticipant && isLive ? (
+                    {hostParticipant ? (
                         <div className="w-full h-full live-stream-video-container">
                             <ParticipantView
                                 participant={hostParticipant}
                                 ParticipantViewUI={null}
                                 trackType="videoTrack"
                             />
-                        </div>
-                    ) : hostParticipant && !isLive && isHost ? (
-                        /* Backstage Preview for Host */
-                        <div className="w-full h-full relative">
-                            <div className="w-full h-full live-stream-video-container opacity-70">
-                                <ParticipantView
-                                    participant={hostParticipant}
-                                    ParticipantViewUI={null}
-                                    trackType="videoTrack"
-                                />
-                            </div>
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-                                <div className="text-center p-8 animate-scale-in">
-                                    <div className="relative inline-block mb-4">
-                                        <div className="absolute -inset-6 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-                                        <div className="relative size-20 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full flex items-center justify-center border border-white/10">
-                                            <Camera className="size-10 text-white" />
-                                        </div>
-                                    </div>
-                                    <h3 className="text-white text-lg font-bold mb-1">Backstage Preview</h3>
-                                    <p className="text-white/50 text-sm mb-6">Check your camera & mic before going live</p>
-                                    <button
-                                        onClick={handleToggleLive}
-                                        disabled={isGoingLive}
-                                        className="btn border-0 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white gap-2 rounded-2xl px-8 py-3 font-bold text-base shadow-2xl shadow-red-600/40 hover:shadow-red-600/60 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-                                    >
-                                        {isGoingLive ? (
-                                            <Loader2 className="size-5 animate-spin" />
-                                        ) : (
-                                            <Radio className="size-5" />
-                                        )}
-                                        {isGoingLive ? "Going Live..." : "Go Live Now"}
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     ) : (
                         /* Waiting for Host (Viewer perspective) */
@@ -412,7 +344,7 @@ const LiveStreamContent = () => {
                     )}
 
                     {/* ===== Viewer Side Buttons ===== */}
-                    {!isHost && hostParticipant && isLive && (
+                    {!isHost && hostParticipant && isStreaming && (
                         <div className="absolute right-3 sm:right-5 bottom-28 sm:bottom-24 flex flex-col gap-4 z-40 items-center">
                             <div className="flex flex-col items-center gap-1 group cursor-pointer active:scale-90 transition-transform" onClick={handleLike}>
                                 <div className="size-12 rounded-full bg-white/8 backdrop-blur-xl flex items-center justify-center border border-white/10 group-hover:bg-red-500/20 group-hover:border-red-500/40 transition-all">
@@ -438,8 +370,8 @@ const LiveStreamContent = () => {
                             <button
                                 onClick={() => call.microphone.toggle()}
                                 className={`size-12 sm:size-14 rounded-full flex items-center justify-center transition-all active:scale-90 ${micMuted
-                                        ? 'bg-white text-black shadow-lg shadow-white/20'
-                                        : 'bg-white/10 text-white border border-white/10 hover:bg-white/15'
+                                    ? 'bg-white text-black shadow-lg shadow-white/20'
+                                    : 'bg-white/10 text-white border border-white/10 hover:bg-white/15'
                                     }`}
                                 title={micMuted ? 'Unmute mic' : 'Mute mic'}
                             >
@@ -450,31 +382,12 @@ const LiveStreamContent = () => {
                             <button
                                 onClick={() => call.camera.toggle()}
                                 className={`size-12 sm:size-14 rounded-full flex items-center justify-center transition-all active:scale-90 ${cameraMuted
-                                        ? 'bg-white text-black shadow-lg shadow-white/20'
-                                        : 'bg-white/10 text-white border border-white/10 hover:bg-white/15'
+                                    ? 'bg-white text-black shadow-lg shadow-white/20'
+                                    : 'bg-white/10 text-white border border-white/10 hover:bg-white/15'
                                     }`}
                                 title={cameraMuted ? 'Turn on camera' : 'Turn off camera'}
                             >
                                 {cameraMuted ? <VideoOff className="size-5 sm:size-6" /> : <Video className="size-5 sm:size-6" />}
-                            </button>
-
-                            <div className="h-8 w-px bg-white/10" />
-
-                            {/* Toggle Live */}
-                            <button
-                                onClick={handleToggleLive}
-                                disabled={isGoingLive}
-                                className={`size-12 sm:size-14 rounded-full flex items-center justify-center transition-all active:scale-90 ${isLive
-                                        ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 hover:bg-red-500'
-                                        : 'bg-green-600 text-white shadow-lg shadow-green-600/30 hover:bg-green-500'
-                                    }`}
-                                title={isLive ? 'Stop Live' : 'Go Live'}
-                            >
-                                {isGoingLive ? (
-                                    <Loader2 className="size-5 sm:size-6 animate-spin" />
-                                ) : (
-                                    <Radio className="size-5 sm:size-6" />
-                                )}
                             </button>
 
                             <div className="h-8 w-px bg-white/10" />
