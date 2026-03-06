@@ -434,7 +434,4 @@ export const deleteSupportMessage = async (messageId) => {
 };
 
 
-export const notifyLiveStreamStart = async () => {
-  const response = await axiosInstance.post("/notifications/notify-live");
-  return response.data;
-};
+

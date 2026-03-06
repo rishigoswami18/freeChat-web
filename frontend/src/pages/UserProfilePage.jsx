@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getUserProfile, getUserPosts, getOtherUserFriends } from "../lib/api";
-import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X, Zap } from "lucide-react";
+import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X } from "lucide-react";
 
 import PostsFeed from "../components/PostsFeed";
 import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
@@ -84,10 +84,6 @@ const UserProfilePage = () => {
                             <button className="btn btn-base-300 btn-sm rounded-xl font-bold">
                                 <UserPlus className="size-4" />
                             </button>
-                            <Link to={`/live/${user._id}`} className="btn btn-outline btn-sm rounded-xl gap-2 font-black text-red-500 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/50 group/live">
-                                <div className="size-3 rounded-full bg-red-500 animate-pulse group-hover/live:scale-125 transition-transform" />
-                                WATCH LIVE
-                            </Link>
                         </div>
                     </div>
 

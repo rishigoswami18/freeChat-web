@@ -1297,53 +1297,7 @@ main {
   z-index: 10;
 }
 
-/* ===== Live Stream Page ===== */
-.live-stream-video-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  background: #000;
-}
 
-.live-stream-video-container .str-video__participant-view {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 0 !important;
-  background: #000 !important;
-}
-
-.live-stream-video-container .str-video__participant-view video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-
-.live-stream-video-container .str-video__participant-view__video-container {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.live-stream-video-container .str-video__participant-details {
-  display: none !important;
-}
-
-/* Scope the livestream theme so it doesn't affect PIP from regular calls */
-.live-stream-theme .str-video__participant-view--local {
-  display: none !important;
-}
-
-@keyframes floatUp {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-120px) scale(1.5);
-  }
-}
 
 /* DaisyUI theme override to prevent FOUC (Flash of Unstyled Content) */
 [data-theme="coffee"] body,

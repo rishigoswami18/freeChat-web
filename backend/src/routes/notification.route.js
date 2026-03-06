@@ -1,6 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
-import { broadcastSystemNotification, clearAdminChats, notifyPendingActions, notifyLiveStreamStart } from "../controllers/notification.controller.js";
+import { broadcastSystemNotification, clearAdminChats, notifyPendingActions } from "../controllers/notification.controller.js";
 
 const router = express.Router();
 
@@ -25,11 +25,6 @@ router.post("/clear-chats", protectRoute, clearAdminChats);
  */
 router.post("/sweep-pending", protectRoute, notifyPendingActions);
 
-/**
- * @route POST /api/notifications/notify-live
- * @desc  Notify friends that you have started a live stream
- * @access Private (Logged in users)
- */
-router.post("/notify-live", protectRoute, notifyLiveStreamStart);
+
 
 export default router;
