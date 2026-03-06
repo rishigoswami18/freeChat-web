@@ -109,7 +109,7 @@ const Sidebar = () => {
 
       <div className="px-3 py-2">
         <a
-          href="https://drive.google.com/uc?export=download&id=1GJDX7Hn2Zq0T8LHLSJogo9yyeQCX574X"
+          href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"

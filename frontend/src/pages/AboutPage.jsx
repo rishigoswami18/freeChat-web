@@ -200,7 +200,7 @@ const AboutPage = () => {
                             Join Now
                         </Link>
                         <a
-                            href="https://drive.google.com/uc?export=download&id=1GJDX7Hn2Zq0T8LHLSJogo9yyeQCX574X"
+                            href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn btn-outline btn-lg rounded-2xl px-8 italic font-black uppercase border-secondary text-secondary"

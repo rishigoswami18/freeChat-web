@@ -205,7 +205,7 @@ const LandingPage = () => {
                                 <ArrowRight className="size-5" />
                             </Link>
                             <a
-                                href="https://drive.google.com/uc?export=download&id=1GJDX7Hn2Zq0T8LHLSJogo9yyeQCX574X"
+                                href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-outline btn-lg gap-2 rounded-2xl hover:scale-[1.02] transition-all duration-300 border-accent text-accent hover:bg-accent hover:text-white"
@@ -407,7 +407,7 @@ const LandingPage = () => {
                                     </p>
                                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                         <a
-                                            href="https://drive.google.com/uc?export=download&id=1GJDX7Hn2Zq0T8LHLSJogo9yyeQCX574X"
+                                            href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-primary btn-lg gap-3 shadow-xl shadow-primary/20 rounded-2xl hover:scale-105 transition-all duration-300"
@@ -531,7 +531,7 @@ const LandingPage = () => {
                                 </li>
                                 <li>
                                     <a
-                                        href="https://drive.google.com/uc?export=download&id=1GJDX7Hn2Zq0T8LHLSJogo9yyeQCX574X"
+                                        href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-2 hover:text-primary transition font-bold text-accent"
