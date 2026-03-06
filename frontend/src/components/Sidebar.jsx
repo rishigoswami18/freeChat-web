@@ -17,7 +17,9 @@ import {
   ShieldAlert,
   BadgeCheck,
   Gem,
+  Zap,
 } from "lucide-react";
+
 import CreateStoryModal from "./CreateStoryModal";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import Logo from "./Logo";
@@ -107,9 +109,21 @@ const Sidebar = () => {
         )}
       </nav>
 
-      <div className="px-3 py-2">
+      <div className="px-3 py-2 space-y-2">
+        <button
+          onClick={() => navigate(`/live/${authUser._id}`)}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all duration-300 group/live shadow-lg shadow-red-500/5 hover:-translate-y-0.5 active:scale-95"
+        >
+          <div className="size-6 rounded-lg bg-red-500 flex items-center justify-center group-hover/live:scale-110 transition-transform animate-pulse">
+            <Zap className="size-3.5 fill-current" />
+          </div>
+          <span>Go Live Now</span>
+          <span className="ml-auto size-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+        </button>
+
         <a
           href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"

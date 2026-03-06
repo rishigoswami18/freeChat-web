@@ -20,7 +20,9 @@ import {
   ShieldAlert,
   BadgeCheck,
   Gem,
+  Zap,
 } from "lucide-react";
+
 import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
 import useNotificationCounts from "../hooks/useNotificationCounts";
@@ -143,8 +145,22 @@ const MobileDrawer = () => {
             </Link>
           ))}
 
+          <button
+            onClick={() => {
+              toggleDrawer();
+              navigate(`/live/${authUser._id}`);
+            }}
+            className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-black uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/20 mt-4 active:scale-95 shadow-lg shadow-red-500/5"
+          >
+            <div className="size-5 rounded bg-red-500 flex items-center justify-center animate-pulse">
+              <Zap className="size-3 fill-current text-white" />
+            </div>
+            Go Live Now
+          </button>
+
           <a
             href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+
             target="_blank"
             rel="noopener noreferrer"
             onClick={toggleDrawer}

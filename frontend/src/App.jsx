@@ -34,6 +34,8 @@ import AboutPage from "./pages/AboutPage.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import UserProfilePage from "./pages/UserProfilePage.jsx";
 import GemShopPage from "./pages/GemShopPage.jsx";
+import LiveStreamPage from "./pages/LiveStreamPage.jsx";
+
 
 import { Toaster } from "react-hot-toast";
 
@@ -238,9 +240,20 @@ const App = () => {
                     )
                   }
                 />
+                <Route
+                  path="/live/:id"
+                  element={
+                    isAuthenticated && isOnboarded ? (
+                      <LiveStreamPage />
+                    ) : (
+                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                    )
+                  }
+                />
 
                 <Route
                   path="/chat/:id"
+
                   element={
                     isAuthenticated && isOnboarded ? (
                       <Layout showSidebar={false} showFooter={false} showNavbar={false}>
