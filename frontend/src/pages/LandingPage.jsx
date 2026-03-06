@@ -407,7 +407,7 @@ const LandingPage = () => {
                                     </p>
                                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                         <a
-                                            href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+                                            href="https://docs.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-primary btn-lg gap-3 shadow-xl shadow-primary/20 rounded-2xl hover:scale-105 transition-all duration-300"

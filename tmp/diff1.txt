@@ -1,0 +1,13 @@
+﻿diff --git a/frontend/src/components/MobileDrawer.jsx b/frontend/src/components/MobileDrawer.jsx
+index 7f567f5..23a0d0f 100644
+--- a/frontend/src/components/MobileDrawer.jsx
++++ b/frontend/src/components/MobileDrawer.jsx
+@@ -159,7 +159,7 @@ const MobileDrawer = () => {
+           </button>
+ 
+           <a
+-            href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
++            href="https://docs.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+ 
+             target="_blank"
+             rel="noopener noreferrer"

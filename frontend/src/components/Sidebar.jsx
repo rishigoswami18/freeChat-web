@@ -122,7 +122,7 @@ const Sidebar = () => {
         </button>
 
         <a
-          href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+          href="https://docs.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
 
           target="_blank"
           rel="noopener noreferrer"
