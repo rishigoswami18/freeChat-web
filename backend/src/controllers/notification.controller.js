@@ -247,3 +247,51 @@ export const notifyPendingActions = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error during sweep" });
     }
 };
+
+/**
+ * Notifies all friends of a user that they have started a live stream.
+ */
+export const notifyLiveStreamStart = async (req, res) => {
+    try {
+        const hostId = req.user._id;
+        const hostName = req.user.fullName;
+        const hostPic = req.user.profilePic;
+
+        // 1. Fetch the host's friends
+        const host = await User.findById(hostId).select("friends");
+        if (!host || !host.friends || host.friends.length === 0) {
+            return res.status(200).json({ success: true, message: "No friends to notify." });
+        }
+
+        const friendIds = host.friends;
+
+        console.log(`📡 [Live] Notifying ${friendIds.length} friends about ${hostName}'s live stream.`);
+
+        // 2. Send push notifications to all friends
+        const notifyTasks = friendIds.map(async (friendId) => {
+            try {
+                await sendPushNotification(friendId.toString(), {
+                    title: "🎥 Live Now!",
+                    body: `${hostName} is live now! Join the stream to say hello.`,
+                    icon: hostPic || "https://www.freechatweb.in/logo.png",
+                    data: {
+                        url: `/live/${hostId}`,
+                        type: "live_stream_start"
+                    }
+                });
+            } catch (err) {
+                console.error(`  ❌ Failed to notify friend ${friendId}:`, err.message);
+            }
+        });
+
+        await Promise.all(notifyTasks);
+
+        res.status(200).json({
+            success: true,
+            message: `Notified ${friendIds.length} friends.`
+        });
+    } catch (error) {
+        console.error("Error in notifyLiveStreamStart:", error);
+        res.status(500).json({ message: "Internal Server Error during live stream notification" });
+    }
+};

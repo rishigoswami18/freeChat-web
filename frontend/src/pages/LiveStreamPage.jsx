@@ -29,6 +29,8 @@ import {
 
 import toast from "react-hot-toast";
 import PageLoader from "../components/PageLoader";
+import { notifyLiveStreamStart } from "../lib/api";
+
 
 const LiveStreamPage = () => {
     const { id: streamId } = useParams();
@@ -111,7 +113,25 @@ const LiveStreamContent = () => {
     // For the UI, we prioritize showing the host
     const hostParticipant = isHost ? localParticipant : (remoteParticipants.find(p => p.role === 'host' || p.role === 'admin') || remoteParticipants[0]);
 
+    const notificationSent = useRef(false);
+
     useEffect(() => {
+        if (isHost && callingState === CallingState.JOINED && !notificationSent.current) {
+            notificationSent.current = true;
+            const triggerNotification = async () => {
+                try {
+                    await notifyLiveStreamStart();
+                    toast.success("Followers notified! 🚀");
+                } catch (error) {
+                    console.error("Failed to notify followers:", error);
+                }
+            };
+            triggerNotification();
+        }
+    }, [isHost, callingState]);
+
+    useEffect(() => {
+
         if (callingState === CallingState.LEFT) {
             navigate("/");
         }
