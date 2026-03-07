@@ -9,7 +9,8 @@ import {
     Instagram,
     Linkedin,
     Twitter,
-    Facebook
+    Facebook,
+    Globe
 } from "lucide-react";
 import Logo from "./Logo";
 
@@ -19,6 +20,7 @@ const Footer = () => {
         { icon: Twitter, href: "https://x.com/RishiGo13597016", label: "Twitter", color: "hover:text-sky-400" },
         { icon: Facebook, href: "https://www.facebook.com/profile.php?id=100084458157489", label: "Facebook", color: "hover:text-blue-600" },
         { icon: Linkedin, href: "https://www.linkedin.com/in/hrishikesh-giri/", label: "LinkedIn", color: "hover:text-blue-700" },
+        { icon: Globe, href: "https://hrishiportfoli.netlify.app/", label: "Portfolio", color: "hover:text-emerald-500" },
     ];
 
     return (
