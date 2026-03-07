@@ -27,8 +27,16 @@ const queryClient = new QueryClient({
 
 // Global error handlers to catch silent crashes
 window.addEventListener('error', (event) => {
+  const isChunkError = /fetch|dynamically|imported|module/i.test(event.error?.message || event.message);
+
+  if (isChunkError) {
+    console.warn("🔄 Detected stale chunk after update. Force reloading...");
+    window.location.reload();
+    return;
+  }
+
   console.error('🔴 GLOBAL ERROR:', event.error?.message || event.message, event.error?.stack);
-  document.getElementById('root').innerHTML = `<div style="padding:40px;font-family:monospace;color:red;"><h2>App Crashed</h2><pre>${event.error?.message || event.message}\n${event.error?.stack || ''}</pre></div>`;
+  document.getElementById('root').innerHTML = `<div style="padding:40px;font-family:monospace;color:red;background:#111;min-height:100vh;"><h2>App Crashed</h2><pre>${event.error?.message || event.message}\n${event.error?.stack || ''}</pre><button onclick="window.location.reload()" style="padding:10px 20px;background:#fff;color:#000;border:none;border-radius:4px;cursor:pointer;margin-top:20px;">Reload App</button></div>`;
 });
 
 window.addEventListener('unhandledrejection', (event) => {

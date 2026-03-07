@@ -59,54 +59,48 @@ self.addEventListener('notificationclick', function (event) {
 
     // Handle Inline Reply
     if (action === 'reply') {
-        const replyText = event.reply; // the text from inline reply
+        const replyText = event.reply;
         const senderId = data.senderId;
 
         if (!replyText || !senderId) return;
-
-        console.log(`[SW] Replying to ${senderId}: ${replyText}`);
 
         event.waitUntil(
             fetch('/api/chat/notification-reply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ recipientId: senderId, text: replyText }),
-                credentials: 'include' // include session cookies
+                credentials: 'include'
             }).then(response => {
                 if (!response.ok) throw new Error('Failed to send reply');
-                console.log('[SW] Reply sent successfully');
             }).catch(err => {
                 console.error('[SW] Error sending reply:', err);
-                // Fallback: Open chat if reply fails
-                const fallbackUrl = self.location.origin + (data.url || '/');
-                return clients.openWindow(fallbackUrl);
+                return clients.openWindow(self.location.origin + (data.url || '/'));
             })
         );
         return;
     }
 
-    // Handle "Answer" action specifically
     const isCall = data.type === 'incoming_call';
     const isAnswerAction = action === 'answer';
 
-    // If it's a call and high-level click (not action) OR it's the answer action
-    // In both cases, we open the app. The CallPage will handle the accept() logic.
-    const url = isCall ? '/' : (data.url || '/');
-    const fullUrl = self.location.origin + url;
+    // For calls, use the specific call URL provided in push data
+    // For direct clicks or Answer action, we want the specific URL
+    const targetUrl = data.url || '/';
+    const fullUrl = self.location.origin + targetUrl;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // Check if app is already open
             for (const client of windowClients) {
                 if (new URL(client.url).origin === self.location.origin) {
                     client.focus();
-                    // If answering, we just want it to focus root so IncomingCallNotification can handle it
-                    // If it's a different URL (like direct message), navigate to it
-                    if (!isCall) client.navigate(fullUrl);
+                    // Always navigate if it's a specific action or a call
+                    // This ensures the transition happens correctly
+                    if (isCall || isAnswerAction || !client.url.includes(targetUrl)) {
+                        return client.navigate(fullUrl);
+                    }
                     return;
                 }
             }
-            // Not open, open new window
             return clients.openWindow(fullUrl);
         })
     );
