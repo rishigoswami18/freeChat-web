@@ -1341,3 +1341,25 @@ main {
 [data-theme="forest"] body {
   background-color: oklch(var(--b1));
 }
+
+/* ===== Audio Call Visualizer ===== */
+@keyframes audioBar {
+  0% {
+    height: 20%;
+  }
+
+  100% {
+    height: 90%;
+  }
+}
+
+/* Custom call button sizes */
+.size-18 {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.size-22 {
+  width: 5.5rem;
+  height: 5.5rem;
+}

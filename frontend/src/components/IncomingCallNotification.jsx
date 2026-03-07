@@ -1,5 +1,5 @@
 import { useCalls, CallingState } from "@stream-io/video-react-sdk";
-import { PhoneOff, PhoneIncoming } from "lucide-react";
+import { PhoneOff, PhoneIncoming, Video, Phone, Lock } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useEffect, useState, useRef } from "react";
 import { outgoingCallIds } from "./VideoProvider";
@@ -12,29 +12,12 @@ const IncomingCallNotification = () => {
     const calls = useCalls();
     const navigate = useNavigate();
 
-    // Debug: log all calls the SDK is aware of
-    useEffect(() => {
-        if (calls.length > 0) {
-            console.log("📞 useCalls() detected calls:", calls.map(c => ({
-                id: c.id,
-                state: c.state.callingState,
-                isOutgoing: outgoingCallIds.has(c.id),
-                createdBy: c.state.createdBy?.id || "unknown",
-            })));
-        }
-    }, [calls]);
-
     // Filter: only ringing calls that WE did NOT initiate
     const incomingCalls = calls.filter((call) => {
         const callingState = call.state.callingState;
         const isRinging = callingState === CallingState.RINGING;
         const isOurCall = outgoingCallIds.has(call.id);
         const isOnCallPage = window.location.pathname.includes(`/call/${call.id}`);
-
-        if (isRinging) {
-            console.log(`📞 Ringing call ${call.id}: isOurCall=${isOurCall}, isOnCallPage=${isOnCallPage}`);
-        }
-
         return isRinging && !isOurCall && !isOnCallPage;
     });
 
@@ -51,12 +34,14 @@ const IncomingCallNotification = () => {
 
 const IncomingCallUI = ({ call, navigate }) => {
     const [caller, setCaller] = useState(null);
+    const [ringSeconds, setRingSeconds] = useState(0);
+    const intervalRef = useRef(null);
 
     useEffect(() => {
         // Start ringtone
         ringtone.play().catch(e => console.log("Ringtone blocked:", e));
 
-        // Get the caller info — the person who created the call
+        // Get the caller info
         const createdBy = call.state.createdBy;
         if (createdBy) {
             setCaller(createdBy);
@@ -70,9 +55,21 @@ const IncomingCallUI = ({ call, navigate }) => {
             }
         }
 
+        // Ring timer — auto-reject after 40 seconds
+        intervalRef.current = setInterval(() => {
+            setRingSeconds(prev => {
+                if (prev >= 39) {
+                    call.leave({ reject: true }).catch(() => { });
+                    return prev;
+                }
+                return prev + 1;
+            });
+        }, 1000);
+
         return () => {
             ringtone.pause();
             ringtone.currentTime = 0;
+            if (intervalRef.current) clearInterval(intervalRef.current);
         };
     }, [call]);
 
@@ -80,11 +77,9 @@ const IncomingCallUI = ({ call, navigate }) => {
 
     const handleAccept = async () => {
         try {
-            // Stop ringtone immediately
             ringtone.pause();
             ringtone.currentTime = 0;
-
-            // Just navigate to the call page. 
+            if (intervalRef.current) clearInterval(intervalRef.current);
             const typeParam = isAudioOnly ? "?type=audio" : "";
             navigate(`/call/${call.id}${typeParam}`);
         } catch (error) {
@@ -94,6 +89,9 @@ const IncomingCallUI = ({ call, navigate }) => {
 
     const handleReject = async () => {
         try {
+            ringtone.pause();
+            ringtone.currentTime = 0;
+            if (intervalRef.current) clearInterval(intervalRef.current);
             await call.leave({ reject: true });
         } catch (error) {
             console.error("Failed to reject call:", error);
@@ -101,44 +99,97 @@ const IncomingCallUI = ({ call, navigate }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="bg-base-100 rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 text-center">
-                {/* Pulsing ring animation */}
-                <div className="relative mx-auto w-24 h-24 mb-6">
-                    <div className="absolute inset-0 rounded-full bg-success/20 animate-ping" />
-                    <div className="absolute inset-2 rounded-full bg-success/30 animate-pulse" />
-                    <div className="relative w-24 h-24 rounded-full overflow-hidden ring-4 ring-success/50">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
+            {/* Full-screen blurred background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c] via-[#111827] to-[#0a0f1c]" />
+
+            {/* Animated glow circles */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <div className="size-[500px] rounded-full bg-primary/5 animate-ping" style={{ animationDuration: '3s' }} />
+            </div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <div className="size-[350px] rounded-full bg-primary/10 animate-ping" style={{ animationDuration: '2s' }} />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center gap-8 sm:gap-10 w-full max-w-md px-6">
+
+                {/* Encrypted badge */}
+                <div className="flex items-center gap-2 opacity-40">
+                    <Lock className="size-3 text-white" />
+                    <span className="text-[10px] text-white uppercase font-black tracking-[0.2em]">End-to-End Encrypted</span>
+                </div>
+
+                {/* Call type */}
+                <div className="flex items-center gap-2">
+                    {isAudioOnly ? (
+                        <Phone className="size-4 text-primary" />
+                    ) : (
+                        <Video className="size-4 text-primary" />
+                    )}
+                    <p className="text-white/60 text-sm font-medium uppercase tracking-[0.3em]">
+                        {isAudioOnly ? "Voice Call" : "Video Call"}
+                    </p>
+                </div>
+
+                {/* Avatar with pulse rings */}
+                <div className="relative">
+                    {/* Pulse rings */}
+                    <div className="absolute -inset-6 rounded-full border-2 border-green-500/30 animate-ping" style={{ animationDuration: '1.5s' }} />
+                    <div className="absolute -inset-10 rounded-full border border-green-500/15 animate-ping" style={{ animationDuration: '2s' }} />
+                    <div className="absolute -inset-14 rounded-full border border-green-500/10 animate-ping" style={{ animationDuration: '2.5s' }} />
+
+                    {/* Glow */}
+                    <div className="absolute -inset-12 rounded-full bg-green-500/10 blur-3xl animate-pulse" />
+
+                    <div className="relative size-36 sm:size-44 rounded-full overflow-hidden ring-4 ring-green-500/40 shadow-[0_0_80px_rgba(34,197,94,0.15)]">
                         <img
                             src={caller?.image || "/avatar.png"}
                             alt={caller?.name || "Caller"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover scale-105"
                         />
                     </div>
                 </div>
 
-                <h2 className="text-xl font-bold mb-1">
-                    {caller?.name || "Someone"}
-                </h2>
-                <p className="text-base-content/60 mb-8 text-sm">
-                    {isAudioOnly ? "Incoming audio call..." : "Incoming video call..."}
-                </p>
+                {/* Name */}
+                <div className="text-center">
+                    <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-lg mb-2">
+                        {caller?.name || "Someone"}
+                    </h2>
+                    <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center gap-1.5">
+                            <div className="size-1.5 rounded-full bg-green-400 animate-bounce" style={{ animationDelay: '0s' }} />
+                            <div className="size-1.5 rounded-full bg-green-400 animate-bounce" style={{ animationDelay: '0.15s' }} />
+                            <div className="size-1.5 rounded-full bg-green-400 animate-bounce" style={{ animationDelay: '0.3s' }} />
+                        </div>
+                        <span className="text-white/50 text-sm font-semibold">Incoming call</span>
+                    </div>
+                </div>
 
-                <div className="flex items-center justify-center gap-8">
-                    <button
-                        onClick={handleReject}
-                        className="btn btn-circle btn-lg bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/30 transition-transform hover:scale-110"
-                        aria-label="Reject call"
-                    >
-                        <PhoneOff className="size-6" />
-                    </button>
+                {/* Action buttons */}
+                <div className="flex items-center justify-center gap-16 sm:gap-20 mt-4">
+                    <div className="flex flex-col items-center gap-3">
+                        <button
+                            onClick={handleReject}
+                            className="size-16 sm:size-18 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-[0_8px_30px_rgba(239,68,68,0.4)] transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-[0_8px_40px_rgba(239,68,68,0.6)]"
+                            aria-label="Reject call"
+                        >
+                            <PhoneOff className="size-7 sm:size-8 fill-current" />
+                        </button>
+                        <span className="text-white/40 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Decline</span>
+                    </div>
 
-                    <button
-                        onClick={handleAccept}
-                        className="btn btn-circle btn-lg bg-green-500 hover:bg-green-600 text-white border-none shadow-lg shadow-green-500/30 transition-transform hover:scale-110"
-                        aria-label="Accept call"
-                    >
-                        <PhoneIncoming className="size-6" />
-                    </button>
+                    <div className="flex flex-col items-center gap-3">
+                        <button
+                            onClick={handleAccept}
+                            className="size-16 sm:size-18 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center shadow-[0_8px_30px_rgba(34,197,94,0.4)] transition-all duration-200 hover:scale-110 active:scale-95 hover:shadow-[0_8px_40px_rgba(34,197,94,0.6)] animate-pulse"
+                            style={{ animationDuration: '2s' }}
+                            aria-label="Accept call"
+                        >
+                            <PhoneIncoming className="size-7 sm:size-8" />
+                        </button>
+                        <span className="text-white/40 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Accept</span>
+                    </div>
                 </div>
             </div>
         </div>
