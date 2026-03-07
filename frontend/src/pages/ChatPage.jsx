@@ -32,6 +32,30 @@ const ChatPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [fontSize, setFontSize] = useState(1);
   const [showShoutSlider, setShowShoutSlider] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+
+  useEffect(() => {
+    if (!window.visualViewport) return;
+
+    const handleViewportChange = () => {
+      setViewportHeight(window.visualViewport.height);
+      // Force scroll to bottom when keyboard opens
+      if (window.visualViewport.height < window.innerHeight) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    window.visualViewport.addEventListener("resize", handleViewportChange);
+    window.visualViewport.addEventListener("scroll", handleViewportChange);
+
+    // Initial call
+    handleViewportChange();
+
+    return () => {
+      window.visualViewport.removeEventListener("resize", handleViewportChange);
+      window.visualViewport.removeEventListener("scroll", handleViewportChange);
+    };
+  }, []);
 
   const handleSnapClick = () => fileInputRef.current?.click();
 
@@ -141,7 +165,10 @@ const ChatPage = () => {
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-base-100 overflow-hidden h-[100dvh] w-full">
+    <div
+      className="absolute inset-0 flex flex-col bg-base-100 overflow-hidden w-full"
+      style={{ height: `${viewportHeight}px`, top: window.visualViewport?.offsetTop || 0 }}
+    >
       {/* Background Wallpaper */}
       <div className="absolute inset-0 premium-chat-bg opacity-20 pointer-events-none z-0" />
 
@@ -174,7 +201,7 @@ const ChatPage = () => {
               </div>
 
               {/* FIXED INPUT AREA */}
-              <div className="flex-shrink-0 z-50 chat-input-glass pb-safe">
+              <div className="flex-shrink-0 z-50 chat-input-glass">
                 {targetUserId === "system_announcement" ? (
                   <div className="p-4 text-center">
                     <p className="text-xs font-black uppercase tracking-[0.2em] opacity-40 italic">
