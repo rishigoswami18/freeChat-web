@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { getLatestRelease } from "../lib/api";
 import { motion } from "framer-motion";
 import {
     MessageCircle,
@@ -120,6 +122,21 @@ const stats = [
 ];
 
 const LandingPage = () => {
+    const [latestApk, setLatestApk] = useState(null);
+
+    useEffect(() => {
+        const fetchApk = async () => {
+            try {
+                const data = await getLatestRelease();
+                setLatestApk(data);
+            } catch (err) {
+                console.error("Failed to fetch apk:", err);
+            }
+        };
+        fetchApk();
+    }, []);
+
+    const apkUrl = latestApk?.apkUrl || "https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy";
     return (
         <div className="min-h-screen bg-base-100" data-theme="forest">
             {/* ===== NAVIGATION ===== */}
@@ -205,7 +222,7 @@ const LandingPage = () => {
                                 <ArrowRight className="size-5" />
                             </Link>
                             <a
-                                href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+                                href={apkUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn btn-outline btn-lg gap-2 rounded-2xl hover:scale-[1.02] transition-all duration-300 border-accent text-accent hover:bg-accent hover:text-white"
@@ -407,7 +424,7 @@ const LandingPage = () => {
                                     </p>
                                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                         <a
-                                            href="https://docs.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+                                            href={apkUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="btn btn-primary btn-lg gap-3 shadow-xl shadow-primary/20 rounded-2xl hover:scale-105 transition-all duration-300"
@@ -416,7 +433,7 @@ const LandingPage = () => {
                                             Download APK Now
                                         </a>
                                         <div className="flex flex-col justify-center text-xs opacity-50 font-medium">
-                                            <span>Version 1.0.0</span>
+                                            <span>Version {latestApk?.versionName || "1.0.0"}</span>
                                             <span>Requires Android 8.0+</span>
                                         </div>
                                     </div>
@@ -531,7 +548,7 @@ const LandingPage = () => {
                                 </li>
                                 <li>
                                     <a
-                                        href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
+                                        href={apkUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-2 hover:text-primary transition font-bold text-accent"

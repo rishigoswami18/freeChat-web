@@ -22,34 +22,34 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef(null);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (isPlaying) {
       audioRef.current?.pause();
     } else {
       audioRef.current?.play();
     }
     setIsPlaying(!isPlaying);
-  };
+  }, [isPlaying]);
 
-  const handleTimeUpdate = () => {
+  const handleTimeUpdate = useCallback(() => {
     setCurrentTime(audioRef.current?.currentTime || 0);
-  };
+  }, []);
 
-  const handleEnded = () => {
+  const handleEnded = useCallback(() => {
     setIsPlaying(false);
     setCurrentTime(0);
-  };
+  }, []);
 
-  const formatTime = (seconds) => {
+  const formatTime = useCallback((seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  }, []);
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-md min-w-[180px] sm:min-w-[240px] border transition-all ${isMyMessage ? 'bg-primary text-primary-content border-primary/20' : 'bg-base-200 text-base-content border-base-300'}`}>
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-md min-w-[180px] sm:min-w-[240px] border ${isMyMessage ? 'bg-primary text-primary-content border-primary/20' : 'bg-base-200 text-base-content border-base-300'}`}>
       <audio
         ref={audioRef}
         src={url}
@@ -81,24 +81,24 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
           </span>
         </div>
       </div>
-
-      <div className={`flex items-center gap-0.5 ${isPlaying ? 'animate-pulse opacity-100' : 'opacity-30'}`}>
-        <div className="w-[2px] h-3 bg-current rounded-full" />
-        <div className="w-[2px] h-5 bg-current rounded-full" />
-        <div className="w-[2px] h-2 bg-current rounded-full" />
-      </div>
     </div>
   );
 });
 
+VoiceMessagePlayer.displayName = "VoiceMessagePlayer";
+
+// Static components to avoid re-renders when passed as props
+const NullComponent = memo(() => null);
+
 const EmotionMessage = memo((props) => {
   const messageContext = useMessageContext();
   const message = messageContext?.message || props.message;
-  const isMyMessage = messageContext?.isMyMessage
-    ? messageContext.isMyMessage()
-    : props.isMyMessage
-      ? props.isMyMessage()
-      : false;
+  // Handle isMyMessage accurately whether as hook or prop
+  const isMyMessage = useMemo(() => {
+    if (messageContext?.isMyMessage) return messageContext.isMyMessage();
+    if (typeof props.isMyMessage === 'function') return props.isMyMessage();
+    return !!props.isMyMessage;
+  }, [messageContext, props.isMyMessage]);
 
   const { authUser } = useAuthUser();
   const isPremium = isPremiumUser(authUser);
@@ -107,16 +107,17 @@ const EmotionMessage = memo((props) => {
   const [isTranslating, setIsTranslating] = useState(false);
   const [isViewingSnap, setIsViewingSnap] = useState(false);
 
-  const isSnap = message?.extra_data?.isSnap || message?.isSnap;
-  const isVoice = message?.extra_data?.isVoice || message?.isVoice;
-  const isViewed = message?.extra_data?.isViewed || message?.isViewed;
+  const extra = message?.extra_data || message || {};
+  const isSnap = extra.isSnap;
+  const isVoice = extra.isVoice;
+  const isViewed = extra.isViewed;
+  const emotion = extra.emotion;
 
-  const handleMarkViewed = async () => {
+  const handleMarkViewed = useCallback(async () => {
     setIsViewingSnap(false);
     if (isViewed || isMyMessage) return;
 
     try {
-      // Update message on Stream
       const client = messageContext?.client;
       if (client) {
         await client.partialUpdateMessage(message.id, {
@@ -126,24 +127,17 @@ const EmotionMessage = memo((props) => {
     } catch (error) {
       console.error("Error marking snap as viewed:", error);
     }
-  };
+  }, [isViewed, isMyMessage, message.id, message.extra_data, messageContext?.client]);
 
-  const emotion =
-    message?.emotion ||
-    message?.extra_data?.emotion ||
-    message?.custom?.emotion;
-
-  const handleTranslate = async () => {
+  const handleTranslate = useCallback(async () => {
     if (!isPremium) {
       toast.error("Translation is a premium feature. Please upgrade!");
       return;
     }
-
     if (translatedText) {
-      setTranslatedText(""); // Toggle off
+      setTranslatedText("");
       return;
     }
-
     setIsTranslating(true);
     try {
       const targetLang = authUser?.nativeLanguage || "en";
@@ -154,73 +148,84 @@ const EmotionMessage = memo((props) => {
     } finally {
       setIsTranslating(false);
     }
-  };
+  }, [isPremium, translatedText, authUser?.nativeLanguage, message.text]);
 
   const { groupStyles = [] } = messageContext || {};
   const isFirstInGroup = groupStyles.includes("top") || groupStyles.includes("single");
   const isLastInGroup = groupStyles.includes("bottom") || groupStyles.includes("single");
-  // isMyMessage is already declared above, just use it.
 
-  const messageFontSize = Number(message?.extra_data?.fontSize || message?.fontSize || 1);
-  // Clamp scale between 0.5 and 2.5 for safety
-  const scale = Math.min(2.5, Math.max(0.5, messageFontSize));
+  const scale = useMemo(() => Math.min(2.5, Math.max(0.5, Number(extra.fontSize || 1))), [extra.fontSize]);
   const isWhisper = scale < 0.9;
   const isShout = scale > 1.3;
 
   const isSystem = message?.user?.id === "system_announcement" || message?.text?.startsWith("📢 SYSTEM NOTIFICATION");
 
+  const timestamp = useMemo(() => {
+    if (!message.created_at) return "";
+    return new Date(message.created_at).toLocaleTimeString("en-US", {
+      timeZone: 'Asia/Kolkata',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  }, [message.created_at]);
+
+  const MessageFooter = useCallback(() => (
+    <div className="absolute bottom-1 right-2 flex items-center gap-1 select-none pointer-events-none z-10">
+      <span className={`text-[9.5px] font-bold tracking-tight ${isMyMessage ? 'text-white/80' : 'text-base-content/40'}`}>
+        {timestamp}
+      </span>
+      {isMyMessage && (
+        <div className="flex -space-x-1.5 translate-y-[1px]">
+          <CheckCheck className={`size-3 ${message.status === 'received' || message.status === 'read' ? 'text-sky-300' : 'text-white/40'}`} />
+        </div>
+      )}
+    </div>
+  ), [isMyMessage, timestamp, message.status]);
+
+  const emotionStyle = useMemo(() => {
+    if (!emotion || emotion === 'neutral' || !emotionColors[emotion]) return null;
+    return emotionColors[emotion].split(' ')[0];
+  }, [emotion]);
+
   if (isSystem) {
     return (
       <div className="flex flex-col items-center my-6 px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-sm sm:max-w-md overflow-hidden rounded-3xl border border-primary/20 bg-base-100 shadow-2xl shadow-primary/10 transition-all hover:shadow-primary/20"
-        >
-          {/* Header Card */}
+        <div className="w-full max-w-sm sm:max-w-md overflow-hidden rounded-3xl border border-primary/20 bg-base-100 shadow-2xl shadow-primary/10">
           <div className="bg-gradient-to-r from-primary via-indigo-600 to-violet-600 p-4 sm:p-5 flex items-center justify-between relative overflow-hidden">
-            {/* Animated light beam */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-
             <div className="flex items-center gap-3 relative z-10">
               <div className="size-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
-                <Mic className="size-6 text-white animate-pulse" />
+                <Mic className="size-6 text-white" />
               </div>
               <div>
                 <h3 className="text-white font-black italic uppercase tracking-tighter text-sm sm:text-base leading-none">System Notification</h3>
                 <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">Official Broadcast</p>
               </div>
             </div>
-            <Star className="size-5 text-amber-300 fill-amber-300 animate-bounce relative z-10" />
+            <Star className="size-5 text-amber-300 fill-amber-300 relative z-10" />
           </div>
-
-          {/* Content Body */}
           <div className="p-5 sm:p-7 space-y-4 bg-gradient-to-b from-primary/5 to-transparent">
             <div className="text-sm sm:text-base font-medium leading-relaxed text-base-content/80 whitespace-pre-wrap">
-              {message.text.replace("📢 SYSTEM NOTIFICATION: \n\n", "").replace("📢 SYSTEM NOTIFICATION:", "").trim()}
+              {message.text.replace(/📢 SYSTEM NOTIFICATION: \n\n|📢 SYSTEM NOTIFICATION:/i, "").trim()}
             </div>
-
             <div className="pt-4 border-t border-base-content/5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+              <div className="flex items-center gap-1.5 grayscale opacity-40">
                 <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center">
                   <CheckCheck className="size-3 text-primary" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest italic">Verified System Message</span>
               </div>
-              <span className="text-[10px] font-bold opacity-30 tabular-nums">
-                {new Date(message.created_at).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: false })}
-              </span>
+              <span className="text-[10px] font-bold opacity-30 tabular-nums">{timestamp}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}
-    >
+    <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`} style={{ contain: 'layout style' }}>
       {isSnap ? (
         <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
           {isViewed ? (
@@ -231,7 +236,7 @@ const EmotionMessage = memo((props) => {
           ) : (
             <button
               onClick={() => setIsViewingSnap(true)}
-              className="flex items-center gap-3 bg-primary text-primary-content px-5 py-3 rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all group/snap"
+              className="flex items-center gap-3 bg-primary text-primary-content px-5 py-3 rounded-2xl shadow-lg active:scale-95 transition-all"
             >
               <div className="size-8 rounded-full bg-white/20 flex items-center justify-center">
                 <Camera className="size-5" />
@@ -242,71 +247,51 @@ const EmotionMessage = memo((props) => {
               </div>
             </button>
           )}
-
-          {isViewingSnap && (
-            <SnapViewer message={message} onClose={handleMarkViewed} />
-          )}
+          {isViewingSnap && <SnapViewer message={message} onClose={handleMarkViewed} />}
         </div>
       ) : isVoice ? (
         <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} mb-2`}>
           <VoiceMessagePlayer
-            url={message.mediaUrl || message.extra_data?.mediaUrl}
-            duration={message.duration || message.extra_data?.duration}
+            url={message.mediaUrl || extra.mediaUrl}
+            duration={message.duration || extra.duration}
             isMyMessage={isMyMessage}
           />
         </div>
       ) : (
-        <div
-          className={`relative w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} ${isShout ? 'drop-shadow-xl' : ''}`}
-        >
+        <div className={`relative w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} ${isShout ? 'drop-shadow-xl' : ''}`}>
           <div
             className={`message-scale-container flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} flex-shrink-0 ${isWhisper ? 'opacity-60' : ''}`}
             style={{
-              transform: `scale(${scale})`,
+              transform: scale !== 1 ? `scale(${scale})` : undefined,
               transformOrigin: isMyMessage ? 'right bottom' : 'left bottom',
               padding: isShout ? `${(scale - 1) * 20}px 0` : undefined,
+              willChange: scale !== 1 ? 'transform' : 'auto'
             }}
           >
             <div className={`relative ${isFirstInGroup ? (isMyMessage ? 'bubble-tail-me' : 'bubble-tail-others') : ''}`}>
               <MessageSimple
                 {...props}
                 hideAvatar={!isFirstInGroup || isMyMessage}
-                // Force fully disable these to avoid ANY leakage
-                MessageHeader={() => null}
-                MessageTimestamp={() => null}
-                MessageStatus={() => null}
-                // Internal bubble layout
+                MessageHeader={NullComponent}
+                MessageTimestamp={NullComponent}
+                MessageStatus={NullComponent}
                 className={`
                   ${isFirstInGroup ? (isMyMessage ? 'bubble-top-right' : 'bubble-top-left') : ''}
                   ${!isLastInGroup ? 'mb-0.5' : 'mb-3'}
                   custom-message-bubble
                 `}
-                MessageFooter={() => (
-                  <div className="absolute bottom-1 right-2 flex items-center gap-1 select-none pointer-events-none z-10">
-                    <span className={`text-[9.5px] font-bold tracking-tight ${isMyMessage ? 'text-white/80' : 'text-base-content/40'}`}>
-                      {new Date(message.created_at).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false })}
-                    </span>
-                    {isMyMessage && (
-                      <div className="flex -space-x-1.5 translate-y-[1px]">
-                        <CheckCheck className={`size-3 ${message.status === 'received' || message.status === 'read' ? 'text-sky-300' : 'text-white/40'}`} />
-                      </div>
-                    )}
-                  </div>
-                )}
+                MessageFooter={MessageFooter}
               />
             </div>
           </div>
         </div>
-      )
-      }
-
+      )}
 
       <div className={`flex flex-col ${isMyMessage ? "items-end mr-14" : "items-start ml-14"} -mt-1 mb-1 gap-1.5`}>
-        {/* Emotion Badge & Translation - Single Row */}
         <div className="flex items-center gap-3">
-          {emotion && emotion !== 'neutral' && emotionColors[emotion] && (
+          {emotionStyle && (
             <div className="flex items-center gap-1.5 opacity-70">
-              <div className={`size-1.5 rounded-full ${emotionColors[emotion].split(' ')[0]} animate-pulse`} />
+              <div className={`size-1.5 rounded-full ${emotionStyle}`} />
               <span className="text-[9px] uppercase tracking-widest font-black italic text-base-content/60">
                 {emotion}
               </span>
@@ -316,15 +301,14 @@ const EmotionMessage = memo((props) => {
           {message.text && !translatedText && (
             <button
               onClick={handleTranslate}
-              className="group/t flex items-center gap-1.5 transition-all opacity-20 hover:opacity-100 text-primary"
+              className="flex items-center gap-1.5 transition-all opacity-20 hover:opacity-100 text-primary"
               disabled={isTranslating}
-              title="Translate message"
             >
               {isTranslating ? (
                 <Loader2 className="size-3 animate-spin" />
               ) : (
                 <>
-                  <Languages className="size-3.5 transition-transform group-hover/t:scale-110" />
+                  <Languages className="size-3.5" />
                   {!isPremium && <Star className="size-2 text-warning fill-warning" />}
                 </>
               )}
@@ -332,17 +316,15 @@ const EmotionMessage = memo((props) => {
           )}
         </div>
 
-        {/* Translation Result */}
         {translatedText && (
-          <div className="bg-base-200/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-base-300 max-w-[240px] animate-in slide-in-from-top-1 duration-300 shadow-lg relative group/trans">
+          <div className="bg-base-200/90 backdrop-blur-md px-3 py-2 rounded-2xl border border-base-300 max-w-[240px] shadow-lg relative">
             <p className="text-[11px] italic text-base-content/90 leading-tight pr-5">
               <Languages className="size-3 inline mr-2 text-primary opacity-60" />
               {translatedText}
             </p>
             <button
               onClick={() => setTranslatedText("")}
-              className="absolute top-1.5 right-1.5 size-4 flex items-center justify-center rounded-full hover:bg-base-300 transition-colors text-base-content/40 hover:text-base-content"
-              title="Hide"
+              className="absolute top-1.5 right-1.5 size-4 flex items-center justify-center rounded-full hover:bg-base-300 text-base-content/40"
             >
               ×
             </button>
@@ -352,5 +334,7 @@ const EmotionMessage = memo((props) => {
     </div>
   );
 });
+
+EmotionMessage.displayName = "EmotionMessage";
 
 export default EmotionMessage;

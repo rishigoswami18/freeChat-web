@@ -21,7 +21,12 @@ import {
     UserCheck,
     LifeBuoy,
     Star,
-    X
+    X,
+    Smartphone,
+    Package,
+    ArrowDownToLine,
+    Plus,
+    CheckCircle
 } from "lucide-react";
 import {
     getAdminStats,
@@ -38,8 +43,11 @@ import {
     sweepPendingActions,
     getAdminSupportMessages,
     deleteSupportMessage,
-    sendEmailToUser,
-    sendNotificationToUser
+    sendNotificationToUser,
+    getAllReleases,
+    createRelease,
+    updateRelease,
+    deleteRelease
 } from "../lib/api";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -77,6 +85,20 @@ const AdminDashboard = () => {
     const [inviteSearch, setInviteSearch] = useState("");
     const [inviteSubject, setInviteSubject] = useState("");
     const [inviteMessage, setInviteMessage] = useState("");
+
+    // APK Manager State
+    const [releases, setReleases] = useState([]);
+    const [isApkLoading, setIsApkLoading] = useState(false);
+    const [isApkUploading, setIsApkUploading] = useState(false);
+    const [showApkModal, setShowApkModal] = useState(false);
+    const [apkForm, setApkForm] = useState({
+        versionCode: "",
+        versionName: "",
+        apkUrl: "",
+        releaseNotes: "",
+        isUpdateRequired: false,
+        apkFile: null // base64
+    });
 
     useEffect(() => {
         fetchStats();
@@ -208,7 +230,83 @@ const AdminDashboard = () => {
         if (activeTab === "stats") fetchStats();
         if (activeTab === "invite") fetchFirebaseUsers();
         if (activeTab === "support") fetchSupportMessages();
+        if (activeTab === "apk") fetchReleases();
     }, [activeTab]);
+
+    const fetchReleases = async () => {
+        setIsApkLoading(true);
+        try {
+            const data = await getAllReleases();
+            setReleases(data || []);
+        } catch (err) {
+            toast.error("Failed to load releases");
+        } finally {
+            setIsApkLoading(false);
+        }
+    };
+
+    const handleApkUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 100 * 1024 * 1024) return toast.error("File size exceeds 100MB limit");
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            setApkForm(prev => ({ ...prev, apkFile: reader.result }));
+            toast.success("File ready for upload");
+        };
+    };
+
+    const handleCreateRelease = async () => {
+        if (!apkForm.versionCode || !apkForm.versionName || (!apkForm.apkUrl && !apkForm.apkFile)) {
+            return toast.error("Please fill all required fields");
+        }
+
+        setIsApkUploading(true);
+        try {
+            await createRelease({
+                ...apkForm,
+                versionCode: Number(apkForm.versionCode)
+            });
+            toast.success("Release created successfully!");
+            setShowApkModal(false);
+            setApkForm({
+                versionCode: "",
+                versionName: "",
+                apkUrl: "",
+                releaseNotes: "",
+                isUpdateRequired: false,
+                apkFile: null
+            });
+            fetchReleases();
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to create release");
+        } finally {
+            setIsApkUploading(false);
+        }
+    };
+
+    const handleDeleteRelease = async (id) => {
+        if (!window.confirm("Delete this release forever?")) return;
+        try {
+            await deleteRelease(id);
+            toast.success("Release deleted");
+            fetchReleases();
+        } catch (err) {
+            toast.error("Failed to delete release");
+        }
+    };
+
+    const handleToggleApkActive = async (release) => {
+        try {
+            await updateRelease(release._id, { isActive: !release.isActive });
+            toast.success(`Release marked as ${!release.isActive ? 'active' : 'inactive'}`);
+            fetchReleases();
+        } catch (err) {
+            toast.error("Failed to update status");
+        }
+    };
 
     const handleBroadcast = async () => {
         if (!broadcastMsg.trim()) return toast.error("Empty message");
@@ -370,6 +468,7 @@ const AdminDashboard = () => {
                     { id: "support", label: "Support", icon: LifeBuoy },
                     { id: "broadcast", label: "Mass Broadcast", icon: Megaphone },
                     { id: "invite", label: "Invite System", icon: UserPlus },
+                    { id: "apk", label: "APK Manager", icon: Smartphone },
                 ].map((tab) => (
                     <button
                         key={tab.id}
@@ -971,6 +1070,220 @@ const AdminDashboard = () => {
                                             </div>
                                         </motion.div>
                                     ))}
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+                    {activeTab === "apk" && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            className="space-y-8"
+                        >
+                            {/* Header Section */}
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 bg-base-200 p-8 rounded-[2.5rem] border border-base-content/5 shadow-inner">
+                                <div className="flex items-center gap-5">
+                                    <div className="size-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center border-2 border-primary/5">
+                                        <Package className="size-8" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-black italic tracking-tighter uppercase">Release Registry</h2>
+                                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Manage BondBeyond Build Artifacts</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowApkModal(true)}
+                                    className="btn btn-primary btn-md rounded-2xl gap-2 font-black uppercase text-xs tracking-tight shadow-xl shadow-primary/20 hover:scale-105 transition-all"
+                                >
+                                    <Plus className="size-4" />
+                                    New Build Command
+                                </button>
+                            </div>
+
+                            {isApkLoading ? (
+                                <div className="flex flex-col items-center justify-center py-32 gap-4">
+                                    <Loader2 className="size-10 animate-spin text-primary" />
+                                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Scanning archives...</p>
+                                </div>
+                            ) : releases.length === 0 ? (
+                                <div className="card bg-base-200 p-16 rounded-[2.5rem] border-2 border-dashed border-base-content/5 text-center">
+                                    <Package className="size-16 text-primary mx-auto mb-4 opacity-20" />
+                                    <h3 className="text-xl font-black uppercase italic tracking-tight opacity-40">No Releases Logged</h3>
+                                    <p className="text-sm opacity-30 mt-2">Deploy your first APK version to get started.</p>
+                                    <button onClick={() => setShowApkModal(true)} className="btn btn-link btn-xs mt-4 text-primary no-underline font-black uppercase tracking-widest">Create Release v1.0.0</button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {releases.map((release) => (
+                                        <motion.div
+                                            key={release._id}
+                                            layout
+                                            className={`card bg-base-100 border-2 rounded-[2.5rem] p-6 group transition-all duration-500 overflow-hidden relative ${release.isActive ? 'border-primary/20 shadow-xl shadow-primary/5' : 'border-base-content/5 opacity-70'}`}
+                                        >
+                                            {release.isUpdateRequired && (
+                                                <div className="absolute top-0 right-10 px-4 py-1.5 bg-error text-error-content text-[8px] font-black uppercase tracking-[0.2em] rounded-b-xl z-10 shadow-lg">
+                                                    Critical Update
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`size-12 rounded-xl flex items-center justify-center font-black ${release.isActive ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content/40'}`}>
+                                                        {release.versionName?.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-lg font-black tracking-tight">{release.versionName}</h4>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Build {release.versionCode}</span>
+                                                            <div className="size-1 rounded-full bg-base-content/20" />
+                                                            <span className="text-[10px] font-bold opacity-40">{new Date(release.createdAt).toLocaleDateString()}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => handleDeleteRelease(release._id)} className="btn btn-ghost btn-sm btn-circle text-error">
+                                                        <Trash2 className="size-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-base-200/50 p-5 rounded-2xl border border-base-content/5 mb-6 shadow-inner min-h-[80px]">
+                                                <p className="text-[11px] leading-relaxed font-medium italic opacity-70">
+                                                    {release.releaseNotes || "No transmission logs provided for this build."}
+                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center justify-between gap-4">
+                                                <button
+                                                    onClick={() => handleToggleApkActive(release)}
+                                                    className={`btn btn-sm flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 transition-all ${release.isActive ? 'btn-success text-white' : 'btn-outline border-base-content/10'}`}
+                                                >
+                                                    {release.isActive ? <CheckCircle className="size-3.5" /> : <Smartphone className="size-3.5" />}
+                                                    {release.isActive ? 'Active Node' : 'Initialize Node'}
+                                                </button>
+                                                <a
+                                                    href={release.apkUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-sm btn-circle bg-base-200 hover:bg-primary hover:text-white transition-all border-none"
+                                                    title="Download Artifact"
+                                                >
+                                                    <ArrowDownToLine className="size-4" />
+                                                </a>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Release Upload Modal */}
+                            {showApkModal && (
+                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        className="bg-base-100 rounded-[3rem] w-full max-w-xl overflow-hidden shadow-2xl ring-1 ring-base-content/5"
+                                    >
+                                        <div className="p-8 bg-gradient-to-br from-primary/10 to-transparent flex items-center justify-between border-b border-base-content/5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="size-12 bg-primary text-primary-content rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+                                                    <Plus className="size-6" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-black uppercase tracking-tight italic">Initialize <span className="text-primary">New Build</span></h3>
+                                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Broadcast Version Registry</p>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => setShowApkModal(false)} className="btn btn-ghost btn-sm btn-circle opacity-50 hover:opacity-100">
+                                                <X className="size-5" />
+                                            </button>
+                                        </div>
+
+                                        <div className="p-8 space-y-6">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Version Code (Number)</label>
+                                                    <input
+                                                        type="number"
+                                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-bold"
+                                                        placeholder="e.g. 1"
+                                                        value={apkForm.versionCode}
+                                                        onChange={(e) => setApkForm({ ...apkForm, versionCode: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Version Name (String)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-bold"
+                                                        placeholder="e.g. 1.0.0"
+                                                        value={apkForm.versionName}
+                                                        onChange={(e) => setApkForm({ ...apkForm, versionName: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">APK Artifact</label>
+                                                <div className="flex flex-col gap-3">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-medium text-xs h-10"
+                                                        placeholder="Direct APK Link (Optional if uploading file)..."
+                                                        value={apkForm.apkUrl}
+                                                        onChange={(e) => setApkForm({ ...apkForm, apkUrl: e.target.value })}
+                                                    />
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex-1 h-10 bg-base-200 rounded-2xl border border-dashed border-base-content/10 flex items-center justify-between px-4 overflow-hidden">
+                                                            <span className="text-[10px] font-bold opacity-30 uppercase truncate">{apkForm.apkFile ? "File Ready to Transmit" : "No File Selected"}</span>
+                                                            {apkForm.apkFile && <CheckCircle className="size-3 text-success flex-shrink-0" />}
+                                                        </div>
+                                                        <label className="btn btn-sm btn-outline rounded-xl font-black text-[10px] uppercase h-10 cursor-pointer">
+                                                            <Plus className="size-3 mr-1" /> Choose .apk
+                                                            <input type="file" accept=".apk" className="hidden" onChange={handleApkUpload} />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1.5">
+                                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Release Intel</label>
+                                                <textarea
+                                                    className="textarea textarea-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 min-h-[80px] font-medium text-sm leading-relaxed"
+                                                    placeholder="Document build changes or transmission logs..."
+                                                    value={apkForm.releaseNotes}
+                                                    onChange={(e) => setApkForm({ ...apkForm, releaseNotes: e.target.value })}
+                                                />
+                                            </div>
+
+                                            <div className="flex items-center gap-3 p-4 bg-base-200 rounded-2xl border border-base-content/5">
+                                                <input
+                                                    type="checkbox"
+                                                    className="checkbox checkbox-primary checkbox-sm"
+                                                    checked={apkForm.isUpdateRequired}
+                                                    onChange={(e) => setApkForm({ ...apkForm, isUpdateRequired: e.target.checked })}
+                                                />
+                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Mandatory System Update Required</p>
+                                            </div>
+
+                                            <button
+                                                onClick={handleCreateRelease}
+                                                disabled={isApkUploading}
+                                                className="btn btn-primary btn-lg w-full rounded-3xl gap-3 shadow-xl shadow-primary/20 transition-all active:scale-95 group overflow-hidden relative"
+                                            >
+                                                {isApkUploading ? (
+                                                    <Loader2 className="size-6 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <span className="font-black italic uppercase tracking-tighter text-lg relative z-10">Broadcast Registry</span>
+                                                        <Send className="size-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </motion.div>
                                 </div>
                             )}
                         </motion.div>

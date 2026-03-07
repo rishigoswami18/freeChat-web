@@ -393,15 +393,21 @@ body.is-chat-active {
 .str-chat__list {
   padding: 8px 6px;
   background: oklch(var(--b1));
-  /* Optimization for large lists */
-  overflow-anchor: auto !important;
-  scroll-behavior: auto !important;
+  overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  will-change: transform;
+  scroll-behavior: auto !important;
+  /* Disable smooth scroll for better performance with virtualization */
+  text-rendering: optimizeSpeed;
+  /* Faster text layout */
 }
 
 .str-chat__message {
   contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 80px;
+  transform: translate3d(0, 0, 0);
+  /* Force GPU */
+  backface-visibility: hidden;
 }
 
 @media (min-width: 640px) {
@@ -490,10 +496,7 @@ body.is-chat-active {
   flex: 1 !important;
   overflow-y: auto !important;
   min-height: 0 !important;
-  -webkit-overflow-scrolling: touch !important;
   /* Smooth scrolling for iOS Safari */
-  will-change: transform !important;
-  /* Performance boost */
   overscroll-behavior-y: contain !important;
   /* Prevent page bounce */
 }
@@ -533,10 +536,10 @@ body.is-chat-active {
   border-radius: 12px !important;
   padding: 8px 12px 6px 12px !important;
   position: relative !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
-  transition: transform 0.2s ease;
-  transform: translateZ(0);
-  /* Force GPU acceleration */
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08) !important;
+  /* Lighter shadow */
+  transition: opacity 0.2s ease;
+  /* No transform transition during scroll */
   max-width: 85% !important;
   width: fit-content !important;
   min-width: max-content !important;
@@ -627,11 +630,13 @@ body.is-chat-active {
   background-image:
     linear-gradient(rgba(var(--b1-rgb), 0.94), rgba(var(--b1-rgb), 0.94)),
     url("https://w7.pngwing.com/pngs/414/83/png-transparent-whatsapp-social-media-icons-pattern-whatsapp-miscellaneous-monochrome-computer-wallpaper-thumbnail.png");
-  background-size: 400px;
+  background-size: 300px;
+  /* Slightly smaller for faster tiling */
   background-repeat: repeat;
-  /* background-attachment: fixed; removed for mobile performance */
   z-index: 0;
   pointer-events: none;
+  background-attachment: local;
+  /* Scrolls WITH content - often faster for GPU tiling than static background in absolute div */
 }
 
 /* For dark mode we might need to invert it */

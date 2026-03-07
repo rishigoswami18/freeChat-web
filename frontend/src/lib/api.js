@@ -423,6 +423,7 @@ export const getFirebaseNonUsers = async () => {
   return response.data;
 };
 
+
 export const sendInvites = async (emails, subject, message) => {
   const response = await axiosInstance.post("/admin/invite", { emails, subject, message });
   return response.data;
@@ -435,6 +436,33 @@ export const getAdminSupportMessages = async () => {
 
 export const deleteSupportMessage = async (messageId) => {
   const response = await axiosInstance.delete(`/admin/support/${messageId}`);
+  return response.data;
+};
+
+// ----------------- APK MANAGEMENT -----------------
+
+export const getLatestRelease = async () => {
+  const response = await axiosInstance.get("/apk/latest");
+  return response.data;
+};
+
+export const getAllReleases = async () => {
+  const response = await axiosInstance.get("/apk/all");
+  return response.data;
+};
+
+export const createRelease = async (releaseData) => {
+  const response = await axiosInstance.post("/apk", releaseData);
+  return response.data;
+};
+
+export const updateRelease = async (releaseId, releaseData) => {
+  const response = await axiosInstance.put(`/apk/${releaseId}`, releaseData);
+  return response.data;
+};
+
+export const deleteRelease = async (releaseId) => {
+  const response = await axiosInstance.delete(`/apk/${releaseId}`);
   return response.data;
 };
 
