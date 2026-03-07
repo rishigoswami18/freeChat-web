@@ -1,4 +1,4 @@
-import React, { useState, memo, useRef, useEffect } from "react";
+import React, { useState, memo, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
 import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCheck, Mic } from "lucide-react";
