@@ -25,7 +25,6 @@ messaging.onBackgroundMessage((payload) => {
         body: payload.notification.body,
         icon: payload.notification.image || payload.notification.icon || '/logo.png',
         data: payload.data,
-        // Call-specific: require interaction (don't auto-dismiss), show action buttons
         ...(isCall && {
             requireInteraction: true,
             tag: 'incoming-call',
@@ -46,27 +45,25 @@ self.addEventListener('notificationclick', function (event) {
     const data = notification.data || {};
     notification.close();
 
-    // Determine URL based on action
-    let url = data.url || '/';
     if (event.action === 'decline') {
-        // User declined — just close the notification
         return;
     }
 
-    // For calls or regular notifications, open the app
+    // For incoming calls: open the app root so IncomingCallNotification can handle it
+    // For other notifications: use the provided URL
+    const isCall = data.type === 'incoming_call';
+    const url = isCall ? '/' : (data.url || '/');
     const fullUrl = self.location.origin + url;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // If app is already open, focus it and navigate
             for (const client of windowClients) {
                 if (client.url.includes(self.location.origin)) {
                     client.focus();
-                    client.navigate(fullUrl);
+                    if (!isCall) client.navigate(fullUrl);
                     return;
                 }
             }
-            // Otherwise open a new window
             return clients.openWindow(fullUrl);
         })
     );

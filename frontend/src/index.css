@@ -972,6 +972,38 @@ body.is-chat-active {
   transform: scale(0.9);
 }
 
+/* WhatsApp-style call control button */
+.call-ctrl-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  backdrop-filter: blur(8px);
+}
+
+.call-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+
+.call-ctrl-btn:active {
+  transform: scale(0.92);
+}
+
+@media (min-width: 1024px) {
+  .call-ctrl-btn {
+    width: 54px;
+    height: 54px;
+  }
+}
+
 .call-avatar-container {
   animation: floating 3s ease-in-out infinite;
 }
