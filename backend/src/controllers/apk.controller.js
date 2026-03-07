@@ -31,8 +31,7 @@ export const createRelease = async (req, res) => {
         const uploadRes = await cloudinary.uploader.upload(apkFile, {
             resource_type: "raw",
             folder: "apk_releases",
-            public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`,
-            format: "apk"
+            public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`
         });
 
         const newRelease = new AppRelease({
