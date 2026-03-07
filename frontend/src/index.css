@@ -1379,3 +1379,65 @@ main {
   width: 5.5rem;
   height: 5.5rem;
 }
+
+/* ===== Safe Area Support (notch/gesture bar devices) ===== */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px) !important;
+}
+
+/* ===== Bottom Navigation Fix ===== */
+/* Ensure bottom tab bar is fully visible on all devices */
+.glass-panel-solid {
+  background: oklch(var(--b1) / 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ===== Hide Stream SDK Branding/Watermark ===== */
+.str-video__logo,
+.str-video__branding,
+.str-video__powered-by,
+[class*="str-video__watermark"],
+[class*="str-video__powered"],
+.str-video__speaker-layout__wrapper>div:last-child:not(.str-video__participant-view),
+a[href*="getstream.io"],
+a[href*="getstream.com"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+/* Fix the speaker layout to fill full screen without gaps */
+.str-video__speaker-layout,
+.str-video__speaker-layout__wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  background: #000 !important;
+}
+
+.str-video__speaker-layout__wrapper>div:first-child {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ===== Call Page Mobile Fix ===== */
+/* Ensure call controls don't go below the screen */
+@media (max-width: 639px) {
+  .whatsapp-call-bg {
+    height: 100dvh !important;
+    max-height: -webkit-fill-available;
+  }
+
+  .floating-controls {
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

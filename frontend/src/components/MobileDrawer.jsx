@@ -221,7 +221,7 @@ const MobileDrawer = () => {
       )}
 
       {/* Bottom Tab Bar */}
-      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") || location.pathname.startsWith("/call") ? "hidden" : ""
         }`}>
         <div className="flex items-center justify-around py-1.5 px-1">
           {bottomTabs.map(({ to, icon: Icon, label }) => {

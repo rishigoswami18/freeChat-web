@@ -308,7 +308,7 @@ const CallContent = ({ isAudioCall }) => {
   return (
     <StreamTheme className="call-page-theme">
       <div
-        className="whatsapp-call-bg h-screen w-screen flex flex-col relative overflow-hidden cursor-default select-none"
+        className="whatsapp-call-bg h-dvh w-screen flex flex-col relative overflow-hidden cursor-default select-none"
         onMouseMove={resetControlsTimeout}
         onClick={resetControlsTimeout}
       >
@@ -612,7 +612,7 @@ const WhatsAppRingingScreen = ({ isAudioCall }) => {
   };
 
   return (
-    <div className="h-screen whatsapp-call-bg flex flex-col items-center justify-between py-14 sm:py-20 lg:py-24 px-6 overflow-hidden">
+    <div className="h-dvh whatsapp-call-bg flex flex-col items-center justify-between py-14 sm:py-20 lg:py-24 px-6 overflow-hidden">
       <div className="text-center z-10 w-full">
         <div className="flex items-center justify-center gap-2 opacity-50 mb-3">
           <Lock className="size-3.5 text-white" />
