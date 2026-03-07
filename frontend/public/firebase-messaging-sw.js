@@ -85,20 +85,28 @@ self.addEventListener('notificationclick', function (event) {
         return;
     }
 
-    // For incoming calls or general clicks: open the app
+    // Handle "Answer" action specifically
     const isCall = data.type === 'incoming_call';
+    const isAnswerAction = action === 'answer';
+
+    // If it's a call and high-level click (not action) OR it's the answer action
+    // In both cases, we open the app. The CallPage will handle the accept() logic.
     const url = isCall ? '/' : (data.url || '/');
     const fullUrl = self.location.origin + url;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // Check if app is already open
             for (const client of windowClients) {
-                if (client.url.includes(self.location.origin)) {
+                if (new URL(client.url).origin === self.location.origin) {
                     client.focus();
+                    // If answering, we just want it to focus root so IncomingCallNotification can handle it
+                    // If it's a different URL (like direct message), navigate to it
                     if (!isCall) client.navigate(fullUrl);
                     return;
                 }
             }
+            // Not open, open new window
             return clients.openWindow(fullUrl);
         })
     );
