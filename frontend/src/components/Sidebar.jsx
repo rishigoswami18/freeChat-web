@@ -112,11 +112,11 @@ const Sidebar = () => {
 
 
         <a
-          href="https://docs.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
-
+          href={`${window.location.origin}/api/apk/download/latest`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"
+          download="BondBeyond_app.apk"
         >
           <div className="size-6 rounded-lg bg-secondary/20 flex items-center justify-center group-hover/apk:rotate-12 transition-transform">
             <Smartphone className="size-3.5" />

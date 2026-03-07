@@ -200,10 +200,9 @@ const AboutPage = () => {
                             Join Now
                         </Link>
                         <a
-                            href="https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href={`${window.location.origin}/api/apk/download/latest`}
                             className="btn btn-outline btn-lg rounded-2xl px-8 italic font-black uppercase border-secondary text-secondary"
+                            download="BondBeyond_app.apk"
                         >
                             Download App
                         </a>
