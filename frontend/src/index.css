@@ -1284,6 +1284,22 @@ body.is-chat-active {
   height: 100% !important;
 }
 
+/* ===== Screen Share Display Fix ===== */
+/* When screen sharing, use contain instead of cover so content isn't cropped */
+.str-video__screen-share-overlay,
+.str-video__screen-share-overlay video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: #000 !important;
+}
+
+/* Ensure screen share video isn't cropped */
+.str-video__participant-view--screen-sharing video {
+  object-fit: contain !important;
+  background: #111 !important;
+}
+
 /* Fine tune the PIP window for a taller, more WhatsApp-like look */
 .str-video__participant-view--local {
   aspect-ratio: 2/3 !important;

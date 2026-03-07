@@ -144,6 +144,7 @@ const CallContent = ({ isAudioCall }) => {
         setWaitingTime(prev => {
           if (prev >= 59) {
             toast("No one joined. Call ended.", { icon: "📞" });
+            call?.leave().catch(() => { });
             navigate("/");
             return prev;
           }
@@ -157,7 +158,34 @@ const CallContent = ({ isAudioCall }) => {
     return () => {
       if (waitTimerRef.current) clearInterval(waitTimerRef.current);
     };
-  }, [callingState, remoteParticipants.length, navigate]);
+  }, [callingState, remoteParticipants.length, navigate, call]);
+
+  // ===== FIX: End call for both sides =====
+  // When remote participant leaves in a 1-on-1 call, end for us too
+  const prevRemoteCountRef = useRef(remoteParticipants.length);
+  useEffect(() => {
+    // If we had a remote participant and now they're gone (and call is still joined)
+    if (prevRemoteCountRef.current > 0 && remoteParticipants.length === 0 && callingState === CallingState.JOINED) {
+      toast("Call ended by the other side.", { icon: "📞" });
+      call?.leave().catch(() => { });
+      navigate("/");
+    }
+    prevRemoteCountRef.current = remoteParticipants.length;
+  }, [remoteParticipants.length, callingState, call, navigate]);
+
+  // Listen for call.ended event from Stream SDK
+  useEffect(() => {
+    if (!call) return;
+    const handleCallEnded = () => {
+      console.log("📞 Call ended event received");
+      toast("Call ended.", { icon: "📞" });
+      navigate("/");
+    };
+    call.on('call.ended', handleCallEnded);
+    return () => {
+      call.off('call.ended', handleCallEnded);
+    };
+  }, [call, navigate]);
 
   // Auto-hide controls on desktop after 4 seconds
   const resetControlsTimeout = useCallback(() => {
@@ -197,9 +225,15 @@ const CallContent = ({ isAudioCall }) => {
 
   const handleEndCall = useCallback(async () => {
     try {
-      await call?.leave();
+      // Try endCall() first — this ends the call for ALL participants
+      await call?.endCall();
     } catch (e) {
-      console.error("Leave error:", e);
+      // If endCall fails (e.g. not the creator), just leave
+      try {
+        await call?.leave();
+      } catch (e2) {
+        console.error("Leave error:", e2);
+      }
     }
     navigate("/");
   }, [call, navigate]);
@@ -237,12 +271,23 @@ const CallContent = ({ isAudioCall }) => {
     try {
       if (isSharingScreen) {
         await call.screenShare.disable();
+        toast.success("Screen sharing stopped");
       } else {
-        await call.screenShare.enable();
+        // Check if browser supports getDisplayMedia
+        if (!navigator.mediaDevices?.getDisplayMedia) {
+          toast.error("Screen sharing is not supported on this device/browser.");
+          return;
+        }
+        await call.screenShare.enable({ audio: true });
         toast.success("Screen sharing started");
       }
     } catch (e) {
-      toast.error("Screen share failed");
+      console.error("Screen share error:", e);
+      if (e.name === "NotAllowedError" || e.message?.includes("denied") || e.message?.includes("Permission")) {
+        toast.error("Screen share permission denied. Please allow access.");
+      } else {
+        toast.error("Screen share failed. Try again.");
+      }
     }
   };
 
@@ -318,6 +363,22 @@ const CallContent = ({ isAudioCall }) => {
             </button>
           </div>
         </div>
+
+        {/* Screen Share Active Banner */}
+        {isSharingScreen && (
+          <div className="absolute top-[72px] sm:top-[88px] inset-x-0 z-40 flex justify-center pointer-events-none">
+            <div className="bg-primary/90 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full flex items-center gap-2 shadow-lg shadow-primary/30 backdrop-blur-sm pointer-events-auto">
+              <Monitor className="size-4" />
+              Sharing your screen
+              <button
+                onClick={handleToggleScreenShare}
+                className="ml-2 bg-white/20 hover:bg-white/30 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors"
+              >
+                Stop
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Dynamic Center Area / Video Views */}
         <div className="flex-1 relative bg-[#0a0a0a]">
@@ -531,7 +592,7 @@ const WhatsAppRingingScreen = ({ isAudioCall }) => {
       setRingTime(prev => {
         if (prev >= 44) {
           toast("No answer. Call ended.", { icon: "📞" });
-          call?.leave().catch(() => { });
+          call?.endCall().catch(() => call?.leave().catch(() => { }));
           navigate("/");
           return prev;
         }
@@ -543,9 +604,9 @@ const WhatsAppRingingScreen = ({ isAudioCall }) => {
 
   const handleCancel = async () => {
     try {
-      await call?.leave();
+      await call?.endCall();
     } catch (e) {
-      console.error("Leave error:", e);
+      try { await call?.leave(); } catch (e2) { }
     }
     navigate("/");
   };
