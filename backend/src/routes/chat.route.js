@@ -10,6 +10,7 @@ import cloudinary from "../lib/cloudinary.js";
 import User from "../models/User.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
 import { sendPushNotification } from "../lib/push.service.js";
+import { streamClient } from "../lib/stream.js";
 
 const router = express.Router();
 
@@ -112,13 +113,48 @@ router.post("/notify-message", protectRoute, async (req, res) => {
       title: `${req.user.fullName.split(' ')[0]} 💬`,
       body: text || `New message from ${req.user.fullName.split(' ')[0]}`,
       icon: req.user.profilePic || "https://www.freechatweb.in/logo.png",
-      data: { url: "/inbox" }
+      data: {
+        url: `/chat/${req.user._id}`,
+        type: "direct_message",
+        senderId: req.user._id.toString() // Needed for notification reply
+      }
     }).catch(err => console.error("[Push] Message notification failed:", err.message));
 
     res.json({ sent: true });
   } catch (err) {
     console.error("Error in message notification:", err.message);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Reply directly from notification (called by Service Worker)
+router.post("/notification-reply", protectRoute, async (req, res) => {
+  try {
+    const { recipientId, text } = req.body;
+    if (!recipientId || !text || !text.trim()) {
+      return res.status(400).json({ message: "Recipient and text required" });
+    }
+
+    if (!streamClient) {
+      return res.status(500).json({ message: "Chat service not initialized" });
+    }
+
+    const channelId = [req.user._id.toString(), recipientId.toString()].sort().join("-");
+    const channel = streamClient.channel("messaging", channelId, {
+      members: [req.user._id.toString(), recipientId.toString()],
+    });
+
+    console.log(`💬 [Notification Reply] ${req.user.fullName} -> ${recipientId}: ${text}`);
+
+    await channel.sendMessage({
+      text,
+      user_id: req.user._id.toString(),
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error replying from notification:", err.message);
+    res.status(500).json({ message: "Failed to send reply" });
   }
 });
 

@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { axiosInstance } from "../lib/axios";
 import { Sparkles, Loader2 } from "lucide-react";
 
-const SmartReply = ({ channel, onSelect }) => {
+const SmartReply = memo(({ channel, onSelect }) => {
     const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -84,6 +84,6 @@ const SmartReply = ({ channel, onSelect }) => {
             ))}
         </div>
     );
-};
+});
 
 export default SmartReply;

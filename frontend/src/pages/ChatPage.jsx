@@ -98,7 +98,7 @@ const ChatPage = () => {
     initChannel();
   }, [chatClient, targetUserId, authUser]);
 
-  const doSendMessageRequest = async (channelObj, message) => {
+  const doSendMessageRequest = useCallback(async (channelObj, message) => {
     try {
       const res = await axiosInstance.post("/chat/send", { text: message.text });
       const enrichedMessage = {
@@ -120,7 +120,22 @@ const ChatPage = () => {
     } catch (error) {
       return await channelObj.sendMessage({ ...message, fontSize, extra_data: { fontSize } });
     }
-  };
+  }, [fontSize, targetUserId]);
+
+  const handleVoiceSend = useCallback((data) => {
+    if (channel) {
+      channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" });
+      if (targetUserId && !targetUserId.startsWith("group_")) {
+        notifyMessage(targetUserId, "🎤 Sent a voice message").catch(() => { });
+      }
+    }
+  }, [channel, targetUserId]);
+
+  const handleSmartReply = useCallback((text) => {
+    if (channel) channel.sendMessage({ text, fontSize: 1 });
+  }, [channel]);
+
+  const MemoizedDateSeparator = useCallback(() => null, []);
 
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
@@ -131,7 +146,7 @@ const ChatPage = () => {
       <div className="absolute inset-0 premium-chat-bg opacity-20 pointer-events-none z-0" />
 
       <Chat client={chatClient} theme="messaging light">
-        <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
+        <Channel channel={channel} doSendMessageRequest={doSendMessageRequest} messageLimit={100}>
           <Window>
             <div className="flex flex-col h-full w-full relative z-10">
 
@@ -141,13 +156,19 @@ const ChatPage = () => {
               </div>
 
               {/* SCROLLABLE CONTENT area */}
-              <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
-                <MessageList Message={EmotionMessage} DateSeparator={() => null} />
+              <div className="flex-1 relative flex flex-col min-h-0">
+                <MessageList
+                  Message={EmotionMessage}
+                  DateSeparator={MemoizedDateSeparator}
+                  virtualized
+                  hideDeletedMessages
+                  closeOnScroll
+                />
 
                 {/* Smart replies float above input */}
                 {targetUserId !== "system_announcement" && (
                   <div className="flex-shrink-0 px-2 z-20">
-                    <SmartReply channel={channel} onSelect={(text) => channel.sendMessage({ text, fontSize: 1 })} />
+                    <SmartReply channel={channel} onSelect={handleSmartReply} />
                   </div>
                 )}
               </div>
@@ -194,16 +215,11 @@ const ChatPage = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5">
-                        <div className="flex-1 bg-base-200/60 rounded-[28px] border border-base-content/5 shadow-inner focus-within:bg-base-100 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                        <div className="flex-1 bg-base-200/60 rounded-[28px] border border-base-content/5 shadow-inner focus-within:bg-base-100 focus-within:ring-1 focus-within:ring-primary/20">
                           <MessageInput focus grow />
                         </div>
                         <div className="flex-shrink-0">
-                          <VoiceRecorder onSend={(data) => {
-                            channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" });
-                            if (targetUserId && !targetUserId.startsWith("group_")) {
-                              notifyMessage(targetUserId, "🎤 Sent a voice message").catch(() => { });
-                            }
-                          }} />
+                          <VoiceRecorder onSend={handleVoiceSend} />
                         </div>
                       </div>
                     </div>

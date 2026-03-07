@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, memo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
 import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCheck, Mic } from "lucide-react";
@@ -7,8 +7,6 @@ import useAuthUser from "../hooks/useAuthUser";
 import { translateText } from "../lib/api";
 import toast from "react-hot-toast";
 import { isPremiumUser } from "../lib/premium";
-import { useRef, useEffect } from "react";
-
 const emotionColors = {
   joy: "bg-yellow-400 text-yellow-950 border-yellow-500",
   love: "bg-pink-400 text-pink-950 border-pink-500",
@@ -19,7 +17,7 @@ const emotionColors = {
   neutral: "bg-slate-300 text-slate-900 border-slate-400",
 };
 
-const VoiceMessagePlayer = ({ url, duration, isMyMessage }) => {
+const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef(null);
@@ -91,9 +89,9 @@ const VoiceMessagePlayer = ({ url, duration, isMyMessage }) => {
       </div>
     </div>
   );
-};
+});
 
-const EmotionMessage = (props) => {
+const EmotionMessage = memo((props) => {
   const messageContext = useMessageContext();
   const message = messageContext?.message || props.message;
   const isMyMessage = messageContext?.isMyMessage
@@ -262,12 +260,11 @@ const EmotionMessage = (props) => {
           className={`relative w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} ${isShout ? 'drop-shadow-xl' : ''}`}
         >
           <div
-            className={`message-scale-container flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} flex-shrink-0 transition-all duration-300 ${isWhisper ? 'opacity-60' : ''}`}
+            className={`message-scale-container flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} flex-shrink-0 ${isWhisper ? 'opacity-60' : ''}`}
             style={{
               transform: `scale(${scale})`,
               transformOrigin: isMyMessage ? 'right bottom' : 'left bottom',
-              marginTop: isShout ? `${(scale - 1) * 20}px` : undefined,
-              marginBottom: isShout ? `${(scale - 1) * 20}px` : undefined,
+              padding: isShout ? `${(scale - 1) * 20}px 0` : undefined,
             }}
           >
             <div className={`relative ${isFirstInGroup ? (isMyMessage ? 'bubble-tail-me' : 'bubble-tail-others') : ''}`}>
@@ -354,6 +351,6 @@ const EmotionMessage = (props) => {
       </div>
     </div>
   );
-};
+});
 
 export default EmotionMessage;

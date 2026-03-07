@@ -1,7 +1,7 @@
+import React, { memo, useState } from "react";
 import { useChannelStateContext } from "stream-chat-react";
 import { Video, Phone, ArrowLeft, Wind, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import { notifyCall } from "../lib/api";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
@@ -59,7 +59,7 @@ function formatLastSeen(lastActive) {
     })}`;
 }
 
-function ChatHeader() {
+const ChatHeader = memo(() => {
     const { channel } = useChannelStateContext();
     const navigate = useNavigate();
     const videoClient = useVideoClient();
@@ -253,7 +253,6 @@ function ChatHeader() {
             )}
         </div>
     );
-}
+});
 
 export default ChatHeader;
-

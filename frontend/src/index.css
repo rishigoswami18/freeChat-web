@@ -393,6 +393,15 @@ body.is-chat-active {
 .str-chat__list {
   padding: 8px 6px;
   background: oklch(var(--b1));
+  /* Optimization for large lists */
+  overflow-anchor: auto !important;
+  scroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
+}
+
+.str-chat__message {
+  contain: content;
 }
 
 @media (min-width: 640px) {
