@@ -19,21 +19,26 @@ const StoryTray = () => {
     return (
         <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth min-h-[100px]">
             {/* Add Story Button */}
-            <div className="flex flex-col items-center gap-1 min-w-[75px] group">
+            <div className="flex flex-col items-center gap-2 min-w-[72px] group relative">
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="relative size-16 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden bg-base-200 active:scale-95 shadow-md"
+                    className="relative size-[66px] rounded-full p-[3px] transition-all duration-300 active:scale-95"
                 >
-                    <img
-                        src={authUser?.profilePic || "/avatar.png"}
-                        alt="Me"
-                        className="size-full object-cover opacity-80"
-                    />
-                    <div className="absolute bottom-0 right-0 p-1 bg-orange-500 rounded-full border-2 border-base-100 shadow-sm translate-x-1 translate-y-1">
-                        <Plus className="size-3.5 text-white" strokeWidth={4} />
+                    <div className="size-full rounded-full overflow-hidden bg-base-300 ring-[1px] ring-base-content/10">
+                        <img
+                            src={authUser?.profilePic || "/avatar.png"}
+                            alt="Me"
+                            className="size-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
                     </div>
+                    {/* Instagram-style blue plus badge */}
+                    <div className="absolute bottom-1 right-1 size-5 bg-[#0095f6] rounded-full border-[2.5px] border-base-100 shadow-sm flex items-center justify-center translate-x-1 translate-y-1 z-10">
+                        <Plus className="size-3 text-white" strokeWidth={4} />
+                    </div>
+                    {/* Subtle hover overlay */}
+                    <div className="absolute inset-[3px] rounded-full bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                 </button>
-                <span className="text-[11px] font-bold opacity-70 mt-1">Your Story</span>
+                <span className="text-[11px] font-medium opacity-60 tracking-tight">Your story</span>
             </div>
 
             {/* Friend Stories */}
@@ -50,20 +55,20 @@ const StoryTray = () => {
                 storiesGrouped.map((group) => (
                     <div
                         key={group.userId}
-                        className="flex flex-col items-center gap-1 cursor-pointer min-w-[75px] group/story"
+                        className="flex flex-col items-center gap-2 cursor-pointer min-w-[72px] group/story"
                         onClick={() => setSelectedUserStories(group)}
                     >
-                        <div className="relative size-16 rounded-full p-[2.5px] bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-600 transition-transform duration-300 active:scale-95">
+                        <div className="relative size-[66px] rounded-full p-[3px] bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-600 transition-transform duration-300 active:scale-95 ring-[1px] ring-base-content/5">
                             <div className="size-full rounded-full border-[2.5px] border-base-100 overflow-hidden bg-base-300">
                                 <img
                                     src={group.profilePic || "/avatar.png"}
                                     alt={group.fullName}
-                                    className="size-full object-cover group-hover/story:scale-110 transition-transform duration-500"
+                                    className="size-full object-cover group-hover/story:scale-105 transition-transform duration-500"
                                 />
                             </div>
                         </div>
-                        <span className="text-[10px] font-bold truncate w-full text-center opacity-80 group-hover/story:opacity-100 transition-opacity">
-                            {group.userId === authUser?._id ? "You" : group.fullName.split(" ")[0]}
+                        <span className="text-[11px] font-medium truncate w-full text-center opacity-60 tracking-tight group-hover/story:opacity-100 transition-opacity">
+                            {group.userId === authUser?._id ? "your story" : group.fullName.split(" ")[0].toLowerCase()}
                         </span>
                     </div>
                 ))
