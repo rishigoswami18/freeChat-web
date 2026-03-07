@@ -1,5 +1,6 @@
 import AppRelease from "../models/AppRelease.js";
 import cloudinary from "../lib/cloudinary.js";
+import { Readable } from "stream";
 
 export const getLatestRelease = async (req, res) => {
     try {
@@ -66,5 +67,28 @@ export const deleteRelease = async (req, res) => {
         res.status(200).json({ message: "Release deleted" });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+export const downloadRelease = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const release = id === "latest"
+            ? await AppRelease.findOne({ isActive: true }).sort({ versionCode: -1 })
+            : await AppRelease.findById(id);
+
+        if (!release) return res.status(404).json({ message: "Release not found" });
+
+        const response = await fetch(release.apkUrl);
+        if (!response.ok) throw new Error("Failed to fetch binary from storage");
+
+        res.setHeader("Content-Type", "application/vnd.android.package-archive");
+        res.setHeader("Content-Disposition", `attachment; filename="BondBeyond_${release.versionName}.apk"`);
+
+        const stream = Readable.fromWeb(response.body);
+        stream.pipe(res);
+    } catch (error) {
+        console.error("Download Error:", error);
+        res.status(500).json({ message: "Transmission failure" });
     }
 };

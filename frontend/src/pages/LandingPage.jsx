@@ -222,9 +222,7 @@ const LandingPage = () => {
                                 <ArrowRight className="size-5" />
                             </Link>
                             <a
-                                href={apkUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href="/api/apk/download/latest"
                                 className="btn btn-outline btn-lg gap-2 rounded-2xl hover:scale-[1.02] transition-all duration-300 border-accent text-accent hover:bg-accent hover:text-white"
                             >
                                 <Smartphone className="size-5" />
@@ -424,9 +422,7 @@ const LandingPage = () => {
                                     </p>
                                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                         <a
-                                            href={apkUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            href="/api/apk/download/latest"
                                             className="btn btn-primary btn-lg gap-3 shadow-xl shadow-primary/20 rounded-2xl hover:scale-105 transition-all duration-300"
                                         >
                                             <Smartphone className="size-6" />
@@ -548,9 +544,7 @@ const LandingPage = () => {
                                 </li>
                                 <li>
                                     <a
-                                        href={apkUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        href="/api/apk/download/latest"
                                         className="flex items-center gap-2 hover:text-primary transition font-bold text-accent"
                                     >
                                         <Smartphone className="size-4" />

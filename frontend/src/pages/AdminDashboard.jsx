@@ -1161,9 +1161,7 @@ const AdminDashboard = () => {
                                                     {release.isActive ? 'Active Node' : 'Initialize Node'}
                                                 </button>
                                                 <a
-                                                    href={release.apkUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                    href={`/api/apk/download/${release._id}`}
                                                     className="btn btn-sm btn-circle bg-base-200 hover:bg-primary hover:text-white transition-all border-none"
                                                     title="Download Artifact"
                                                 >
