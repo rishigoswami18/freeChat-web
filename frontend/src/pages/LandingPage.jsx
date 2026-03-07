@@ -136,7 +136,7 @@ const LandingPage = () => {
         fetchApk();
     }, []);
 
-    const apkUrl = latestApk?.apkUrl || "https://drive.google.com/uc?export=download&id=1fPRmdfcbsSOhHp58blp3NKBozp4LEoIy";
+    const apkUrl = latestApk?.apkUrl || null;
     return (
         <div className="min-h-screen bg-base-100" data-theme="forest">
             {/* ===== NAVIGATION ===== */}

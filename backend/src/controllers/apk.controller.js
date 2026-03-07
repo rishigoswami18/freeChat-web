@@ -21,27 +21,23 @@ export const getAllReleases = async (req, res) => {
 
 export const createRelease = async (req, res) => {
     try {
-        const { versionCode, versionName, apkUrl, releaseNotes, isUpdateRequired } = req.body;
+        const { versionCode, versionName, apkFile, releaseNotes, isUpdateRequired } = req.body;
 
-        let finalApkUrl = apkUrl;
-
-        // If a file was uploaded via Buffer/Selection (Admin might send a base64 or similar)
-        // But for simplicity in a "raw" uploader, we'll allow either a direct URL or a file upload.
-        // If the admin sends 'apkFile' as base64:
-        if (req.body.apkFile) {
-            const uploadRes = await cloudinary.uploader.upload(req.body.apkFile, {
-                resource_type: "raw",
-                folder: "apk_releases",
-                public_id: `BondBeyond_v${versionName}_${Date.now()}`,
-                format: "apk"
-            });
-            finalApkUrl = uploadRes.secure_url;
+        if (!apkFile) {
+            return res.status(400).json({ message: "Direct APK file upload is required" });
         }
+
+        const uploadRes = await cloudinary.uploader.upload(apkFile, {
+            resource_type: "raw",
+            folder: "apk_releases",
+            public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`,
+            format: "apk"
+        });
 
         const newRelease = new AppRelease({
             versionCode,
             versionName,
-            apkUrl: finalApkUrl,
+            apkUrl: uploadRes.secure_url,
             releaseNotes,
             isUpdateRequired
         });

@@ -94,7 +94,6 @@ const AdminDashboard = () => {
     const [apkForm, setApkForm] = useState({
         versionCode: "",
         versionName: "",
-        apkUrl: "",
         releaseNotes: "",
         isUpdateRequired: false,
         apkFile: null // base64
@@ -259,8 +258,8 @@ const AdminDashboard = () => {
     };
 
     const handleCreateRelease = async () => {
-        if (!apkForm.versionCode || !apkForm.versionName || (!apkForm.apkUrl && !apkForm.apkFile)) {
-            return toast.error("Please fill all required fields");
+        if (!apkForm.versionCode || !apkForm.versionName || !apkForm.apkFile) {
+            return toast.error("Please fill all required fields and upload an APK file");
         }
 
         setIsApkUploading(true);
@@ -274,7 +273,6 @@ const AdminDashboard = () => {
             setApkForm({
                 versionCode: "",
                 versionName: "",
-                apkUrl: "",
                 releaseNotes: "",
                 isUpdateRequired: false,
                 apkFile: null
@@ -1191,8 +1189,8 @@ const AdminDashboard = () => {
                                                     <Plus className="size-6" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl font-black uppercase tracking-tight italic">Initialize <span className="text-primary">New Build</span></h3>
-                                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Broadcast Version Registry</p>
+                                                    <h3 className="text-xl font-black uppercase tracking-tight italic">Direct <span className="text-primary">Build Upload</span></h3>
+                                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Upload APK Artifact to Cloudinary</p>
                                                 </div>
                                             </div>
                                             <button onClick={() => setShowApkModal(false)} className="btn btn-ghost btn-sm btn-circle opacity-50 hover:opacity-100">
@@ -1225,25 +1223,30 @@ const AdminDashboard = () => {
                                             </div>
 
                                             <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">APK Artifact</label>
+                                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 text-primary">APK Artifact (Direct Upload)</label>
                                                 <div className="flex flex-col gap-3">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-medium text-xs h-10"
-                                                        placeholder="Direct APK Link (Optional if uploading file)..."
-                                                        value={apkForm.apkUrl}
-                                                        onChange={(e) => setApkForm({ ...apkForm, apkUrl: e.target.value })}
-                                                    />
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex-1 h-10 bg-base-200 rounded-2xl border border-dashed border-base-content/10 flex items-center justify-between px-4 overflow-hidden">
-                                                            <span className="text-[10px] font-bold opacity-30 uppercase truncate">{apkForm.apkFile ? "File Ready to Transmit" : "No File Selected"}</span>
-                                                            {apkForm.apkFile && <CheckCircle className="size-3 text-success flex-shrink-0" />}
-                                                        </div>
-                                                        <label className="btn btn-sm btn-outline rounded-xl font-black text-[10px] uppercase h-10 cursor-pointer">
-                                                            <Plus className="size-3 mr-1" /> Choose .apk
-                                                            <input type="file" accept=".apk" className="hidden" onChange={handleApkUpload} />
-                                                        </label>
+                                                    <div
+                                                        className={`flex flex-col items-center justify-center border-2 border-dashed rounded-3xl p-8 transition-all cursor-pointer ${apkForm.apkFile ? 'border-success/50 bg-success/5' : 'border-primary/20 bg-primary/5 hover:border-primary/40'}`}
+                                                        onClick={() => document.getElementById('apk-file-input').click()}
+                                                    >
+                                                        <Plus className={`size-10 mb-2 ${apkForm.apkFile ? 'text-success' : 'text-primary opacity-40'}`} />
+                                                        <span className={`text-xs font-black uppercase tracking-widest ${apkForm.apkFile ? 'text-success' : 'opacity-40'}`}>
+                                                            {apkForm.apkFile ? "Build Ready for Transmission" : "Click to select .apk file"}
+                                                        </span>
+                                                        <input
+                                                            id="apk-file-input"
+                                                            type="file"
+                                                            accept=".apk"
+                                                            className="hidden"
+                                                            onChange={handleApkUpload}
+                                                        />
                                                     </div>
+                                                    {apkForm.apkFile && (
+                                                        <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase text-success">
+                                                            <CheckCircle className="size-3" />
+                                                            Upload Verified
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
