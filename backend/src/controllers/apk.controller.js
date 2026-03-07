@@ -78,12 +78,20 @@ export const downloadRelease = async (req, res) => {
 
         if (!release) return res.status(404).json({ message: "Release not found" });
 
-        // Improve download stability by using Cloudinary's dedicated download flags.
-        // We inject 'fl_attachment' into the URL to force the browser to save it rather than view it.
-        const originalUrl = release.apkUrl;
-        const attachmentUrl = originalUrl.replace("/upload/", `/upload/fl_attachment:BondBeyond_v${release.versionName.replace(/\./g, '_')}/`);
+        // Direct streaming from the server is the MOST reliable way to ensure correct headers.
+        // This ensures every phone sees it as a real Android Installer (.apk) file.
+        const response = await fetch(release.apkUrl);
+        if (!response.ok) throw new Error("Failed to fetch binary from storage");
 
-        res.redirect(attachmentUrl);
+        const filename = `BondBeyond_v${release.versionName.replace(/\./g, '_')}.apk`;
+
+        res.setHeader("Content-Type", "application/vnd.android.package-archive");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.setHeader("Content-Length", response.headers.get("content-length"));
+        res.setHeader("Cache-Control", "no-cache");
+
+        const stream = Readable.fromWeb(response.body);
+        stream.pipe(res);
     } catch (error) {
         console.error("Download Error:", error);
         res.status(500).json({ message: "Transmission failure" });
