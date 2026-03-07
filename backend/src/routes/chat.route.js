@@ -122,4 +122,40 @@ router.post("/notify-message", protectRoute, async (req, res) => {
   }
 });
 
+// ===== Call Notification =====
+// Send a high-priority push notification when someone calls
+router.post("/notify-call", protectRoute, async (req, res) => {
+  try {
+    const { recipientId, callId, callType } = req.body;
+    if (!recipientId || !callId) {
+      return res.status(400).json({ message: "recipientId and callId required" });
+    }
+
+    const callerName = req.user.fullName?.split(' ')[0] || "Someone";
+    const callerPic = req.user.profilePic || "https://www.freechatweb.in/logo.png";
+    const isAudio = callType === "audio";
+
+    console.log(`📞 [Call Push] ${callerName} calling ${recipientId} (${isAudio ? 'audio' : 'video'})`);
+
+    // Send high-priority push notification
+    await sendPushNotification(recipientId, {
+      title: `${isAudio ? "📞" : "📹"} ${callerName} is calling...`,
+      body: `Incoming ${isAudio ? "voice" : "video"} call. Tap to answer!`,
+      icon: callerPic,
+      data: {
+        url: `/call/${callId}${isAudio ? "?type=audio" : ""}`,
+        type: "incoming_call",
+        callId: callId,
+        callerName: req.user.fullName,
+        callerPic: callerPic,
+      },
+    });
+
+    res.json({ sent: true });
+  } catch (err) {
+    console.error("[Call Push] Error:", err.message);
+    res.status(500).json({ message: "Failed to send call notification" });
+  }
+});
+
 export default router;

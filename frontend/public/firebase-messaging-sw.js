@@ -3,9 +3,6 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
 // Initialize the Firebase app in the service worker
-// IMPORTANT: You MUST replace these placeholders with your actual Firebase Web App config from the Firebase Console.
-// Go to: Project Settings -> Apps -> SDK Setup and Config.
-// Since this file is in the public folder, Vite environment variables do not work here.
 firebase.initializeApp({
     apiKey: "AIzaSyBAuqlmt5xGqDKZG_ROCJdiza56zPisHS0",
     authDomain: "mychat-f3ee1.firebaseapp.com",
@@ -19,22 +16,58 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    if (!payload.notification) return; // Guard clause
+    if (!payload.notification) return;
+
+    const isCall = payload.data?.type === "incoming_call";
 
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
         icon: payload.notification.image || payload.notification.icon || '/logo.png',
-        data: payload.data
+        data: payload.data,
+        // Call-specific: require interaction (don't auto-dismiss), show action buttons
+        ...(isCall && {
+            requireInteraction: true,
+            tag: 'incoming-call',
+            renotify: true,
+            actions: [
+                { action: 'answer', title: '✅ Answer' },
+                { action: 'decline', title: '❌ Decline' },
+            ],
+            vibrate: [200, 100, 200, 100, 200, 100, 200],
+        }),
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 self.addEventListener('notificationclick', function (event) {
-    event.notification.close();
-    const url = event.notification.data?.url || '/';
+    const notification = event.notification;
+    const data = notification.data || {};
+    notification.close();
+
+    // Determine URL based on action
+    let url = data.url || '/';
+    if (event.action === 'decline') {
+        // User declined — just close the notification
+        return;
+    }
+
+    // For calls or regular notifications, open the app
+    const fullUrl = self.location.origin + url;
+
     event.waitUntil(
-        clients.openWindow(url)
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            // If app is already open, focus it and navigate
+            for (const client of windowClients) {
+                if (client.url.includes(self.location.origin)) {
+                    client.focus();
+                    client.navigate(fullUrl);
+                    return;
+                }
+            }
+            // Otherwise open a new window
+            return clients.openWindow(fullUrl);
+        })
     );
 });

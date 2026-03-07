@@ -22,12 +22,37 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
                 title,
                 body,
             },
-            data: data || {},
+            data: {},
             tokens: user.fcmTokens,
         };
 
+        // Convert all data values to strings (FCM requirement)
+        if (data) {
+            Object.entries(data).forEach(([key, value]) => {
+                message.data[key] = String(value);
+            });
+        }
+
         if (icon) {
             message.notification.image = icon;
+        }
+
+        // For incoming calls, set high priority to wake up the device
+        if (data?.type === "incoming_call") {
+            message.android = {
+                priority: "high",
+                notification: {
+                    channelId: "calls",
+                    priority: "max",
+                    sound: "default",
+                },
+            };
+            message.apns = {
+                headers: { "apns-priority": "10" },
+                payload: {
+                    aps: { sound: "default", "content-available": 1 },
+                },
+            };
         }
 
         console.log(`[Push] Sending notification to ${user.fullName} (${user.fcmTokens.length} tokens)...`);

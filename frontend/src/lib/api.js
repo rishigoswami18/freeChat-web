@@ -247,6 +247,11 @@ export const notifyMessage = async (recipientId, text) => {
   return response.data;
 };
 
+export const notifyCall = async (recipientId, callId, callType = "video") => {
+  const response = await axiosInstance.post("/chat/notify-call", { recipientId, callId, callType });
+  return response.data;
+};
+
 // ----------------- MEMBERSHIP -----------------
 
 export const getMembershipStatus = async () => {

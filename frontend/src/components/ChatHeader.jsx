@@ -3,6 +3,7 @@ import { Video, Phone, ArrowLeft, Wind, BadgeCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
+import { notifyCall } from "../lib/api";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import toast from "react-hot-toast";
 
@@ -116,6 +117,9 @@ function ChatHeader() {
                 },
             });
             navigate(`/call/${callId}`);
+
+            // Send push notification to recipient (fire-and-forget)
+            notifyCall(theirId, callId, "video").catch(() => { });
         } catch (error) {
             console.error("Call Error:", error);
             toast.error("Could not start call.");
@@ -149,6 +153,9 @@ function ChatHeader() {
                 },
             });
             navigate(`/call/${callId}?type=audio`);
+
+            // Send push notification to recipient (fire-and-forget)
+            notifyCall(theirId, callId, "audio").catch(() => { });
         } catch (error) {
             console.error("Audio Call Error:", error);
             toast.error("Could not start audio call.");
