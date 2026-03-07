@@ -157,4 +157,25 @@ router.post("/comment/:storyId", async (req, res) => {
     }
 });
 
+// Delete a story
+router.delete("/:storyId", async (req, res) => {
+    try {
+        const { storyId } = req.params;
+        const story = await Story.findById(storyId);
+
+        if (!story) return res.status(404).json({ message: "Story not found" });
+
+        // Check if owner
+        if (story.userId.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Unauthorized to delete this story" });
+        }
+
+        await Story.findByIdAndDelete(storyId);
+        res.json({ message: "Story deleted successfully" });
+    } catch (err) {
+        console.error("Error deleting story:", err);
+        res.status(500).json({ message: "Error deleting story" });
+    }
+});
+
 export default router;

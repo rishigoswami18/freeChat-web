@@ -5,16 +5,28 @@ import { useState } from "react";
 import StoryViewer from "./StoryViewer";
 import useAuthUser from "../hooks/useAuthUser";
 import CreateStoryModal from "./CreateStoryModal";
+import { deleteStory } from "../lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 const StoryTray = () => {
     const { authUser } = useAuthUser();
     const [selectedUserStories, setSelectedUserStories] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const queryClient = useQueryClient();
 
     const { data: storiesGrouped = [], isLoading } = useQuery({
         queryKey: ["stories"],
         queryFn: getStories,
     });
+
+    const handleDelete = async (storyId) => {
+        try {
+            await deleteStory(storyId);
+            queryClient.invalidateQueries({ queryKey: ["stories"] });
+        } catch (err) {
+            console.error("Delete story error", err);
+        }
+    };
 
     return (
         <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth min-h-[100px]">
@@ -84,6 +96,7 @@ const StoryTray = () => {
                 <StoryViewer
                     group={selectedUserStories}
                     onClose={() => setSelectedUserStories(null)}
+                    onDelete={handleDelete}
                 />
             )}
         </div>

@@ -167,7 +167,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/98 flex flex-col items-center justify-center sm:p-4 backdrop-blur-xl overflow-hidden">
+        <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center sm:p-4 backdrop-blur-xl overflow-hidden">
             {story.audioUrl && (
                 <audio ref={audioRef} src={story.audioUrl} loop />
             )}
@@ -284,7 +284,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
             </div>
 
             {/* Bottom Action Bar */}
-            <div className="absolute bottom-0 inset-x-0 z-50 bg-gradient-to-t from-black/80 to-transparent">
+            <div className="absolute bottom-24 sm:bottom-0 inset-x-0 z-50 bg-gradient-to-t from-black/80 to-transparent">
                 <div className="max-w-md mx-auto px-4 pb-6 pt-10 flex items-center gap-3">
                     {/* Comment Input */}
                     <div className="flex-1 relative">
@@ -340,7 +340,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
 
             {/* Owner Actions */}
             {isOwner && (
-                <div className="absolute bottom-20 right-4 sm:right-auto sm:bottom-20 z-50">
+                <div className="absolute bottom-40 right-4 sm:right-auto sm:bottom-20 z-50">
                     <button
                         onClick={handleDeleteStory}
                         className="btn btn-error btn-sm rounded-full gap-2 px-5 shadow-lg shadow-error/20"
