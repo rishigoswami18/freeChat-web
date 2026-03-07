@@ -103,6 +103,40 @@ const CallContent = ({ isAudioCall }) => {
 
   // For swapping views in 1-on-1 calls
   const [isSwapped, setIsSwapped] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Call timer
+  const [callDuration, setCallDuration] = useState(0);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    if (callingState === CallingState.JOINED) {
+      timerRef.current = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [callingState]);
+
+  const formatDuration = (secs) => {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
+    }
+  };
 
   useEffect(() => {
     if (callingState === CallingState.LEFT) {
@@ -150,15 +184,19 @@ const CallContent = ({ isAudioCall }) => {
       <div className="whatsapp-call-bg h-screen w-screen flex flex-col relative overflow-hidden">
 
         {/* Top Overlay */}
-        <div className="absolute top-0 inset-x-0 p-6 sm:p-10 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 to-transparent">
+        <div className="absolute top-0 inset-x-0 p-6 sm:p-10 flex items-center justify-between z-40 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
           <div className="flex flex-col">
             <div className="flex items-center gap-2 group cursor-default">
               <Lock className="size-3 text-white/50 group-hover:text-primary transition-colors" />
               <span className="text-[10px] text-white/50 uppercase tracking-widest font-extrabold">End-to-End Encrypted</span>
             </div>
-            <h3 className="text-xl sm:text-2xl font-bold text-white mt-1 drop-shadow-lg">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mt-1 drop-shadow-lg">
               {remoteParticipant?.name || "Connecting..."}
             </h3>
+            {/* Call Timer */}
+            <p className="text-sm lg:text-base text-white/60 font-mono tracking-wider mt-1">
+              {formatDuration(callDuration)}
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -168,6 +206,14 @@ const CallContent = ({ isAudioCall }) => {
                 REC
               </div>
             )}
+            {/* Fullscreen toggle (desktop only) */}
+            <button
+              onClick={toggleFullscreen}
+              className="hidden lg:flex size-11 sm:size-12 rounded-full bg-white/10 backdrop-blur-xl items-center justify-center border border-white/10 hover:bg-white/20 transition-all cursor-pointer group active:scale-90"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              <Maximize2 className="size-5 sm:size-6 text-white group-hover:scale-110 transition-transform" />
+            </button>
             <div className="size-11 sm:size-12 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/10 hover:bg-white/20 transition-all cursor-pointer group active:scale-90">
               <Volume2 className="size-5 sm:size-6 text-white group-hover:scale-110 transition-transform" />
             </div>
@@ -188,7 +234,7 @@ const CallContent = ({ isAudioCall }) => {
               <div className="call-avatar-container flex flex-col items-center gap-10">
                 <div className="relative">
                   <div className="absolute -inset-16 rounded-full bg-primary/10 blur-3xl animate-pulse" />
-                  <div className="size-56 sm:size-72 rounded-full overflow-hidden border-8 border-white/5 ring-4 ring-black/40 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.6)] relative z-10">
+                  <div className="size-56 sm:size-72 lg:size-80 rounded-full overflow-hidden border-8 border-white/5 ring-4 ring-black/40 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.6)] relative z-10">
                     <img
                       src={remoteParticipant?.image || "/avatar.png"}
                       alt="avatar"
@@ -199,6 +245,7 @@ const CallContent = ({ isAudioCall }) => {
                 <div className="text-center z-10">
                   <p className="text-white/40 text-xs font-bold tracking-[0.3em] uppercase mb-2">Secure Audio Call</p>
                   <p className="text-primary font-bold tracking-widest text-lg animate-pulse">INCALL</p>
+                  <p className="text-white/50 font-mono text-sm mt-2">{formatDuration(callDuration)}</p>
                 </div>
               </div>
             </div>
@@ -239,7 +286,7 @@ const CallContent = ({ isAudioCall }) => {
               {localParticipant && remoteParticipant && (
                 <div
                   onClick={() => setIsSwapped(!isSwapped)}
-                  className="absolute top-32 right-6 sm:top-40 sm:right-12 w-32 h-48 sm:w-56 sm:h-80 lg:w-64 lg:h-96 rounded-3xl overflow-hidden border-2 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-30 active:scale-95 transition-all cursor-pointer bg-black group ring-1 ring-white/20"
+                  className="absolute top-32 right-6 sm:top-40 sm:right-12 lg:top-36 lg:right-16 w-32 h-48 sm:w-56 sm:h-80 lg:w-72 lg:h-[420px] xl:w-80 xl:h-[460px] rounded-3xl overflow-hidden border-2 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-30 active:scale-95 transition-all cursor-pointer bg-black group ring-1 ring-white/20 hover:ring-primary/40"
                 >
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors z-10" />
                   {isSwapped ? (
@@ -262,15 +309,15 @@ const CallContent = ({ isAudioCall }) => {
         </div>
 
         {/* WhatsApp Style Controls Bar */}
-        <div className="p-6 pb-14 sm:pb-12 flex justify-center z-50">
-          <div className="floating-controls px-6 py-4 sm:px-12 sm:py-5 gap-6 sm:gap-10 backdrop-blur-2xl">
+        <div className="p-6 pb-14 sm:pb-12 lg:pb-16 flex justify-center z-50">
+          <div className="floating-controls px-6 py-4 sm:px-12 sm:py-5 lg:px-16 lg:py-6 gap-6 sm:gap-10 lg:gap-12 backdrop-blur-2xl">
             {/* Screen Share */}
             <button
               onClick={handleToggleScreenShare}
               className={`control-btn ${isSharingScreen ? 'bg-primary text-white shadow-[0_0_20px_rgba(37,211,102,0.4)]' : 'control-btn-active'}`}
               title="Screen Share"
             >
-              <Monitor className="size-6 sm:size-7" />
+              <Monitor className="size-6 sm:size-7 lg:size-8" />
             </button>
 
             {/* Mic Mute */}
@@ -279,7 +326,7 @@ const CallContent = ({ isAudioCall }) => {
               className={`control-btn ${micMuted ? 'bg-white text-black' : 'control-btn-active'}`}
               title={micMuted ? "Unmute Mic" : "Mute Mic"}
             >
-              {micMuted ? <MicOff className="size-6 sm:size-7" /> : <Mic className="size-6 sm:size-7" />}
+              {micMuted ? <MicOff className="size-6 sm:size-7 lg:size-8" /> : <Mic className="size-6 sm:size-7 lg:size-8" />}
             </button>
 
             {/* Video Mute */}
@@ -290,14 +337,14 @@ const CallContent = ({ isAudioCall }) => {
                   className={`control-btn ${cameraMuted ? 'bg-white text-black' : 'control-btn-active'}`}
                   title={cameraMuted ? "Turn Camera On" : "Turn Camera Off"}
                 >
-                  {cameraMuted ? <VideoOff className="size-6 sm:size-7" /> : <Video className="size-6 sm:size-7" />}
+                  {cameraMuted ? <VideoOff className="size-6 sm:size-7 lg:size-8" /> : <Video className="size-6 sm:size-7 lg:size-8" />}
                 </button>
                 <button
                   onClick={() => call.camera.flip()}
                   className="control-btn control-btn-active"
                   title="Flip Camera"
                 >
-                  <RefreshCw className="size-6 sm:size-7" />
+                  <RefreshCw className="size-6 sm:size-7 lg:size-8" />
                 </button>
               </>
             )}
@@ -308,7 +355,7 @@ const CallContent = ({ isAudioCall }) => {
               className={`control-btn ${isRecording ? 'bg-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'control-btn-active shadow-lg shadow-red-500/10'}`}
               title="Record Call"
             >
-              {isRecording ? <StopCircle className="size-6 sm:size-7" /> : <Circle className="size-6 sm:size-7" />}
+              {isRecording ? <StopCircle className="size-6 sm:size-7 lg:size-8" /> : <Circle className="size-6 sm:size-7 lg:size-8" />}
             </button>
 
             {/* End Call */}
@@ -317,7 +364,7 @@ const CallContent = ({ isAudioCall }) => {
               className="control-btn control-btn-danger"
               title="End Call"
             >
-              <PhoneOff className="size-8 sm:size-10 fill-current" />
+              <PhoneOff className="size-8 sm:size-10 lg:size-12 fill-current" />
             </button>
           </div>
         </div>
