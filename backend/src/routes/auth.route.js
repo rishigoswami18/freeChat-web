@@ -17,7 +17,8 @@ router.post("/onboarding", protectRoute, onboard);
 
 // check if user is logged in
 router.get("/me", protectRoute, (req, res) => {
-  res.status(200).json({ success: true, user: req.user });
+  const user = req.user.toObject();
+  res.status(200).json({ success: true, user: { ...user, friendCount: req.user.friends?.length || 0 } });
 });
 
 router.get("/ping", (req, res) => {

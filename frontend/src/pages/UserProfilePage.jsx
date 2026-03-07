@@ -1,19 +1,49 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getUserProfile, getUserPosts, getOtherUserFriends } from "../lib/api";
-import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X } from "lucide-react";
-
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getUserProfile, getUserPosts, getOtherUserFriends, sendFriendRequest, unfriend } from "../lib/api";
+import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X, Globe, Languages, MapPin, UserCheck, UserX, Clock } from "lucide-react";
+import toast from "react-hot-toast";
+import useAuthUser from "../hooks/useAuthUser";
 import PostsFeed from "../components/PostsFeed";
 import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
 import { AnimatePresence } from "framer-motion";
 
 const UserProfilePage = () => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { authUser } = useAuthUser();
     const { userId } = useParams();
+
+    useEffect(() => {
+        if (authUser?._id && userId && authUser._id.toString() === userId.toString()) {
+            navigate("/profile", { replace: true });
+        }
+    }, [authUser, userId, navigate]);
     const [viewMode, setViewMode] = useState("grid"); // grid or feed
     const [viewingDP, setViewingDP] = useState(null);
     const [showFriends, setShowFriends] = useState(false);
     const [userPosts, setUserPosts] = useState([]);
+
+    const { mutate: addFriendMutation, isPending: isAddingFriend } = useMutation({
+        mutationFn: () => sendFriendRequest(userId),
+        onSuccess: () => {
+            toast.success("Friend request sent!");
+            queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || "Failed to send request");
+        }
+    });
+
+    const { mutate: unfriendMutation, isPending: isUnfriending } = useMutation({
+        mutationFn: () => unfriend(userId),
+        onSuccess: () => {
+            toast.success("Unfriended");
+            queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+        },
+    });
 
     const { data: user, isLoading: isUserLoading, error: userError } = useQuery({
         queryKey: ["userProfile", userId],
@@ -70,48 +100,92 @@ const UserProfilePage = () => {
                 </div>
 
                 <div className="flex-1 text-center sm:text-left space-y-4 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <h1 className="text-2xl font-black flex items-center justify-center sm:justify-start gap-2 tracking-tight">
-                            {user.fullName}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h1 className="text-xl font-medium tracking-tight truncate max-w-xs mx-auto sm:mx-0 flex items-center justify-center sm:justify-start gap-1">
+                            @{user.username || 'user'}
                             {(user.role === "admin" || user.isVerified) && (
-                                <BadgeCheck className="size-6 text-amber-500 fill-amber-500/10" />
+                                <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
                             )}
                         </h1>
-                        <div className="flex items-center justify-center sm:justify-start gap-2">
-                            <Link to={`/chat/${user._id}`} className="btn btn-primary btn-sm rounded-xl gap-2 font-bold px-5">
-                                <MessageCircle className="size-4" /> Message
-                            </Link>
-                            <button className="btn btn-base-300 btn-sm rounded-xl font-bold">
-                                <UserPlus className="size-4" />
-                            </button>
-                        </div>
                     </div>
 
-                    <div className="flex items-center justify-center sm:justify-start gap-6 font-medium">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1">
-                            <span className="font-bold text-lg">{userPosts.length}</span>
-                            <span className="text-xs opacity-50 uppercase tracking-widest font-black">Posts</span>
+                    <div className="flex items-center justify-center sm:justify-start gap-10 py-2">
+                        <div className="flex flex-col items-center sm:items-start">
+                            <span className="font-bold text-lg leading-none">{userPosts.length}</span>
+                            <span className="text-sm opacity-60">posts</span>
                         </div>
                         <div
-                            className={`flex flex-col sm:flex-row sm:items-center gap-1 ${isPublic ? 'cursor-pointer hover:text-primary transition-colors' : 'opacity-50 cursor-not-allowed'}`}
+                            className={`flex flex-col items-center sm:items-start ${isPublic ? 'cursor-pointer hover:text-primary transition-colors' : 'opacity-50 cursor-not-allowed'}`}
                             onClick={() => isPublic && setShowFriends(true)}
                         >
-                            <span className="font-bold text-lg">{user.friendCount || 0}</span>
-                            <span className="text-xs opacity-50 uppercase tracking-widest font-black">Friends</span>
+                            <span className="font-bold text-lg leading-none">{user.friendCount ?? user.friends?.length ?? 0}</span>
+                            <span className="text-sm opacity-60">friends</span>
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <p className="font-mono text-sm text-primary font-bold">@{user.username || 'user'}</p>
-                        {user.bio && <p className="text-sm opacity-80 max-w-md mx-auto sm:mx-0 whitespace-pre-wrap">{user.bio}</p>}
-                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
+                        <p className="font-bold text-sm tracking-tight">{user.fullName}</p>
+                        {user.bio && <p className="text-sm opacity-90 max-w-md mx-auto sm:mx-0 whitespace-pre-wrap leading-relaxed">{user.bio}</p>}
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1 pb-4">
                             {user.nativeLanguage && (
-                                <span className="badge badge-secondary badge-sm font-bold">{user.nativeLanguage}</span>
+                                <span className="text-xs font-semibold bg-base-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-base-300/50">
+                                    <Globe className="size-3 text-secondary" /> {user.nativeLanguage}
+                                </span>
                             )}
                             {user.learningLanguage && (
-                                <span className="badge badge-outline badge-sm font-bold">Learning {user.learningLanguage}</span>
+                                <span className="text-xs font-semibold bg-base-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-base-300/50">
+                                    <Languages className="size-3 text-primary" /> {user.learningLanguage}
+                                </span>
+                            )}
+                            {user.location && (
+                                <span className="text-xs font-semibold bg-base-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-base-300/50">
+                                    <MapPin className="size-3 text-accent" /> {user.location}
+                                </span>
                             )}
                         </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 w-full pt-2">
+                        {authUser?._id === userId ? (
+                            <>
+                                <Link to="/profile" className="btn btn-base-300 btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case">
+                                    Edit Profile
+                                </Link>
+                                <button
+                                    onClick={() => {
+                                        const url = `${window.location.origin}/user/${authUser._id}`;
+                                        navigator.clipboard.writeText(url);
+                                        toast.success("Profile link copied!");
+                                    }}
+                                    className="btn btn-base-300 btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case"
+                                >
+                                    Share Profile
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to={`/chat/${user._id}`} className="btn btn-primary btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case gap-2">
+                                    <MessageCircle className="size-4" /> Message
+                                </Link>
+                                {authUser?.friends?.includes(user._id) ? (
+                                    <button
+                                        onClick={() => unfriendMutation()}
+                                        disabled={isUnfriending}
+                                        className="btn btn-error btn-outline btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case gap-2"
+                                    >
+                                        <UserX className="size-4" /> {isUnfriending ? "Processing..." : "Unfriend"}
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => addFriendMutation()}
+                                        disabled={isAddingFriend}
+                                        className="btn btn-base-200 btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case gap-2"
+                                    >
+                                        <UserPlus className="size-4" /> {isAddingFriend ? "Sending..." : "Add Friend"}
+                                    </button>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -138,7 +212,7 @@ const UserProfilePage = () => {
                     <div className="flex justify-center py-20">
                         <Loader2 className="size-8 animate-spin text-primary opacity-20" />
                     </div>
-                ) : !isPublic && user._id !== userId ? (
+                ) : !isPublic && authUser?._id !== user._id && !authUser?.friends?.includes(user._id) ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
                         <Lock className="size-16" />
                         <h3 className="text-xl font-black uppercase tracking-widest italic">Private Profile</h3>

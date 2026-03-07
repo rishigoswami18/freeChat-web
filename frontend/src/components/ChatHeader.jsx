@@ -196,7 +196,7 @@ const ChatHeader = memo(() => {
                     )}
                 </div>
 
-                <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/profile/${user?.id}`)}>
+                <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/user/${user?.id}`)}>
                     <h3 className="font-extrabold text-[14px] sm:text-[16px] leading-tight truncate tracking-tight text-base-content/90 flex items-center gap-1">
                         {displayData.name}
                         {(user?.role === "admin" || user?.isVerified) && (

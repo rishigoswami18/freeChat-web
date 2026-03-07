@@ -159,7 +159,15 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
 }
-  , { timestamps: true });
+  , {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  });
+
+userSchema.virtual("friendCount").get(function () {
+  return this.friends ? this.friends.length : 0;
+});
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

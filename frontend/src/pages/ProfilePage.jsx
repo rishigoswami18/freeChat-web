@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { updateProfile, getUserPosts } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid, Flame } from "lucide-react";
+import { updateProfile, getUserPosts, getUserFriends } from "../lib/api";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid, Flame, X, BadgeCheck, Users, MessageCircle, List } from "lucide-react";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 import BadgeIcon from "../components/BadgeIcon";
 import PostsFeed from "../components/PostsFeed";
 import { isPremiumUser } from "../lib/premium";
 import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
+import { AnimatePresence } from "framer-motion";
 
 const ProfilePage = () => {
     const { authUser, isLoading } = useAuthUser();
@@ -106,6 +108,7 @@ const ProfilePage = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [viewMode, setViewMode] = useState("grid"); // grid or feed
+    const [showFriends, setShowFriends] = useState(false);
 
     const handleShareProfile = () => {
         const url = `${window.location.origin}/user/${authUser._id}`;
@@ -420,52 +423,60 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="flex-1 text-center sm:text-left space-y-4 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <h1 className="text-xl font-medium tracking-tight truncate max-w-xs mx-auto sm:mx-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h1 className="text-xl font-bold tracking-tight truncate max-w-xs mx-auto sm:mx-0 flex items-center justify-center sm:justify-start gap-1">
                             @{authUser?.username || 'user'}
+                            {(authUser?.role === "admin" || authUser?.isVerified) && (
+                                <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
+                            )}
                         </h1>
-                        <div className="flex items-center justify-center sm:justify-start gap-2">
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="btn btn-base-200 btn-sm rounded-lg font-bold px-6 normal-case"
-                            >
-                                Edit Profile
-                            </button>
-                            <button
-                                onClick={handleShareProfile}
-                                className="btn btn-base-200 btn-sm rounded-lg font-bold px-6 normal-case"
-                            >
-                                Share Profile
-                            </button>
-                        </div>
                     </div>
 
-                    <div className="flex items-center justify-center sm:justify-start gap-10">
-                        <div className="flex flex-col sm:flex-row items-center gap-1">
-                            <span className="font-bold text-lg">{userPosts.length}</span>
+                    <div className="flex items-center justify-center sm:justify-start gap-10 py-2">
+                        <div className="flex flex-col items-center sm:items-start">
+                            <span className="font-bold text-lg leading-none">{userPosts.length}</span>
                             <span className="text-sm opacity-60">posts</span>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-center gap-1">
-                            <span className="font-bold text-lg">{authUser?.friendCount || 0}</span>
+                        <div
+                            className="flex flex-col items-center sm:items-start cursor-pointer hover:text-primary transition-colors active:scale-95"
+                            onClick={() => setShowFriends(true)}
+                        >
+                            <span className="font-bold text-lg leading-none">{authUser?.friendCount ?? authUser?.friends?.length ?? 0}</span>
                             <span className="text-sm opacity-60">friends</span>
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <p className="font-bold text-sm">{authUser?.fullName}</p>
-                        {authUser?.bio && <p className="text-sm opacity-90 max-w-md mx-auto sm:mx-0 whitespace-pre-wrap">{authUser.bio}</p>}
-                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
+                        <p className="font-bold text-sm tracking-tight">{authUser?.fullName}</p>
+                        {authUser?.bio && <p className="text-sm opacity-90 max-w-md mx-auto sm:mx-0 whitespace-pre-wrap leading-relaxed">{authUser.bio}</p>}
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1 pb-4">
                             {authUser?.nativeLanguage && (
-                                <span className="text-xs font-medium bg-base-200 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                    <Globe className="size-3 opacity-50" /> {authUser.nativeLanguage}
+                                <span className="text-xs font-semibold bg-base-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-base-300/50">
+                                    <Globe className="size-3 text-secondary" /> {authUser.nativeLanguage}
                                 </span>
                             )}
                             {authUser?.location && (
-                                <span className="text-xs font-medium bg-base-200 px-2 py-0.5 rounded-md flex items-center gap-1">
-                                    <MapPin className="size-3 opacity-50" /> {authUser.location}
+                                <span className="text-xs font-semibold bg-base-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-base-300/50">
+                                    <MapPin className="size-3 text-primary" /> {authUser.location}
                                 </span>
                             )}
                         </div>
+                    </div>
+
+                    {/* Action Buttons at the bottom of header */}
+                    <div className="flex items-center justify-center sm:justify-start gap-2 w-full">
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case"
+                        >
+                            Edit Profile
+                        </button>
+                        <button
+                            onClick={handleShareProfile}
+                            className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case"
+                        >
+                            Share Profile
+                        </button>
                     </div>
                 </div>
             </div>
@@ -533,6 +544,15 @@ const ProfilePage = () => {
                 )}
             </div>
 
+            <AnimatePresence>
+                {showFriends && (
+                    <FriendsListModal
+                        isOpen={showFriends}
+                        onClose={() => setShowFriends(false)}
+                    />
+                )}
+            </AnimatePresence>
+
             {viewingDP && (
                 <ProfilePhotoViewer
                     imageUrl={viewingDP.url}
@@ -540,6 +560,71 @@ const ProfilePage = () => {
                     onClose={() => setViewingDP(null)}
                 />
             )}
+        </div>
+    );
+};
+
+const FriendsListModal = ({ isOpen, onClose }) => {
+    const { data: friends, isLoading } = useQuery({
+        queryKey: ["userFriends", "me"],
+        queryFn: () => getUserFriends(),
+        enabled: isOpen,
+    });
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-base-100 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-base-300 flex flex-col max-h-[80vh]">
+                <div className="p-4 sm:p-6 border-b border-base-300 flex justify-between items-center bg-base-200/50">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-xl text-primary">
+                            <Users className="size-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold italic tracking-tight uppercase">Friends</h2>
+                            <p className="text-[10px] font-black opacity-50 uppercase tracking-widest">{friends?.length || 0} Connected</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
+                        <X className="size-5" />
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-2 sm:p-4 no-scrollbar">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-4">
+                            <Loader2 className="size-10 animate-spin text-primary opacity-20" />
+                            <p className="text-xs font-bold opacity-40 uppercase tracking-widest animate-pulse">Loading list...</p>
+                        </div>
+                    ) : friends?.length > 0 ? (
+                        <div className="space-y-1">
+                            {friends.map((friend) => (
+                                <div key={friend._id} className="flex items-center gap-3 p-3 rounded-2xl transition-all hover:bg-base-200 active:scale-[0.98] group">
+                                    <Link to={`/user/${friend._id}`} onClick={onClose} className="avatar">
+                                        <div className="size-12 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/40 transition-all overflow-hidden bg-base-300">
+                                            <img src={friend.profilePic || "/avatar.png"} alt={friend.fullName} className="object-cover w-full h-full" />
+                                        </div>
+                                    </Link>
+                                    <div className="flex-1 min-w-0">
+                                        <Link to={`/user/${friend._id}`} onClick={onClose} className="font-bold text-sm block truncate hover:text-primary transition-colors flex items-center gap-1">
+                                            {friend.fullName}
+                                            {(friend.role === "admin" || friend.isVerified) && (
+                                                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+                                            )}
+                                        </Link>
+                                        <p className="text-[10px] opacity-40 truncate">@{friend.username || 'user'}</p>
+                                    </div>
+                                    <Link to={`/chat/${friend._id}`} className="btn btn-primary btn-xs rounded-lg">Chat</Link>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-30 gap-4">
+                            <Users className="size-16" />
+                            <p className="text-sm font-bold uppercase tracking-widest italic">No friends found</p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

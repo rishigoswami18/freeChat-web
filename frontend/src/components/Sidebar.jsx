@@ -136,9 +136,7 @@ const Sidebar = () => {
           to="/profile"
           className="flex items-center gap-3 p-2.5 hover:bg-base-300/50 rounded-xl transition-all duration-200 group"
         >
-          <div className="relative" onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          <div className="relative" onClick={() => {
             setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName });
           }}>
             <img

@@ -57,8 +57,9 @@ export const getFriends = async () => {
   return response.data;
 };
 
-export const getUserFriends = async () => {
-  const response = await axiosInstance.get("/users/friends");
+export const getUserFriends = async (userId) => {
+  const url = userId ? `/users/${userId}/friends` : "/users/friends";
+  const response = await axiosInstance.get(url);
   return response.data;
 };
 
