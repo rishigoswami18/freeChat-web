@@ -1,6 +1,9 @@
 import AppRelease from "../models/AppRelease.js";
 import cloudinary from "../lib/cloudinary.js";
 import { Readable } from "stream";
+import fs from "fs";
+import path from "path";
+import os from "os";
 
 export const getLatestRelease = async (req, res) => {
     try {
@@ -28,11 +31,31 @@ export const createRelease = async (req, res) => {
             return res.status(400).json({ message: "Direct APK file upload is required" });
         }
 
-        const uploadRes = await cloudinary.uploader.upload(apkFile, {
-            resource_type: "raw",
-            folder: "apk_releases",
-            public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`
-        });
+        // Handle large files by writing to a temporary file and using upload_large
+        // This bypasses Cloudinary's 10MB limit for single-request "raw" uploads
+        const base64Data = apkFile.split(",")[1];
+        if (!base64Data) {
+            return res.status(400).json({ message: "Invalid APK file format" });
+        }
+
+        const buffer = Buffer.from(base64Data, "base64");
+        const tempFilePath = path.join(os.tmpdir(), `temp_apk_${Date.now()}.apk`);
+        fs.writeFileSync(tempFilePath, buffer);
+
+        let uploadRes;
+        try {
+            uploadRes = await cloudinary.uploader.upload_large(tempFilePath, {
+                resource_type: "raw",
+                folder: "apk_releases",
+                public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`,
+                chunk_size: 6000000 // 6MB chunks
+            });
+        } finally {
+            // Always clean up the temp file
+            if (fs.existsSync(tempFilePath)) {
+                fs.unlinkSync(tempFilePath);
+            }
+        }
 
         const newRelease = new AppRelease({
             versionCode,
