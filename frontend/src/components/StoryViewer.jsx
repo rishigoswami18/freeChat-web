@@ -62,7 +62,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                 }
                 return prev + 1;
             });
-        }, 50);
+        }, 300); // 300ms * 100 steps = 30,000ms (30 seconds)
 
         return () => clearInterval(interval);
     }, [handleNext, isPaused, viewingDP, showComments]);
