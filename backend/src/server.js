@@ -89,9 +89,25 @@ app.use("/api/admin", adminRoutes);
 
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../../frontend/dist")));
+  // Cache hashed assets for 1 year (Vite adds content hashes)
+  app.use("/assets", express.static(path.join(__dirname, "../../frontend/dist/assets"), {
+    maxAge: "1y",
+    immutable: true,
+  }));
+
+  // Serve other static files with a short cache
+  app.use(express.static(path.join(__dirname, "../../frontend/dist"), {
+    maxAge: "1h",
+    setHeaders: (res, filePath) => {
+      // Never cache index.html so updates are always picked up
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      }
+    },
+  }));
 
   app.get("*", (req, res) => {
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     res.sendFile(path.join(__dirname, "../../frontend", "dist", "index.html"));
   });
 }

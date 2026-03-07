@@ -3,39 +3,40 @@
  * Powered by freechatweb.in
  */
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import React, { useEffect, useRef } from "react";
+import { AnimatePresence } from "framer-motion";
+import React, { useEffect, Suspense } from "react";
 
-import HomePage from "./pages/HomePage.jsx";
-import SignUpPage from "./pages/SignUpPage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
-import NotificationsPage from "./pages/NotificationsPage.jsx";
-import CallPage from "./pages/CallPage.jsx";
-import ChatPage from "./pages/ChatPage.jsx";
-import OnboardingPage from "./pages/OnboardingPage.jsx";
-import FriendsPage from "./pages/FriendsPage.jsx";
+// Only eagerly load pages visible on first paint
 import PostsPage from "./pages/PostsPage.jsx";
-import CoupleProfilePage from "./pages/CoupleProfilePage.jsx";
-import MembershipPage from "./pages/MembershipPage.jsx";
-import GameDashboard from "./pages/GameDashboard.jsx";
-import CompatibilityQuiz from "./pages/CompatibilityQuiz.jsx";
-import ProfilePage from "./pages/ProfilePage.jsx";
-import SearchPage from "./pages/SearchPage.jsx";
-import ReelsPage from "./pages/ReelsPage.jsx";
-import InboxPage from "./pages/InboxPage.jsx";
-import ContactPage from "./pages/ContactPage.jsx";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.jsx";
-import TermsPage from "./pages/TermsPage.jsx";
-import RefundPolicyPage from "./pages/RefundPolicyPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
-import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
-import AboutPage from "./pages/AboutPage.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import UserProfilePage from "./pages/UserProfilePage.jsx";
-import GemShopPage from "./pages/GemShopPage.jsx";
 
-
+// Lazy load everything else — downloaded only when navigated to
+const SignUpPage = React.lazy(() => import("./pages/SignUpPage.jsx"));
+const LoginPage = React.lazy(() => import("./pages/LoginPage.jsx"));
+const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage.jsx"));
+const CallPage = React.lazy(() => import("./pages/CallPage.jsx"));
+const ChatPage = React.lazy(() => import("./pages/ChatPage.jsx"));
+const OnboardingPage = React.lazy(() => import("./pages/OnboardingPage.jsx"));
+const FriendsPage = React.lazy(() => import("./pages/FriendsPage.jsx"));
+const CoupleProfilePage = React.lazy(() => import("./pages/CoupleProfilePage.jsx"));
+const MembershipPage = React.lazy(() => import("./pages/MembershipPage.jsx"));
+const GameDashboard = React.lazy(() => import("./pages/GameDashboard.jsx"));
+const CompatibilityQuiz = React.lazy(() => import("./pages/CompatibilityQuiz.jsx"));
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage.jsx"));
+const SearchPage = React.lazy(() => import("./pages/SearchPage.jsx"));
+const ReelsPage = React.lazy(() => import("./pages/ReelsPage.jsx"));
+const InboxPage = React.lazy(() => import("./pages/InboxPage.jsx"));
+const ContactPage = React.lazy(() => import("./pages/ContactPage.jsx"));
+const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage.jsx"));
+const TermsPage = React.lazy(() => import("./pages/TermsPage.jsx"));
+const RefundPolicyPage = React.lazy(() => import("./pages/RefundPolicyPage.jsx"));
+const ForgotPasswordPage = React.lazy(() => import("./pages/ForgotPasswordPage.jsx"));
+const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage.jsx"));
+const AboutPage = React.lazy(() => import("./pages/AboutPage.jsx"));
+const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard.jsx"));
+const UserProfilePage = React.lazy(() => import("./pages/UserProfilePage.jsx"));
+const GemShopPage = React.lazy(() => import("./pages/GemShopPage.jsx"));
+const HomePage = React.lazy(() => import("./pages/HomePage.jsx"));
 
 import { Toaster } from "react-hot-toast";
 
@@ -126,289 +127,291 @@ const App = () => {
 
         <ChatProvider>
           <VideoProvider>
-            <AnimatePresence mode="wait">
-              <Routes location={location} key={location.pathname}>
-                <Route
-                  path="/"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <PostsPage />
-                      </Layout>
-                    ) : isAuthenticated ? (
-                      <Navigate to="/onboarding" />
-                    ) : (
-                      <LandingPage />
-                    )
-                  }
-                />
-                <Route
-                  path="/friends"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <FriendsPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/signup"
-                  element={
-                    !isAuthenticated ? (
-                      <SignUpPage />
-                    ) : (
-                      <Navigate to={isOnboarded ? "/" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={
-                    !isAuthenticated ? (
-                      <LoginPage />
-                    ) : (
-                      <Navigate to={isOnboarded ? "/" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/forgot-password"
-                  element={!isAuthenticated ? <ForgotPasswordPage /> : <Navigate to="/" />}
-                />
-                <Route
-                  path="/reset-password"
-                  element={!isAuthenticated ? <ResetPasswordPage /> : <Navigate to="/" />}
-                />
-                <Route
-                  path="/notifications"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <NotificationsPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/posts"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <PostsPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/search"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <SearchPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/inbox"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <InboxPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/call/:id"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <CallPage />
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
+            <Suspense fallback={<PageLoader />}>
+              <AnimatePresence mode="wait">
+                <Routes location={location} key={location.pathname}>
+                  <Route
+                    path="/"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <PostsPage />
+                        </Layout>
+                      ) : isAuthenticated ? (
+                        <Navigate to="/onboarding" />
+                      ) : (
+                        <LandingPage />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/friends"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <FriendsPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/signup"
+                    element={
+                      !isAuthenticated ? (
+                        <SignUpPage />
+                      ) : (
+                        <Navigate to={isOnboarded ? "/" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={
+                      !isAuthenticated ? (
+                        <LoginPage />
+                      ) : (
+                        <Navigate to={isOnboarded ? "/" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/forgot-password"
+                    element={!isAuthenticated ? <ForgotPasswordPage /> : <Navigate to="/" />}
+                  />
+                  <Route
+                    path="/reset-password"
+                    element={!isAuthenticated ? <ResetPasswordPage /> : <Navigate to="/" />}
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <NotificationsPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/posts"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <PostsPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/search"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <SearchPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/inbox"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <InboxPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/call/:id"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <CallPage />
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
 
-                <Route
-                  path="/chat/:id"
+                  <Route
+                    path="/chat/:id"
 
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={false} showFooter={false} showNavbar={false}>
-                        <ChatPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-                <Route
-                  path="/reels"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={false} showFooter={false} showNavbar={false}>
-                        <ReelsPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={false} showFooter={false} showNavbar={false}>
+                          <ChatPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/reels"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={false} showFooter={false} showNavbar={false}>
+                          <ReelsPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                <Route
-                  path="/onboarding"
-                  element={
-                    isAuthenticated ? (
-                      !isOnboarded ? (
-                        <OnboardingPage />
+                  <Route
+                    path="/onboarding"
+                    element={
+                      isAuthenticated ? (
+                        !isOnboarded ? (
+                          <OnboardingPage />
+                        ) : (
+                          <Navigate to="/" />
+                        )
+                      ) : (
+                        <Navigate to="/login" />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/couple"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <CoupleProfilePage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/profile"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <ProfilePage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/user/:userId"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <UserProfilePage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/membership"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <MembershipPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/games"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <GameDashboard />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/gem-shop"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <GemShopPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/game/:sessionId"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <CompatibilityQuiz />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/game/:param1/:sessionId"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <CompatibilityQuiz />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route path="/about" element={<Layout showSidebar={false}><AboutPage /></Layout>} />
+                  <Route path="/contact" element={<Layout showSidebar={false}><ContactPage /></Layout>} />
+                  <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
+                  <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
+                  <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
+
+                  <Route
+                    path="/admin"
+                    element={
+                      isAuthenticated && authUser?.role === "admin" ? (
+                        <Layout showSidebar={true}>
+                          <AdminDashboard />
+                        </Layout>
                       ) : (
                         <Navigate to="/" />
                       )
-                    ) : (
-                      <Navigate to="/login" />
-                    )
-                  }
-                />
+                    }
+                  />
 
-                <Route
-                  path="/couple"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <CoupleProfilePage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/profile"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <ProfilePage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/user/:userId"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <UserProfilePage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/membership"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <MembershipPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/games"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <GameDashboard />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/gem-shop"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <GemShopPage />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/game/:sessionId"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <CompatibilityQuiz />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route
-                  path="/game/:param1/:sessionId"
-                  element={
-                    isAuthenticated && isOnboarded ? (
-                      <Layout showSidebar={true}>
-                        <CompatibilityQuiz />
-                      </Layout>
-                    ) : (
-                      <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                    )
-                  }
-                />
-
-                <Route path="/about" element={<Layout showSidebar={false}><AboutPage /></Layout>} />
-                <Route path="/contact" element={<Layout showSidebar={false}><ContactPage /></Layout>} />
-                <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
-                <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
-                <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
-
-                <Route
-                  path="/admin"
-                  element={
-                    isAuthenticated && authUser?.role === "admin" ? (
-                      <Layout showSidebar={true}>
-                        <AdminDashboard />
-                      </Layout>
-                    ) : (
-                      <Navigate to="/" />
-                    )
-                  }
-                />
-
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </AnimatePresence>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </AnimatePresence>
+            </Suspense>
 
             <Toaster />
           </VideoProvider>

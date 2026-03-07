@@ -14,7 +14,16 @@ import { BrowserRouter } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,         // Data stays fresh for 5 minutes
+      gcTime: 10 * 60 * 1000,            // Garbage-collect after 10 minutes
+      refetchOnWindowFocus: false,        // Don't refetch when tab regains focus
+      retry: 1,                           // Only 1 retry on failure
+    },
+  },
+});
 
 // Global error handlers to catch silent crashes
 window.addEventListener('error', (event) => {

@@ -52,8 +52,8 @@ const useNotificationCounts = () => {
             chatClient.on(eventName, handleChatEvent);
         });
 
-        // Failsafe: Sync every 10 seconds in case events are missed
-        const interval = setInterval(updateCount, 10000);
+        // Failsafe: Sync every 60 seconds in case events are missed
+        const interval = setInterval(updateCount, 60000);
 
         return () => {
             events.forEach(eventName => {

@@ -34,5 +34,10 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes for common queries
+postSchema.index({ userId: 1, createdAt: -1 });  // User's posts sorted by date
+postSchema.index({ createdAt: -1 });               // Feed pagination
+postSchema.index({ mediaType: 1, createdAt: -1 }); // Video/reel filtering
+
 const Post = mongoose.model("Post", postSchema);
 export default Post;
