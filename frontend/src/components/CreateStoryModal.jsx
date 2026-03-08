@@ -5,7 +5,8 @@ import { Plus, Loader2, X, Music, Search, Play } from "lucide-react";
 import toast from "react-hot-toast";
 
 const CreateStoryModal = ({ isOpen, onClose }) => {
-    const [previewImage, setPreviewImage] = useState(null);
+    const [previewMedia, setPreviewMedia] = useState(null);
+    const [mediaType, setMediaType] = useState("image");
     const [caption, setCaption] = useState("");
     const [songName, setSongName] = useState("");
     const [audioUrl, setAudioUrl] = useState("");
@@ -47,18 +48,24 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            if (file.size > 20 * 1024 * 1024) {
+                return toast.error("File size exceeds 20MB limit");
+            }
+            const isVideo = file.type.startsWith("video");
+            setMediaType(isVideo ? "video" : "image");
+
             const reader = new FileReader();
             reader.onloadend = () => {
-                setPreviewImage(reader.result);
+                setPreviewMedia(reader.result);
             };
             reader.readAsDataURL(file);
         }
     };
 
     const handleConfirmUpload = () => {
-        if (!previewImage) return;
+        if (!previewMedia) return;
         uploadStory({
-            image: previewImage,
+            media: previewMedia,
             caption: caption.trim(),
             songName: songName.trim() || "Original Audio",
             audioUrl: audioUrl
@@ -66,7 +73,8 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     };
 
     const handleClose = () => {
-        setPreviewImage(null);
+        setPreviewMedia(null);
+        setMediaType("image");
         setCaption("");
         setSongName("");
         setAudioUrl("");
@@ -79,7 +87,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
     return (
         <div className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 transition-all duration-300">
             <div className="bg-base-100 rounded-3xl overflow-hidden w-full max-w-sm max-h-[90vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-300">
-                {!previewImage ? (
+                {!previewMedia ? (
                     <div className="p-8 flex flex-col items-center text-center space-y-6">
                         <div className="size-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                             <Plus className="size-10" />
@@ -99,9 +107,13 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                 ) : (
                     <>
                         <div className="relative h-[40vh] bg-base-300 flex-shrink-0">
-                            <img src={previewImage} className="w-full h-full object-cover" alt="Preview" />
+                            {mediaType === "video" ? (
+                                <video src={previewMedia} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                            ) : (
+                                <img src={previewMedia} className="w-full h-full object-cover" alt="Preview" />
+                            )}
                             <button
-                                onClick={() => setPreviewImage(null)}
+                                onClick={() => setPreviewMedia(null)}
                                 className="absolute top-4 right-4 btn btn-circle btn-sm bg-black/40 text-white border-none hover:bg-black/60 shadow-lg"
                             >
                                 <X className="size-5" />
@@ -183,7 +195,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                         <div className="p-5 border-t border-base-300 bg-base-100 flex gap-3 flex-shrink-0">
                             <button
                                 className="btn btn-ghost flex-1 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-base-200 transition-all"
-                                onClick={() => setPreviewImage(null)}
+                                onClick={() => setPreviewMedia(null)}
                                 disabled={isUploading}
                             >
                                 Change
@@ -207,7 +219,7 @@ const CreateStoryModal = ({ isOpen, onClose }) => {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
-                accept="image/*"
+                accept="image/*,video/*"
                 className="hidden"
             />
         </div>

@@ -136,6 +136,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  boostUntil: {
+    type: Date,
+    default: null,
+  },
   // BondBeyond Relationship fields
   mood: {
     type: String,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getWalletBalance, createGemOrder, verifyGemPayment, buyVerification, getRazorpayKey } from "../lib/api";
+import { getWalletBalance, createGemOrder, verifyGemPayment, buyVerification, getRazorpayKey, boostProfile } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -64,13 +64,13 @@ const shopItems = [
     },
     {
         id: "boost",
-        name: "Post Boost",
-        description: "Push your post to the top of everyone's feed",
-        cost: 200,
+        name: "Profile Boost",
+        description: "Be featured at the top of everyone's discovery for 24h",
+        cost: 99,
         icon: TrendingUp,
         color: "text-emerald-500",
         bg: "bg-emerald-500/10",
-        action: "coming_soon",
+        action: "boost",
     },
 ];
 
@@ -102,6 +102,18 @@ const GemShopPage = () => {
         },
         onError: (err) => {
             toast.error(err.response?.data?.message || "Failed to purchase");
+        },
+    });
+
+    const boostMutation = useMutation({
+        mutationFn: boostProfile,
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["walletBalance"] });
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            toast.success(data.message || "Profile boosted! 🚀");
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || "Failed to boost");
         },
     });
 
@@ -182,6 +194,12 @@ const GemShopPage = () => {
                 return;
             }
             verifyMutation.mutate();
+        } else if (item.action === "boost") {
+            if ((wallet?.gems || 0) < item.cost) {
+                toast.error(`Not enough gems. You need ${item.cost} 💎`);
+                return;
+            }
+            boostMutation.mutate();
         } else {
             toast("Coming soon! Stay tuned ✨", { icon: "🔮" });
         }
@@ -218,6 +236,14 @@ const GemShopPage = () => {
                             <div className="flex items-center gap-2.5">
                                 <Gem className="size-7 text-amber-300 drop-shadow-lg" />
                                 <span className="text-4xl font-black tabular-nums">{currentGems.toLocaleString()}</span>
+                            </div>
+                        )}
+                        {authUser?.boostUntil && new Date(authUser.boostUntil) > new Date() && (
+                            <div className="mt-1 flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
+                                <TrendingUp className="size-3 text-emerald-300" />
+                                <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">
+                                    Featured Profile
+                                </span>
                             </div>
                         )}
                         {(wallet?.earnings || 0) > 0 && (

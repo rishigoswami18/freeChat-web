@@ -241,15 +241,31 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                         className="absolute inset-0 flex items-center justify-center"
                     >
                         <div className="absolute inset-0 z-0">
-                            <img src={story.imageUrl} alt="" className="w-full h-full object-cover blur-3xl opacity-30 scale-150" />
+                            {story.mediaType === 'video' ? (
+                                <video src={story.imageUrl} className="w-full h-full object-cover blur-3xl opacity-30 scale-150" muted playsInline />
+                            ) : (
+                                <img src={story.imageUrl} alt="" className="w-full h-full object-cover blur-3xl opacity-30 scale-150" />
+                            )}
                         </div>
 
-                        <img
-                            src={story.imageUrl}
-                            alt=""
-                            className="relative z-10 w-full h-full object-contain select-none shadow-2xl shadow-black/50"
-                            onContextMenu={(e) => e.preventDefault()}
-                        />
+                        {story.mediaType === 'video' ? (
+                            <video
+                                src={story.imageUrl}
+                                className="relative z-10 w-full h-full object-contain select-none shadow-2xl shadow-black/50"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                                onContextMenu={(e) => e.preventDefault()}
+                            />
+                        ) : (
+                            <img
+                                src={story.imageUrl}
+                                alt=""
+                                className="relative z-10 w-full h-full object-contain select-none shadow-2xl shadow-black/50"
+                                onContextMenu={(e) => e.preventDefault()}
+                            />
+                        )}
                     </motion.div>
                 </AnimatePresence>
 

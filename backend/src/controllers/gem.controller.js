@@ -125,3 +125,36 @@ export const verifyGemPayment = async (req, res) => {
     }
 };
 
+// Boost profile for 24 hours (costs 99 gems)
+export const boostProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const user = await User.findById(userId);
+
+        const BOOST_COST = 99;
+        const BOOST_HOURS = 24;
+
+        if (user.gems < BOOST_COST) {
+            return res.status(400).json({ message: `Not enough gems. You need ${BOOST_COST}💎 to boost.` });
+        }
+
+        user.gems -= BOOST_COST;
+
+        const now = new Date();
+        const existingBoost = user.boostUntil && user.boostUntil > now ? user.boostUntil : now;
+        user.boostUntil = new Date(existingBoost.getTime() + BOOST_HOURS * 60 * 60 * 1000);
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Profile boosted! 🚀 You are now being featured.",
+            gems: user.gems,
+            boostUntil: user.boostUntil
+        });
+    } catch (error) {
+        console.error("Error boosting profile:", error);
+        res.status(500).json({ message: "Failed to boost profile" });
+    }
+};
+

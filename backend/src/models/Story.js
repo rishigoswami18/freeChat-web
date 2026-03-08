@@ -6,6 +6,7 @@ const storySchema = new mongoose.Schema(
         fullName: { type: String, required: true },
         profilePic: { type: String, default: "" },
         imageUrl: { type: String, required: true },
+        mediaType: { type: String, enum: ["image", "video"], default: "image" },
         caption: { type: String, default: "" },
         songName: { type: String, default: "Original Audio" },
         audioUrl: { type: String, default: "" },

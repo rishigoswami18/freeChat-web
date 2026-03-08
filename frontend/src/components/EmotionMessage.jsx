@@ -1,12 +1,34 @@
 import React, { useState, memo, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { MessageSimple, useMessageContext } from "stream-chat-react";
-import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCheck, Mic } from "lucide-react";
+import { Play, Pause, Volume2, Languages, Loader2, Star, Camera, CheckCheck, Mic, Download } from "lucide-react";
 import SnapViewer from "./SnapViewer";
 import useAuthUser from "../hooks/useAuthUser";
 import { translateText } from "../lib/api";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { isPremiumUser } from "../lib/premium";
+
+const handleFileDownload = async (url, type = 'media') => {
+  if (!url) return;
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    const ext = type === 'video' ? 'mp4' : type === 'audio' ? 'webm' : 'jpg';
+    a.download = `freechat_${type}_${Date.now()}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(blobUrl);
+    toast.success("Saved! 🚀");
+  } catch (err) {
+    window.open(url, '_blank');
+  }
+};
+
 const emotionColors = {
   joy: "bg-yellow-400 text-yellow-950 border-yellow-500",
   love: "bg-pink-400 text-pink-950 border-pink-500",
@@ -76,11 +98,15 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
           <span className="text-[9px] font-bold opacity-70">
             {isPlaying ? formatTime(currentTime) : <Mic className="size-2.5" />}
           </span>
-          <span className="text-[9px] font-mono tracking-tighter opacity-70">
-            {formatTime(duration || 0)}
-          </span>
         </div>
       </div>
+
+      <button
+        onClick={() => handleFileDownload(url, 'audio')}
+        className={`ml-1 size-7 rounded-full flex items-center justify-center transition-all active:scale-95 opacity-40 hover:opacity-100 ${isMyMessage ? 'hover:bg-white/20' : 'hover:bg-base-300'}`}
+      >
+        <Download className="size-3.5" />
+      </button>
     </div>
   );
 });
@@ -129,6 +155,7 @@ const EmotionMessage = memo((props) => {
     }
   }, [isViewed, isMyMessage, message.id, message.extra_data, messageContext?.client]);
 
+  const { i18n } = useTranslation();
   const handleTranslate = useCallback(async () => {
     if (!isPremium) {
       toast.error("Translation is a premium feature. Please upgrade!");
@@ -140,7 +167,7 @@ const EmotionMessage = memo((props) => {
     }
     setIsTranslating(true);
     try {
-      const targetLang = authUser?.nativeLanguage || "en";
+      const targetLang = i18n.language?.split("-")[0] || authUser?.nativeLanguage || "en";
       const res = await translateText(message.text, targetLang);
       setTranslatedText(res.translatedText);
     } catch (err) {
@@ -148,7 +175,7 @@ const EmotionMessage = memo((props) => {
     } finally {
       setIsTranslating(false);
     }
-  }, [isPremium, translatedText, authUser?.nativeLanguage, message.text]);
+  }, [isPremium, translatedText, authUser?.nativeLanguage, message.text, i18n.language]);
 
   const { groupStyles = [] } = messageContext || {};
   const isFirstInGroup = groupStyles.includes("top") || groupStyles.includes("single");
@@ -312,6 +339,20 @@ const EmotionMessage = memo((props) => {
                   {!isPremium && <Star className="size-2 text-warning fill-warning" />}
                 </>
               )}
+            </button>
+          )}
+
+          {/* Download button for ordinary attachments */}
+          {message.attachments?.length > 0 && (
+            <button
+              onClick={() => {
+                const att = message.attachments[0];
+                handleFileDownload(att.asset_url || att.image_url, att.type || 'image');
+              }}
+              className="flex items-center gap-1 opacity-20 hover:opacity-100 text-primary transition-all p-1"
+              title="Download Media"
+            >
+              <Download className="size-3.5" />
             </button>
           )}
         </div>

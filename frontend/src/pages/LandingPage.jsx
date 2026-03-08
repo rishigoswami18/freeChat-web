@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getLatestRelease } from "../lib/api";
 import { motion } from "framer-motion";
 import {
@@ -24,6 +25,7 @@ import {
 } from "lucide-react";
 import Logo from "../components/Logo";
 import AdSense from "../components/AdSense";
+import { BASE_URL } from "../lib/axios";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 30 },
@@ -122,6 +124,7 @@ const stats = [
 ];
 
 const LandingPage = () => {
+    const { t } = useTranslation();
     const [latestApk, setLatestApk] = useState(null);
 
     useEffect(() => {
@@ -145,10 +148,10 @@ const LandingPage = () => {
                     <Logo className="size-8" fontSize="text-2xl" />
                     <div className="flex items-center gap-3">
                         <Link to="/login" className="btn btn-ghost btn-sm rounded-xl hover:bg-base-200 transition-all">
-                            Login
+                            {t('login')}
                         </Link>
                         <Link to="/signup" className="btn btn-primary btn-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
-                            Sign Up Free
+                            {t('signup_free')}
                         </Link>
                     </div>
                 </div>
@@ -172,7 +175,7 @@ const LandingPage = () => {
                         >
                             <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-semibold mb-8">
                                 <Sparkles className="size-4" />
-                                100% Free — No Hidden Charges
+                                {t('free_forever')}
                                 <ChevronRight className="size-3.5 opacity-60" />
                             </span>
                         </motion.div>
@@ -191,7 +194,7 @@ const LandingPage = () => {
                                 Powered by freechatweb.in
                             </div>
                             <span className="text-base-content text-3xl sm:text-4xl lg:text-5xl block mt-2">
-                                Your Relationship, <br className="hidden sm:block" />Stronger Every Day.
+                                {t('hero_title')}
                             </span>
                         </motion.h1>
 
@@ -202,9 +205,7 @@ const LandingPage = () => {
                             variants={fadeUp}
                             custom={2}
                         >
-                            The ultimate social app for couples and friends. Chat freely,
-                            make video calls, share reels, play games, and build deeper
-                            connections — all in one beautiful platform.
+                            {t('hero_desc')}
                         </motion.p>
 
                         <motion.div
@@ -218,16 +219,16 @@ const LandingPage = () => {
                                 to="/signup"
                                 className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 rounded-2xl hover:shadow-primary/40 hover:scale-[1.02] transition-all duration-300"
                             >
-                                Start Chatting Today
+                                {t('start_chatting')}
                                 <ArrowRight className="size-5" />
                             </Link>
                             <a
-                                href={`${window.location.origin}/api/apk/download/latest`}
+                                href={`${BASE_URL}/apk/download/latest`}
                                 className="btn btn-outline btn-lg gap-2 rounded-2xl hover:scale-[1.02] transition-all duration-300 border-accent text-accent hover:bg-accent hover:text-white"
                                 download={`BondBeyond_${latestApk?.versionName || 'app'}.apk`}
                             >
                                 <Smartphone className="size-5" />
-                                Download Android App
+                                {t('download_app')}
                             </a>
                         </motion.div>
                     </div>
@@ -272,7 +273,7 @@ const LandingPage = () => {
                         variants={fadeUp}
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4 section-heading section-heading-center">
-                            What is <span className="text-primary">BondBeyond</span>?
+                            {t('what_is')}
                         </h2>
                         <p className="text-lg opacity-70 leading-relaxed mt-6">
                             BondBeyond is a free social platform built for real human connection.
@@ -295,12 +296,10 @@ const LandingPage = () => {
                         variants={fadeUp}
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4 section-heading section-heading-center">
-                            Everything You Need,{" "}
-                            <span className="text-primary">Totally Free</span>
+                            {t('everything_free')}
                         </h2>
                         <p className="text-lg opacity-60 max-w-2xl mx-auto mt-6">
-                            Packed with features that other apps charge for.
-                            Here, it's all free — forever.
+                            {t('packed_features')}
                         </p>
                     </motion.div>
 
@@ -423,7 +422,7 @@ const LandingPage = () => {
                                     </p>
                                     <div className="flex flex-wrap justify-center md:justify-start gap-4">
                                         <a
-                                            href={`${window.location.origin}/api/apk/download/latest`}
+                                            href={`${BASE_URL}/apk/download/latest`}
                                             className="btn btn-primary btn-lg gap-3 shadow-xl shadow-primary/20 rounded-2xl hover:scale-105 transition-all duration-300"
                                             download={`BondBeyond_${latestApk?.versionName || 'app'}.apk`}
                                         >
@@ -486,7 +485,7 @@ const LandingPage = () => {
                         variants={fadeUp}
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                            Ready to Try <span className="text-primary">BondBeyond</span>?
+                            {t('get_started')}
                         </h2>
                         <p className="text-lg opacity-70 mb-10 max-w-xl mx-auto leading-relaxed">
                             Join thousands of people who've switched to BondBeyond for real,
@@ -496,7 +495,7 @@ const LandingPage = () => {
                             to="/signup"
                             className="btn btn-primary btn-lg gap-2 shadow-lg shadow-primary/25 rounded-2xl hover:shadow-primary/40 hover:scale-[1.02] transition-all duration-300"
                         >
-                            Create Your Free Account
+                            {t('create_account')}
                             <ArrowRight className="size-5" />
                         </Link>
                     </motion.div>
@@ -546,7 +545,7 @@ const LandingPage = () => {
                                 </li>
                                 <li>
                                     <a
-                                        href={`${window.location.origin}/api/apk/download/latest`}
+                                        href={`${BASE_URL}/apk/download/latest`}
                                         className="flex items-center gap-2 hover:text-primary transition font-bold text-accent"
                                         download={`BondBeyond_${latestApk?.versionName || 'app'}.apk`}
                                     >

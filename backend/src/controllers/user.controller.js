@@ -58,6 +58,8 @@ export async function getRecommendedUsers(req, res) {
       const currentNative = (currentUser.nativeLanguage || "").toLowerCase();
       const currentLearning = (currentUser.learningLanguage || "").toLowerCase();
 
+      const isBoosted = user.boostUntil && new Date(user.boostUntil) > new Date();
+
       // Perfect Match: B speaks L (what A learns) AND B learns N (what A speaks)
       if (userNative === currentLearning && userLearning === currentNative && currentLearning !== "") {
         matchScore = 100;
@@ -72,11 +74,12 @@ export async function getRecommendedUsers(req, res) {
         matchScore = 25;
       }
 
-      return { ...userObj, matchScore, isTandemMatch };
+      return { ...userObj, matchScore, isTandemMatch, isBoosted };
     });
 
-    // Sort by matchScore descending, then by newest
+    // Sort: 1. Boosted first, 2. Highest Match score, 3. Newest
     recommendedUsers.sort((a, b) => {
+      if (a.isBoosted !== b.isBoosted) return b.isBoosted ? 1 : -1;
       if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
       return b.createdAt - a.createdAt;
     });

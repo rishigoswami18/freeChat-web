@@ -481,6 +481,7 @@ export const deleteRelease = async (releaseId) => {
   const response = await axiosInstance.delete(`/apk/${releaseId}`);
   return response.data;
 };
-
-
-
+export const boostProfile = async () => {
+  const response = await axiosInstance.post("/gems/boost");
+  return response.data;
+};

@@ -49,6 +49,7 @@ import {
     updateRelease,
     deleteRelease
 } from "../lib/api";
+import { BASE_URL } from "../lib/axios";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -1161,7 +1162,7 @@ const AdminDashboard = () => {
                                                     {release.isActive ? 'Active Node' : 'Initialize Node'}
                                                 </button>
                                                 <a
-                                                    href={`/api/apk/download/${release._id}`}
+                                                    href={`${BASE_URL}/apk/download/${release._id}`}
                                                     className="btn btn-sm btn-circle bg-base-200 hover:bg-primary hover:text-white transition-all border-none"
                                                     title="Download Artifact"
                                                 >

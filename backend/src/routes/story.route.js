@@ -10,15 +10,17 @@ router.use(protectRoute);
 // Create story
 router.post("/", async (req, res) => {
     try {
-        const { image, caption, songName, audioUrl } = req.body;
+        const { image, media, caption, songName, audioUrl } = req.body;
+        const mediaData = media || image;
 
-        if (!image) {
-            return res.status(400).json({ message: "Image is required for a story" });
+        if (!mediaData) {
+            return res.status(400).json({ message: "Media (image/video) is required for a story" });
         }
 
-        // Upload to Cloudinary
-        const uploaded = await cloudinary.uploader.upload(image, {
+        // Upload to Cloudinary with 'auto' to support videos
+        const uploaded = await cloudinary.uploader.upload(mediaData, {
             folder: "freechat_stories",
+            resource_type: "auto"
         });
 
         const newStory = await Story.create({
@@ -26,6 +28,7 @@ router.post("/", async (req, res) => {
             fullName: req.user.fullName,
             profilePic: req.user.profilePic || "",
             imageUrl: uploaded.secure_url,
+            mediaType: uploaded.resource_type === "video" ? "video" : "image",
             caption: caption || "",
             songName: songName || "Original Audio",
             audioUrl: audioUrl || "",

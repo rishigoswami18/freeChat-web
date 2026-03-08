@@ -1,4 +1,5 @@
-import { X, Clock, Play } from "lucide-react";
+import { X, Clock, Download, Camera } from "lucide-react";
+import toast from "react-hot-toast";
 
 const SnapViewer = ({ message, onClose }) => {
     const user = message?.user || {};
@@ -7,6 +8,26 @@ const SnapViewer = ({ message, onClose }) => {
     // Resolve media data from all possible sources
     const mediaUrl = message?.mediaUrl || extraData?.mediaUrl || message?.attachments?.[0]?.image_url || message?.attachments?.[0]?.asset_url;
     const mediaType = message?.mediaType || extraData?.mediaType || (message?.attachments?.[0]?.type === "video" ? "video" : "image");
+
+    const handleDownload = async () => {
+        if (!mediaUrl) return;
+        try {
+            const response = await fetch(mediaUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `freechat_${mediaType}_${Date.now()}.${mediaType === 'video' ? 'mp4' : 'jpg'}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            toast.success("Media saved!");
+        } catch (error) {
+            console.error("Download failed:", error);
+            window.open(mediaUrl, '_blank');
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center backdrop-blur-md">
@@ -24,12 +45,22 @@ const SnapViewer = ({ message, onClose }) => {
                         </p>
                     </div>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"
-                >
-                    <X className="size-7 text-white" />
-                </button>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleDownload}
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"
+                        title="Download"
+                    >
+                        <Download className="size-6 text-white" />
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"
+                    >
+                        <X className="size-7 text-white" />
+                    </button>
+                </div>
             </div>
 
             {/* Media Content */}

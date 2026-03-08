@@ -3,6 +3,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { Bell, LogOut, Pencil, Flame, MessageSquare } from "lucide-react";
 import useNotificationCounts from "../hooks/useNotificationCounts";
 import ThemeSelector from "./ThemeSelector";
+import LanguageSelector from "./LanguageSelector";
 import useLogout from "../hooks/useLogout";
 import Logo from "./Logo";
 
@@ -62,6 +63,7 @@ const Navbar = () => {
                   )}
                 </Link>
 
+                <LanguageSelector />
                 <ThemeSelector />
 
                 {/* New Post */}
@@ -97,7 +99,12 @@ const Navbar = () => {
                 </button>
               </>
             )}
-            {!authUser && <ThemeSelector />}
+            {!authUser && (
+              <>
+                <LanguageSelector />
+                <ThemeSelector />
+              </>
+            )}
           </div>
         </div>
       </div>

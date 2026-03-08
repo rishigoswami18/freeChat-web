@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getOutgoingFriendReqs,
   getRecommendedUsers,
@@ -7,7 +8,7 @@ import {
   sendFriendRequest,
 } from "../lib/api";
 import { Link } from "react-router-dom";
-import { CheckCircle, MapPin, UserPlus, Users } from "lucide-react";
+import { CheckCircle, MapPin, UserPlus, Users, TrendingUp } from "lucide-react";
 
 import { capitialize } from "../lib/utils";
 
@@ -17,6 +18,7 @@ import Logo from "../components/Logo";
 import AdSense from "../components/AdSense";
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [outgoingRequestsIds, setOutgoingRequestsIds] = useState(new Set());
 
@@ -57,18 +59,18 @@ const HomePage = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Welcome back <span className="opacity-80">👋</span>
+              {t('welcome')} <span className="opacity-80">👋</span>
             </h1>
-            <p className="text-sm opacity-50 mt-1">See what's happening with your friends</p>
+            <p className="text-sm opacity-50 mt-1">{t('see_happening')}</p>
           </div>
           <Link to="/notifications" className="btn btn-outline btn-sm rounded-xl gap-2 hover:scale-[1.02] transition-transform">
             <Users className="size-4" />
-            Friend Requests
+            {t('notifications')}
           </Link>
         </div>
 
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading mb-6">Your Friends</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading mb-6">{t('your_friends')}</h2>
         </div>
 
         {loadingFriends ? (
@@ -87,15 +89,19 @@ const HomePage = () => {
           </div>
         )}
 
-        {/* Sponsored content temporary hidden to fix layout */}
+        {/* Sponsored content for income generation (Hidden for Premium) */}
+        <section className="max-w-4xl mx-auto">
+          <div className="text-[10px] font-bold opacity-30 text-center uppercase tracking-widest mb-2">{t('sponsored')}</div>
+          <AdSense slot="5614946399" />
+        </section>
 
         <section>
           <div className="mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading">Meet New Learners</h2>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading">{t('meet_new')}</h2>
                 <p className="opacity-60 text-sm mt-4">
-                  Discover perfect language exchange partners based on your profile
+                  {t('discover_partners')}
                 </p>
               </div>
             </div>
@@ -107,9 +113,9 @@ const HomePage = () => {
             </div>
           ) : recommendedUsers.length === 0 ? (
             <div className="card bg-base-200 p-6 text-center">
-              <h3 className="font-semibold text-lg mb-2">No recommendations available</h3>
+              <h3 className="font-semibold text-lg mb-2">{t('no_recommendations')}</h3>
               <p className="text-base-content opacity-70">
-                Check back later for new language partners!
+                {t('check_back')}
               </p>
             </div>
           ) : (
@@ -129,7 +135,14 @@ const HomePage = () => {
                         </div>
 
                         <div>
-                          <h3 className="font-semibold text-lg">{user.fullName}</h3>
+                          <h3 className="font-semibold text-lg flex items-center gap-2">
+                            {user.fullName}
+                            {user.isBoosted && (
+                              <div className="badge badge-success badge-xs gap-1 font-black uppercase tracking-tighter py-2 border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                <TrendingUp className="size-2.5" /> Featured
+                              </div>
+                            )}
+                          </h3>
                           {user.location && (
                             <div className="flex items-center text-xs opacity-70 mt-1">
                               <MapPin className="size-3 mr-1" />
@@ -163,12 +176,12 @@ const HomePage = () => {
                         {hasRequestBeenSent ? (
                           <>
                             <CheckCircle className="size-4 mr-2" />
-                            Request Sent
+                            {t('request_sent')}
                           </>
                         ) : (
                           <>
                             <UserPlus className="size-4 mr-2" />
-                            Send Friend Request
+                            {t('send_request')}
                           </>
                         )}
                       </button>

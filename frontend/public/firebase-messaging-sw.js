@@ -61,22 +61,28 @@ self.addEventListener('notificationclick', function (event) {
     if (action === 'reply') {
         const replyText = event.reply;
         const senderId = data.senderId;
+        const targetUrl = data.url || '/';
+        const fullUrl = self.location.origin + targetUrl;
 
-        if (!replyText || !senderId) return;
-
-        event.waitUntil(
-            fetch('/api/chat/notification-reply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ recipientId: senderId, text: replyText }),
-                credentials: 'include'
-            }).then(response => {
-                if (!response.ok) throw new Error('Failed to send reply');
-            }).catch(err => {
-                console.error('[SW] Error sending reply:', err);
-                return clients.openWindow(self.location.origin + (data.url || '/'));
-            })
-        );
+        // If OS supports inline reply and user typed something
+        if (replyText && senderId) {
+            event.waitUntil(
+                fetch('/api/chat/notification-reply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ recipientId: senderId, text: replyText }),
+                    credentials: 'include'
+                }).then(response => {
+                    if (!response.ok) throw new Error('Reply failed');
+                }).catch(err => {
+                    console.error('[SW] Reply Error:', err);
+                    return clients.openWindow(fullUrl);
+                })
+            );
+        } else {
+            // OS doesn't support inline reply or user just clicked the button
+            event.waitUntil(clients.openWindow(fullUrl));
+        }
         return;
     }
 

@@ -1,0 +1,147 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
+
+const resources = {
+    en: {
+        translation: {
+            welcome: "Welcome back",
+            see_happening: "See what's happening with your friends",
+            your_friends: "Your Friends",
+            meet_new: "Meet New Learners",
+            discover_partners: "Discover perfect language exchange partners based on your profile",
+            send_request: "Send Friend Request",
+            request_sent: "Request Sent",
+            no_friends: "No friends found",
+            no_recommendations: "No recommendations available",
+            check_back: "Check back later for new language partners!",
+            login: "Login",
+            logout: "Logout",
+            profile: "Profile",
+            inbox: "Inbox",
+            notifications: "Notifications",
+            featured: "Featured",
+            sponsored: "Sponsored",
+            signup_free: "Sign Up Free",
+            hero_title: "Your Relationship, Stronger Every Day.",
+            hero_desc: "The ultimate social app for couples and friends. Chat freely, make video calls, share reels, play games, and build deeper connections — all in one beautiful platform.",
+            start_chatting: "Start Chatting Today",
+            download_app: "Download Android App",
+            what_is: "What is BondBeyond?",
+            everything_free: "Everything You Need, Totally Free",
+            packed_features: "Packed with features that other apps charge for. Here, it's all free — forever.",
+            get_started: "Ready to Try BondBeyond?",
+            create_account: "Create Your Free Account",
+            free_forever: "100% Free — No Hidden Charges",
+        }
+    },
+    hi: {
+        translation: {
+            welcome: "वापस स्वागत है",
+            see_happening: "देखें आपके दोस्तों के साथ क्या हो रहा है",
+            your_friends: "आपके मित्र",
+            meet_new: "नए सीखने वालों से मिलें",
+            discover_partners: "अपनी प्रोफ़ाइल के आधार पर सही भाषा विनिमय भागीदारों की खोज करें",
+            send_request: "मित्रता अनुरोध भेजें",
+            request_sent: "अनुरोध भेजा गया",
+            no_friends: "कोई मित्र नहीं मिला",
+            no_recommendations: "कोई अनुशंसा उपलब्ध नहीं है",
+            check_back: "नए भाषा भागीदारों के लिए बाद में फिर से जांचें!",
+            login: "लॉगिन",
+            logout: "लॉगआउट",
+            profile: "प्रोफ़ाइल",
+            inbox: "इनबॉक्स",
+            notifications: "सूचनाएं",
+            featured: "विशेष रुप से प्रदर्शित",
+            sponsored: "प्रायोजित",
+            signup_free: "मुफ्त साइन अप करें",
+            hero_title: "आपका रिश्ता, हर दिन मजबूत होता है।",
+            hero_desc: "जोड़ों और दोस्तों के लिए परम सामाजिक ऐप। स्वतंत्र रूप से चैट करें, वीडियो कॉल करें, रील साझा करें, गेम खेलें और गहरे संबंध बनाएं - सब कुछ एक सुंदर मंच पर।",
+            start_chatting: "आज ही चैट करना शुरू करें",
+            download_app: "एंड्रॉइड ऐप डाउनलोड करें",
+            what_is: "बॉन्डबियॉन्ड क्या है?",
+            everything_free: "आपकी हर ज़रूरत, बिल्कुल मुफ़्त",
+            packed_features: "उन सुविधाओं से भरपूर जिनके लिए अन्य ऐप्स शुल्क लेते हैं। यहाँ, सब कुछ मुफ़्त है - हमेशा के लिए।",
+            get_started: "बॉन्डबियॉन्ड आज़माने के लिए तैयार हैं?",
+            create_account: "अपना मुफ़्त खाता बनाएँ",
+            free_forever: "100% मुफ़्त — कोई छिपा हुआ शुल्क नहीं",
+        }
+    },
+    es: {
+        translation: {
+            welcome: "Bienvenido de nuevo",
+            see_happening: "Mira lo que está pasando con tus amigos",
+            your_friends: "Tus Amigos",
+            meet_new: "Conoce a nuevos estudiantes",
+            discover_partners: "Descubre compañeros de intercambio de idiomas perfectos según tu perfil",
+            send_request: "Enviar solicitud de amistad",
+            request_sent: "Solicitud enviada",
+            no_friends: "No se encontraron amigos",
+            no_recommendations: "No hay recomendaciones disponibles",
+            check_back: "¡Vuelve más tarde para ver nuevos compañeros de idiomas!",
+            login: "Iniciar sesión",
+            logout: "Cerrar sesión",
+            profile: "Perfil",
+            inbox: "Bandeja de entrada",
+            notifications: "Notificaciones",
+            featured: "Destacado",
+            sponsored: "Patrocinado",
+            signup_free: "Regístrate Gratis",
+            hero_title: "Tu relación, más fuerte cada día.",
+            hero_desc: "La aplicación social definitiva para parejas y amigos. Chatea libremente, haz videollamadas, comparte reels, juega y construye conexiones más profundas, todo en una plataforma hermosa.",
+            start_chatting: "Comienza a chatear hoy",
+            download_app: "Descargar App para Android",
+            what_is: "¿Qué es BondBeyond?",
+            everything_free: "Todo lo que necesitas, totalmente gratis",
+            packed_features: "Repleto de funciones por las que otras aplicaciones cobran. Aquí, todo es gratis, para siempre.",
+            get_started: "¿Listo para probar BondBeyond?",
+            create_account: "Crea tu cuenta gratuita",
+            free_forever: "100% Gratis — Sin cargos ocultos",
+        }
+    },
+    fr: {
+        translation: {
+            welcome: "Bon retour",
+            see_happening: "Voyez ce qui se passe avec vos amis",
+            your_friends: "Vos Amis",
+            meet_new: "Rencontrez de nouveaux apprenants",
+            discover_partners: "Découvrez des partenaires d'échange linguistique parfaits basés sur votre profil",
+            send_request: "Envoyer une demande d'ami",
+            request_sent: "Demande envoyée",
+            no_friends: "Aucun ami trouvé",
+            no_recommendations: "Aucune recommandation disponible",
+            check_back: "Revenez plus tard pour de nouveaux partenaires linguistiques !",
+            login: "Connexion",
+            logout: "Déconnexion",
+            profile: "Profil",
+            inbox: "Boîte de réception",
+            notifications: "Notifications",
+            featured: "En vedette",
+            sponsored: "Sponsorisé",
+            signup_free: "S'inscrire Gratuitement",
+            hero_title: "Votre relation, plus forte chaque jour.",
+            hero_desc: "L'application sociale ultime pour les couples et les amis. Discutez librement, passez des appels vidéo, partagez des reels, jouez à des jeux et créez des liens plus profonds - le tout sur une plateforme magnifique.",
+            start_chatting: "Commencez à discuter aujourd'hui",
+            download_app: "Télécharger l'application Android",
+            what_is: "Qu'est-ce que BondBeyond ?",
+            everything_free: "Tout ce dont vous avez besoin, totalement gratuit",
+            packed_features: "Rempli de fonctionnalités que d'autres applications facturent. Ici, tout est gratuit — pour toujours.",
+            get_started: "Prêt à essayer BondBeyond ?",
+            create_account: "Créez votre compte gratuit",
+            free_forever: "100% Gratuit — Aucun frais caché",
+        }
+    }
+};
+
+i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+        resources,
+        fallbackLng: "en",
+        interpolation: {
+            escapeValue: false
+        }
+    });
+
+export default i18n;

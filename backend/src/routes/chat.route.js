@@ -8,6 +8,7 @@ import {
 } from "../controllers/chat.controller.js";
 import cloudinary from "../lib/cloudinary.js";
 import User from "../models/User.js";
+import DelayedEmail from "../models/DelayedEmail.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
 import { sendPushNotification } from "../lib/push.service.js";
 import { streamClient } from "../lib/stream.js";
@@ -97,18 +98,32 @@ router.post("/notify-message", protectRoute, async (req, res) => {
 
     messageNotifCooldown.set(cooldownKey, Date.now());
 
-    // Fire-and-forget Email
+    // 🕒 DELAYED Email Notification (Scheduled for 2 hours later)
     if (recipient.email) {
-      sendNotificationEmail(recipient.email, {
-        emoji: "💬",
-        title: `New message from ${req.user.fullName.split(' ')[0]}!`,
-        body: `<strong>${req.user.fullName}</strong> sent you a message: <br/><br/><i>"${text || "New message"}"</i><br/><br/>Open the app to read and reply!`,
-        ctaText: "Open Chat",
-        ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/inbox`,
+      const channelId = [req.user._id.toString(), recipientId.toString()].sort().join("-");
+
+      // Update existing pending email if one exists to avoid spamming
+      const existing = await DelayedEmail.findOne({
+        recipientId,
+        channelId,
+        isProcessed: false
       });
+
+      if (existing) {
+        existing.messageText = text || "New unread messages...";
+        await existing.save();
+      } else {
+        await DelayedEmail.create({
+          recipientId,
+          senderName: req.user.fullName,
+          messageText: text || "New message",
+          channelId,
+          scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 Hour Mark
+        });
+      }
     }
 
-    // Send push notification (fire-and-forget)
+    // 🚀 Immediate Push Notification (STAYS REAL-TIME)
     sendPushNotification(recipientId, {
       title: `${req.user.fullName.split(' ')[0]} 💬`,
       body: text || `New message from ${req.user.fullName.split(' ')[0]}`,
@@ -116,7 +131,7 @@ router.post("/notify-message", protectRoute, async (req, res) => {
       data: {
         url: `/chat/${req.user._id}`,
         type: "direct_message",
-        senderId: req.user._id.toString() // Needed for notification reply
+        senderId: req.user._id.toString()
       }
     }).catch(err => console.error("[Push] Message notification failed:", err.message));
 
