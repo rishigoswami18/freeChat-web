@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptFriendRequest, getFriendRequests } from "../lib/api";
 import { Bell, Clock, MessageSquare, UserCheck } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
+import { ChatSkeleton } from "../components/Skeletons";
 
 const NotificationsPage = () => {
   const queryClient = useQueryClient();
@@ -29,9 +30,7 @@ const NotificationsPage = () => {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-8 section-heading">Notifications</h1>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg"></span>
-          </div>
+          <ChatSkeleton />
         ) : (
           <>
             {incomingRequests.length > 0 && (

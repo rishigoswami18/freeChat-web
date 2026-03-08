@@ -1,8 +1,12 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 import cloudinary from "../lib/cloudinary.js";
-import { upsertStreamUser } from "../lib/stream.js";
+import { upsertStreamUser, getStreamClient } from "../lib/stream.js";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
+import bcrypt from "bcryptjs";
+import Post from "../models/Post.js";
+import Story from "../models/Story.js";
+import Couple from "../models/Couple.js";
 
 // backend/src/controllers/user.controller.js
 export const getAllUsers = async (req, res) => {
@@ -384,6 +388,65 @@ export async function getUserFriends(req, res) {
   } catch (error) {
     console.error("Error in getUserFriends controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function changePassword(req, res) {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Incorrect current password" });
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export async function deleteAccount(req, res) {
+  try {
+    const userId = req.user._id;
+
+    // 1. Delete from Stream
+    try {
+      const client = getStreamClient();
+      await client.deleteUser(String(userId), { delete_conversation_interactions: true });
+    } catch (e) {
+      console.error("Stream user deletion failed:", e.message);
+    }
+
+    // 2. Delete Posts and Stories
+    await Post.deleteMany({ userId });
+    await Story.deleteMany({ userId });
+
+    // 3. Cleanup Friend Requests
+    await FriendRequest.deleteMany({
+      $or: [{ sender: userId }, { recipient: userId }]
+    });
+
+    // 4. Remove from Friends lists of others
+    await User.updateMany(
+      { friends: userId },
+      { $pull: { friends: userId } }
+    );
+
+    // 5. Cleanup Couple status if any
+    await Couple.deleteMany({
+      $or: [{ user1: userId }, { user2: userId }]
+    });
+
+    // 6. Delete User document
+    await User.findByIdAndDelete(userId);
+
+    res.json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 }
 

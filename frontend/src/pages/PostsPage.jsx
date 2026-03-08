@@ -5,6 +5,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { useQuery } from "@tanstack/react-query";
 import { getFriends, getPosts } from "../lib/api";
 import StoryTray from "../components/StoryTray";
+import { PostSkeleton } from "../components/Skeletons";
 
 const PostsPage = () => {
   const { authUser } = useAuthUser();
@@ -51,9 +52,7 @@ const PostsPage = () => {
       </div>
       <CreatePost onPost={addPost} authUser={authUser} />
       {isLoading && localPosts.length === 0 ? (
-        <div className="flex justify-center py-12">
-          <span className="loading loading-spinner loading-lg" />
-        </div>
+        <PostSkeleton />
       ) : (
         <PostsFeed posts={localPosts} setPosts={setLocalPosts} />
       )}

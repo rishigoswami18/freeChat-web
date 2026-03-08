@@ -34,7 +34,7 @@ const PostsFeed = ({ posts, setPosts }) => {
   return (
     <div className="space-y-4 sm:space-y-5">
       {posts.map((post, index) => (
-        <div key={post._id}>
+        <div key={post._id} className="stagger-item">
           <PostCard
             post={post}
             setPosts={setPosts}

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck } from "lucide-react";
+import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatClient } from "../components/ChatProvider";
 import useAuthUser from "../hooks/useAuthUser";
 import ProfilePhotoViewer from "../components/ProfilePhotoViewer";
 import AdSense from "../components/AdSense";
+import { ChatSkeleton } from "../components/Skeletons";
 
 // Removed mock data for real integration
 
@@ -153,10 +154,11 @@ const InboxPage = () => {
                         Messages
                     </h1>
                     <button
-                        onClick={() => toast("Coming soon!")}
-                        className="btn btn-ghost btn-sm btn-circle hover:bg-primary/10 text-primary transition-all active:scale-90"
+                        onClick={() => navigate("/search")}
+                        className="btn btn-primary btn-sm btn-circle shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-90"
+                        title="New Message"
                     >
-                        <ArrowRight className="size-5 rotate-[-45deg]" />
+                        <Plus className="size-5" />
                     </button>
                 </div>
 
@@ -178,10 +180,7 @@ const InboxPage = () => {
             {/* Conversation List */}
             <div className="px-1">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-40">
-                        <Loader2 className="size-8 animate-spin text-primary" />
-                        <p className="font-bold uppercase tracking-widest text-xs">Loading chats...</p>
-                    </div>
+                    <ChatSkeleton />
                 ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-32 gap-4">
                         <div className="empty-state-icon">

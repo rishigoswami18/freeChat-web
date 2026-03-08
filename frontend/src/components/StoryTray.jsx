@@ -7,6 +7,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import CreateStoryModal from "./CreateStoryModal";
 import { deleteStory } from "../lib/api";
 import { useQueryClient } from "@tanstack/react-query";
+import { StorySkeleton } from "./Skeletons";
 
 const StoryTray = () => {
     const { authUser } = useAuthUser();
@@ -55,14 +56,7 @@ const StoryTray = () => {
 
             {/* Friend Stories */}
             {isLoading ? (
-                <div className="flex gap-4">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex flex-col items-center gap-1">
-                            <div className="size-16 rounded-full bg-base-300 animate-pulse border-2 border-base-200" />
-                            <div className="h-2 w-10 bg-base-300 animate-pulse rounded" />
-                        </div>
-                    ))}
-                </div>
+                <StorySkeleton />
             ) : (
                 storiesGrouped.map((group) => (
                     <div

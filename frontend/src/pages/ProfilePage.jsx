@@ -3,7 +3,9 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import { updateProfile, getUserPosts, getUserFriends } from "../lib/api";
-import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid, Flame, X, BadgeCheck, Users, MessageCircle, List } from "lucide-react";
+import { Camera, MapPin, Globe, User, Languages, Loader2, Save, Shield, Keyboard, Star, Calendar, Grid, Flame, X, BadgeCheck, Users, MessageCircle, List, Lock, Trash2, Key } from "lucide-react";
+import { changePassword, deleteAccount } from "../lib/api";
+import useLogout from "../hooks/useLogout";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 import BadgeIcon from "../components/BadgeIcon";
@@ -110,10 +112,54 @@ const ProfilePage = () => {
     const [viewMode, setViewMode] = useState("grid"); // grid or feed
     const [showFriends, setShowFriends] = useState(false);
 
+    // Security states
+    const [showSecurity, setShowSecurity] = useState(false);
+    const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const { logoutMutation } = useLogout();
+
     const handleShareProfile = () => {
         const url = `${window.location.origin}/user/${authUser._id}`;
         navigator.clipboard.writeText(url);
         toast.success("Profile link copied!");
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            return toast.error("New passwords do not match");
+        }
+        if (passwordData.newPassword.length < 6) {
+            return toast.error("Password must be at least 6 characters");
+        }
+
+        setIsChangingPassword(true);
+        try {
+            await changePassword(passwordData.currentPassword, passwordData.newPassword);
+            toast.success("Password updated successfully!");
+            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            setShowSecurity(false);
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to update password");
+        } finally {
+            setIsChangingPassword(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        const confirm = window.confirm("CRITICAL: Are you sure you want to delete your account? This will permanently erase your posts, stories, messages, and profile. THIS ACTION CANNOT BE UNDONE.");
+        if (confirm) {
+            const secondConfirm = window.prompt("To confirm deletion, type 'DELETE' below:");
+            if (secondConfirm === "DELETE") {
+                try {
+                    await deleteAccount();
+                    toast.success("Account deleted. We're sad to see you go.");
+                    logoutMutation();
+                } catch (err) {
+                    toast.error("Failed to delete account");
+                }
+            }
+        }
     };
 
     if (isLoading) {
@@ -305,6 +351,90 @@ const ProfilePage = () => {
                         </button>
                     </div>
                 </form>
+
+                <div className="mt-12 pt-8">
+                    <div className="section-divider" />
+                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2 section-heading">
+                        <Lock className="text-primary" />
+                        Security & Privacy
+                    </h2>
+
+                    <div className="bg-base-200 p-6 rounded-2xl space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="font-semibold">Password Management</h3>
+                                <p className="text-sm opacity-50">Keep your account secure by rotating passwords.</p>
+                            </div>
+                            <button
+                                onClick={() => setShowSecurity(!showSecurity)}
+                                className="btn btn-ghost btn-sm rounded-xl"
+                            >
+                                {showSecurity ? "Hide Settings" : "Change Password"}
+                            </button>
+                        </div>
+
+                        {showSecurity && (
+                            <form onSubmit={handleChangePassword} className="space-y-4 animate-in slide-in-from-top-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <input
+                                        type="password"
+                                        placeholder="Current Password"
+                                        className="input input-bordered rounded-xl"
+                                        value={passwordData.currentPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                        required
+                                    />
+                                    <div className="hidden sm:block" />
+                                    <input
+                                        type="password"
+                                        placeholder="New Password"
+                                        className="input input-bordered rounded-xl"
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        required
+                                    />
+                                    <input
+                                        type="password"
+                                        placeholder="Confirm New Password"
+                                        className="input input-bordered rounded-xl"
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isChangingPassword}
+                                    className="btn btn-primary btn-sm rounded-xl gap-2"
+                                >
+                                    {isChangingPassword ? <Loader2 className="size-4 animate-spin" /> : <Key className="size-4" />}
+                                    Update Password
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                </div>
+
+                <div className="mt-12 pt-8">
+                    <div className="section-divider" />
+                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2 section-heading border-error/20">
+                        <Trash2 className="text-error" />
+                        Danger Zone
+                    </h2>
+
+                    <div className="bg-error/5 border border-error/10 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="text-center sm:text-left">
+                            <h3 className="font-bold text-error">Delete Account</h3>
+                            <p className="text-sm opacity-60">Permanently delete your account and all associated data.</p>
+                        </div>
+                        <button
+                            onClick={handleDeleteAccount}
+                            className="btn btn-error btn-sm rounded-xl font-bold px-6 shadow-lg shadow-error/10 hover:shadow-error/20"
+                        >
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
 
                 <div className="mt-12 pt-8">
                     <div className="section-divider" />

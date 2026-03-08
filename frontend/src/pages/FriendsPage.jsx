@@ -4,6 +4,7 @@ import { User, MessageSquare, UserMinus, Loader2, Users } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { ChatSkeleton } from "../components/Skeletons";
 
 const FriendsPage = () => {
   const queryClient = useQueryClient();
@@ -41,15 +42,13 @@ const FriendsPage = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <span className="loading loading-spinner loading-lg"></span>
-          </div>
+          <ChatSkeleton />
         ) : friends.length > 0 ? (
           <div className="space-y-3">
             {friends.map((friend) => (
               <div
                 key={friend._id}
-                className="card bg-base-200 shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+                className="card bg-base-200 shadow-sm hover:shadow-md transition-all active:scale-[0.99] stagger-item"
               >
                 <div className="card-body p-3 sm:p-4">
                   <div className="flex items-center gap-3">

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRecommendedUsers, sendFriendRequest } from "../lib/api";
 import { Search, UserPlus, Check, X, Loader2, Star } from "lucide-react";
 import toast from "react-hot-toast";
+import { ChatSkeleton } from "../components/Skeletons";
 
 const SearchPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -57,15 +58,12 @@ const SearchPage = () => {
 
             <div className="space-y-4">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                        <Loader2 className="size-10 animate-spin text-primary opacity-20" />
-                        <p className="text-base-content/40 font-medium animate-pulse">Finding friends...</p>
-                    </div>
+                    <ChatSkeleton />
                 ) : users.length > 0 ? (
                     users.map((user) => (
                         <div
                             key={user._id}
-                            className={`group p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border shadow-sm ${user.isTandemMatch
+                            className={`group p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border shadow-sm stagger-item ${user.isTandemMatch
                                 ? "bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 hover:border-primary/40 shadow-md ring-1 ring-primary/5"
                                 : "bg-base-200/50 hover:bg-base-200 border-transparent hover:border-primary/10"
                                 }`}

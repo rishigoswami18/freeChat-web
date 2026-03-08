@@ -321,6 +321,16 @@ export const updateProfile = async (profileData) => {
   return response.data;
 };
 
+export const changePassword = async (currentPassword, newPassword) => {
+  const response = await axiosInstance.put("/users/change-password", { currentPassword, newPassword });
+  return response.data;
+};
+
+export const deleteAccount = async () => {
+  const response = await axiosInstance.delete("/users/delete-account");
+  return response.data;
+};
+
 export const buyVerification = async () => {
   const response = await axiosInstance.put("/users/buy-verification");
   return response.data;

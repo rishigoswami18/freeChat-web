@@ -3,6 +3,7 @@ import { getGameTemplates, getActiveGameSessions, getGameHistory, startGame } fr
 import { Gamepad2, Play, Users, CheckCircle2, Loader2, ArrowLeft, History, Trophy, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { GameSkeleton } from "../components/Skeletons";
 
 const GameDashboard = () => {
     const navigate = useNavigate();
@@ -34,11 +35,7 @@ const GameDashboard = () => {
     });
 
     if (templatesLoading || activeLoading || historyLoading) {
-        return (
-            <div className="flex justify-center py-20">
-                <Loader2 className="size-8 animate-spin text-primary" />
-            </div>
-        );
+        return <GameSkeleton />;
     }
 
     return (
