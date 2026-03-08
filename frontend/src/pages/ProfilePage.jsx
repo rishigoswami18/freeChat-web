@@ -189,19 +189,24 @@ const ProfilePage = () => {
                         <div className="relative group">
                             <div className="avatar">
                                 <div
-                                    className="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300 cursor-pointer active:scale-95 transition-transform"
-                                    onClick={() => setViewingDP({ url: selectedImg || authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+                                    className="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300 cursor-pointer active:scale-95 transition-transform relative"
+                                    onClick={() => document.getElementById("profile-upload").click()}
                                 >
                                     <img
                                         src={selectedImg || authUser?.profilePic || "/avatar.png"}
                                         alt="Profile"
                                         className="object-cover w-full h-full"
                                     />
+                                    {/* Overlay on hover */}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1">
+                                        <Camera className="size-6" />
+                                        <span>CHANGE</span>
+                                    </div>
                                 </div>
                             </div>
                             <label
                                 htmlFor="profile-upload"
-                                className="absolute bottom-0 right-0 bg-primary text-primary-content p-2 rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg"
+                                className="absolute bottom-1 right-1 bg-white text-black p-2 rounded-full cursor-pointer hover:scale-110 transition-transform shadow-xl border border-black/5 z-20"
                             >
                                 <Camera className="size-5" />
                                 <input
@@ -213,7 +218,9 @@ const ProfilePage = () => {
                                 />
                             </label>
                         </div>
-                        <p className="text-xs opacity-50">Click the camera to upload a new photo</p>
+                        <p className="text-xs font-bold opacity-60 uppercase tracking-widest bg-base-200 px-4 py-1.5 rounded-full border border-base-300">
+                            Tap Photo to Upload
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -531,6 +538,10 @@ const ProfilePage = () => {
                         imageUrl={viewingDP.url}
                         fullName={viewingDP.name}
                         onClose={() => setViewingDP(null)}
+                        onUpdate={async (base64) => {
+                            await doUpdate({ profilePic: base64 });
+                            setViewingDP(null);
+                        }}
                     />
                 )}
             </div>
@@ -542,12 +553,22 @@ const ProfilePage = () => {
             {/* Instagram Style Header */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10 mb-10 pb-6 border-b border-base-300">
                 <div
-                    className="avatar cursor-pointer active:scale-95 transition-transform shrink-0"
-                    onClick={() => setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+                    className="avatar cursor-pointer active:scale-95 transition-transform shrink-0 relative group"
+                    onClick={() => {
+                        // For own profile, clicking the image can lead to edit
+                        setIsEditing(true);
+                        // Briefly wait and trigger input
+                        setTimeout(() => document.getElementById("profile-upload")?.click(), 100);
+                    }}
                 >
                     <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full p-[3px] bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-600">
-                        <div className="size-full rounded-full border-2 border-base-100 overflow-hidden bg-base-300">
+                        <div className="size-full rounded-full border-2 border-base-100 overflow-hidden bg-base-300 relative">
                             <img src={authUser?.profilePic || "/avatar.png"} alt={authUser?.fullName} className="object-cover w-full h-full" />
+                            {/* Overlay for quick edit */}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold">
+                                <Camera className="size-5 sm:size-7" />
+                                <span className="hidden sm:inline">CHANGE</span>
+                            </div>
                         </div>
                     </div>
                 </div>

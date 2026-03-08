@@ -47,6 +47,7 @@ import VideoProvider from "./components/VideoProvider.jsx";
 import { ChatProvider } from "./components/ChatProvider.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
 import StealthOverlay from "./components/StealthOverlay.jsx";
+import GoogleOneTap from "./components/GoogleOneTap.jsx";
 
 
 const App = () => {
@@ -127,6 +128,7 @@ const App = () => {
 
         <ChatProvider>
           <VideoProvider>
+            {!isAuthenticated && <GoogleOneTap />}
             <Suspense fallback={<PageLoader />}>
               <AnimatePresence mode="wait">
                 <Routes location={location} key={location.pathname}>

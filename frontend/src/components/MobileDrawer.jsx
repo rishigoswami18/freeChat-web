@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateProfile } from "../lib/api";
+import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -39,6 +42,19 @@ const MobileDrawer = () => {
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const { logoutMutation, isPending: isLoggingOut } = useLogout();
   const { unreadMessages, notificationCount } = useNotificationCounts();
+  const queryClient = useQueryClient();
+
+  const { mutate: doUpdate } = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (data) => {
+      toast.success("Profile photo updated! ✨");
+      queryClient.setQueryData(["authUser"], data.user);
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to update photo");
+    }
+  });
 
   const toggleDrawer = () => setIsOpen(!isOpen);
 
@@ -261,6 +277,10 @@ const MobileDrawer = () => {
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
           onClose={() => setViewingDP(null)}
+          onUpdate={async (base64) => {
+            await doUpdate({ profilePic: base64 });
+            setViewingDP(null);
+          }}
         />
       )}
     </>

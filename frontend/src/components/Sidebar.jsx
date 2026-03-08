@@ -1,4 +1,7 @@
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateProfile } from "../lib/api";
+import toast from "react-hot-toast";
 import useNotificationCounts from "../hooks/useNotificationCounts";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
@@ -40,10 +43,23 @@ const navItems = [
 const Sidebar = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const currentPath = location.pathname;
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
   const { unreadMessages, notificationCount } = useNotificationCounts();
+
+  const { mutate: doUpdate } = useMutation({
+    mutationFn: updateProfile,
+    onSuccess: (data) => {
+      toast.success("Profile photo updated! ✨");
+      queryClient.setQueryData(["authUser"], data.user);
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || "Failed to update photo");
+    }
+  });
 
   const navigate = useNavigate();
 
@@ -169,6 +185,10 @@ const Sidebar = () => {
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
           onClose={() => setViewingDP(null)}
+          onUpdate={async (base64) => {
+            await doUpdate({ profilePic: base64 });
+            setViewingDP(null);
+          }}
         />
       )}
     </aside>

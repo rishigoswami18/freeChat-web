@@ -12,7 +12,14 @@ const useLogout = () => {
   } = useMutation({
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.clear(); // Clear EVERYTHING on logout for security
+      // 1. Clear Local/Query Cache
+      queryClient.clear();
+
+      // 2. Disable Google One-Tap for next land (Standard security practice)
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.disableAutoSelect();
+      }
+
       toast.success("Logged out successfully");
     },
     onError: (err) => {

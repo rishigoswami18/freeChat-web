@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { googleLoginWithAccessToken } from "../lib/api";
+import { googleLoginWithAccessToken, googleLogin } from "../lib/api";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -11,92 +12,103 @@ const GoogleSignInButton = ({ text = "signin_with" }) => {
 
     const { mutate: accessTokenMutation } = useMutation({
         mutationFn: googleLoginWithAccessToken,
-        onSuccess: () => {
+        onSuccess: (data) => {
             setIsLoading(false);
+            queryClient.setQueryData(["authUser"], data.user);
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
-            toast.success("Signed in with Google!");
+            toast.success("Signed in with Google! 🚀");
         },
         onError: (error) => {
             setIsLoading(false);
-            const errorMsg = error.response?.data?.message || error.response?.data?.details || error.message || "Google sign-in failed. Please try again.";
-            console.error("Google Auth Error:", error);
+            const errorMsg = error.response?.data?.message || error.message || "Google sign-in failed.";
+            toast.error(errorMsg);
+        },
+    });
+
+    const { mutate: credentialMutation } = useMutation({
+        mutationFn: googleLogin,
+        onSuccess: (data) => {
+            setIsLoading(false);
+            queryClient.setQueryData(["authUser"], data.user);
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            toast.success("Signed in with Google! 🚀");
+        },
+        onError: (error) => {
+            setIsLoading(false);
+            const errorMsg = error.response?.data?.message || "Google credential invalid.";
             toast.error(errorMsg);
         },
     });
 
     const handleGoogleLogin = () => {
         if (!GOOGLE_CLIENT_ID) {
-            toast.error("Google Sign-In is not configured.");
+            toast.error("Google Client ID is missing.");
             return;
         }
 
         setIsLoading(true);
 
-        const redirectUri = window.location.origin;
-        const scope = "email profile openid";
-        const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-            `client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
-            `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-            `&response_type=token` +
-            `&scope=${encodeURIComponent(scope)}` +
-            `&prompt=select_account`;
-
-        const width = 500;
-        const height = 600;
+        const width = 500, height = 600;
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
 
-        const popup = window.open(
-            googleAuthUrl,
-            "google-auth",
-            `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
-        );
+        const scope = encodeURIComponent("email profile openid");
+        const redirect = encodeURIComponent(window.location.origin);
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirect}&response_type=token&scope=${scope}&prompt=select_account`;
+
+        const popup = window.open(authUrl, "google-auth", `width=${width},height=${height},left=${left},top=${top}`);
 
         if (!popup) {
             setIsLoading(false);
-            toast.error("Popup blocked! Please allow popups for this site.");
+            toast.error("Popup blocked! Access denied.");
             return;
         }
 
-        // --- New Message Listener (More reliable than polling) ---
+        /**
+         * FAST EVENT LISTENER
+         */
         const handleMessage = (event) => {
-            if (event.data?.type === "GOOGLE_OAUTH_TOKEN" && event.data?.token) {
-                const token = event.data.token;
+            if (event.data?.type === "GOOGLE_OAUTH_TOKEN") {
+                const { token, credential } = event.data;
                 window.removeEventListener("message", handleMessage);
-                accessTokenMutation(token);
+                if (token) accessTokenMutation(token);
+                else if (credential) credentialMutation(credential);
             }
         };
 
-        // --- Storage Polling (The most reliable fallback) ---
-        const pollStorage = setInterval(() => {
+        window.addEventListener("message", handleMessage);
+
+        /**
+         * FALLBACK POLLING (Only if message doesn't fire)
+         */
+        const poll = setInterval(() => {
             const token = localStorage.getItem("google_auth_token");
-            if (token) {
-                localStorage.removeItem("google_auth_token"); // Clean up
-                clearInterval(pollStorage);
-                window.removeEventListener("message", handleMessage);
-                if (popup && !popup.closed) popup.close();
-                accessTokenMutation(token);
-            }
-        }, 500);
+            const credential = localStorage.getItem("google_auth_credential");
 
-        // Safety cleanup if popup is closed or times out
-        const pollPopupStatus = setInterval(() => {
-            if (!popup || popup.closed) {
-                clearInterval(pollPopupStatus);
-                clearInterval(pollStorage);
+            if (token || credential) {
+                clearInterval(poll);
                 window.removeEventListener("message", handleMessage);
+                localStorage.removeItem("google_auth_token");
+                localStorage.removeItem("google_auth_credential");
+                if (popup) popup.close();
+                if (token) accessTokenMutation(token);
+                else if (credential) credentialMutation(credential);
+            }
+
+            if (popup?.closed) {
+                clearInterval(poll);
                 setIsLoading(false);
+                window.removeEventListener("message", handleMessage);
             }
-        }, 1000);
-
-        setTimeout(() => {
-            clearInterval(pollPopupStatus);
-            clearInterval(pollStorage);
-            window.removeEventListener("message", handleMessage);
-            if (popup && !popup.closed) popup.close();
-            setIsLoading(false);
-        }, 120000);
+        }, 800);
     };
+
+    useEffect(() => {
+        return () => {
+            // Memory cleanup
+            setIsLoading(false);
+        };
+    }, []);
 
     const buttonLabel = text === "signup_with" ? "Sign up with Google" : "Sign in with Google";
 

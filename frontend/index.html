@@ -13,30 +13,7 @@
   <meta name="HandheldFriendly" content="True" />
   <meta name="MobileOptimized" content="320" />
 
-  <script>
-    // --- BULLETPROOF OAUTH HANDLER ---
-    (function () {
-      const hash = window.location.hash || window.location.href;
-      if (hash && hash.includes("access_token=")) {
-        const urlParams = new URLSearchParams(hash.split('#')[1] || hash.split('?')[1]);
-        const accessToken = urlParams.get("access_token");
-
-        if (accessToken) {
-          // 1. Save to storage for the main window to find
-          localStorage.setItem("google_auth_token", accessToken);
-
-          // 2. Try to notify via message as backup
-          if (window.opener) {
-            window.opener.postMessage({ type: "GOOGLE_OAUTH_TOKEN", token: accessToken }, "*");
-          }
-
-          // 3. UI feedback & self-destruct
-          document.documentElement.innerHTML = "<body style='background:#111;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'><div><h2>Logged in!</h2><p>Closing window...</p></div></body>";
-          setTimeout(() => window.close(), 500);
-        }
-      }
-    })();
-  </script>
+  <!-- Google OAuth Callback Handler is now centralized at the bottom for reliability -->
 
 
   <!-- ===== OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ===== -->
@@ -264,6 +241,7 @@
   <meta name="author" content="Hrishikesh Giri AKA Rishi Goswami" />
   <meta name="creator" content="Hrishikesh Giri AKA Rishi Goswami" />
   <meta name="publisher" content="freechatweb.in" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 </head>
 
@@ -300,20 +278,44 @@
 
   <div id="root"></div>
   <script>
-    // --- Direct OAuth Callback Handler (Fastsest & Most Reliable) ---
+    /**
+     * CENTRAL OAUTH HANDLER (v2.0)
+     * Handles popups for Google Sign-In and One Tap.
+     */
     (function () {
-      const hash = window.location.hash;
-      if (hash && hash.includes("access_token=")) {
-        const params = new URLSearchParams(hash.substring(1));
-        const accessToken = params.get("access_token");
-        if (accessToken && window.opener) {
-          // Send token back to the main window
-          window.opener.postMessage({ type: "GOOGLE_OAUTH_TOKEN", token: accessToken }, "*");
-          // Visual feedback
-          document.body.innerHTML = "<div style='display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#111;color:#fff;'><h2>Sign-in Successful!</h2><p>Closing this window...</p></div>";
-          // Close immediately
-          setTimeout(() => window.close(), 500);
-        }
+      const hash = window.location.hash || "";
+      const search = window.location.search || "";
+      const combined = hash + search;
+
+      if (!combined.includes("access_token=") && !combined.includes("credential=")) return;
+
+      const params = new URLSearchParams(combined.replace("#", "?").substring(1));
+      const accessToken = params.get("access_token");
+      const credential = params.get("credential");
+
+      if ((accessToken || credential) && window.opener) {
+        // 🚀 BLAZING FAST MESSAGE PASSING
+        window.opener.postMessage({
+          type: "GOOGLE_OAUTH_TOKEN",
+          token: accessToken,
+          credential: credential
+        }, "*");
+
+        // --- Persistent Backup (in case message fails) ---
+        if (accessToken) localStorage.setItem("google_auth_token", accessToken);
+        if (credential) localStorage.setItem("google_auth_credential", credential);
+
+        // --- Visual Feedback ---
+        document.body.innerHTML = `
+          <div style='display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;background:#000;color:#fff;'>
+            <div style='border:4px solid #fff;border-top-color:transparent;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;'></div>
+            <h2 style='margin-top:20px;letter-spacing:1px;text-transform:uppercase;font-size:14px;'>Connecting Account...</h2>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+          </div>
+        `;
+
+        // Direct self-close
+        setTimeout(() => window.close(), 400);
       }
     })();
   </script>
