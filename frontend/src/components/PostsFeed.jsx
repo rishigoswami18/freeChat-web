@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   Heart,
@@ -18,21 +19,31 @@ import LikedByModal from "./LikedByModal";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
 const PostsFeed = ({ posts, setPosts }) => {
+  const { authUser } = useAuthUser();
   const [likedByPostId, setLikedByPostId] = useState(null);
   const [viewingDP, setViewingDP] = useState(null); // { url, name }
 
+  const isPremium = authUser?.role === "admin" || authUser?.isPremium;
+
   if (!posts || posts.length === 0) {
     return (
-      <div className="text-center py-16 opacity-60">
-        <MessageSquare className="w-14 h-14 mx-auto mb-3 opacity-30" />
-        <p className="text-lg font-medium">No posts yet</p>
-        <p className="text-sm mt-1">Be the first to share something!</p>
+      <div className="text-center py-24 opacity-60">
+        <div className="relative inline-block mb-6">
+          <MessageSquare className="w-16 h-16 mx-auto opacity-10" />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 3 }}
+            className="absolute -top-1 -right-1 size-4 bg-primary rounded-full"
+          />
+        </div>
+        <p className="text-xl font-black italic uppercase tracking-tighter">Your feed is silent</p>
+        <p className="text-sm mt-1 opacity-40">Follow legends or share your own story!</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="space-y-4 sm:space-y-6">
       {posts.map((post, index) => (
         <div key={post._id} className="stagger-item">
           <PostCard
@@ -41,10 +52,10 @@ const PostsFeed = ({ posts, setPosts }) => {
             setLikedByPostId={setLikedByPostId}
             setViewingDP={setViewingDP}
           />
-          {/* Show an ad after every 3 posts */}
-          {(index + 1) % 3 === 0 && (
-            <div className="mt-4 sm:mt-5">
-              <PostAd index={Math.floor(index / 3)} />
+          {/* Professional Ad Injection (Non-Premium Only) */}
+          {!isPremium && (index + 1) % 4 === 0 && (
+            <div className="mt-4 sm:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <PostAd index={Math.floor(index / 4)} />
             </div>
           )}
         </div>
@@ -89,7 +100,8 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [likeAnim, setLikeAnim] = useState(false);
+  const [showHeart, setShowHeart] = useState(false);
+  const lastTap = useRef(0);
 
   const isLiked = post.likes?.includes(authUser?._id);
   const likeCount = post.likes?.length || 0;
@@ -126,6 +138,18 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
     } finally {
       setIsLiking(false);
     }
+  };
+
+  const handleDoubleTap = (e) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTap.current < DOUBLE_TAP_DELAY) {
+      if (!isLiked) handleLike();
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 800);
+      return;
+    }
+    lastTap.current = now;
   };
 
   const handleComment = async () => {
@@ -243,22 +267,40 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
           </p>
         )}
 
-        {/* Media */}
+        {/* Media with Double-Tap Support */}
         {post.mediaUrl && (
-          <div className="rounded-xl overflow-hidden bg-base-300 mb-2.5 -mx-3 sm:-mx-5">
+          <div
+            className="relative rounded-xl overflow-hidden bg-base-300 mb-2.5 -mx-3 sm:-mx-5 cursor-pointer select-none group/media"
+            onClick={handleDoubleTap}
+          >
+            {/* Double Tap Heart Animation */}
+            <AnimatePresence>
+              {showHeart && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
+                >
+                  <Heart className="size-24 text-white fill-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {post.mediaType === "image" ? (
               <img
                 src={post.mediaUrl}
                 alt="Post media"
-                className="w-full max-h-[420px] object-cover sm:object-contain"
+                className="w-full max-h-[500px] object-cover sm:object-contain transition-transform duration-700 group-hover/media:scale-[1.02]"
                 loading="lazy"
               />
             ) : post.mediaType === "video" ? (
               <video
                 src={post.mediaUrl}
                 controls
-                className="w-full max-h-[420px]"
+                className="w-full max-h-[500px]"
                 playsInline
+                preload="metadata"
               />
             ) : null}
           </div>

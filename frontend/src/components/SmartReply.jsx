@@ -68,16 +68,16 @@ const SmartReply = memo(({ channel, onSelect }) => {
     ];
 
     return (
-        <div className="flex gap-2 p-3 overflow-x-auto no-scrollbar animate-in slide-in-from-bottom-2 duration-300">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-black rounded-full border border-primary/20 shrink-0 shadow-sm">
+        <div className="flex gap-2 p-2.5 overflow-x-auto no-scrollbar animate-in slide-in-from-bottom-2 duration-400 bg-base-100/40 backdrop-blur-md rounded-2xl border border-base-content/5 mb-1 mx-1 scroll-smooth">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-[9px] font-black rounded-full border border-primary/20 shrink-0 shadow-sm self-center">
                 <Sparkles className="size-3 animate-pulse" />
-                SMART REPLY
+                AI SUGGEST
             </div>
             {replies.map((reply, idx) => (
                 <button
                     key={idx}
                     onClick={() => onSelect(reply)}
-                    className={`px-5 py-1.5 bg-base-100/50 backdrop-blur-md rounded-full border text-xs font-bold transition-all whitespace-nowrap active:scale-95 shadow-sm hover:shadow-md ${colors[idx % colors.length]}`}
+                    className="px-5 py-2 bg-base-100 border border-base-content/10 rounded-full text-[13px] font-semibold transition-all whitespace-nowrap active:scale-95 shadow-sm hover:shadow-md hover:border-primary/30 hover:bg-primary/5 text-base-content/70 hover:text-primary"
                 >
                     {reply}
                 </button>

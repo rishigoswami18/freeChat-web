@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserProfile, getUserPosts, getOtherUserFriends, sendFriendRequest, unfriend } from "../lib/api";
-import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X, Globe, Languages, MapPin, UserCheck, UserX, Clock } from "lucide-react";
+import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X, Globe, Languages, MapPin, UserCheck, UserCheck as Check, UserX, Clock, Heart } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuthUser from "../hooks/useAuthUser";
 import PostsFeed from "../components/PostsFeed";
@@ -24,6 +24,7 @@ const UserProfilePage = () => {
     const [viewingDP, setViewingDP] = useState(null);
     const [showFriends, setShowFriends] = useState(false);
     const [userPosts, setUserPosts] = useState([]);
+    const loadMoreRef = useRef(null);
 
     const { mutate: addFriendMutation, isPending: isAddingFriend } = useMutation({
         mutationFn: () => sendFriendRequest(userId),
@@ -53,19 +54,43 @@ const UserProfilePage = () => {
         placeholderData: (prev) => prev,
     });
 
-    const { data: serverPosts, isLoading: isPostsLoading } = useQuery({
+    // Professional Infinite Scroll for User Posts
+    const {
+        data: postsData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading: isPostsLoading,
+    } = useInfiniteQuery({
         queryKey: ["userPosts", userId],
-        queryFn: () => getUserPosts(userId),
+        queryFn: ({ pageParam }) => getUserPosts(userId, pageParam, 12),
+        initialPageParam: null,
+        getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
         enabled: !!userId,
         staleTime: 1000 * 60 * 5,
-        placeholderData: (prev) => prev,
     });
 
+    // Flatten pages
+    const allPosts = useMemo(() => postsData?.pages.flatMap((page) => page.posts) || [], [postsData]);
+
     useEffect(() => {
-        if (serverPosts) {
-            setUserPosts(serverPosts);
-        }
-    }, [serverPosts]);
+        setUserPosts(allPosts);
+    }, [allPosts]);
+
+    // Intersection Observer for User Posts
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     if (isUserLoading) {
         return (
@@ -208,9 +233,11 @@ const UserProfilePage = () => {
 
             {/* Content Area */}
             <div className="min-h-[300px]">
-                {isPostsLoading ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="size-8 animate-spin text-primary opacity-20" />
+                {isLoading && userPosts.length === 0 ? (
+                    <div className="grid grid-cols-3 gap-1 sm:gap-4 animate-pulse">
+                        {[1, 2, 3, 4, 5, 6].map(i => (
+                            <div key={i} className="aspect-square bg-base-300 rounded-sm sm:rounded-xl" />
+                        ))}
                     </div>
                 ) : !isPublic && authUser?._id !== user._id && !authUser?.friends?.includes(user._id) ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-40">
@@ -219,38 +246,56 @@ const UserProfilePage = () => {
                         <p className="text-sm">Follow this user to see their posts and friends</p>
                     </div>
                 ) : userPosts.length > 0 ? (
-                    viewMode === "grid" ? (
-                        <div className="grid grid-cols-3 gap-1 sm:gap-4">
-                            {userPosts.map((post) => (
-                                <div
-                                    key={post._id}
-                                    className="aspect-square relative group cursor-pointer overflow-hidden bg-base-300 rounded-sm sm:rounded-xl"
-                                    onClick={() => setViewMode("feed")} // Simple way to "view" it for now
-                                >
-                                    {post.mediaUrl ? (
-                                        <div className="w-full h-full">
-                                            {post.mediaType === "video" ? (
-                                                <video src={post.mediaUrl} className="w-full h-full object-cover" muted />
-                                            ) : (
-                                                <img src={post.mediaUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                            )}
+                    <>
+                        {viewMode === "grid" ? (
+                            <div className="grid grid-cols-3 gap-1 sm:gap-4">
+                                {userPosts.map((post) => (
+                                    <div
+                                        key={post._id}
+                                        className="aspect-square relative group cursor-pointer overflow-hidden bg-base-300 rounded-sm sm:rounded-xl"
+                                        onClick={() => setViewMode("feed")}
+                                    >
+                                        {post.mediaUrl ? (
+                                            <div className="w-full h-full">
+                                                {post.mediaType === "video" ? (
+                                                    <video src={post.mediaUrl} className="w-full h-full object-cover" muted />
+                                                ) : (
+                                                    <img src={post.mediaUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="w-full h-full p-3 flex flex-col items-center justify-center text-[10px] sm:text-sm text-center font-medium opacity-60 bg-gradient-to-br from-base-200 to-base-300">
+                                                <List className="size-4 mb-2 opacity-20" />
+                                                <span className="line-clamp-3">{post.content}</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white font-bold">
+                                            <div className="flex items-center gap-1"><Heart className="size-4 fill-current" /> {post.likes?.length || 0}</div>
+                                            <div className="flex items-center gap-1"><MessageCircle className="size-4 fill-current" /> {post.comments?.length || 0}</div>
                                         </div>
-                                    ) : (
-                                        <div className="w-full h-full p-2 flex items-center justify-center text-[10px] sm:text-xs text-center font-medium opacity-60 italic bg-gradient-to-br from-base-200 to-base-300">
-                                            {post.content?.substring(0, 50)}...
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white font-bold">
-                                        <div className="flex items-center gap-1"><Grid className="size-4 fill-current" /> {post.likes?.length || 0}</div>
                                     </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="max-w-xl mx-auto space-y-6">
+                                <PostsFeed posts={userPosts} setPosts={setUserPosts} />
+                            </div>
+                        )}
+
+                        {/* Infinite Scroll Trigger */}
+                        <div ref={loadMoreRef} className="py-12 flex justify-center">
+                            {isFetchingNextPage ? (
+                                <div className="flex flex-col items-center gap-3 opacity-40">
+                                    <div className="size-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest">Loading History...</p>
                                 </div>
-                            ))}
+                            ) : hasNextPage ? (
+                                <div className="h-20" />
+                            ) : (
+                                <div className="divider opacity-20 text-[10px] font-black uppercase tracking-[0.2em]">End of Transmission</div>
+                            )}
                         </div>
-                    ) : (
-                        <div className="max-w-xl mx-auto space-y-6">
-                            <PostsFeed posts={userPosts} setPosts={setUserPosts} />
-                        </div>
-                    )
+                    </>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 opacity-30 italic">
                         <Grid className="size-12 mb-4" />

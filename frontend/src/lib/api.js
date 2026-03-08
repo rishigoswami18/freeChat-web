@@ -111,11 +111,13 @@ export const createPost = async (postData) => {
   return response.data;
 };
 
-export const getPosts = async (userId, friendIds = []) => {
+export const getPosts = async (userId, friendIds = [], lastId = null, limit = 10) => {
   const response = await axiosInstance.get("/posts", {
     params: {
       userId,
       friends: friendIds.join(","),
+      lastId,
+      limit
     },
   });
   return response.data;
@@ -146,13 +148,17 @@ export const deletePost = async (postId) => {
   return response.data;
 };
 
-export const getUserPosts = async (userId) => {
-  const response = await axiosInstance.get(`/posts/user/${userId}`);
+export const getUserPosts = async (userId, lastId = null, limit = 10) => {
+  const response = await axiosInstance.get(`/posts/user/${userId}`, {
+    params: { lastId, limit }
+  });
   return response.data;
 };
 
-export const getVideoPosts = async () => {
-  const response = await axiosInstance.get("/posts/videos");
+export const getVideoPosts = async (lastId = null, limit = 10) => {
+  const response = await axiosInstance.get("/posts/videos", {
+    params: { lastId, limit }
+  });
   return response.data;
 };
 

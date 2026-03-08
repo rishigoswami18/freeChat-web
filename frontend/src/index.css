@@ -681,19 +681,67 @@ body.is-chat-active {
   color: white !important;
 }
 
-/* ===== Premium Chat Background & Wallpaper ===== */
+/* ===== Professional Premium Chat Background & Wallpaper ===== */
 .premium-chat-bg {
   background-color: oklch(var(--b1));
   background-image:
-    linear-gradient(rgba(var(--b1-rgb), 0.94), rgba(var(--b1-rgb), 0.94)),
-    url("https://w7.pngwing.com/pngs/414/83/png-transparent-whatsapp-social-media-icons-pattern-whatsapp-miscellaneous-monochrome-computer-wallpaper-thumbnail.png");
-  background-size: 300px;
-  /* Slightly smaller for faster tiling */
-  background-repeat: repeat;
+    linear-gradient(rgba(var(--b1-rgb), 0.9), rgba(var(--b1-rgb), 0.9)),
+    url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 15c-1.105 0-2 .895-2 2 0 1.105.895 2 2 2 1.105 0 2-.895 2-2 0-1.105-.895-2-2-2zm0-4c-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6s6-2.686 6-6c0-3.314-2.686-6-6-6zm0 2c2.21 0 4 1.79 4 4 0 2.21-1.79 4-4 4-2.21 0-4-1.79-4-4 0-2.21 1.79-4 4-4zm115 106c-1.105 0-2 .895-2 2 0 1.105.895 2 2 2 1.105 0 2-.895 2-2 0-1.105-.895-2-2-2zm0-4c-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6s6-2.686 6-6c0-3.314-2.686-6-6-6zm0 2c2.21 0 4 1.79 4 4 0 2.21-1.79 4-4 4-2.21 0-4-1.79-4-4 0-2.21 1.79-4 4-4zm-22-22c-1.105 0-2 .895-2 2 0 1.105.895 2 2 2 1.105 0 2-.895 2-2 0-1.105-.895-2-2-2zm0-4c-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6s6-2.686 6-6c0-3.314-2.686-6-6-6zm0 2c2.21 0 4 1.79 4 4 0 2.21-1.79 4-4 4-2.21 0-4-1.79-4-4 0-2.21 1.79-4 4-4zm-84-64c-1.105 0-2 .895-2 2 0 1.105.895 2 2 2 1.105 0 2-.895 2-2 0-1.105-.895-2-2-2zm0-4c-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6s6-2.686 6-6c0-3.314-2.686-6-6-6zm0 2c2.21 0 4 1.79 4 4 0 2.21-1.79 4-4 4-2.21 0-4-1.79-4-4 0-2.21 1.79-4 4-4zM60 60c-1.105 0-2 .895-2 2 0 1.105.895 2 2 2 1.105 0 2-.895 2-2 0-1.105-.895-2-2-2zm0-4c-3.314 0-6 2.686-6 6 0 3.314 2.686 6 6 6s6-2.686 6-6c0-3.314-2.686-6-6-6zm0 2c2.21 0 4 1.79 4 4 0 2.21-1.79 4-4 4-2.21 0-4-1.79-4-4 0-2.21 1.79-4 4-4z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-size: 180px;
   z-index: 0;
   pointer-events: none;
-  background-attachment: local;
-  /* Scrolls WITH content - often faster for GPU tiling than static background in absolute div */
+  background-attachment: scroll;
+  /* Performance win over 'local' in some browsers, but let's test */
+}
+
+/* ===== Premium Message Bubbles (Direct Professional Look) ===== */
+.str-chat__message-simple-text-inner {
+  border-radius: 18px !important;
+  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  will-change: transform, opacity;
+}
+
+/* Received (Other) Bubble */
+.str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  background: oklch(var(--b2)) !important;
+  color: oklch(var(--bc)) !important;
+  border: 1px solid oklch(var(--bc) / 0.08) !important;
+  border-top-left-radius: 4px !important;
+}
+
+/* Sent (Me) Bubble - Instagram Style Gradient */
+.str-chat__message-simple--me .str-chat__message-simple-text-inner {
+  background: linear-gradient(135deg, oklch(var(--p)) 0%, #3b82f6 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-top-right-radius: 4px !important;
+}
+
+/* Bubble Tails (Sharper, more native) */
+.bubble-tail-others::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-right: 10px solid oklch(var(--b2));
+  border-top: 10px solid transparent;
+  z-index: 1;
+}
+
+.bubble-tail-me::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 10px solid #3b82f6;
+  /* Matching gradient end */
+  border-top: 10px solid transparent;
+  z-index: 1;
 }
 
 /* For dark mode we might need to invert it */
@@ -708,10 +756,26 @@ body.is-chat-active {
 }
 
 .chat-input-glass {
-  background: oklch(var(--b1) / 0.85);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border-top: 1px solid oklch(var(--bc) / 0.08);
+  background: oklch(var(--b1) / 0.98);
+  /* More solid for better performance */
+  border-top: 1px solid oklch(var(--bc) / 0.1);
+}
+
+/* Highly optimized input area for older devices */
+.chat-input-pro-optimized {
+  background: oklch(var(--b1));
+  border-top: 1px solid oklch(var(--bc) / 0.12);
+  position: relative;
+  z-index: 50;
+  contain: layout style;
+  /* Performance hint for the browser */
+}
+
+/* Disable heavy filters on mobile if possible, but definitely for these classes */
+.chat-input-glass,
+.chat-input-pro-optimized {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Custom Message Bubble Shapes (Tails handled by pseudo-elements) */

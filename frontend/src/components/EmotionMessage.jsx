@@ -71,7 +71,7 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-md min-w-[180px] sm:min-w-[240px] border ${isMyMessage ? 'bg-primary text-primary-content border-primary/20' : 'bg-base-200 text-base-content border-base-300'}`}>
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-[0_5px_15px_-3px_rgba(0,0,0,0.1)] min-w-[200px] sm:min-w-[260px] border backdrop-blur-md ${isMyMessage ? 'bg-gradient-to-br from-primary/50 to-primary/80 text-white border-white/10' : 'bg-base-200/80 text-base-content border-base-300'}`}>
       <audio
         ref={audioRef}
         src={url}
@@ -82,30 +82,30 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
 
       <button
         onClick={togglePlay}
-        className={`size-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${isMyMessage ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-primary text-primary-content hover:bg-primary-focus'}`}
+        className={`size-11 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-lg ${isMyMessage ? 'bg-white text-primary hover:bg-zinc-100' : 'bg-primary text-primary-content hover:scale-105'}`}
       >
         {isPlaying ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current ml-0.5" />}
       </button>
 
       <div className="flex-1 space-y-1.5">
-        <div className="h-1 w-full bg-black/10 rounded-full overflow-hidden relative">
+        <div className={`h-1.5 w-full rounded-full overflow-hidden relative ${isMyMessage ? 'bg-white/20' : 'bg-base-content/10'}`}>
           <div
             className={`h-full transition-all duration-100 ease-linear ${isMyMessage ? 'bg-white' : 'bg-primary'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="flex justify-between items-center px-0.5">
-          <span className="text-[9px] font-bold opacity-70">
-            {isPlaying ? formatTime(currentTime) : <Mic className="size-2.5" />}
+          <span className={`text-[10px] font-bold ${isMyMessage ? 'text-white/80' : 'opacity-60'}`}>
+            {isPlaying ? formatTime(currentTime) : <div className="flex items-center gap-1.5"><Mic className="size-2.5" />{formatTime(duration)}</div>}
           </span>
         </div>
       </div>
 
       <button
         onClick={() => handleFileDownload(url, 'audio')}
-        className={`ml-1 size-7 rounded-full flex items-center justify-center transition-all active:scale-95 opacity-40 hover:opacity-100 ${isMyMessage ? 'hover:bg-white/20' : 'hover:bg-base-300'}`}
+        className={`ml-1 size-8 rounded-full flex items-center justify-center transition-all active:scale-95 opacity-50 hover:opacity-100 ${isMyMessage ? 'hover:bg-white/20' : 'hover:bg-base-300'}`}
       >
-        <Download className="size-3.5" />
+        <Download className="size-4" />
       </button>
     </div>
   );
@@ -199,12 +199,12 @@ const EmotionMessage = memo((props) => {
 
   const MessageFooter = useCallback(() => (
     <div className="absolute bottom-1 right-2 flex items-center gap-1 select-none pointer-events-none z-10">
-      <span className={`text-[9.5px] font-bold tracking-tight ${isMyMessage ? 'text-white/80' : 'text-base-content/40'}`}>
+      <span className={`text-[10px] font-bold tracking-tight ${isMyMessage ? 'text-white/70' : 'text-base-content/30'}`}>
         {timestamp}
       </span>
       {isMyMessage && (
         <div className="flex -space-x-1.5 translate-y-[1px]">
-          <CheckCheck className={`size-3 ${message.status === 'received' || message.status === 'read' ? 'text-sky-300' : 'text-white/40'}`} />
+          <CheckCheck className={`size-3.5 stroke-[2.5px] ${message.status === 'read' ? 'text-sky-300' : 'text-white/40'}`} />
         </div>
       )}
     </div>
@@ -256,21 +256,21 @@ const EmotionMessage = memo((props) => {
       {isSnap ? (
         <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
           {isViewed ? (
-            <div className="flex items-center gap-2 bg-base-200/50 px-4 py-2 rounded-2xl border border-base-300 opacity-60">
-              <CheckCheck className="size-4 text-success" />
-              <span className="text-xs font-medium italic">Viewed snap</span>
+            <div className="flex items-center gap-2 bg-base-200/40 px-3.5 py-1.5 rounded-full border border-base-300/50 opacity-50 select-none">
+              <CheckCheck className="size-3.5 text-success/70" />
+              <span className="text-[10px] font-bold uppercase tracking-widest italic opacity-70">Snap Viewed</span>
             </div>
           ) : (
             <button
               onClick={() => setIsViewingSnap(true)}
-              className="flex items-center gap-3 bg-primary text-primary-content px-5 py-3 rounded-2xl shadow-lg active:scale-95 transition-all"
+              className="flex items-center gap-3.5 bg-gradient-to-r from-primary to-indigo-600 text-white px-5 py-3 rounded-[20px] shadow-xl shadow-primary/20 active:scale-90 transition-all border border-white/10 group/snap"
             >
-              <div className="size-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Camera className="size-5" />
+              <div className="size-9 rounded-full bg-white/20 flex items-center justify-center transition-transform group-hover/snap:rotate-12">
+                <Camera className="size-5 fill-white/10" />
               </div>
               <div className="text-left">
-                <p className="text-xs font-bold uppercase tracking-wider">New Snap</p>
-                <p className="text-[10px] opacity-80">Tap to view</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.15em] leading-none mb-1">New Snap</p>
+                <p className="text-[9px] font-bold opacity-60 uppercase tracking-tighter">Tap to re-live</p>
               </div>
             </button>
           )}

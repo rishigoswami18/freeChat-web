@@ -87,15 +87,21 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get video posts with prioritization (for Reels)
+// Get video posts with prioritization (for Reels) with pagination
 router.get("/videos", async (req, res) => {
   try {
-    console.log("Fetching video posts for Reels...");
+    const { limit = 8, lastId } = req.query;
+    const limitNum = parseInt(limit, 10) || 8;
     const isPremium = hasPremiumAccess(req.user);
+
+    const matchQuery = { mediaType: "video", isAd: false };
+    if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
+      matchQuery._id = { $lt: new mongoose.Types.ObjectId(lastId) };
+    }
 
     // Fetch real video posts with author status
     let posts = await Post.aggregate([
-      { $match: { mediaType: "video", isAd: false } }, // Exclude ads
+      { $match: matchQuery }, // Exclude ads and previous pages
       {
         $lookup: {
           from: "users",
@@ -115,66 +121,29 @@ router.get("/videos", async (req, res) => {
           profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
         }
       },
+      { $sort: { _id: -1 } },
+      { $limit: limitNum + 1 },
       { $project: { authorInfo: 0 } }
     ]);
-    console.log(`Found ${posts.length} non-ad video posts.`);
 
-    // Sort by popularity/recency
-    posts.sort((a, b) => {
-      const scoreA = (a.likes.length * 2) + (a.shareCount * 5);
-      const scoreB = (b.likes.length * 2) + (b.shareCount * 5);
-      if (scoreA === scoreB) return new Date(b.createdAt) - new Date(a.createdAt);
-      return scoreB - scoreA;
-    });
-    console.log("Video posts sorted by popularity and recency.");
+    const hasMore = posts.length > limitNum;
+    const paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
+    const nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
 
-    // If user is not premium, inject ads every 4th post
-    if (!isPremium) {
-      console.log("User is not premium. Injecting ads into video feed.");
-      const ads = await Post.find({ isAd: true }).limit(5); // Fetch a few ads
-      console.log(`Found ${ads.length} ad posts in DB.`);
-
-      // Fallback sample ad if none in DB
-      const sampleAd = {
-        _id: "ad_123",
-        userId: "ad_user_id", // Placeholder for ad user
-        fullName: "FreeChat Business",
-        profilePic: "https://res.cloudinary.com/demo/image/upload/v1624103175/samples/people/steve-jobs.jpg",
-        content: "Grow your business with FreeChat Ads. Target the right audience today!",
-        mediaUrl: "https://res.cloudinary.com/demo/video/upload/v1624103175/samples/elephants.mp4",
-        mediaType: "video",
-        isAd: true,
-        adLink: "https://freechatweb.in/ads",
-        adCta: "Get Started",
-        likes: [],
-        comments: [],
-        shareCount: 0,
-        songName: "Sponsored Content",
-        isVerified: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
+    // If user is not premium, inject ads
+    if (!isPremium && paginatedPosts.length > 0) {
+      const ads = await Post.find({ isAd: true }).limit(2);
       const finalPosts = [];
-      let adIndex = 0;
-
-      posts.forEach((post, index) => {
+      paginatedPosts.forEach((post, index) => {
         finalPosts.push(post);
-        // Inject an ad every 4th post
-        if ((index + 1) % 4 === 0) {
-          const currentAd = ads[adIndex] || sampleAd;
-          finalPosts.push(currentAd);
-          adIndex = (adIndex + 1) % (ads.length > 0 ? ads.length : 1); // Cycle through available ads
-          console.log(`Injected ad at position ${finalPosts.length}. Ad ID: ${currentAd._id}`);
+        if ((index + 1) % 4 === 0 && ads.length > 0) {
+          finalPosts.push(ads[index % ads.length]);
         }
       });
-
-      console.log(`Final video feed with ads: ${finalPosts.length} items.`);
-      return res.json(finalPosts);
+      return res.json({ posts: finalPosts, nextCursor, hasMore });
     }
 
-    console.log("User is premium. No ads injected.");
-    res.json(posts);
+    res.json({ posts: paginatedPosts, nextCursor, hasMore });
   } catch (err) {
     console.error("Error fetching video posts:", err.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -206,14 +175,14 @@ router.post("/songs", async (req, res) => {
   }
 });
 
-// Get feed posts (user + friends + public profiles)
+// Get feed posts (user + friends + public profiles) with Pagination
 router.get("/", async (req, res) => {
   try {
-    const { userId, friends } = req.query;
+    const { userId, friends, limit = 10, lastId } = req.query;
     const friendIds = friends ? friends.split(",").filter(Boolean) : [];
+    const limitNum = parseInt(limit, 10) || 10;
 
     // Convert string IDs to ObjectIds for the aggregation pipeline
-    // Fallback to req.user._id if userId is not provided in query
     const myId = userId ? new mongoose.Types.ObjectId(userId) : req.user._id;
     const peerIds = friendIds.map(id => {
       try {
@@ -222,6 +191,19 @@ router.get("/", async (req, res) => {
         return null;
       }
     }).filter(Boolean);
+
+    // Build Match Query
+    const matchQuery = {
+      $or: [
+        { userId: { $in: [myId, ...peerIds] } },
+        { "authorInfo.isPublic": true },
+      ],
+    };
+
+    // Cursor-based pagination: If lastId is provided, get posts before it
+    if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
+      matchQuery._id = { $lt: new mongoose.Types.ObjectId(lastId) };
+    }
 
     const posts = await Post.aggregate([
       {
@@ -238,17 +220,9 @@ router.get("/", async (req, res) => {
           preserveNullAndEmptyArrays: true,
         },
       },
-      {
-        $match: {
-          $or: [
-            { userId: { $in: [myId, ...peerIds] } },
-            { "authorInfo.isPublic": true },
-          ],
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
+      { $match: matchQuery },
+      { $sort: { _id: -1 } }, // Using _id for stability in pagination
+      { $limit: limitNum + 1 }, // Fetch 1 extra to see if there's more
       {
         $addFields: {
           role: { $ifNull: ["$role", "$authorInfo.role"] },
@@ -257,14 +231,18 @@ router.get("/", async (req, res) => {
           profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
         }
       },
-      {
-        $project: {
-          authorInfo: 0, // Remove the joined data to keep response structure identical
-        },
-      },
+      { $project: { authorInfo: 0 } },
     ]);
 
-    res.json(posts);
+    const hasMore = posts.length > limitNum;
+    const paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
+    const nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
+
+    res.json({
+      posts: paginatedPosts,
+      nextCursor,
+      hasMore
+    });
   } catch (err) {
     console.error("Error fetching posts:", err.message);
     res.status(500).json({ message: "Internal Server Error" });
@@ -363,11 +341,19 @@ router.put("/:id/share", async (req, res) => {
   }
 });
 
-// Get user specific posts
+// Get user specific posts with pagination
 router.get("/user/:userId", async (req, res) => {
   try {
+    const { limit = 10, lastId } = req.query;
+    const limitNum = parseInt(limit, 10) || 10;
+
+    const matchQuery = { userId: new mongoose.Types.ObjectId(req.params.userId) };
+    if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
+      matchQuery._id = { $lt: new mongoose.Types.ObjectId(lastId) };
+    }
+
     const posts = await Post.aggregate([
-      { $match: { userId: new mongoose.Types.ObjectId(req.params.userId) } },
+      { $match: matchQuery },
       {
         $lookup: {
           from: "users",
@@ -387,10 +373,16 @@ router.get("/user/:userId", async (req, res) => {
           profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
         }
       },
-      { $sort: { createdAt: -1 } },
+      { $sort: { _id: -1 } },
+      { $limit: limitNum + 1 },
       { $project: { authorInfo: 0 } }
     ]);
-    res.json(posts);
+
+    const hasMore = posts.length > limitNum;
+    const paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
+    const nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
+
+    res.json({ posts: paginatedPosts, nextCursor, hasMore });
   } catch (err) {
     console.error("Error fetching user posts:", err.message);
     res.status(500).json({ message: "Internal Server Error" });

@@ -40,8 +40,18 @@ const InboxPage = () => {
             return channels;
         };
 
-        const fetchChannels = async () => {
+        const fetchChannels = async (retries = 3) => {
             try {
+                // Check if client is actually ready to query
+                if (!chatClient?.userID) {
+                    if (retries > 0) {
+                        console.log(`Waiting for chat client... (${retries} retries left)`);
+                        setTimeout(() => fetchChannels(retries - 1), 1000);
+                        return;
+                    }
+                    throw new Error("Chat client not ready");
+                }
+
                 // Broaden filter to ensure we see all chats user is part of
                 const filter = {
                     type: "messaging",
@@ -97,6 +107,11 @@ const InboxPage = () => {
                 setConversations(mapped);
             } catch (error) {
                 console.error("Error fetching channels:", error);
+                if (retries > 0) {
+                    console.log(`Retrying fetchChannels due to error... (${retries} left)`);
+                    setTimeout(() => fetchChannels(retries - 1), 1500);
+                    return;
+                }
                 toast.error("Could not load conversations.");
             } finally {
                 setIsLoading(false);

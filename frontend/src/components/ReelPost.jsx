@@ -28,6 +28,7 @@ const ReelPost = ({ post, isActive }) => {
     const queryClient = useQueryClient();
 
     const lastTap = useRef(0);
+    const [showHeart, setShowHeart] = useState(false);
 
     const gifts = [
         { id: 'rose', name: 'Rose', cost: 10, icon: '🌹' },
@@ -43,6 +44,21 @@ const ReelPost = ({ post, isActive }) => {
             setLikesCount(data.likes.length);
         }
     });
+
+    const handleDoubleTap = (e) => {
+        const now = Date.now();
+        const DOUBLE_TAP_DELAY = 300;
+        if (now - lastTap.current < DOUBLE_TAP_DELAY) {
+            if (!liked) {
+                toggleLike.mutate();
+            }
+            setShowHeart(true);
+            setTimeout(() => setShowHeart(false), 800);
+            return true;
+        }
+        lastTap.current = now;
+        return false;
+    };
 
     const handleComment = async () => {
         if (!commentText.trim() || isCommenting) return;
@@ -112,20 +128,7 @@ const ReelPost = ({ post, isActive }) => {
     }, [isActive, playbackRate]);
 
     const togglePlay = (e) => {
-        const now = Date.now();
-        const DOUBLE_TAP_DELAY = 300;
-
-        if (now - lastTap.current < DOUBLE_TAP_DELAY) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            if (x < rect.width / 2) {
-                handleSeek(-10);
-            } else {
-                handleSeek(10);
-            }
-            return;
-        }
-        lastTap.current = now;
+        if (handleDoubleTap(e)) return;
 
         if (videoRef.current?.paused) {
             videoRef.current.play();
@@ -163,10 +166,25 @@ const ReelPost = ({ post, isActive }) => {
                 className={`h-full w-full transition-all duration-500 ${isTheaterMode ? 'object-contain' : 'object-cover'}`}
                 loop
                 playsInline
+                preload="auto"
                 onClick={togglePlay}
                 muted={!!post.audioUrl}
                 onTimeUpdate={(e) => setProgress((e.target.currentTime / e.target.duration) * 100)}
             />
+
+            {/* Double Tap Heart Animation */}
+            <AnimatePresence>
+                {showHeart && (
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
+                    >
+                        <Heart className="size-32 text-white fill-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {post.audioUrl && (
                 <audio ref={audioRef} src={post.audioUrl} loop />
