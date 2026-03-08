@@ -44,28 +44,22 @@ export const createRelease = async (req, res) => {
 
         let uploadRes;
         try {
-            console.log("Initiating Cloudinary upload_large for APK...");
-            // Using resource_type: "video" is a known workaround to bypass the 10MB limit for "raw" files on free accounts.
-            // Cloudinary allows up to 100MB for "video" types on free plans.
-            uploadRes = await new Promise((resolve, reject) => {
-                cloudinary.uploader.upload_large(tempFilePath, {
-                    resource_type: "video",
-                    folder: "apk_releases",
-                    public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`,
-                    chunk_size: 6000000 // 6MB chunks
-                }, (error, result) => {
-                    if (error) {
-                        console.error("Cloudinary upload_large Error Details:", error);
-                        reject(error);
-                    } else {
-                        console.log("Cloudinary upload_large Success Result:", result);
-                        resolve(result);
-                    }
-                });
+            console.log("Initiating Cloudinary upload_large for APK with resource_type: auto");
+            uploadRes = await cloudinary.uploader.upload_large(tempFilePath, {
+                resource_type: "auto",
+                folder: "apk_releases",
+                public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`,
+                chunk_size: 6000000
             });
+            console.log("Cloudinary upload_large Success Result:", uploadRes);
         } catch (uploadError) {
-            console.error("Upload process failed:", uploadError);
-            throw new Error(`Cloudinary Transmission Failed: ${uploadError.message || JSON.stringify(uploadError)}`);
+            console.error("Cloudinary upload_large Exception:", uploadError);
+            // Return the specific error from Cloudinary to the frontend
+            return res.status(500).json({
+                message: "Cloudinary Transmission Failed",
+                error: uploadError.message || "Unknown Cloudinary Error",
+                details: uploadError
+            });
         } finally {
             if (fs.existsSync(tempFilePath)) {
                 fs.unlinkSync(tempFilePath);
@@ -73,8 +67,7 @@ export const createRelease = async (req, res) => {
         }
 
         if (!uploadRes || !uploadRes.secure_url) {
-            console.error("Upload finished but secure_url is missing. Full response:", uploadRes);
-            throw new Error("Cloudinary response missing secure_url. Please check backend logs.");
+            return res.status(500).json({ message: "Upload finished but secure_url is missing", response: uploadRes });
         }
 
         const newRelease = new AppRelease({
@@ -86,11 +79,10 @@ export const createRelease = async (req, res) => {
         });
 
         await newRelease.save();
-        console.log("Database entry created for release:", newRelease._id);
         res.status(201).json(newRelease);
     } catch (error) {
         console.error("Final createRelease Error:", error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message || "Internal Server Error" });
     }
 };
 
