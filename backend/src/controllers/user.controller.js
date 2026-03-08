@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import FriendRequest from "../models/FriendRequest.js";
 import cloudinary from "../lib/cloudinary.js";
-import { upsertStreamUser, getStreamClient } from "../lib/stream.js";
+import { upsertStreamUser, streamClient } from "../lib/stream.js";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
 import bcrypt from "bcryptjs";
 import Post from "../models/Post.js";
@@ -415,8 +415,11 @@ export async function deleteAccount(req, res) {
 
     // 1. Delete from Stream
     try {
-      const client = getStreamClient();
-      await client.deleteUser(String(userId), { delete_conversation_interactions: true });
+      if (streamClient) {
+        await streamClient.deleteUser(String(userId), { delete_conversation_interactions: true });
+      } else {
+        console.warn("Stream client not initialized, skipping user deletion");
+      }
     } catch (e) {
       console.error("Stream user deletion failed:", e.message);
     }
