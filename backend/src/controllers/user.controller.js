@@ -6,7 +6,7 @@ import { hasPremiumAccess } from "../utils/freeTrial.js";
 import bcrypt from "bcryptjs";
 import Post from "../models/Post.js";
 import Story from "../models/Story.js";
-import Couple from "../models/Couple.js";
+import GameSession from "../models/GameSession.js";
 
 // backend/src/controllers/user.controller.js
 export const getAllUsers = async (req, res) => {
@@ -436,12 +436,25 @@ export async function deleteAccount(req, res) {
       { $pull: { friends: userId } }
     );
 
-    // 5. Cleanup Couple status if any
-    await Couple.deleteMany({
-      $or: [{ user1: userId }, { user2: userId }]
+    // 5. Cleanup Couple status and partner reference
+    await User.updateMany(
+      { partnerId: userId },
+      {
+        $set: {
+          partnerId: null,
+          coupleStatus: "none",
+          coupleStreak: 0,
+          coupleRequestSenderId: null
+        }
+      }
+    );
+
+    // 6. Delete Game Sessions where user was a participant
+    await GameSession.deleteMany({
+      participants: userId
     });
 
-    // 6. Delete User document
+    // 7. Delete User document
     await User.findByIdAndDelete(userId);
 
     res.json({ success: true, message: "Account deleted successfully" });
