@@ -133,8 +133,6 @@ const Sidebar = () => {
 
         <a
           href={`${BASE_URL}/apk/download/latest`}
-          target="_blank"
-          rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"
           download="BondBeyond_app.apk"
         >
