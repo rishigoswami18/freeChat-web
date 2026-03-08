@@ -1,9 +1,19 @@
 import AppRelease from "../models/AppRelease.js";
-import cloudinary from "../lib/cloudinary.js";
 import { Readable } from "stream";
 import fs from "fs";
 import path from "path";
-import os from "os";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// APKs are stored in /backend/uploads/apk/
+const APK_DIR = path.join(__dirname, "..", "..", "uploads", "apk");
+
+// Ensure the directory exists on startup
+if (!fs.existsSync(APK_DIR)) {
+    fs.mkdirSync(APK_DIR, { recursive: true });
+}
 
 export const getLatestRelease = async (req, res) => {
     try {
@@ -28,52 +38,33 @@ export const createRelease = async (req, res) => {
         const { versionCode, versionName, apkFile, releaseNotes, isUpdateRequired } = req.body;
 
         if (!apkFile) {
-            return res.status(400).json({ message: "Direct APK file upload is required" });
+            return res.status(400).json({ message: "APK file is required" });
         }
 
-        // Handle large files by writing to a temporary file and using upload_large
-        // This bypasses Cloudinary's 10MB limit for single-request "raw" uploads
         const base64Data = apkFile.split(",")[1];
         if (!base64Data) {
             return res.status(400).json({ message: "Invalid APK file format" });
         }
 
         const buffer = Buffer.from(base64Data, "base64");
-        const tempFilePath = path.join(os.tmpdir(), `temp_apk_${Date.now()}.apk`);
-        fs.writeFileSync(tempFilePath, buffer);
+        const sizeMB = (buffer.length / 1024 / 1024).toFixed(1);
+        console.log(`📦 Saving APK locally: ${sizeMB}MB`);
 
-        let uploadRes;
-        try {
-            console.log("Initiating Cloudinary upload_large for APK with resource_type: auto");
-            uploadRes = await cloudinary.uploader.upload_large(tempFilePath, {
-                resource_type: "auto",
-                folder: "apk_releases",
-                public_id: `BondBeyond_v${versionName.replace(/\./g, '_')}_${Date.now()}`,
-                chunk_size: 6000000
-            });
-            console.log("Cloudinary upload_large Success Result:", uploadRes);
-        } catch (uploadError) {
-            console.error("Cloudinary upload_large Exception:", uploadError);
-            // Return the specific error from Cloudinary to the frontend
-            return res.status(500).json({
-                message: "Cloudinary Transmission Failed",
-                error: uploadError.message || "Unknown Cloudinary Error",
-                details: uploadError
-            });
-        } finally {
-            if (fs.existsSync(tempFilePath)) {
-                fs.unlinkSync(tempFilePath);
-            }
-        }
+        // Save APK to local filesystem
+        const fileName = `BondBeyond_v${versionName.replace(/\./g, "_")}_${Date.now()}.apk`;
+        const filePath = path.join(APK_DIR, fileName);
+        fs.writeFileSync(filePath, buffer);
 
-        if (!uploadRes || !uploadRes.secure_url) {
-            return res.status(500).json({ message: "Upload finished but secure_url is missing", response: uploadRes });
-        }
+        // Build a public URL — the backend serves /uploads/apk/ as static files
+        const baseUrl = process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5001}`;
+        const apkUrl = `${baseUrl}/uploads/apk/${fileName}`;
+
+        console.log(`✅ APK saved: ${apkUrl}`);
 
         const newRelease = new AppRelease({
             versionCode,
             versionName,
-            apkUrl: uploadRes.secure_url,
+            apkUrl,
             releaseNotes,
             isUpdateRequired
         });
@@ -81,7 +72,7 @@ export const createRelease = async (req, res) => {
         await newRelease.save();
         res.status(201).json(newRelease);
     } catch (error) {
-        console.error("Final createRelease Error:", error);
+        console.error("createRelease Error:", error);
         res.status(500).json({ message: error.message || "Internal Server Error" });
     }
 };
@@ -99,6 +90,15 @@ export const updateRelease = async (req, res) => {
 export const deleteRelease = async (req, res) => {
     try {
         const { id } = req.params;
+        const release = await AppRelease.findById(id);
+        if (release) {
+            // Also delete the local file if it exists
+            try {
+                const fileName = path.basename(release.apkUrl);
+                const filePath = path.join(APK_DIR, fileName);
+                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            } catch (_) { }
+        }
         await AppRelease.findByIdAndDelete(id);
         res.status(200).json({ message: "Release deleted" });
     } catch (error) {
@@ -115,20 +115,28 @@ export const downloadRelease = async (req, res) => {
 
         if (!release) return res.status(404).json({ message: "Release not found" });
 
-        // Direct streaming from the server is the MOST reliable way to ensure correct headers.
-        // This ensures every phone sees it as a real Android Installer (.apk) file.
-        const response = await fetch(release.apkUrl);
-        if (!response.ok) throw new Error("Failed to fetch binary from storage");
+        const filename = `BondBeyond_v${release.versionName.replace(/\./g, "_")}.apk`;
+        const localFileName = path.basename(release.apkUrl);
+        const localFilePath = path.join(APK_DIR, localFileName);
 
-        const filename = `BondBeyond_v${release.versionName.replace(/\./g, '_')}.apk`;
-
-        res.setHeader("Content-Type", "application/vnd.android.package-archive");
-        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-        res.setHeader("Content-Length", response.headers.get("content-length"));
-        res.setHeader("Cache-Control", "no-cache");
-
-        const stream = Readable.fromWeb(response.body);
-        stream.pipe(res);
+        // If APK is stored locally, stream it directly
+        if (fs.existsSync(localFilePath)) {
+            res.setHeader("Content-Type", "application/vnd.android.package-archive");
+            res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+            res.setHeader("Content-Length", fs.statSync(localFilePath).size);
+            res.setHeader("Cache-Control", "no-cache");
+            fs.createReadStream(localFilePath).pipe(res);
+        } else {
+            // Fallback: proxy from external URL (e.g. old Cloudinary releases)
+            const response = await fetch(release.apkUrl);
+            if (!response.ok) throw new Error("Failed to fetch APK from storage");
+            res.setHeader("Content-Type", "application/vnd.android.package-archive");
+            res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+            res.setHeader("Content-Length", response.headers.get("content-length"));
+            res.setHeader("Cache-Control", "no-cache");
+            const stream = Readable.fromWeb(response.body);
+            stream.pipe(res);
+        }
     } catch (error) {
         console.error("Download Error:", error);
         res.status(500).json({ message: "Transmission failure" });

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../lib/api";
+import { BASE_URL } from "../lib/axios";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -163,7 +164,7 @@ const MobileDrawer = () => {
 
 
           <a
-            href={`${window.location.origin}/api/apk/download/latest`}
+            href={`${BASE_URL}/apk/download/latest`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={toggleDrawer}

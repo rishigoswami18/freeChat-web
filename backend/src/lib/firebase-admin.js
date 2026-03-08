@@ -13,7 +13,12 @@ const parseServiceAccount = (jsonString) => {
 
         const serviceAccount = JSON.parse(cleanJson);
         if (serviceAccount.private_key) {
-            serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+            // Robust check for various newline encoding formats common in .env
+            // We need actual newlines (\n) for the PEM format to be valid
+            serviceAccount.private_key = serviceAccount.private_key
+                .replace(/\\n/g, '\n')     // Handle escaped \n
+                .replace(/[\r\n]+/g, '\n') // Normalize existing newlines
+                .trim();
         }
         return serviceAccount;
     } catch (e) {

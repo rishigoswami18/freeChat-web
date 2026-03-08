@@ -1,7 +1,9 @@
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../lib/api";
+import { BASE_URL } from "../lib/axios";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import useNotificationCounts from "../hooks/useNotificationCounts";
 import { useState } from "react";
 import useAuthUser from "../hooks/useAuthUser";
@@ -27,17 +29,17 @@ import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import Logo from "./Logo";
 
 const navItems = [
-  { to: "/", icon: Home, label: "Feed" },
-  { to: "/inbox", icon: MessageSquare, label: "Inbox" },
-  { to: "/profile", icon: User, label: "Profile" },
-  { to: "/friends", icon: Users, label: "Friends" },
-  { to: "/search", icon: Search, label: "Explore" },
-  { to: "/reels", icon: Film, label: "Reels" },
-  { to: "/notifications", icon: Bell, label: "Notifications" },
-  { to: "/couple", icon: HeartHandshake, label: "Bond Dashboard" },
-  { to: "/games", icon: Gamepad2, label: "Games" },
-  { to: "/gem-shop", icon: Gem, label: "Gem Shop" },
-  { to: "/membership", icon: Crown, label: "Premium" },
+  { to: "/", icon: Home, labelKey: "feed" },
+  { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
+  { to: "/profile", icon: User, labelKey: "profile" },
+  { to: "/friends", icon: Users, labelKey: "friends" },
+  { to: "/search", icon: Search, labelKey: "explore" },
+  { to: "/reels", icon: Film, labelKey: "reels" },
+  { to: "/notifications", icon: Bell, labelKey: "notifications" },
+  { to: "/couple", icon: HeartHandshake, labelKey: "bond_dashboard" },
+  { to: "/games", icon: Gamepad2, labelKey: "games" },
+  { to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
+  { to: "/membership", icon: Crown, labelKey: "premium" },
 ];
 
 const Sidebar = () => {
@@ -48,6 +50,7 @@ const Sidebar = () => {
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
   const { unreadMessages, notificationCount } = useNotificationCounts();
+  const { t } = useTranslation();
 
   const { mutate: doUpdate } = useMutation({
     mutationFn: updateProfile,
@@ -72,8 +75,9 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
-        {navItems.map(({ to, icon: Icon, label }) => {
+        {navItems.map(({ to, icon: Icon, labelKey }) => {
           const isActive = currentPath === to;
+          const label = t(labelKey);
           return (
             <Link
               key={to}
@@ -89,12 +93,12 @@ const Sidebar = () => {
                   className={`size-[18px] flex-shrink-0 ${isActive ? "text-primary" : "opacity-60"
                     }`}
                 />
-                {label === "Inbox" && unreadMessages > 0 && (
+                {labelKey === "inbox" && unreadMessages > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-primary text-primary-content text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-200">
                     {unreadMessages > 9 ? "9+" : unreadMessages}
                   </span>
                 )}
-                {label === "Notifications" && notificationCount > 0 && (
+                {labelKey === "notifications" && notificationCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-error text-error-content text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-200">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
@@ -119,7 +123,7 @@ const Sidebar = () => {
               }`}
           >
             <ShieldAlert className="size-[18px]" />
-            <span>Admin Command</span>
+            <span>{t('admin_command')}</span>
           </Link>
         )}
       </nav>
@@ -128,7 +132,7 @@ const Sidebar = () => {
 
 
         <a
-          href={`${window.location.origin}/api/apk/download/latest`}
+          href={`${BASE_URL}/apk/download/latest`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"
@@ -137,7 +141,7 @@ const Sidebar = () => {
           <div className="size-6 rounded-lg bg-secondary/20 flex items-center justify-center group-hover/apk:rotate-12 transition-transform">
             <Smartphone className="size-3.5" />
           </div>
-          Download App (APK)
+          {t('download_apk')}
         </a>
       </div>
 

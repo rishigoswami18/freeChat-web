@@ -74,6 +74,9 @@ app.use(
 app.use(express.json({ limit: "200mb" }));
 app.use(cookieParser());
 
+// Serve locally stored APK files publicly (no auth needed for downloads)
+app.use("/uploads", express.static(path.join(__dirname, "../../uploads")));
+
 app.use("/api/auth", authRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/chat", chatRoutes)

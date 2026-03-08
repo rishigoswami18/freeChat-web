@@ -1189,7 +1189,7 @@ const AdminDashboard = () => {
                                                 </div>
                                                 <div>
                                                     <h3 className="text-xl font-black uppercase tracking-tight italic">Direct <span className="text-primary">Build Upload</span></h3>
-                                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Upload APK Artifact to Cloudinary</p>
+                                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Upload APK Artifact to Server</p>
                                                 </div>
                                             </div>
                                             <button onClick={() => setShowApkModal(false)} className="btn btn-ghost btn-sm btn-circle opacity-50 hover:opacity-100">

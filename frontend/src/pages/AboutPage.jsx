@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Heart, Shield, Zap, Users, Sparkles, Globe } from "lucide-react";
 import Logo from "../components/Logo";
+import { BASE_URL } from "../lib/axios";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 20 },
@@ -200,7 +201,7 @@ const AboutPage = () => {
                             Join Now
                         </Link>
                         <a
-                            href={`${window.location.origin}/api/apk/download/latest`}
+                            href={`${BASE_URL}/apk/download/latest`}
                             className="btn btn-outline btn-lg rounded-2xl px-8 italic font-black uppercase border-secondary text-secondary"
                             download="BondBeyond_app.apk"
                         >
