@@ -1,7 +1,7 @@
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../lib/api";
-import { BASE_URL } from "../lib/axios";
+import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import useNotificationCounts from "../hooks/useNotificationCounts";
@@ -49,8 +49,13 @@ const Sidebar = () => {
   const currentPath = location.pathname;
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
-  const { unreadMessages, notificationCount } = useNotificationCounts();
+  const { notificationCount, unreadMessages } = useNotificationCounts();
   const { t } = useTranslation();
+
+  const handleDownload = (e) => {
+    e.preventDefault();
+    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "BondBeyond_app.apk");
+  };
 
   const { mutate: doUpdate } = useMutation({
     mutationFn: updateProfile,
@@ -132,9 +137,9 @@ const Sidebar = () => {
 
 
         <a
-          href={`${BASE_URL}/apk/download/latest`}
+          href={`${APK_DOWNLOAD_URL}/latest`}
+          onClick={handleDownload}
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all duration-200 active:scale-95 group/apk"
-          download="BondBeyond_app.apk"
         >
           <div className="size-6 rounded-lg bg-secondary/20 flex items-center justify-center group-hover/apk:rotate-12 transition-transform">
             <Smartphone className="size-3.5" />

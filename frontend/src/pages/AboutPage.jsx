@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Heart, Shield, Zap, Users, Sparkles, Globe } from "lucide-react";
 import Logo from "../components/Logo";
-import { BASE_URL } from "../lib/axios";
+import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 
 const fadeUp = {
     hidden: { opacity: 0, y: 20 },
@@ -14,6 +14,10 @@ const fadeUp = {
 };
 
 const AboutPage = () => {
+    const handleDownload = (e) => {
+        e.preventDefault();
+        downloadFile(`${APK_DOWNLOAD_URL}/latest`, "BondBeyond_app.apk");
+    };
     return (
         <div className="min-h-screen bg-base-100">
             {/* Hero Section */}
@@ -201,9 +205,9 @@ const AboutPage = () => {
                             Join Now
                         </Link>
                         <a
-                            href={`${BASE_URL}/apk/download/latest`}
+                            href={`${APK_DOWNLOAD_URL}/latest`}
+                            onClick={handleDownload}
                             className="btn btn-outline btn-lg rounded-2xl px-8 italic font-black uppercase border-secondary text-secondary"
-                            download="BondBeyond_app.apk"
                         >
                             Download App
                         </a>

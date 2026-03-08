@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateProfile } from "../lib/api";
-import { BASE_URL } from "../lib/axios";
+import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -164,10 +164,12 @@ const MobileDrawer = () => {
 
 
           <a
-            href={`${BASE_URL}/apk/download/latest`}
-            onClick={toggleDrawer}
+            href={`${APK_DOWNLOAD_URL}/latest`}
+            onClick={(e) => {
+              toggleDrawer();
+              handleDownload(e);
+            }}
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-accent transition-all duration-200 active:scale-[0.98] hover:bg-accent/10 mt-4 border border-dashed border-accent/30 bg-accent/5"
-            download="BondBeyond_app.apk"
           >
             <Smartphone className="size-5" />
             Download Android App

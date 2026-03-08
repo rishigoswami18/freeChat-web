@@ -7,6 +7,16 @@ export default defineConfig({
   server: {
     port: 5174,
     host: true,
+    proxy: {
+      // Proxy APK downloads through Vite so they are same-origin
+      // This makes the browser respect the `download` attribute and
+      // saves the file with the correct .apk filename instead of a UUID
+      '/apk-download': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/apk-download/, '/api/apk/download'),
+      },
+    },
   },
   build: {
     // Code-split large vendor chunks for better caching
