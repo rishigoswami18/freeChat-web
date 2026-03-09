@@ -24,7 +24,7 @@ const ProfilePage = () => {
     const [userPosts, setUserPosts] = useState([]);
 
     // Fetch user specific posts with caching
-    const { data: serverPosts, isLoading: isLoadingPosts } = useQuery({
+    const { data: serverPosts, isLoading: isLoadingPosts, isError: isErrorPosts, refetch: refetchPosts } = useQuery({
         queryKey: ["userPosts", authUser?._id],
         queryFn: () => getUserPosts(authUser._id),
         enabled: !!authUser?._id,
@@ -33,8 +33,8 @@ const ProfilePage = () => {
     });
 
     useEffect(() => {
-        if (serverPosts) {
-            setUserPosts(serverPosts);
+        if (serverPosts?.posts) {
+            setUserPosts(serverPosts.posts);
         }
     }, [serverPosts]);
 
@@ -585,7 +585,9 @@ const ProfilePage = () => {
 
                     <div className="flex items-center justify-center sm:justify-start gap-10 py-2">
                         <div className="flex flex-col items-center sm:items-start">
-                            <span className="font-bold text-lg leading-none">{userPosts.length}</span>
+                            <span className="font-bold text-lg leading-none">
+                                {Array.isArray(userPosts) ? userPosts.length : 0}
+                            </span>
                             <span className="text-sm opacity-60">posts</span>
                         </div>
                         <div
@@ -654,6 +656,12 @@ const ProfilePage = () => {
                     <div className="flex justify-center py-20">
                         <Loader2 className="size-8 animate-spin text-primary opacity-20" />
                     </div>
+                ) : isErrorPosts ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <X className="size-12 text-error opacity-40" />
+                        <p className="text-sm font-semibold opacity-50">Failed to load posts</p>
+                        <button onClick={() => refetchPosts()} className="btn btn-ghost btn-xs rounded-lg">Retry</button>
+                    </div>
                 ) : userPosts.length > 0 ? (
                     viewMode === "grid" ? (
                         <div className="grid grid-cols-3 gap-0.5 sm:gap-4">
@@ -704,14 +712,16 @@ const ProfilePage = () => {
                 )}
             </AnimatePresence>
 
-            {viewingDP && (
-                <ProfilePhotoViewer
-                    imageUrl={viewingDP.url}
-                    fullName={viewingDP.name}
-                    onClose={() => setViewingDP(null)}
-                />
-            )}
-        </div>
+            {
+                viewingDP && (
+                    <ProfilePhotoViewer
+                        imageUrl={viewingDP.url}
+                        fullName={viewingDP.name}
+                        onClose={() => setViewingDP(null)}
+                    />
+                )
+            }
+        </div >
     );
 };
 

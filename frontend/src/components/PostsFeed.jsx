@@ -18,68 +18,6 @@ import PostAd from "./PostAd";
 import LikedByModal from "./LikedByModal";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
-const PostsFeed = ({ posts, setPosts }) => {
-  const { authUser } = useAuthUser();
-  const [likedByPostId, setLikedByPostId] = useState(null);
-  const [viewingDP, setViewingDP] = useState(null); // { url, name }
-
-  const isPremium = authUser?.role === "admin" || authUser?.isPremium;
-
-  if (!posts || posts.length === 0) {
-    return (
-      <div className="text-center py-24 opacity-60">
-        <div className="relative inline-block mb-6">
-          <MessageSquare className="w-16 h-16 mx-auto opacity-10" />
-          <motion.div
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Infinity, duration: 3 }}
-            className="absolute -top-1 -right-1 size-4 bg-primary rounded-full"
-          />
-        </div>
-        <p className="text-xl font-black italic uppercase tracking-tighter">Your feed is silent</p>
-        <p className="text-sm mt-1 opacity-40">Follow legends or share your own story!</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4 sm:space-y-6">
-      {posts.map((post, index) => (
-        <div key={post._id} className="stagger-item">
-          <PostCard
-            post={post}
-            setPosts={setPosts}
-            setLikedByPostId={setLikedByPostId}
-            setViewingDP={setViewingDP}
-          />
-          {/* Professional Ad Injection (Non-Premium Only) */}
-          {!isPremium && (index + 1) % 4 === 0 && (
-            <div className="mt-4 sm:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <PostAd index={Math.floor(index / 4)} />
-            </div>
-          )}
-        </div>
-      ))}
-
-      {likedByPostId && (
-        <LikedByModal
-          postId={likedByPostId}
-          isOpen={true}
-          onClose={() => setLikedByPostId(null)}
-        />
-      )}
-
-      {viewingDP && (
-        <ProfilePhotoViewer
-          imageUrl={viewingDP.url}
-          fullName={viewingDP.name}
-          onClose={() => setViewingDP(null)}
-        />
-      )}
-    </div>
-  );
-};
-
 const emotionEmoji = {
   happy: "😊",
   joy: "😄",
@@ -101,18 +39,19 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
   const [isCommenting, setIsCommenting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [likeAnimationPulse, setLikeAnimationPulse] = useState(false);
   const lastTap = useRef(0);
 
-  const isLiked = post.likes?.includes(authUser?._id);
-  const likeCount = post.likes?.length || 0;
-  const commentCount = post.comments?.length || 0;
+  const isLiked = post?.likes?.includes(authUser?._id) || false;
+  const likeCount = post?.likes?.length || 0;
+  const commentCount = post?.comments?.length || 0;
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
     setIsDeleting(true);
     try {
       await deletePost(post._id);
-      setPosts((prev) => prev.filter((p) => p._id !== post._id));
+      setPosts((prev) => prev.filter((p) => p && p._id !== post._id));
       toast.success("Post deleted");
     } catch {
       toast.error("Failed to delete post");
@@ -124,13 +63,13 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
   const handleLike = async () => {
     if (isLiking) return;
     setIsLiking(true);
-    setLikeAnim(true);
-    setTimeout(() => setLikeAnim(false), 300);
+    setLikeAnimationPulse(true);
+    setTimeout(() => setLikeAnimationPulse(false), 300);
     try {
       const data = await likePost(post._id);
       setPosts((prev) =>
         prev.map((p) =>
-          p._id === post._id ? { ...p, likes: data.likes } : p
+          p && p._id === post._id ? { ...p, likes: data.likes } : p
         )
       );
     } catch {
@@ -159,7 +98,7 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
       const newComment = await commentOnPost(post._id, commentText.trim());
       setPosts((prev) =>
         prev.map((p) =>
-          p._id === post._id
+          p && p._id === post._id
             ? { ...p, comments: [...(p.comments || []), newComment] }
             : p
         )
@@ -179,7 +118,7 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
       await sharePost(post._id);
       setPosts((prev) =>
         prev.map((p) =>
-          p._id === post._id
+          p && p._id === post._id
             ? { ...p, shareCount: (p.shareCount || 0) + 1 }
             : p
         )
@@ -199,7 +138,9 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
     if (hours < 24) return `${hours}h`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}d`;
-    return new Date(date).toLocaleDateString("en-US", { timeZone: "Asia/Kolkata" });
+    return new Date(date).toLocaleDateString("en-US", {
+      timeZone: "Asia/Kolkata",
+    });
   };
 
   return (
@@ -209,7 +150,9 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
         <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5">
           <div
             className="avatar w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-base-300 flex-shrink-0 cursor-pointer hover:ring-4 ring-primary/20 transition-all active:scale-95"
-            onClick={() => setViewingDP({ url: post.profilePic, name: post.fullName })}
+            onClick={() =>
+              setViewingDP({ url: post.profilePic, name: post.fullName })
+            }
           >
             {post.profilePic ? (
               <img
@@ -224,7 +167,10 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <Link to={`/user/${post.userId}`} className="hover:text-primary transition-colors">
+            <Link
+              to={`/user/${post.userId}`}
+              className="hover:text-primary transition-colors"
+            >
               <h3 className="font-semibold text-sm truncate flex items-center gap-1">
                 {post.fullName || "Unknown User"}
                 {(post.role === "admin" || post.isVerified) && (
@@ -238,7 +184,8 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
               </span>
               {post.caption && (
                 <span className="badge badge-xs badge-outline gap-0.5 capitalize">
-                  {emotionEmoji[post.caption.toLowerCase()] || "💬"} {post.caption}
+                  {emotionEmoji[post.caption.toLowerCase()] || "💬"}{" "}
+                  {post.caption}
                 </span>
               )}
             </div>
@@ -342,7 +289,8 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
             disabled={isLiking}
           >
             <Heart
-              className={`size-[18px] transition-transform ${isLiked ? "fill-red-500" : ""} ${likeAnim ? "scale-125" : ""}`}
+              className={`size-[18px] transition-transform ${isLiked ? "fill-red-500" : ""
+                } ${likeAnimationPulse ? "scale-125" : ""}`}
             />
             <span className="text-xs font-medium">Like</span>
           </button>
@@ -393,7 +341,8 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
                     </p>
                     {comment.caption && (
                       <span className="badge badge-xs badge-outline gap-0.5 capitalize">
-                        {emotionEmoji[comment.caption.toLowerCase()] || "💬"} {comment.caption}
+                        {emotionEmoji[comment.caption.toLowerCase()] || "💬"}{" "}
+                        {comment.caption}
                       </span>
                     )}
                   </div>
@@ -432,6 +381,75 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+const PostsFeed = ({ posts, setPosts }) => {
+  const { authUser } = useAuthUser();
+  const [likedByPostId, setLikedByPostId] = useState(null);
+  const [viewingDP, setViewingDP] = useState(null); // { url, name }
+
+  const isPremium = authUser?.role === "admin" || authUser?.isPremium;
+
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="text-center py-24 opacity-60">
+        <div className="relative inline-block mb-6">
+          <MessageSquare className="w-16 h-16 mx-auto opacity-10" />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 3 }}
+            className="absolute -top-1 -right-1 size-4 bg-primary rounded-full"
+          />
+        </div>
+        <p className="text-xl font-black italic uppercase tracking-tighter">
+          Your feed is silent
+        </p>
+        <p className="text-sm mt-1 opacity-40">
+          Follow legends or share your own story!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      {posts.map((post, index) => {
+        if (!post) return null;
+        return (
+          <div key={post._id} className="stagger-item">
+            <PostCard
+              post={post}
+              setPosts={setPosts}
+              setLikedByPostId={setLikedByPostId}
+              setViewingDP={setViewingDP}
+            />
+            {/* Professional Ad Injection (Non-Premium Only) */}
+            {!isPremium && (index + 1) % 4 === 0 && (
+              <div className="mt-4 sm:mt-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <PostAd index={Math.floor(index / 4)} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {likedByPostId && (
+        <LikedByModal
+          postId={likedByPostId}
+          isOpen={true}
+          onClose={() => setLikedByPostId(null)}
+        />
+      )}
+
+      {viewingDP && (
+        <ProfilePhotoViewer
+          imageUrl={viewingDP.url}
+          fullName={viewingDP.name}
+          onClose={() => setViewingDP(null)}
+        />
+      )}
     </div>
   );
 };

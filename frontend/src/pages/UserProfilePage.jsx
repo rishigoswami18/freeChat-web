@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { getUserProfile, getUserPosts, getOtherUserFriends, sendFriendRequest, unfriend } from "../lib/api";
 import { Loader2, Grid, List, UserPlus, MessageCircle, BadgeCheck, Users, Lock, X, Globe, Languages, MapPin, UserCheck, UserCheck as Check, UserX, Clock, Heart } from "lucide-react";
 import toast from "react-hot-toast";

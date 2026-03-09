@@ -17,7 +17,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
     const [commentText, setCommentText] = useState("");
     const [localLikes, setLocalLikes] = useState({});
     const [localComments, setLocalComments] = useState({});
-    const [isLikeAnimating, setIsLikeAnimating] = useState(false);
+    const [isStoryLikeAnimating, setIsStoryLikeAnimating] = useState(false);
     const [doubleTapHeart, setDoubleTapHeart] = useState(false);
 
     const story = group.stories[currentIndex];
@@ -29,7 +29,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
     // Get current likes/comments (local state overrides server data)
     const currentLikes = localLikes[story?._id] || story?.likes || [];
     const currentComments = localComments[story?._id] || story?.comments || [];
-    const isLiked = currentLikes.some(id => id.toString() === authUser?._id);
+    const isLiked = Array.isArray(currentLikes) && currentLikes.some(id => id?.toString() === authUser?._id);
 
     const handleNext = useCallback(() => {
         setIsPaused(false);
@@ -106,8 +106,8 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
         setLocalLikes(prev => ({ ...prev, [story._id]: newLikes }));
 
         if (!wasLiked) {
-            setIsLikeAnimating(true);
-            setTimeout(() => setIsLikeAnimating(false), 600);
+            setIsStoryLikeAnimating(true);
+            setTimeout(() => setIsStoryLikeAnimating(false), 600);
         }
 
         try {
@@ -329,7 +329,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                         onClick={handleLike}
                         className={`p-2.5 rounded-full transition-all active:scale-90 ${isLiked ? 'bg-red-500/20' : 'bg-white/10 hover:bg-white/20'}`}
                     >
-                        <Heart className={`size-6 transition-all ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'} ${isLikeAnimating ? 'scale-125' : ''}`} />
+                        <Heart className={`size-6 transition-all ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'} ${isStoryLikeAnimating ? 'scale-125' : ''}`} />
                     </button>
 
                     {/* Comment Button */}
