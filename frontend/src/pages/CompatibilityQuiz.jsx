@@ -5,6 +5,7 @@ import { getGameSession, submitGameAnswers } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
 import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart, Gamepad2 } from "lucide-react";
 import toast from "react-hot-toast";
+import LoveDestinyGame from "./LoveDestinyGame";
 
 const CompatibilityQuiz = () => {
     const { sessionId } = useParams();
@@ -21,6 +22,11 @@ const CompatibilityQuiz = () => {
         queryFn: () => getGameSession(sessionId),
         refetchInterval: (data) => data?.status === "completed" ? false : 3000, // Poll if still pending
     });
+
+    // DISPATCH TO NEW 3D GAME IF TYPE MATCHES
+    if (session?.gameType === "heart_destiny") {
+        return <LoveDestinyGame />;
+    }
 
     const { mutate: handleSubmit, isPending: isSubmitting } = useMutation({
         mutationFn: () => submitGameAnswers(sessionId, answers),

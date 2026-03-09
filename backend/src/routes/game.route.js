@@ -177,6 +177,29 @@ const QUIZ_TEMPLATES = {
                 options: ["Done ✓", "Too shy"],
             }
         ]
+    },
+    heart_destiny: {
+        title: "Heart of Destiny ✨",
+        description: "A premium 3D interactive experience. Spin the heart to reveal your romantic destiny!",
+        is3D: true, // Marker for frontend to use the new high-end view
+        questions: [
+            {
+                question: "If we could disappear for 24 hours, where would we go?",
+                options: ["Private Island", "Cabin in the Woods", "Luxury Penthouse", "Camping under the stars"],
+            },
+            {
+                question: "What's one thing I do that always makes you blush?",
+                options: ["A certain look", "A compliment", "Physical touch", "Just being near me"],
+            },
+            {
+                question: "Task: Stare into each other's eyes for 30 seconds without laughing.",
+                options: ["Bond Strengthened ✨", "We failed (but laughed!) 😂"],
+            },
+            {
+                question: "Destiny: What is our 'theme song' as a couple?",
+                options: ["Something romantic", "Something high-energy", "Something classic", "Something quirky"],
+            }
+        ]
     }
 };
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGameTemplates, getActiveGameSessions, getGameHistory, startGame } from "../lib/api";
-import { Gamepad2, Play, Users, CheckCircle2, Loader2, ArrowLeft, History, Trophy, Calendar } from "lucide-react";
+import { Gamepad2, Play, Users, CheckCircle2, Loader2, ArrowLeft, History, Trophy, Calendar, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { GameSkeleton } from "../components/Skeletons";
@@ -141,6 +141,11 @@ const GameDashboard = () => {
                             {template.isAdult && (
                                 <div className="absolute top-0 right-0 bg-error text-error-content text-[10px] font-bold px-2 py-0.5 rounded-bl-lg z-10">
                                     18+ ONLY
+                                </div>
+                            )}
+                            {template.is3D && (
+                                <div className="absolute top-0 left-0 bg-primary text-primary-content text-[10px] font-black px-2 py-0.5 rounded-br-lg z-10 flex items-center gap-1 uppercase tracking-tighter shadow-lg">
+                                    <Sparkles className="size-2.5 fill-current" /> 3D Experience
                                 </div>
                             )}
                             <div className="card-body">
