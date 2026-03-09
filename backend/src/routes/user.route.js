@@ -15,6 +15,7 @@ import {
   getUserFriends,
   changePassword,
   deleteAccount,
+  claimDailyReward,
 } from "../controllers/user.controller.js";
 import { migrateUsernames } from "../controllers/migration.controller.js";
 
@@ -49,6 +50,7 @@ router.put("/fcm-token", async (req, res) => {
 router.delete("/unfriend/:id", unfriend);
 router.put("/change-password", changePassword);
 router.delete("/delete-account", deleteAccount);
+router.post("/claim-daily-reward", claimDailyReward);
 
 // Migration route (Temporary)
 router.post("/migrate-usernames", migrateUsernames);

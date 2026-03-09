@@ -170,6 +170,10 @@ const ReelPost = ({ post, isActive }) => {
                 onClick={togglePlay}
                 muted={!!post.audioUrl}
                 onTimeUpdate={(e) => setProgress((e.target.currentTime / e.target.duration) * 100)}
+                onEnded={(e) => {
+                    e.target.currentTime = 0;
+                    e.target.play().catch(() => { });
+                }}
             />
 
             {/* Double Tap Heart Animation */}

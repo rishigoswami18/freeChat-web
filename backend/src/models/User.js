@@ -158,6 +158,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  lastRewardClaimDate: {
+    type: Date,
+    default: null,
+  },
   fcmTokens: {
     type: [String],
     default: [],

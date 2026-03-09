@@ -9,7 +9,13 @@ import {
   User,
   MessageSquare,
   Trash2,
-  BadgeCheck
+  BadgeCheck,
+  TrendingUp,
+  Zap,
+  Gem,
+  Flame,
+  Sparkles,
+  Shield,
 } from "lucide-react";
 import { likePost, commentOnPost, sharePost, deletePost } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
@@ -40,6 +46,7 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
   const [likeAnimationPulse, setLikeAnimationPulse] = useState(false);
+  const [particles, setParticles] = useState([]); // State for particles
   const lastTap = useRef(0);
 
   const isLiked = post?.likes?.includes(authUser?._id) || false;
@@ -167,6 +174,20 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
             )}
           </div>
           <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-[11px] text-success font-medium">Online</p>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast("Streak Protection is Premium!", { icon: "🛡️" });
+                }}
+                className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/10 hover:bg-blue-500/20 rounded-md border border-blue-500/20 text-[9px] font-black text-blue-500 uppercase tracking-tighter transition-all hover:scale-105 active:scale-95"
+              >
+                <Shield className="size-2.5" />
+                Protect
+              </button>
+            </div>
             <Link
               to={`/user/${post.userId}`}
               className="hover:text-primary transition-colors"
@@ -279,6 +300,67 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
             </div>
           </div>
         )}
+
+        {/* QUICK REACTION BAR (ADDICTIVE ENGAGEMENT) */}
+        <div className="flex items-center justify-around bg-base-300/50 backdrop-blur-sm rounded-2xl py-2 mb-2 group/reactions opacity-0 group-hover:opacity-100 transition-opacity duration-300 relative overflow-hidden">
+          {['❤️', '🔥', '🙌', '😍', '📈'].map((emoji, i) => (
+            <motion.button
+              key={i}
+              whileHover={{ scale: i === 4 ? 1.2 : 1.5, y: -5 }}
+              whileTap={{ scale: 0.8 }}
+              onClick={(e) => {
+                if (!isLiked) handleLike();
+                setShowHeart(true);
+                setTimeout(() => setShowHeart(false), 800);
+
+                // Particle Burst Logic
+                const rect = e.currentTarget.getBoundingClientRect();
+                const newParticles = Array.from({ length: 8 }).map((_, idx) => ({
+                  id: Date.now() + idx + Math.random(), // Ensure unique ID
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2,
+                  offsetX: Math.random() * 40 - 20, // Random horizontal offset
+                  offsetY: Math.random() * -60 - 20, // Random upward offset
+                  rotation: Math.random() * 360,
+                  emoji
+                }));
+                setParticles((prev) => [...prev, ...newParticles]);
+                // Remove particles after animation
+                setTimeout(() => {
+                  setParticles((prev) => prev.filter(p => !newParticles.some(np => np.id === p.id)));
+                }, 1000); // Match animation duration
+              }}
+              className="text-xl filter drop-shadow-sm hover:drop-shadow-md transition-all cursor-pointer relative z-10"
+            >
+              {emoji}
+            </motion.button>
+          ))}
+          <AnimatePresence>
+            {particles.map((p) => (
+              <motion.div
+                key={p.id}
+                initial={{ x: p.x, y: p.y, opacity: 1, scale: 0.8, rotate: p.rotation }}
+                animate={{
+                  x: p.x + p.offsetX,
+                  y: p.y + p.offsetY,
+                  opacity: 0,
+                  scale: 1.5,
+                  rotate: p.rotation + (Math.random() * 180 - 90), // Add more rotation
+                }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="absolute text-xl pointer-events-none"
+                style={{
+                  left: 0, // Position relative to the viewport
+                  top: 0,
+                  transform: `translate(-50%, -50%)`, // Center the emoji
+                }}
+              >
+                {p.emoji}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
 
         {/* Action Buttons — optimized for mobile touch */}
         <div className="flex items-center border-t border-base-300/50 pt-1.5 -mx-1">

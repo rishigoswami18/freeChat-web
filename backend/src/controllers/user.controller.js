@@ -469,3 +469,35 @@ export async function deleteAccount(req, res) {
   }
 }
 
+export async function claimDailyReward(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    if (user.lastRewardClaimDate) {
+      const lastClaimStr = new Date(user.lastRewardClaimDate).toISOString().split('T')[0];
+
+      if (todayStr === lastClaimStr) {
+        return res.status(400).json({ message: "You have already claimed your reward for today! ✨" });
+      }
+    }
+
+    // Reward calculation: Base 10 + (Streak * 2)
+    const rewardGems = 10 + (user.streak * 2);
+    user.gems = (user.gems || 0) + rewardGems;
+    user.lastRewardClaimDate = now;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Congratulations! You received ${rewardGems} Gems! 💎`,
+      gems: user.gems,
+      rewardGems
+    });
+  } catch (error) {
+    console.error("Error in claimDailyReward:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}

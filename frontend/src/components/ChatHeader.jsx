@@ -1,11 +1,13 @@
-import React, { memo, useState } from "react";
+import { memo, useState, useMemo } from "react";
 import { useChannelStateContext } from "stream-chat-react";
-import { Video, Phone, ArrowLeft, Wind, BadgeCheck } from "lucide-react";
+import { Video, Phone, ArrowLeft, Wind, BadgeCheck, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
-import { notifyCall } from "../lib/api";
+import { notifyCall, getCoupleStatus } from "../lib/api";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import toast from "react-hot-toast";
+import useAuthUser from "../hooks/useAuthUser";
+import { useQuery } from "@tanstack/react-query";
 
 // Format "Last seen" like WhatsApp
 // Format "Last seen" like WhatsApp using Delhi (IST) time zone
@@ -61,6 +63,7 @@ function formatLastSeen(lastActive) {
 
 const ChatHeader = memo(() => {
     const { channel } = useChannelStateContext();
+    const { authUser } = useAuthUser();
     const navigate = useNavigate();
     const videoClient = useVideoClient();
     const [viewingDP, setViewingDP] = useState(null);
@@ -80,12 +83,26 @@ const ChatHeader = memo(() => {
             return {
                 name: otherMember?.user?.name || "Chat",
                 image: otherMember?.user?.image || "/avatar.png",
+                id: otherMember?.user?.id,
                 user: otherMember?.user,
             };
         })();
 
     const user = displayData.user;
     const isOnline = user?.online;
+
+    // Couple status for header
+    const { data: coupleData } = useQuery({
+        queryKey: ["coupleStatus"],
+        queryFn: getCoupleStatus,
+        enabled: !!authUser && !isGroup && displayData.id !== "system_announcement",
+        staleTime: 1000 * 60 * 10
+    });
+
+    const isPartner = useMemo(() => {
+        if (!coupleData || !displayData.id || coupleData.coupleStatus !== "coupled") return false;
+        return coupleData.partner?._id === displayData.id;
+    }, [coupleData, displayData.id]);
 
     const handleCall = async () => {
         if (!videoClient || isGroup || !user) {
@@ -187,12 +204,12 @@ const ChatHeader = memo(() => {
 
                 <div className="relative flex-shrink-0 group cursor-pointer">
                     <div className="avatar" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name })}>
-                        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all overflow-hidden bg-base-300">
+                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full ring-2 transition-all overflow-hidden bg-base-300 ${isPartner ? 'ring-pink-500 shadow-lg shadow-pink-500/20' : 'ring-primary/10 group-hover:ring-primary/30'}`}>
                             <img src={displayData.image} alt={displayData.name} className="object-cover" />
                         </div>
                     </div>
                     {isOnline && !isGroup && (
-                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-base-100 shadow-sm dot-pulse" />
+                        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-base-100 shadow-sm dot-pulse ${isPartner ? 'bg-pink-500' : 'bg-success'}`} />
                     )}
                 </div>
 
@@ -202,19 +219,28 @@ const ChatHeader = memo(() => {
                         {(user?.role === "admin" || user?.isVerified) && (
                             <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
                         )}
+                        {isPartner && <Heart className="size-3.5 text-pink-500 fill-pink-500 animate-pulse ml-0.5" />}
                     </h3>
-                    <p
-                        className={`text-[10px] sm:text-[12px] font-semibold truncate tracking-wide ${isOnline && !isGroup
-                            ? "text-success animate-pulse"
-                            : "text-base-content/50"
-                            }`}
-                    >
-                        {isGroup
-                            ? `${Object.keys(channel.state.members).length} members`
-                            : isOnline
-                                ? "Online"
-                                : formatLastSeen(user?.last_active)}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                        <p
+                            className={`text-[10px] sm:text-[12px] font-semibold truncate tracking-wide ${isOnline && !isGroup
+                                ? isPartner ? "text-pink-500" : "text-success animate-pulse"
+                                : "text-base-content/50"
+                                }`}
+                        >
+                            {isGroup
+                                ? `${Object.keys(channel.state.members).length} members`
+                                : isOnline
+                                    ? "Online"
+                                    : formatLastSeen(user?.last_active)}
+                        </p>
+                        {isPartner && (
+                            <span className="text-[10px] font-black bg-pink-500/10 text-pink-500 px-1.5 py-0 rounded flex items-center gap-1 uppercase tracking-tighter">
+                                <span className="size-1 bg-pink-500 rounded-full animate-ping" />
+                                Linked
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 

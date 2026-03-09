@@ -103,6 +103,11 @@ export const getOtherUserFriends = async (userId) => {
   return response.data;
 };
 
+export const claimDailyReward = async () => {
+  const response = await axiosInstance.post("/users/claim-daily-reward");
+  return response.data;
+};
+
 
 // ----------------- POSTS -----------------
 

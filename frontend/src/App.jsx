@@ -118,7 +118,26 @@ const App = () => {
 
       syncStoredToken();
     }
-  }, [isAuthenticated, isOnboarded]);
+
+    // Daily Reward Reminder Toast (Addictive nudge)
+    if (isAuthenticated && authUser) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const lastClaimDate = authUser.lastRewardClaimDate ? new Date(authUser.lastRewardClaimDate) : null;
+      const lastClaimStr = lastClaimDate ? lastClaimDate.toISOString().split('T')[0] : null;
+
+      const hasClaimedToday = lastClaimStr === todayStr;
+
+      if (!hasClaimedToday) {
+        import("react-hot-toast").then(({ toast }) => {
+          toast("💎 Your Daily Gem Drop is ready! Claim it in the sidebar.", {
+            icon: '🎁',
+            duration: 5000,
+            id: 'daily-reward-nudge'
+          });
+        });
+      }
+    }
+  }, [isAuthenticated, authUser]);
 
   if (isLoading) return <PageLoader />;
 

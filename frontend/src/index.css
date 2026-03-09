@@ -392,12 +392,77 @@ body.is-chat-active {
 }
 
 
-/* ===== Gradient Text Utility ===== */
-.gradient-text {
-  background: linear-gradient(135deg, oklch(var(--p)), oklch(var(--s)));
+/* ===== Romantic & Couple UI Utilities ===== */
+.romantic-gradient-text {
+  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.romantic-gradient-bg {
+  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+}
+
+.romantic-card-luxe {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(255, 78, 80, 0.15);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.romantic-card-luxe:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 30px 60px -12px rgba(255, 78, 80, 0.25);
+  border-color: rgba(255, 78, 80, 0.3);
+}
+
+@keyframes float-heart {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.8;
+  }
+
+  90% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.heart-particle {
+  position: fixed;
+  pointer-events: none;
+  animation: float-heart linear forwards;
+  z-index: 50;
+  color: #ff4e50;
+  filter: drop-shadow(0 0 5px rgba(255, 78, 80, 0.5));
+}
+
+.luxe-shadow-pink {
+  box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.3);
+}
+
+.luxe-shadow-gold {
+  box-shadow: 0 10px 30px -5px rgba(234, 179, 8, 0.3);
+}
+
+.glow-text-romantic {
+  text-shadow: 0 0 15px rgba(255, 78, 80, 0.4);
+}
+
+.luxe-border-gradient {
+  border: 1px solid transparent;
+  background: linear-gradient(oklch(var(--b1)), oklch(var(--b1))) padding-box,
+    linear-gradient(135deg, #ff4e50, #f9d423) border-box;
 }
 
 /* ===== Dot Pulse (Online indicator) ===== */
