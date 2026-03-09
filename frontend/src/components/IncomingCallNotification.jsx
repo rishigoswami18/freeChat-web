@@ -39,8 +39,32 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
     const [isAccepting, setIsAccepting] = useState(false);
 
     useEffect(() => {
-        // Play ringtone
+        // 1. Play Web Ringtone
         ringtone.play().catch(() => { });
+
+        // 2. Native Android Bridge: Long Vibration + Native Call UI
+        if (window.AndroidBridge) {
+            try {
+                // High-priority native notification
+                window.AndroidBridge.showCallNotification(
+                    `📞 Incoming Call`,
+                    `${call.state.createdBy?.name || 'Someone'} is calling you...`
+                );
+
+                // Start a repeating vibration pattern
+                const vibrateInterval = setInterval(() => {
+                    window.AndroidBridge.vibrate(500);
+                }, 1000);
+
+                return () => {
+                    clearInterval(vibrateInterval);
+                    ringtone.pause();
+                    ringtone.currentTime = 0;
+                };
+            } catch (e) {
+                console.error("Android Bridge Error:", e);
+            }
+        }
 
         // Get caller info
         const createdBy = call.state.createdBy;
@@ -81,10 +105,15 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
         setIsAccepting(true);
 
         try {
-            // Stop ringtone
+            // Stop ringtone & bridge
             ringtone.pause();
             ringtone.currentTime = 0;
             if (intervalRef.current) clearInterval(intervalRef.current);
+
+            // Close native notification if possible via bridge (not strictly necessary as we navigate)
+            if (window.AndroidBridge) {
+                window.AndroidBridge.vibrate(50); // Small haptic for click
+            }
 
             // Navigate to call page — CallPage will handle accept + join
             const typeParam = isAudioOnly ? "?type=audio" : "";
@@ -100,6 +129,7 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
             ringtone.pause();
             ringtone.currentTime = 0;
             if (intervalRef.current) clearInterval(intervalRef.current);
+            if (window.AndroidBridge) window.AndroidBridge.vibrate(50);
             await call.leave({ reject: true });
         } catch (error) {
             console.error("Failed to reject call:", error);

@@ -18,6 +18,11 @@ import {
 import toast from "react-hot-toast";
 import PageLoader from "../components/PageLoader";
 
+const ringbackTone = new Audio("https://assets.mixkit.co/active_storage/sfx/1360/1360-preview.mp3");
+ringbackTone.loop = true;
+const endCallTone = new Audio("https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3");
+const errorTone = new Audio("https://assets.mixkit.co/active_storage/sfx/2359/2359-preview.mp3");
+
 const CallPage = () => {
   const { id: callId } = useParams();
   const location = useLocation();
@@ -45,21 +50,18 @@ const CallPage = () => {
         const state = callInstance.state.callingState;
         console.log("📞 Call state:", state);
 
-        if (state === CallingState.JOINED || state === CallingState.JOINING) {
-          callRef.current = callInstance;
-          setCall(callInstance);
-          return;
-        }
-
         // INCOMING CALL: accept first, then join
         if (state === CallingState.RINGING) {
           console.log("📞 Accepting ringing call...");
+          if (window.AndroidBridge) window.AndroidBridge.vibrate(50);
           await callInstance.accept();
-          await callInstance.join();
         } else {
-          // OUTGOING CALL or re-joining: just join
-          await callInstance.join({ create: true });
+          // OUTGOING CALL or re-joining
+          console.log("📞 Outgoing call - playing ringback...");
+          ringbackTone.play().catch(() => { });
         }
+
+        await callInstance.join({ create: !state });
 
         if (isAudioCall) {
           await callInstance.camera.disable();
@@ -70,6 +72,7 @@ const CallPage = () => {
       } catch (error) {
         console.error("Error joining call:", error);
         toast.error("Could not join the call.");
+        ringbackTone.pause();
         joiningRef.current = false;
         setIsConnecting(false);
         return;
@@ -89,6 +92,8 @@ const CallPage = () => {
     }
 
     return () => {
+      ringbackTone.pause();
+      ringbackTone.currentTime = 0;
       const currentCall = callRef.current;
       if (currentCall) {
         currentCall.leave().catch(console.error);
@@ -184,6 +189,11 @@ const CallUI = ({ isAudioCall }) => {
   // --- Auto-end when remote leaves (1-on-1) ---
   const prevRemoteRef = useRef(remoteParticipants.length);
   useEffect(() => {
+    if (remoteParticipants.length > 0) {
+      ringbackTone.pause();
+      ringbackTone.currentTime = 0;
+    }
+
     if (prevRemoteRef.current > 0 && remoteParticipants.length === 0 && callingState === CallingState.JOINED) {
       toast("Call ended.", { icon: "📞" });
       call?.leave().catch(() => { });
@@ -192,16 +202,32 @@ const CallUI = ({ isAudioCall }) => {
     prevRemoteRef.current = remoteParticipants.length;
   }, [remoteParticipants.length, callingState, call, navigate]);
 
-  // --- Listen for call.ended event ---
+  // --- Listen for call events ---
   useEffect(() => {
     if (!call) return;
+
     const onEnded = () => {
+      endCallTone.play().catch(() => { });
       toast("Call ended.", { icon: "📞" });
+      if (window.AndroidBridge) window.AndroidBridge.vibrate(100);
       navigate("/");
     };
+
+    const onRejected = (event) => {
+      errorTone.play().catch(() => { });
+      toast.error(`Call declined by ${remoteParticipant?.name || 'user'}`);
+      if (window.AndroidBridge) window.AndroidBridge.vibrate(200);
+      setTimeout(() => navigate("/"), 1500);
+    };
+
     call.on('call.ended', onEnded);
-    return () => call.off('call.ended', onEnded);
-  }, [call, navigate]);
+    call.on('call.rejected', onRejected);
+
+    return () => {
+      call.off('call.ended', onEnded);
+      call.off('call.rejected', onRejected);
+    };
+  }, [call, navigate, remoteParticipant]);
 
   // --- Auto-hide controls (video only) ---
   const resetControlsTimeout = useCallback(() => {
@@ -481,13 +507,19 @@ const CallUI = ({ isAudioCall }) => {
             </button>
 
             {/* Mic */}
-            <button onClick={() => call.microphone.toggle()}
+            <button onClick={() => {
+              if (window.AndroidBridge) window.AndroidBridge.vibrate(20);
+              call.microphone.toggle();
+            }}
               className={`call-ctrl-btn ${micMuted ? 'bg-white text-black' : ''}`} title="Mute (M)">
               {micMuted ? <MicOff className="size-5 lg:size-6" /> : <Mic className="size-5 lg:size-6" />}
             </button>
 
             {/* End Call - Big red WhatsApp button */}
-            <button onClick={handleEndCall}
+            <button onClick={() => {
+              if (window.AndroidBridge) window.AndroidBridge.vibrate(150);
+              handleEndCall();
+            }}
               className="size-16 sm:size-[68px] rounded-full bg-[#ff3b30] flex items-center justify-center shadow-[0_8px_25px_rgba(255,59,48,0.4)] active:scale-90 transition-all hover:bg-[#ff453a]"
               title="End Call (Esc)">
               <PhoneOff className="size-7 sm:size-8 text-white fill-current" />
@@ -496,7 +528,10 @@ const CallUI = ({ isAudioCall }) => {
             {/* Camera */}
             {!isAudioCall && (
               <>
-                <button onClick={() => call.camera.toggle()}
+                <button onClick={() => {
+                  if (window.AndroidBridge) window.AndroidBridge.vibrate(20);
+                  call.camera.toggle();
+                }}
                   className={`call-ctrl-btn ${cameraMuted ? 'bg-white text-black' : ''}`} title="Camera (V)">
                   {cameraMuted ? <VideoOff className="size-5 lg:size-6" /> : <Video className="size-5 lg:size-6" />}
                 </button>
