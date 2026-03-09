@@ -81,6 +81,12 @@ const App = () => {
 
       localStorage.setItem("android_fcm_token", token);
 
+      // Show a subtle toast to founder/admin to confirm bridge works (Debug only)
+      if (authRef.current.isAuthenticated && authRef.current.authUser?.role === 'admin') {
+        const { toast } = await import("react-hot-toast");
+        toast.success("Android FCM Bridge Connected! 📱", { id: 'fcm-bridge' });
+      }
+
       // If user is already logged in, sync now
       if (authRef.current.isAuthenticated && authRef.current.isOnboarded) {
         try {

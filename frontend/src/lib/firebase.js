@@ -36,6 +36,15 @@ export const requestNotificationPermission = async () => {
 
     try {
         console.log("[FCM] Requesting notification permission...");
+
+        // Explicitly register service worker for mobile reliability
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+                scope: '/'
+            });
+            console.log("[FCM] Service Worker registered with scope:", registration.scope);
+        }
+
         const permission = await Notification.requestPermission();
 
         if (permission === 'granted') {

@@ -37,5 +37,6 @@
         }
     ],
     "related_applications": [],
-    "prefer_related_applications": false
+    "prefer_related_applications": false,
+    "gcm_sender_id": "1045840095786"
 }

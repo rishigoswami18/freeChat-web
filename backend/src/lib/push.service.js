@@ -24,6 +24,29 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
             },
             data: {},
             tokens: user.fcmTokens,
+            // Android-specific options for high reliability
+            android: {
+                priority: "high",
+                notification: {
+                    channelId: "default_channel",
+                    priority: "max",
+                    defaultSound: true,
+                    defaultVibrateTimings: true,
+                    icon: "notification_icon", // Should match native drawable if available, otherwise falls back
+                    color: "#f97316", // Primary brand color (orange-500)
+                }
+            },
+            // Web-specific options for browser reliability
+            webpush: {
+                headers: {
+                    Urgency: "high"
+                },
+                notification: {
+                    icon: icon || "/logo.png",
+                    badge: "/logo.png",
+                    requireInteraction: data?.type === "incoming_call",
+                }
+            }
         };
 
         // Convert all data values to strings (FCM requirement)
@@ -31,22 +54,19 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
             Object.entries(data).forEach(([key, value]) => {
                 message.data[key] = String(value);
             });
+            // Add click_action for web notifications
+            if (data.url) {
+                message.webpush.notification.click_action = data.url;
+            }
         }
 
         if (icon) {
             message.notification.image = icon;
         }
 
-        // For incoming calls, set high priority to wake up the device
+        // Specific overrides for incoming calls
         if (data?.type === "incoming_call") {
-            message.android = {
-                priority: "high",
-                notification: {
-                    channelId: "calls",
-                    priority: "max",
-                    sound: "default",
-                },
-            };
+            message.android.notification.channelId = "calls";
             message.apns = {
                 headers: { "apns-priority": "10" },
                 payload: {
