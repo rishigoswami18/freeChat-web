@@ -23,10 +23,6 @@ const CompatibilityQuiz = () => {
         refetchInterval: (data) => data?.status === "completed" ? false : 3000, // Poll if still pending
     });
 
-    // DISPATCH TO NEW 3D GAME IF TYPE MATCHES
-    if (session?.gameType === "heart_destiny") {
-        return <LoveDestinyGame />;
-    }
 
     const { mutate: handleSubmit, isPending: isSubmitting } = useMutation({
         mutationFn: () => submitGameAnswers(sessionId, answers),
@@ -57,6 +53,11 @@ const CompatibilityQuiz = () => {
             handleSubmit();
         }
     }, [answers, session, isSubmitting, handleSubmit]);
+
+    // DISPATCH TO NEW 3D GAME IF TYPE MATCHES (Must be after all hooks!)
+    if (session?.gameType === "heart_destiny") {
+        return <LoveDestinyGame />;
+    }
 
     if (isLoading) {
         return (
