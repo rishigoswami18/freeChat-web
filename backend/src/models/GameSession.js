@@ -14,7 +14,8 @@ const gameSessionSchema = new mongoose.Schema({
             "long_distance_bucket_list",
             "fantasy_quest_mature",
             "never_have_i_ever_naughty",
-            "spicy_truth_or_dare"
+            "spicy_truth_or_dare",
+            "heart_destiny"
         ],
         default: "compatibility_quiz"
     },
