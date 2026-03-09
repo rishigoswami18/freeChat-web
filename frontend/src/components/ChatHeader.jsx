@@ -78,7 +78,7 @@ const ChatHeader = memo(() => {
         : (() => {
             const members = Object.values(channel.state.members);
             const otherMember = members.find(
-                (m) => m.user?.id !== channel._client?.userID
+                (m) => m.user?.id !== authUser?._id?.toString()
             );
             return {
                 name: otherMember?.user?.name || "Chat",
@@ -115,7 +115,7 @@ const ChatHeader = memo(() => {
         }
 
         try {
-            const myId = String(channel._client.userID);
+            const myId = String(authUser._id);
             const theirId = String(user.id);
             const timestamp = Date.now().toString(36);
             const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
@@ -153,7 +153,7 @@ const ChatHeader = memo(() => {
             return;
         }
         try {
-            const myId = String(channel._client.userID);
+            const myId = String(authUser._id);
             const theirId = String(user.id);
             const timestamp = Date.now().toString(36);
             const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
