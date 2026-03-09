@@ -133,7 +133,7 @@ const ChatHeader = memo(() => {
                     ],
                 },
             });
-            navigate(`/call/${callId}`);
+            navigate(`/call/${callId}`, { state: { callee: { name: user.name, image: user.image } } });
 
             // Send push notification to recipient (fire-and-forget)
             notifyCall(theirId, callId, "video").catch(() => { });
@@ -169,7 +169,7 @@ const ChatHeader = memo(() => {
                     audioOnly: true,
                 },
             });
-            navigate(`/call/${callId}?type=audio`);
+            navigate(`/call/${callId}?type=audio`, { state: { callee: { name: user.name, image: user.image } } });
 
             // Send push notification to recipient (fire-and-forget)
             notifyCall(theirId, callId, "audio").catch(() => { });

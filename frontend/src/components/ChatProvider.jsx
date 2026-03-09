@@ -112,19 +112,28 @@ export const ChatProvider = ({ children }) => {
                 // Global Message Handler
                 const handleNewMessage = (event) => {
                     if (event.user.id === currentUserId) return;
-                    const isOnChatPage = window.location.pathname.includes(`/chat/${event.user.id}`);
+
+                    const isGroup = event.channel_type === "messaging" && event.channel_id.startsWith("group_");
+                    const targetId = isGroup ? event.channel_id : event.user.id;
+                    const isOnChatPage = window.location.pathname.includes(`/chat/${targetId}`);
+
                     if (!isOnChatPage) {
                         messageSound.play().catch(() => { });
                         toast((t) => (
                             <div className="flex items-center gap-3 cursor-pointer" onClick={() => {
-                                navigate(`/chat/${event.user.id}`);
+                                navigate(`/chat/${targetId}`);
                                 toast.dismiss(t.id);
                             }}>
                                 <div className="avatar w-10 h-10 rounded-full overflow-hidden shrink-0">
                                     <img src={event.user.image || "/avatar.png"} alt={event.user.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="font-bold text-sm truncate">{event.user.name}</p>
+                                    <p className="font-bold text-sm truncate">
+                                        {isGroup ? `${event.channel_id.replace('group_', '').replace(/_/g, ' ')}` : event.user.name}
+                                    </p>
+                                    <p className="text-[10px] font-bold text-primary mb-0.5 truncate uppercase">
+                                        {isGroup ? `${event.user.name}:` : "New Message"}
+                                    </p>
                                     <p className="text-xs opacity-80 truncate max-w-[150px]">{event.message.text}</p>
                                 </div>
                             </div>

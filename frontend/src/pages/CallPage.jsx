@@ -55,12 +55,16 @@ const CallPage = () => {
           console.log("📞 Accepting ringing call...");
           if (window.AndroidBridge) window.AndroidBridge.vibrate(50);
           await callInstance.accept();
-        } else {
-          // OUTGOING CALL or re-joining
-          console.log("📞 Outgoing call - playing ringback...");
-          ringbackTone.play().catch(() => { });
+        } else if (state !== CallingState.JOINED) {
+          // OUTGOING CALL or JOINING (not yet connected): play ringback
+          // Only play if there are no remote participants yet
+          if (callInstance.state.remoteParticipants.length === 0) {
+            console.log("📞 Outgoing call - playing ringback...");
+            ringbackTone.play().catch(() => { });
+          }
         }
 
+        // Join the call
         await callInstance.join({ create: !state });
 
         if (isAudioCall) {
@@ -71,10 +75,11 @@ const CallPage = () => {
         setCall(callInstance);
       } catch (error) {
         console.error("Error joining call:", error);
-        toast.error("Could not join the call.");
+        toast.error("Call no longer available or invalid.");
         ringbackTone.pause();
         joiningRef.current = false;
         setIsConnecting(false);
+        navigate("/"); // Professional redirect
         return;
       }
       joiningRef.current = false;
@@ -561,11 +566,12 @@ const CallUI = ({ isAudioCall }) => {
 // ==============================
 const OutgoingRingingScreen = ({ isAudioCall }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const call = useCall();
   const { useCallMembers } = useCallStateHooks();
   const members = useCallMembers();
   const otherMember = members?.find((m) => !m.isLocalParticipant);
-  const callee = otherMember?.user;
+  const callee = otherMember?.user || location.state?.callee;
   const [ringTime, setRingTime] = useState(0);
 
   useEffect(() => {
