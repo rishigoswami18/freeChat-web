@@ -136,6 +136,7 @@ const CallUI = ({ isAudioCall }) => {
 
   const callingState = useCallCallingState();
   const remoteParticipants = useRemoteParticipants();
+  const remoteParticipant = remoteParticipants[0];
   const localParticipant = useLocalParticipant();
   const { isMuted: micMuted } = useMicrophoneState();
   const { isMuted: cameraMuted } = useCameraState();
@@ -299,8 +300,6 @@ const CallUI = ({ isAudioCall }) => {
   if (callingState === CallingState.RINGING || callingState === CallingState.JOINING) {
     return <OutgoingRingingScreen isAudioCall={isAudioCall} />;
   }
-
-  const remoteParticipant = remoteParticipants[0];
 
   const handleToggleScreenShare = async () => {
     try {
