@@ -1,37 +1,22 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles, Zap, Flame, Trophy, Play, ArrowLeft, Loader2, Send, Gamepad2, Users } from "lucide-react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGameSession, submitGameAnswers } from "../lib/api";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 
-const LoveDestinyGame = () => {
-    const { sessionId } = useParams();
-    const navigate = useNavigate();
-    const queryClient = useQueryClient();
+const LoveDestinyGame = ({ session, onAnswer }) => {
     const { authUser } = useAuthUser();
     const [isSpinning, setIsSpinning] = useState(false);
     const [rotation, setRotation] = useState(0);
     const [showResult, setShowResult] = useState(false);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [answers, setAnswers] = useState([]);
+
+    // We get these from props now to keep hooks consistent in parent
+    const currentQuestionIndex = Math.min(
+        (session?.answers && session.answers[authUser._id]?.length) || 0,
+        (session?.questions?.length - 1) || 0
+    );
+
     const [selectedOption, setSelectedOption] = useState(null);
-
-    const { data: session, isLoading } = useQuery({
-        queryKey: ["gameSession", sessionId],
-        queryFn: () => getGameSession(sessionId),
-        refetchInterval: (data) => (data?.status === "completed" ? false : 3000),
-    });
-
-    const { mutate: handleSubmit, isPending: isSubmitting } = useMutation({
-        mutationFn: () => submitGameAnswers(sessionId, answers),
-        onSuccess: () => {
-            toast.success("Destiny Sealed! ✨");
-            queryClient.invalidateQueries({ queryKey: ["gameSession", sessionId] });
-        },
-    });
 
     const myId = authUser?._id?.toString();
     const partner = session?.participants?.find(p => p._id?.toString() !== myId);
@@ -59,25 +44,11 @@ const LoveDestinyGame = () => {
         if (!selectedOption) return;
 
         const newAnswer = { questionIndex: currentQuestionIndex, answer: selectedOption };
-        const updatedAnswers = [...answers, newAnswer];
-        setAnswers(updatedAnswers);
+        onAnswer(newAnswer);
         setSelectedOption(null);
         setShowResult(false);
-
-        if (currentQuestionIndex < session.questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-        } else {
-            // Auto submit handled by useEffect
-        }
     };
 
-    useEffect(() => {
-        if (session && answers.length === session.questions.length && !isSubmitting) {
-            handleSubmit();
-        }
-    }, [answers, session, isSubmitting, handleSubmit]);
-
-    if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="size-10 animate-spin text-primary" /></div>;
     if (!session) return <div className="p-10 text-center">Session not found.</div>;
 
     if (isCompleted) {
@@ -240,8 +211,8 @@ const LoveDestinyGame = () => {
                                                     key={opt}
                                                     onClick={() => setSelectedOption(opt)}
                                                     className={`py-4 px-6 rounded-2xl border-2 transition-all font-bold text-sm ${selectedOption === opt
-                                                            ? "bg-primary border-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)]"
-                                                            : "bg-white/5 border-white/5 text-white/70 hover:bg-white/10"
+                                                        ? "bg-primary border-primary text-white shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                                                        : "bg-white/5 border-white/5 text-white/70 hover:bg-white/10"
                                                         }`}
                                                 >
                                                     {opt}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGameSession, submitGameAnswers } from "../lib/api";
@@ -11,21 +11,18 @@ const CompatibilityQuiz = () => {
     const { sessionId } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [answers, setAnswers] = useState([]); // [{ questionIndex: 0, answer: "Red" }, ...]
+    const [answers, setAnswers] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
-
     const { authUser } = useAuthUser();
 
     const { data: session, isLoading, isError } = useQuery({
         queryKey: ["gameSession", sessionId],
         queryFn: () => getGameSession(sessionId),
-        refetchInterval: (data) => data?.status === "completed" ? false : 3000, // Poll if still pending
+        refetchInterval: (data) => data?.status === "completed" ? false : 3000,
     });
 
-
     const { mutate: handleSubmit, isPending: isSubmitting } = useMutation({
-        mutationFn: () => submitGameAnswers(sessionId, answers),
+        mutationFn: (answersToSubmit) => submitGameAnswers(sessionId, answersToSubmit),
         onSuccess: () => {
             toast.success("Answers submitted!");
             queryClient.invalidateQueries({ queryKey: ["gameSession", sessionId] });
@@ -33,31 +30,16 @@ const CompatibilityQuiz = () => {
         onError: (err) => toast.error(err.response?.data?.message || "Failed to submit answers"),
     });
 
-    const handleNext = () => {
-        if (!selectedOption) return;
+    // Unified handleAnswer function for both standard and 3D UI
+    const handleAnswer = useCallback((newAnswer) => {
+        const updatedAnswers = [...answers, newAnswer];
+        setAnswers(updatedAnswers);
 
-        const newAnswer = { questionIndex: currentQuestionIndex, answer: selectedOption };
-        setAnswers([...answers, newAnswer]);
-        setSelectedOption(null);
-
-        if (currentQuestionIndex < session.questions.length - 1) {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-        } else {
-            // Last question, trigger submit logic
+        // If it was the last question, auto-submit
+        if (session && updatedAnswers.length === session.questions.length) {
+            handleSubmit(updatedAnswers);
         }
-    };
-
-    // Auto-trigger submit when all answers collected
-    useEffect(() => {
-        if (session && answers.length === session.questions.length && !isSubmitting) {
-            handleSubmit();
-        }
-    }, [answers, session, isSubmitting, handleSubmit]);
-
-    // DISPATCH TO NEW 3D GAME IF TYPE MATCHES (Must be after all hooks!)
-    if (session?.gameType === "heart_destiny") {
-        return <LoveDestinyGame />;
-    }
+    }, [answers, session, handleSubmit]);
 
     if (isLoading) {
         return (
@@ -71,9 +53,16 @@ const CompatibilityQuiz = () => {
         return (
             <div className="p-8 text-center">
                 <p className="text-error mb-4">Error loading game session.</p>
-                <Link to="/games" className="btn btn-primary">Back to Games</Link>
+                <div className="flex justify-center gap-4">
+                    <Link to="/games" className="btn btn-primary">Back to Games</Link>
+                </div>
             </div>
         );
+    }
+
+    // DISPATCH TO NEW 3D GAME IF TYPE MATCHES
+    if (session?.gameType === "heart_destiny") {
+        return <LoveDestinyGame session={session} onAnswer={handleAnswer} />;
     }
 
     const myId = authUser?._id?.toString();
@@ -81,8 +70,9 @@ const CompatibilityQuiz = () => {
     const partner = session.participants?.find(p => p._id?.toString() !== myId);
     const isCompleted = session.status === "completed";
 
-    // Quiz UI render
+    // Standard Quiz UI
     if (!hasAnswered && !isCompleted) {
+        const currentQuestionIndex = answers.length;
         const currentQuestion = session.questions[currentQuestionIndex];
         const progress = ((currentQuestionIndex + 1) / session.questions.length) * 100;
 
@@ -125,7 +115,12 @@ const CompatibilityQuiz = () => {
 
                         <div className="card-actions justify-end mt-8">
                             <button
-                                onClick={handleNext}
+                                onClick={() => {
+                                    if (selectedOption) {
+                                        handleAnswer({ questionIndex: currentQuestionIndex, answer: selectedOption });
+                                        setSelectedOption(null);
+                                    }
+                                }}
                                 disabled={!selectedOption || isSubmitting}
                                 className="btn btn-primary min-w-[120px] gap-2"
                             >
@@ -144,7 +139,7 @@ const CompatibilityQuiz = () => {
         );
     }
 
-    // Waiting or Results UI
+    // Results UI
     return (
         <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto text-center">
             <Link to="/games" className="btn btn-ghost btn-sm gap-2 mb-6 mx-auto flex items-center w-fit">
