@@ -233,7 +233,7 @@ const UserProfilePage = () => {
 
             {/* Content Area */}
             <div className="min-h-[300px]">
-                {isLoading && userPosts.length === 0 ? (
+                {isPostsLoading && userPosts.length === 0 ? (
                     <div className="grid grid-cols-3 gap-1 sm:gap-4 animate-pulse">
                         {[1, 2, 3, 4, 5, 6].map(i => (
                             <div key={i} className="aspect-square bg-base-300 rounded-sm sm:rounded-xl" />
