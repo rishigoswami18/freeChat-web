@@ -33,6 +33,8 @@ import ThemeSelector from "./ThemeSelector";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
+import { claimDailyReward } from "../lib/api";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MobileDrawer = () => {
   const { authUser } = useAuthUser();
@@ -132,6 +134,59 @@ const MobileDrawer = () => {
             <X className="size-5" />
           </button>
         </div>
+
+        {/* DAILY REWARDS (MOBILE GEM DROP) */}
+        {authUser && (() => {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const lastClaimDate = authUser.lastRewardClaimDate ? new Date(authUser.lastRewardClaimDate) : null;
+          const lastClaimStr = lastClaimDate ? lastClaimDate.toISOString().split('T')[0] : null;
+          const hasClaimedToday = lastClaimStr === todayStr;
+
+          if (!hasClaimedToday) {
+            const progress = (authUser.streak % 7) / 7 * 100;
+            return (
+              <div className="px-3 pt-4 pb-2">
+                <motion.div
+                  whileTap={{ scale: 0.98 }}
+                  onClick={async () => {
+                    try {
+                      if (window.AndroidBridge) window.AndroidBridge.vibrate(50);
+                      const res = await claimDailyReward();
+                      toast.success(res.message, { icon: '💎' });
+                      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+                      toggleDrawer();
+                    } catch (err) {
+                      toast.error(err.response?.data?.message || "Wait for tomorrow!");
+                    }
+                  }}
+                  className="p-4 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/20 border-t border-white/20 relative overflow-hidden group cursor-pointer"
+                >
+                  <div className="absolute top-0 right-0 p-2 opacity-10 -rotate-12">
+                    <Gem className="size-16 text-white" />
+                  </div>
+                  <div className="relative z-10 flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-black text-white/80 uppercase tracking-widest">Gem Drop</span>
+                      <div className="flex items-center gap-1 bg-black/20 px-1.5 py-0.5 rounded-full">
+                        <Flame className="size-2.5 text-white fill-current" />
+                        <span className="text-[9px] font-black text-white">{authUser.streak}d</span>
+                      </div>
+                    </div>
+                    <h4 className="text-base font-black italic text-white tracking-tight uppercase">Ready to Claim</h4>
+                    <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden mt-1">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        className="h-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto no-scrollbar overscroll-contain">
           {navItems.map(({ to, icon: Icon, label }) => (
