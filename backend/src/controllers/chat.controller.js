@@ -1,7 +1,6 @@
-import { detectEmotion } from "../utils/emotionService.js";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
-
-import { generateStreamToken } from "../lib/stream.js";
+import { generateStreamToken, upsertStreamUser, streamClient } from "../lib/stream.js";
+import { getAIResponse } from "../lib/gemini.js";
 
 export async function getStreamToken(req, res) {
   try {
@@ -74,11 +73,48 @@ export const testMLConnection = async (req, res) => {
 };
 export const sendMessage = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, recipientId, channelId } = req.body;
     if (!text || !text.trim()) {
       return res.status(400).json({ message: "Text is required" });
     }
+
+    // --- Virtual Girlfrind AI Logic ---
+    if (recipientId === "ai-user-id" && streamClient) {
+      console.log(`🤖 AI Chat Request: ${req.user.fullName} -> AI`);
+
+      // Ensure AI User exists in Stream
+      await upsertStreamUser({
+        id: "ai-user-id",
+        name: "Aria (AI)",
+        image: "https://avatar.iran.liara.run/public/girl?username=aria",
+        role: "user"
+      });
+
+      // Fetch the last few messages for context (optional, let's start simple)
+      const channel = streamClient.channel("messaging", channelId);
+      const historyRes = await channel.query({ messages: { limit: 10 } });
+      const history = (historyRes.messages || [])
+        .filter(m => m.user.id !== "ai-user-id") // Just user messages for now
+        .map(m => ({
+          role: m.user.id === "ai-user-id" ? "model" : "user",
+          parts: [{ text: m.text }]
+        }));
+
+      const aiReply = await getAIResponse(text, history);
+
+      // Send reply as AI via Stream
+      await channel.sendMessage({
+        text: aiReply,
+        user_id: "ai-user-id",
+        silent: true // Don't trigger standard notifications
+      });
+
+      return res.status(200).json({ success: true, aiReply });
+    }
+
+    // Standard emotion logic for human chats
     let emotion = "neutral";
+    const { detectEmotion } = await import("../utils/emotionService.js");
     if (hasPremiumAccess(req.user)) {
       emotion = await detectEmotion(text);
     }

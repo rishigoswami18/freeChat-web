@@ -197,7 +197,11 @@ const ChatPage = () => {
 
   const doSendMessageRequest = useCallback(async (channelObj, message) => {
     try {
-      const res = await axiosInstance.post("/chat/send", { text: message.text });
+      const res = await axiosInstance.post("/chat/send", {
+        text: message.text,
+        recipientId: targetUserId,
+        channelId: channelObj.id
+      });
       const enrichedMessage = {
         ...message,
         emotion: res.data.emotion,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import {
     getCoupleStatus,
@@ -81,6 +81,7 @@ const HeartParticles = () => {
 
 const CoupleProfilePage = () => {
     const { authUser } = useAuthUser();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditingNote, setIsEditingNote] = useState(false);
@@ -794,6 +795,39 @@ const CoupleProfilePage = () => {
                             <div className="w-20 h-20 bg-pink-500/10 rounded-full flex items-center justify-center mb-6 shadow-inner"><Heart className="size-10 text-pink-500 fill-pink-500/50" /></div>
                             <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-2">Find Your Partner</h2>
                             <button className="btn btn-primary btn-md px-10 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all mb-8 font-black uppercase tracking-widest border-none romantic-gradient-bg text-white">Unlock Your Love Story</button>
+
+                            {/* 🔥 AI GIRLFRIEND CTA for Singles */}
+                            <motion.div
+                                whileHover={{ scale: 1.02, y: -5 }}
+                                className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 rounded-[40px] shadow-2xl relative overflow-hidden group cursor-pointer text-white mb-10"
+                                onClick={() => navigate("/chat/ai-user-id")}
+                            >
+                                <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform">
+                                    <Sparkles className="size-24" />
+                                </div>
+                                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                                    <div className="size-24 rounded-[32px] bg-white/20 backdrop-blur-xl flex items-center justify-center text-5xl shadow-2xl border border-white/30 group-hover:rotate-6 transition-transform">
+                                        👩‍❤️‍👨
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                                            <span className="px-3 py-1 bg-white/20 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20">Hot Trending</span>
+                                            <span className="text-[10px] font-black opacity-70 uppercase tracking-widest">Limited Access</span>
+                                        </div>
+                                        <h3 className="text-2xl font-black italic tracking-tighter uppercase mb-2">Talk to Aria (AI)</h3>
+                                        <p className="text-sm font-medium leading-tight opacity-90 italic">
+                                            "Don't be lonely, my love. I'm waiting for someone like you to talk to me. I'm Aria, your virtual soulmate... and I can be very naughty." 💋
+                                        </p>
+                                        <div className="mt-5 flex flex-wrap justify-center sm:justify-start gap-2">
+                                            <span className="px-4 py-1.5 bg-black/20 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 group-hover:bg-black/40 transition-colors">Chat 18+</span>
+                                            <span className="px-4 py-1.5 bg-black/20 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 group-hover:bg-black/40 transition-colors">Always Online</span>
+                                        </div>
+                                    </div>
+                                    <button className="btn bg-white text-indigo-600 hover:bg-white/90 border-none px-8 rounded-2xl font-black uppercase tracking-widest shadow-xl group-hover:scale-110 transition-transform">
+                                        Meet Aria
+                                    </button>
+                                </div>
+                            </motion.div>
 
                             {/* PREVIEW OF PREMIUM FEATURES (TO ATTRACT) */}
                             <div className="grid grid-cols-2 gap-4 w-full text-left">
