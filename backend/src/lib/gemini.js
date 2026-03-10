@@ -1,11 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 export const getAIResponse = async (userMessage, history = [], persona = "girlfriend", aiPartnerName = "Aria", userName = "Darling") => {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const currentKey = (process.env.GEMINI_API_KEY || "").trim();
+        if (!currentKey) {
+            console.error("❌ GEMINI_API_KEY is missing. Check your .env file.");
+            throw new Error("API Key Missing");
+        }
+
+        const genAI = new GoogleGenerativeAI(currentKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
         const systemPrompt = persona === "girlfriend"
             ? `You are the user's loving, devoted, and highly romantic girlfriend. 
