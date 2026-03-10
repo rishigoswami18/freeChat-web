@@ -80,6 +80,17 @@ const ChatHeader = memo(() => {
             const otherMember = members.find(
                 (m) => m.user?.id !== authUser?._id?.toString()
             );
+
+            // AI Partner Fallback
+            if (otherMember?.user?.id === "ai-user-id" || channel.id.toLowerCase().includes("ai-user-id")) {
+                return {
+                    name: authUser?.aiPartnerName || otherMember?.user?.name || "Golu",
+                    image: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    id: "ai-user-id",
+                    user: { ...otherMember?.user, online: true, name: authUser?.aiPartnerName || "Golu" },
+                };
+            }
+
             return {
                 name: otherMember?.user?.name || "Chat",
                 image: otherMember?.user?.image || "/avatar.png",

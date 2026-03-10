@@ -16,6 +16,20 @@ export async function getStreamToken(req, res) {
 
     const token = generateStreamToken(userId);
 
+    // Ensure AI partner exists in Stream if coupled
+    if (req.user.isCoupledWithAI && streamClient) {
+      try {
+        await upsertStreamUser({
+          id: "ai-user-id",
+          name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
+          image: "https://avatar.iran.liara.run/public/girl?username=aria",
+          role: "user"
+        });
+      } catch (upsertErr) {
+        console.error("Failed to ensure AI partner in Stream:", upsertErr);
+      }
+    }
+
     if (!token) {
       console.error("❌ Failed to generate Stream token for user:", userId);
       return res.status(500).json({ message: "Stream token generation failed" });

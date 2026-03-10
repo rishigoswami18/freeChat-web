@@ -184,10 +184,18 @@ const ChatPage = () => {
         const currChannel = chatClient.channel("messaging", channelId,
           isGroup ? {} : { members: [authUser._id, targetUserId] }
         );
-        await currChannel.watch();
+
+        // Add timeout to watch to prevent infinite hang
+        const watchPromise = currChannel.watch();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Stream Timeout")), 10000)
+        );
+
+        await Promise.race([watchPromise, timeoutPromise]);
         setChannel(currChannel);
       } catch (error) {
-        toast.error("Could not load chat.");
+        console.error("Chat Init Error:", error);
+        toast.error(error.message === "Stream Timeout" ? "Chat connecting slow..." : "Could not load chat.");
       } finally {
         setLoading(false);
       }
