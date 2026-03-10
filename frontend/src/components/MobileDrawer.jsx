@@ -4,6 +4,7 @@ import { updateProfile, getCoupleStatus, claimDailyReward } from "../lib/api";
 import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Home,
   Users,
@@ -31,6 +32,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import useLogout from "../hooks/useLogout";
 import useNotificationCounts from "../hooks/useNotificationCounts";
 import ThemeSelector from "./ThemeSelector";
+import LanguageSelector from "./LanguageSelector";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
@@ -38,6 +40,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const MobileDrawer = () => {
   const { authUser } = useAuthUser();
+  const { t } = useTranslation();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
@@ -73,18 +76,18 @@ const MobileDrawer = () => {
   const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
-    { to: "/", icon: Home, label: "Feed" },
-    { to: "/inbox", icon: MessageSquare, label: "Inbox" },
-    { to: "/friends", icon: Users, label: "Friends" },
-    { to: "/reels", icon: Film, label: "Reels" },
-    { to: "/search", icon: Search, label: "Search" },
-    { to: "/notifications", icon: Bell, label: "Notifications" },
-    { to: "/posts", icon: Pencil, label: "Posts" },
-    { to: "/couple", icon: Heart, label: "Couple" },
-    { to: "/games", icon: Gamepad2, label: "Games" },
-    { to: "/gem-shop", icon: Gem, label: "Gem Shop" },
-    { to: "/membership", icon: Crown, label: "Premium" },
-    { to: "/profile", icon: User, label: "Profile" },
+    { to: "/", icon: Home, labelKey: "feed" },
+    { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
+    { to: "/friends", icon: Users, labelKey: "friends" },
+    { to: "/reels", icon: Film, labelKey: "reels" },
+    { to: "/search", icon: Search, labelKey: "explore" },
+    { to: "/notifications", icon: Bell, labelKey: "notifications" },
+    { to: "/posts", icon: Pencil, labelKey: "post" },
+    { to: "/couple", icon: Heart, labelKey: "bond_dashboard" },
+    { to: "/games", icon: Gamepad2, labelKey: "games" },
+    { to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
+    { to: "/membership", icon: Crown, labelKey: "premium" },
+    { to: "/profile", icon: User, labelKey: "profile" },
   ];
 
   const dynamicNavItems = [...navItems];
@@ -123,6 +126,7 @@ const MobileDrawer = () => {
               <span className="font-bold text-[11px] tabular-nums">{authUser.streak}</span>
             </div>
           )}
+          <LanguageSelector size="btn-sm" />
           <ThemeSelector size="btn-sm" />
           <button
             onClick={() => logoutMutation()}
@@ -213,7 +217,7 @@ const MobileDrawer = () => {
         })()}
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto no-scrollbar overscroll-contain">
-          {dynamicNavItems.map(({ to, icon: Icon, label, isSacred }) => (
+          {dynamicNavItems.map(({ to, icon: Icon, labelKey, isSacred, label: customLabel }) => (
             <Link
               key={to}
               to={to}
@@ -229,18 +233,18 @@ const MobileDrawer = () => {
                 ) : (
                   <Icon className="size-5" />
                 )}
-                {label === "Inbox" && unreadMessages > 0 && (
+                {labelKey === "inbox" && unreadMessages > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-white text-primary text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary">
                     {unreadMessages > 9 ? "9+" : unreadMessages}
                   </span>
                 )}
-                {label === "Notifications" && notificationCount > 0 && (
+                {labelKey === "notifications" && notificationCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
               </div>
-              {label}
+              {isSacred ? customLabel : t(labelKey)}
             </Link>
           ))}
 
@@ -324,7 +328,7 @@ const MobileDrawer = () => {
       <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") || location.pathname.startsWith("/call") ? "hidden" : ""
         }`}>
         <div className="flex items-center justify-around py-1.5 px-1">
-          {bottomTabs.map(({ to, icon: Icon, label }) => {
+          {bottomTabs.map(({ to, icon: Icon, labelKey }) => {
             const isActive = location.pathname === to;
             return (
               <Link
@@ -338,18 +342,18 @@ const MobileDrawer = () => {
                 )}
                 <div className="relative">
                   <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />
-                  {label === "Inbox" && unreadMessages > 0 && (
+                  {labelKey === "inbox" && unreadMessages > 0 && (
                     <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-primary text-primary-content text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
                       {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
-                  {label === "Notifications" && notificationCount > 0 && (
+                  {labelKey === "notifications" && notificationCount > 0 && (
                     <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-error text-error-content text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
                       {notificationCount > 9 ? "9+" : notificationCount}
                     </span>
                   )}
                 </div>
-                <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{label}</span>
+                <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{t(labelKey)}</span>
               </Link>
             );
           })}

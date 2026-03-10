@@ -9,12 +9,12 @@ const languages = [
     { code: "fr", label: "Français", flag: "🇫🇷" },
 ];
 
-const LanguageSelector = () => {
+const LanguageSelector = ({ align = "end", size = "btn-sm" }) => {
     const { i18n } = useTranslation();
 
     return (
-        <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors group">
+        <div className={`dropdown dropdown-${align}`}>
+            <div tabIndex={0} role="button" className={`btn btn-ghost btn-circle ${size} hover:bg-base-300/60 transition-colors group`}>
                 <div className="relative">
                     <Globe className="size-[18px] text-base-content/60 group-hover:text-primary transition-colors" />
                     <span className="absolute -top-1 -right-1 text-[8px] font-black uppercase text-primary/40 leading-none">
@@ -31,6 +31,7 @@ const LanguageSelector = () => {
                         <button
                             onClick={() => {
                                 i18n.changeLanguage(lang.code);
+                                localStorage.setItem("i18nextLng", lang.code);
                                 document.activeElement.blur(); // Close dropdown
                             }}
                             className={`flex items-center gap-3 py-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-200 ${i18n.language === lang.code ? "bg-primary/20 text-primary font-bold shadow-inner" : ""

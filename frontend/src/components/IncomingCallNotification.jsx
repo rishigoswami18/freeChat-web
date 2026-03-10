@@ -137,9 +137,12 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
     }, [call]);
 
     return (
-        <div className="fixed inset-0 z-[9999] overflow-hidden">
-            {/* Full-screen dark background with gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#075e54] via-[#054d44] to-[#022c27]" />
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-black">
+            {/* Full-screen dark background with premium glow */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute -top-[20%] -left-[10%] size-[80%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute -bottom-[20%] -right-[10%] size-[80%] bg-pink-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+            </div>
 
             {/* Subtle pattern overlay */}
             <div className="absolute inset-0 opacity-5"
@@ -179,13 +182,13 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
                         {caller?.name || "Someone"}
                     </h2>
 
-                    <div className="flex items-center justify-center gap-2 mt-3">
-                        <div className="flex items-center gap-1.5">
-                            <div className="size-1.5 rounded-full bg-[#25D366] animate-bounce" style={{ animationDelay: '0s' }} />
-                            <div className="size-1.5 rounded-full bg-[#25D366] animate-bounce" style={{ animationDelay: '0.15s' }} />
-                            <div className="size-1.5 rounded-full bg-[#25D366] animate-bounce" style={{ animationDelay: '0.3s' }} />
+                    <div className="flex items-center justify-center gap-2 mt-3 cursor-default">
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 rounded-full border border-primary/20">
+                            <div className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                            <div className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                            <div className="size-1.5 rounded-full bg-primary animate-bounce" />
+                            <span className="text-primary text-[10px] font-black uppercase tracking-widest ml-1">Incoming</span>
                         </div>
-                        <span className="text-[#25D366]/80 text-sm font-semibold">Incoming call</span>
                     </div>
                 </div>
 
@@ -199,11 +202,11 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
                     <div className="absolute -inset-8 rounded-full border border-[#25D366]/15 animate-ping" style={{ animationDuration: '2s' }} />
                     <div className="absolute -inset-12 rounded-full border border-[#25D366]/8 animate-ping" style={{ animationDuration: '2.5s' }} />
 
-                    <div className="relative size-40 sm:size-52 rounded-full overflow-hidden ring-4 ring-white/20 shadow-[0_0_80px_rgba(37,211,102,0.15)]">
+                    <div className="relative size-44 sm:size-56 rounded-full overflow-hidden ring-4 ring-white/10 shadow-[0_0_80px_rgba(0,0,0,0.5)] p-1 bg-gradient-to-br from-white/20 to-transparent">
                         <img
                             src={caller?.image || "/avatar.png"}
                             alt={caller?.name || "Caller"}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover rounded-full"
                         />
                     </div>
                 </div>
@@ -228,7 +231,7 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
                             <button
                                 onClick={handleAccept}
                                 disabled={isAccepting}
-                                className="size-16 sm:size-[72px] rounded-full bg-[#25D366] flex items-center justify-center shadow-[0_8px_30px_rgba(37,211,102,0.35)] transition-all duration-200 active:scale-90 hover:bg-[#22c55e] hover:shadow-[0_8px_40px_rgba(37,211,102,0.5)] disabled:opacity-50 animate-pulse"
+                                className="size-16 sm:size-[72px] rounded-full bg-[#25D366] flex items-center justify-center shadow-[0_8px_35px_rgba(37,211,102,0.4)] transition-all duration-300 active:scale-90 hover:bg-[#22c55e] hover:shadow-[0_8px_45px_rgba(37,211,102,0.6)] disabled:opacity-50 animate-pulse outline outline-offset-4 outline-white/10"
                                 style={{ animationDuration: '2s' }}
                                 aria-label="Accept"
                             >

@@ -30,6 +30,7 @@ import apkRoutes from "./routes/apk.route.js";
 import { seedQuestions } from "./controllers/bond.controller.js";
 import { connectDB } from "./lib/db.js";
 import { startDelayedEmailWorker } from "./lib/delayed-email.worker.js";
+import { startAINoteWorker } from "./lib/ai-note.worker.js";
 
 const app = express();
 
@@ -123,4 +124,5 @@ app.listen(PORT, async () => {
   await connectDB();
   await seedQuestions();
   startDelayedEmailWorker();
+  startAINoteWorker();
 });

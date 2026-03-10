@@ -534,7 +534,7 @@ body.is-chat-active {
 
 @media (min-width: 640px) {
   .str-chat__list {
-    padding: 20px;
+    padding: 16px 20px;
   }
 }
 
@@ -655,23 +655,24 @@ body.is-chat-active {
 }
 
 .str-chat__message-simple-text-inner {
-  border-radius: 12px !important;
-  padding: 8px 12px 6px 12px !important;
+  border-radius: 18px !important;
+  padding: 10px 14px 8px 14px !important;
   position: relative !important;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08) !important;
-  /* Lighter shadow */
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1) !important;
   transition: opacity 0.2s ease;
-  /* No transform transition during scroll */
-  max-width: 85% !important;
+  max-width: 82% !important;
   width: fit-content !important;
-  min-width: max-content !important;
+  min-width: 60px !important;
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.04) !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
 }
 
 @media (min-width: 640px) {
   .str-chat__message-simple-text-inner {
     max-width: 70% !important;
-    padding: 10px 16px 8px 16px !important;
-    border-radius: 16px !important;
+    padding: 12px 18px 10px 18px !important;
+    border-radius: 22px !important;
   }
 }
 
@@ -685,48 +686,50 @@ body.is-chat-active {
 }
 
 .str-chat__message-simple--others .str-chat__message-simple-text-inner {
-  background: oklch(var(--b2)) !important;
+  background: oklch(var(--b2) / 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%);
   color: oklch(var(--bc)) !important;
   border: 1px solid oklch(var(--bc) / 0.05) !important;
-  border-bottom-left-radius: 16px !important;
+  border-bottom-left-radius: 18px !important;
 }
 
 .str-chat__message-simple--me .str-chat__message-simple-text-inner {
-  background: oklch(var(--p)) !important;
-  color: oklch(var(--pc)) !important;
+  background: linear-gradient(135deg, oklch(var(--p)) 0%, #3b82f6 100%) !important;
+  color: #ffffff !important;
   border: none !important;
-  border-bottom-right-radius: 16px !important;
+  border-bottom-right-radius: 18px !important;
+  box-shadow: 0 8px 25px -5px oklch(var(--p) / 0.3) !important;
 }
 
 /* Whisper/Shout aggressive override */
 .message-scale-container .str-chat__message-simple-text-inner * {
   font-size: inherit !important;
-  line-height: 1.4 !important;
+  line-height: inherit !important;
 }
 
 /* Bubble Tail (WhatsApp style) - Only on first message of a group */
 .bubble-tail-others::before {
   content: '';
   position: absolute;
-  left: -8px;
+  left: -6px;
   top: 0;
-  width: 0;
-  height: 0;
-  border-right: 12px solid oklch(var(--b2));
-  border-bottom: 12px solid transparent;
-  z-index: -1;
+  width: 10px;
+  height: 10px;
+  background: oklch(var(--b2) / 0.8);
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+  z-index: 10;
 }
 
 .bubble-tail-me::after {
   content: '';
   position: absolute;
-  right: -8px;
+  right: -6px;
   top: 0;
-  width: 0;
-  height: 0;
-  border-left: 12px solid oklch(var(--p));
-  border-bottom: 12px solid transparent;
-  z-index: -1;
+  width: 10px;
+  height: 10px;
+  background: oklch(var(--p));
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  z-index: 10;
 }
 
 /* ===== Quoted Message (Reply) Styling ===== */
@@ -759,74 +762,13 @@ body.is-chat-active {
   /* Performance win over 'local' in some browsers, but let's test */
 }
 
-/* ===== Premium Message Bubbles (Direct Professional Look) ===== */
-.str-chat__message-simple-text-inner {
-  border-radius: 18px !important;
-  box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.15) !important;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  will-change: transform, opacity;
+/* Collapse excessive spacing from AI responses */
+.str-chat__message-simple-text-inner br {
+  display: block;
+  content: "";
+  margin-top: 4px;
 }
 
-/* Received (Other) Bubble */
-.str-chat__message-simple--others .str-chat__message-simple-text-inner {
-  background: oklch(var(--b2)) !important;
-  color: oklch(var(--bc)) !important;
-  border: 1px solid oklch(var(--bc) / 0.08) !important;
-  border-top-left-radius: 4px !important;
-}
-
-/* Sent (Me) Bubble - Instagram Style Gradient */
-.str-chat__message-simple--me .str-chat__message-simple-text-inner {
-  background: linear-gradient(135deg, oklch(var(--p)) 0%, #3b82f6 100%) !important;
-  color: #ffffff !important;
-  border: none !important;
-  border-top-right-radius: 4px !important;
-}
-
-/* Multiline Support & Polish */
-.str-chat__message-simple-text-inner {
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-  line-height: 1.5 !important;
-  font-size: 15px !important;
-  letter-spacing: -0.01em !important;
-}
-
-.str-chat__message-simple-text-inner p {
-  margin: 0 !important;
-  white-space: pre-wrap !important;
-}
-
-/* Premium Glow for AI messages (others) if they are linked */
-.str-chat__message-simple--others .str-chat__message-simple-text-inner {
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Bubble Tails (Sharper, more native) */
-.bubble-tail-others::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 0;
-  width: 0;
-  height: 0;
-  border-right: 10px solid oklch(var(--b2));
-  border-bottom: 10px solid transparent;
-  z-index: 1;
-}
-
-.bubble-tail-me::after {
-  content: '';
-  position: absolute;
-  right: -6px;
-  top: 0;
-  width: 0;
-  height: 0;
-  border-left: 10px solid #3b82f6;
-  /* Matching gradient end */
-  border-top: 10px solid transparent;
-  z-index: 1;
-}
 
 /* For dark mode we might need to invert it */
 [data-theme="dark"] .premium-chat-bg {
@@ -1612,11 +1554,18 @@ main {
 /* ===== Audio Call Visualizer ===== */
 @keyframes audioBar {
   0% {
-    height: 20%;
+    transform: scaleY(0.4);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 0.8;
   }
 
   100% {
-    height: 90%;
+    transform: scaleY(0.6);
+    opacity: 0.5;
   }
 }
 

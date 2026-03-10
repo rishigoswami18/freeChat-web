@@ -99,6 +99,8 @@ const ChatPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [fontSize, setFontSize] = useState(1);
   const [showShoutSlider, setShowShoutSlider] = useState(false);
+  const [isThinking, setIsThinking] = useState(false); // Added for AI delay
+  const scrollRef = useRef(null);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   // Optimized viewport handling for smooth mobile typing
@@ -205,29 +207,56 @@ const ChatPage = () => {
 
   const doSendMessageRequest = useCallback(async (channelObj, message) => {
     try {
+      if (targetUserId === "ai-user-id") {
+        setIsThinking(true);
+        // Step 1: Send user message to Stream first to guarantee correct order
+        const result = await channelObj.sendMessage({
+          ...message,
+          fontSize: fontSize,
+          extra_data: { ...message.extra_data, fontSize: fontSize }
+        });
+
+        // Reset UI state immediately
+        setFontSize(1);
+        setShowShoutSlider(false);
+
+        // Step 2: Trigger AI response generation on backend
+        await axiosInstance.post("/chat/send", {
+          text: message.text,
+          recipientId: targetUserId,
+          channelId: channelObj.id
+        });
+
+        setIsThinking(false);
+        return result;
+      }
+
+      // Standard flow for Human/Group chats
       const res = await axiosInstance.post("/chat/send", {
         text: message.text,
         recipientId: targetUserId,
         channelId: channelObj.id
       });
+
       const enrichedMessage = {
         ...message,
         emotion: res.data.emotion,
         fontSize: fontSize,
         extra_data: { ...message.extra_data, fontSize: fontSize }
       };
+
       setFontSize(1);
       setShowShoutSlider(false);
       const result = await channelObj.sendMessage(enrichedMessage);
 
-      // Push/Email notification (fire-and-forget, rate-limited on backend)
       if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement") {
         notifyMessage(targetUserId, message.text).catch(() => { });
       }
 
       return result;
     } catch (error) {
-      return await channelObj.sendMessage({ ...message, fontSize, extra_data: { fontSize } });
+      setIsThinking(false);
+      return await channelObj.sendMessage({ ...message, extra_data: { fontSize } });
     }
   }, [fontSize, targetUserId]);
 
@@ -266,6 +295,21 @@ const ChatPage = () => {
                   hideDeletedMessages
                   closeOnScroll
                 />
+
+                {isThinking && (
+                  <div className="flex items-center gap-2 px-4 py-2 mb-4 stagger-item">
+                    <div className="avatar size-7 sm:size-8">
+                      <div className="bg-base-300 rounded-full flex items-center justify-center border border-primary/10">
+                        <img src="https://avatar.iran.liara.run/public/girl?username=aria" alt="AI" className="rounded-full" />
+                      </div>
+                    </div>
+                    <div className="bg-base-200/80 backdrop-blur-md px-4 py-3 rounded-[20px] rounded-tl-none flex items-center gap-1.5 shadow-sm border border-base-content/5">
+                      <div className="size-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <div className="size-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <div className="size-1.5 bg-primary/40 rounded-full animate-bounce" />
+                    </div>
+                  </div>
+                )}
 
                 {targetUserId !== "system_announcement" && (
                   <div className="flex-shrink-0 px-2 z-20">

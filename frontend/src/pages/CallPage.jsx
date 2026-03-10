@@ -143,7 +143,6 @@ const CallUI = ({ isAudioCall }) => {
   const { isSharingScreen } = useScreenShareState();
   const isRecording = useIsCallRecordingInProgress();
   const navigate = useNavigate();
-
   const [isSwapped, setIsSwapped] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -152,6 +151,7 @@ const CallUI = ({ isAudioCall }) => {
   // Call timer
   const [callDuration, setCallDuration] = useState(0);
   const timerRef = useRef(null);
+  const startTimeRef = useRef(null);
 
   // Waiting timeout
   const [waitingTime, setWaitingTime] = useState(0);
@@ -160,6 +160,7 @@ const CallUI = ({ isAudioCall }) => {
   // --- Timer ---
   useEffect(() => {
     if (callingState === CallingState.JOINED) {
+      startTimeRef.current = Date.now();
       timerRef.current = setInterval(() => {
         setCallDuration(prev => prev + 1);
       }, 1000);
@@ -214,7 +215,8 @@ const CallUI = ({ isAudioCall }) => {
 
     const onEnded = () => {
       endCallTone.play().catch(() => { });
-      toast("Call ended.", { icon: "📞" });
+      const summary = formatTime(timerRef.current ? (Date.now() - startTimeRef.current) / 1000 : callDuration);
+      toast(`Call ended • ${summary}`, { icon: "📞" });
       if (window.AndroidBridge) window.AndroidBridge.vibrate(100);
       navigate("/");
     };
@@ -343,10 +345,16 @@ const CallUI = ({ isAudioCall }) => {
   return (
     <StreamTheme className="call-page-theme">
       <div
-        className="whatsapp-call-bg h-dvh w-screen flex flex-col relative overflow-hidden cursor-default select-none"
+        className="h-dvh w-screen flex flex-col relative overflow-hidden cursor-default select-none bg-black"
         onMouseMove={resetControlsTimeout}
         onClick={resetControlsTimeout}
       >
+        {/* Animated Background Layer */}
+        <div className="absolute inset-0 z-0 opacity-40">
+          <div className="absolute top-0 -left-20 size-[500px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-0 -right-20 size-[500px] bg-pink-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+
 
         {/* === TOP BAR (WhatsApp green gradient) === */}
         <div className={`absolute top-0 inset-x-0 p-4 sm:p-6 lg:p-8 flex items-center justify-between z-40 bg-gradient-to-b from-black/70 via-black/30 to-transparent transition-all duration-500 safe-area-top ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -390,6 +398,15 @@ const CallUI = ({ isAudioCall }) => {
           </div>
         </div>
 
+        {/* === RECONNECTING OVERLAY === */}
+        {callingState === CallingState.RECONNECTING && (
+          <div className="absolute inset-0 z-[60] bg-black/60 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300">
+            <div className="size-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin mb-4" />
+            <h4 className="text-white font-black uppercase tracking-widest text-sm">Poor Connection</h4>
+            <p className="text-white/40 text-[10px] mt-1 font-bold uppercase">Reconnecting your love line...</p>
+          </div>
+        )}
+
         {/* === SCREEN SHARE BANNER === */}
         {isSharingScreen && (
           <div className="absolute top-16 sm:top-20 inset-x-0 z-40 flex justify-center">
@@ -407,14 +424,14 @@ const CallUI = ({ isAudioCall }) => {
             /* --- AUDIO CALL VIEW --- */
             <div className="h-full w-full flex items-center justify-center px-6">
               {/* Bars visualizer */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-[0.06] pointer-events-none">
-                <div className="flex items-end gap-1 h-28">
-                  {[...Array(24)].map((_, i) => (
-                    <div key={i} className="w-1 bg-[#25D366] rounded-full"
+              <div className="absolute inset-x-0 bottom-40 flex items-center justify-center opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity">
+                <div className="flex items-end gap-1.5 h-32">
+                  {[...Array(32)].map((_, i) => (
+                    <div key={i} className="w-1 bg-gradient-to-t from-primary to-pink-500 rounded-full"
                       style={{
-                        height: `${Math.random() * 100 + 20}%`,
-                        animation: `audioBar ${0.3 + Math.random() * 0.7}s ease-in-out infinite alternate`,
-                        animationDelay: `${i * 0.04}s`,
+                        height: `${Math.random() * 80 + 20}%`,
+                        animation: `audioBar ${0.4 + Math.random() * 0.8}s ease-in-out infinite alternate`,
+                        animationDelay: `${i * 0.03}s`,
                       }}
                     />
                   ))}
@@ -430,8 +447,8 @@ const CallUI = ({ isAudioCall }) => {
                       <div className="absolute -inset-8 rounded-full border border-[#25D366]/10 animate-ping" style={{ animationDuration: '3s' }} />
                     </>
                   )}
-                  <div className="size-44 sm:size-56 lg:size-64 rounded-full overflow-hidden border-4 border-white/5 shadow-[0_25px_50px_rgba(0,0,0,0.5)] relative z-10">
-                    <img src={remoteParticipant?.image || "/avatar.png"} alt="avatar" className="w-full h-full object-cover" />
+                  <div className="size-44 sm:size-56 lg:size-64 rounded-full overflow-hidden border-4 border-white/10 shadow-[0_25px_80px_rgba(0,0,0,0.8)] relative z-10 p-1 bg-gradient-to-br from-white/20 to-transparent">
+                    <img src={remoteParticipant?.image || "/avatar.png"} alt="avatar" className="w-full h-full object-cover rounded-full" />
                   </div>
                 </div>
                 <div className="text-center">
@@ -594,7 +611,13 @@ const OutgoingRingingScreen = ({ isAudioCall }) => {
   };
 
   return (
-    <div className="h-dvh bg-gradient-to-b from-[#075e54] via-[#054d44] to-[#022c27] flex flex-col items-center justify-between py-14 sm:py-20 px-6 overflow-hidden safe-area-bottom safe-area-top">
+    <div className="h-dvh bg-[#080808] flex flex-col items-center justify-between py-14 sm:py-20 px-6 overflow-hidden safe-area-bottom safe-area-top relative">
+      {/* Premium Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] size-[80%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute -bottom-[10%] -right-[10%] size-[80%] bg-pink-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
 
       {/* Top info */}
       <div className="text-center z-10 w-full">

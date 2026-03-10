@@ -24,27 +24,42 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
             },
             data: {},
             tokens: user.fcmTokens,
-            // Android-specific options for high reliability
+            // Android-specific options for high reliability & premium feel
             android: {
                 priority: "high",
                 notification: {
-                    channelId: "default_channel",
+                    channelId: data?.type === "incoming_call" ? "calls" : "messages",
                     priority: "max",
                     defaultSound: true,
                     defaultVibrateTimings: true,
-                    icon: "notification_icon", // Should match native drawable if available, otherwise falls back
-                    color: "#f97316", // Primary brand color (orange-500)
+                    icon: "notification_icon",
+                    color: "#f53855", // Brand Primary (approximately from oklch)
+                    tag: data?.senderId || "bondbeyond_general", // Group by sender
+                    clickAction: "FLUTTER_NOTIFICATION_CLICK" // For mobile compatibility
+                },
+                fcmOptions: {
+                    analyticsLabel: data?.type || "general"
                 }
             },
-            // Web-specific options for browser reliability
+            // Web-specific options for premium browser experience
             webpush: {
                 headers: {
                     Urgency: "high"
                 },
                 notification: {
-                    icon: icon || "/logo.png",
-                    badge: "/logo.png",
+                    icon: icon || "https://www.freechatweb.in/logo.png",
+                    badge: "https://www.freechatweb.in/logo.png",
                     requireInteraction: data?.type === "incoming_call",
+                    timestamp: Date.now(),
+                    silent: false,
+                    vibrate: [200, 100, 200],
+                    actions: data?.type === "direct_message" ? [
+                        { action: "view", title: "View Message" },
+                        { action: "reply", title: "Quick Reply" }
+                    ] : []
+                },
+                fcmOptions: {
+                    link: data?.url ? `https://www.freechatweb.in${data.url}` : "https://www.freechatweb.in"
                 }
             }
         };

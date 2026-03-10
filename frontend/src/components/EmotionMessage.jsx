@@ -260,7 +260,7 @@ const EmotionMessage = memo((props) => {
       style={{ contain: 'layout style' }}
     >
       {isSnap ? (
-        <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
+        <div className={`flex flex-col ${isMyMessage ? "items-end pr-4" : "items-start pl-12"} mb-3`}>
           {isViewed ? (
             <div className="flex items-center gap-2 bg-base-200/40 px-3.5 py-1.5 rounded-full border border-base-300/50 opacity-50 select-none">
               <CheckCheck className="size-3.5 text-success/70" />
@@ -283,7 +283,7 @@ const EmotionMessage = memo((props) => {
           {isViewingSnap && <SnapViewer message={message} onClose={handleMarkViewed} />}
         </div>
       ) : isVoice ? (
-        <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} mb-2`}>
+        <div className={`flex flex-col ${isMyMessage ? "items-end pr-4" : "items-start pl-12"} mb-3`}>
           <VoiceMessagePlayer
             url={message.mediaUrl || extra.mediaUrl}
             duration={message.duration || extra.duration}
@@ -291,14 +291,14 @@ const EmotionMessage = memo((props) => {
           />
         </div>
       ) : (
-        <div className={`relative w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} ${isShout ? 'drop-shadow-xl' : ''}`}>
+        <div className={`w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} px-2`}>
           <div
-            className={`message-scale-container flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} flex-shrink-0 ${isWhisper ? 'opacity-60' : ''}`}
+            className={`message-bubble-scaling flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} max-w-[85%] sm:max-w-none ${isWhisper ? 'opacity-60' : ''}`}
             style={{
               transform: scale !== 1 ? `scale(${scale})` : undefined,
-              transformOrigin: isMyMessage ? 'right bottom' : 'left bottom',
-              padding: isShout ? `${(scale - 1) * 20}px 0` : undefined,
-              willChange: scale !== 1 ? 'transform' : 'auto'
+              transformOrigin: isMyMessage ? 'right top' : 'left top',
+              paddingTop: isShout ? `${(scale - 1) * 12}px` : undefined,
+              paddingBottom: isShout ? `${(scale - 1) * 12}px` : undefined,
             }}
           >
             <div className={`relative ${isFirstInGroup ? (isMyMessage ? 'bubble-tail-me' : 'bubble-tail-others') : ''}`}>
@@ -309,9 +309,9 @@ const EmotionMessage = memo((props) => {
                 MessageTimestamp={NullComponent}
                 MessageStatus={NullComponent}
                 className={`
+                  custom-message-bubble
                   ${isFirstInGroup ? (isMyMessage ? 'bubble-top-right' : 'bubble-top-left') : ''}
                   ${!isLastInGroup ? 'mb-0.5' : 'mb-3'}
-                  custom-message-bubble
                 `}
                 MessageFooter={MessageFooter}
               />

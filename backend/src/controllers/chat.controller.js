@@ -104,17 +104,20 @@ export const sendMessage = async (req, res) => {
         role: "user"
       });
 
-      // Fetch the last few messages for context (optional, let's start simple)
+      // Fetch history and map to Gemini format properly
       const channel = streamClient.channel("messaging", channelId);
-      const historyRes = await channel.query({ messages: { limit: 10 } });
+      const historyRes = await channel.query({ messages: { limit: 15 } });
       const history = (historyRes.messages || [])
-        .filter(m => m.user.id !== "ai-user-id") // Just user messages for now
         .map(m => ({
           role: m.user.id === "ai-user-id" ? "model" : "user",
           parts: [{ text: m.text }]
         }));
 
-      const aiReply = await getAIResponse(text, history, "girlfriend", req.user.aiPartnerName, req.user.fullName);
+      // Generate AI response with history
+      let aiReply = await getAIResponse(text, history, "girlfriend", req.user.aiPartnerName, req.user.fullName);
+
+      // Clean up excessive newlines for a better chat look
+      aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
       // Send reply as AI via Stream
       await channel.sendMessage({

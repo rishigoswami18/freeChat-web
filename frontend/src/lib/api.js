@@ -337,6 +337,11 @@ export const tttAction = async (sessionId, index) => {
   return response.data;
 };
 
+export const triggerAiTurn = async (sessionId) => {
+  const response = await axiosInstance.post(`/games/ai-turn/${sessionId}`);
+  return response.data;
+};
+
 export const updateProfile = async (profileData) => {
   const response = await axiosInstance.put("/users/profile", profileData);
   return response.data;

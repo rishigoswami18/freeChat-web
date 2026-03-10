@@ -150,6 +150,10 @@ const LandingPage = () => {
     const apkUrl = latestApk?.apkUrl || null;
     return (
         <div className="min-h-screen bg-base-100" data-theme="forest">
+            {/* SEO & Meta Tags */}
+            <title>BondBeyond | Connect, Play & Express Emotion ❤️</title>
+            <meta name="description" content="The world's first emotion-aware social platform. Message friends, play couple games, and find your perfect bond on BondBeyond." />
+
             {/* ===== NAVIGATION ===== */}
             <nav className="navbar bg-base-100/80 backdrop-blur-lg border-b border-base-300/50 sticky top-0 z-50">
                 <div className="container mx-auto flex items-center justify-between px-4">

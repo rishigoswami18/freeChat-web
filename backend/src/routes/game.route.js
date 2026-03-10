@@ -47,7 +47,7 @@ const populateParticipants = async (sessionOrSessions, reqUser) => {
     });
 
     // Fetch all users at once
-    const users = await User.find({ _id: { $in: Array.from(allUserIds) } }).select("fullName profilePic");
+    const users = await User.find({ _id: { $in: Array.from(allUserIds) } }).select("fullName profilePic aiPartnerName");
     const userMap = new Map(users.map(u => [u._id.toString(), u]));
 
     const mapped = sessions.map(s => {
@@ -55,10 +55,13 @@ const populateParticipants = async (sessionOrSessions, reqUser) => {
         sObj.participants = s.participants.map(p => {
             const pStr = p?.toString();
             if (pStr === "ai-user-id" || !pStr) {
+                // Find the user who belongs to this session to get their customized AI name
+                const owner = users.find(u => s.participants.some(pid => pid.toString() === u._id.toString()));
+                const aiName = owner?.aiPartnerName || "Sushmita";
                 return {
                     _id: "ai-user-id",
-                    fullName: reqUser.aiPartnerName || "Aria",
-                    profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    fullName: aiName,
+                    profilePic: `https://avatar.iran.liara.run/public/girl?username=${aiName.toLowerCase()}`,
                     bio: "Your sweet AI virtual partner. ❤️"
                 };
             }
@@ -278,13 +281,16 @@ router.get("/templates", checkMembership, async (req, res) => {
             isBothAdult = myAge >= 18 && partnerAge >= 18;
         }
 
-        const filteredTemplates = {};
+        const templatesArray = [];
         Object.entries(QUIZ_TEMPLATES).forEach(([key, template]) => {
             if (template.isAdult && !isBothAdult) return;
-            filteredTemplates[key] = template;
+            templatesArray.push({
+                ...template,
+                type: key
+            });
         });
 
-        res.json(filteredTemplates);
+        res.json(templatesArray);
     } catch (err) {
         console.error("Error fetching templates:", err);
         res.status(500).json({ message: "Internal Server Error" });
@@ -308,9 +314,12 @@ router.post("/start", checkMembership, async (req, res) => {
             return res.status(400).json({ message: "Invalid game type" });
         }
 
+        const partnerIdStr = partnerId.toString();
+        const myIdStr = req.user._id.toString();
+
         // Check if there's already an active (pending) session for this couple and game type
         const existingSession = await GameSession.findOne({
-            participants: { $all: [req.user._id, partnerId] },
+            participants: { $all: [myIdStr, partnerIdStr] },
             gameType,
             status: "pending"
         });
@@ -322,30 +331,30 @@ router.post("/start", checkMembership, async (req, res) => {
         let state = {};
         if (gameType === "ludo") {
             state = {
-                currentPlayer: req.user._id.toString(),
+                currentPlayer: myIdStr,
                 dice: 1,
                 rolled: false,
                 pieces: {
-                    [req.user._id.toString()]: [-1, -1, -1, -1], // -1 means in base
-                    [partnerId.toString()]: [-1, -1, -1, -1]
+                    [myIdStr]: [-1, -1, -1, -1], // -1 means in base
+                    [partnerIdStr]: [-1, -1, -1, -1]
                 },
                 lastRoll: 0,
                 turnCount: 0
             };
         } else if (gameType === "tic_tac_toe") {
             state = {
-                currentPlayer: req.user._id.toString(),
+                currentPlayer: myIdStr,
                 board: Array(9).fill(null),
                 symbols: {
-                    [req.user._id.toString()]: "X",
-                    [partnerId.toString()]: "O"
+                    [myIdStr]: "X",
+                    [partnerIdStr]: "O"
                 },
                 turnCount: 0
             };
         }
 
         const newSession = await GameSession.create({
-            participants: [req.user._id, partnerId],
+            participants: [myIdStr, partnerIdStr],
             gameType,
             questions: template.questions,
             answers: new Map(),
@@ -527,8 +536,8 @@ router.post("/ludo/action/:id", async (req, res) => {
             const myPieces = state.pieces[myId];
             const canMove = myPieces.some(pos => {
                 if (pos === -1) return roll === 6; // Need 6 to get out
-                if (pos >= 57) return false; // Already finished
-                if (pos + roll > 57) return false; // Must be exact
+                if (pos >= 56) return false; // Already finished
+                if (pos + roll > 56) return false; // Must be exact to finish
                 return true;
             });
 
@@ -549,84 +558,58 @@ router.post("/ludo/action/:id", async (req, res) => {
                 if (roll !== 6) return res.status(400).json({ message: "Need a 6 to start" });
                 myPieces[pieceIndex] = 0; // Start position
             } else {
-                if (pos + roll > 57) return res.status(400).json({ message: "Can't move that far" });
+                if (pos + roll > 56) return res.status(400).json({ message: "Can't move that far" });
                 myPieces[pieceIndex] += roll;
             }
 
-            // Simple kick logic (if not in safe zone/base/finish)
-            // Let's implement full Ludo logic later if needed, starting with basic racing.
+            let hasReachedHome = myPieces[pieceIndex] === 56;
+
+            // Kick Logic (Professional Ludo Rules)
+            const SAFE_SPOTS = [0, 8, 13, 21, 26, 34, 39, 47];
+            const isAtHomeStretch = myPieces[pieceIndex] >= 51;
+            const isAtSafeSpot = SAFE_SPOTS.includes(myPieces[pieceIndex]);
+
+            let hasKicked = false;
+            if (!isAtHomeStretch && !isAtSafeSpot) {
+                // Check other participants
+                session.participants.forEach(pId => {
+                    const pIdStr = pId.toString();
+                    if (pIdStr !== myId) {
+                        const enemyPieces = state.pieces[pIdStr];
+                        if (enemyPieces) {
+                            enemyPieces.forEach((enemyPos, idx) => {
+                                // Important: Adjust enemy pos to common global path if needed
+                                // For simple 2-player racing, we just check if absolute index matches
+                                // and if they are on the common path (not home stretch)
+                                if (enemyPos !== -1 && enemyPos < 51) {
+                                    // Calculate global position for both
+                                    const myGlobal = myId === session.participants[0].toString() ? myPieces[pieceIndex] : (myPieces[pieceIndex] + 26) % 52;
+                                    const enemyGlobal = pIdStr === session.participants[0].toString() ? enemyPos : (enemyPos + 26) % 52;
+
+                                    if (myGlobal === enemyGlobal) {
+                                        enemyPieces[idx] = -1; // Kick back to base!
+                                        hasKicked = true;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
 
             // Winning check
-            if (myPieces.every(p => p === 57)) {
+            if (myPieces.every(p => p === 56)) {
                 session.status = "completed";
                 session.score = 100;
             }
 
-            // Turn management
-            if (roll !== 6) {
+            // Turn management: Extra turn for 6, Kick, or Reaching Home
+            if (roll !== 6 && !hasKicked && !hasReachedHome) {
                 const nextPlayerId = session.participants.find(p => p.toString() !== myId);
                 state.currentPlayer = nextPlayerId ? nextPlayerId.toString() : "ai-user-id";
             }
             state.rolled = false;
             state.turnCount++;
-        }
-
-        if (state.currentPlayer === "ai-user-id" && session.status !== "completed") {
-            let turnOver = false;
-            while (!turnOver && state.currentPlayer === "ai-user-id" && session.status !== "completed") {
-                const roll = Math.floor(Math.random() * 6) + 1;
-                state.dice = roll;
-                state.rolled = true;
-
-                // Robust way to find AI pieces
-                const aiId = "ai-user-id";
-                const aiPieces = state.pieces[aiId] || state.pieces["ai-user-id"];
-
-                if (!aiPieces) {
-                    state.currentPlayer = myId;
-                    turnOver = true;
-                    break;
-                }
-
-                const possibleMoves = aiPieces.map((pos, idx) => {
-                    if (pos === -1 && roll === 6) return idx;
-                    if (pos >= 0 && pos + roll <= 57) return idx;
-                    return null;
-                }).filter(v => v !== null);
-
-                if (possibleMoves.length > 0) {
-                    const pieceIndex = possibleMoves.reduce((best, curr) => {
-                        const posBest = aiPieces[best];
-                        const posCurr = aiPieces[curr];
-                        if (posCurr >= 0 && (posBest === -1 || posCurr > posBest)) return curr;
-                        return best;
-                    }, possibleMoves[0]);
-
-                    if (aiPieces[pieceIndex] === -1) {
-                        aiPieces[pieceIndex] = 0;
-                    } else {
-                        aiPieces[pieceIndex] += roll;
-                    }
-
-                    if (aiPieces.every(p => p === 57)) {
-                        session.status = "completed";
-                        session.score = 100;
-                        turnOver = true;
-                    }
-
-                    if (roll !== 6) {
-                        state.currentPlayer = myId;
-                        turnOver = true;
-                    }
-                    state.rolled = false;
-                    state.turnCount++;
-                } else {
-                    state.currentPlayer = myId;
-                    state.rolled = false;
-                    state.turnCount++;
-                    turnOver = true;
-                }
-            }
         }
 
         session.markModified("state");
@@ -686,41 +669,63 @@ router.post("/ttt/action/:id", async (req, res) => {
             session.score = 50; // Draw
         } else {
             // Switch turn
-            const nextPlayerId = session.participants.find(p => p.toString() !== myId);
-            const nextPlayer = nextPlayerId ? nextPlayerId.toString() : "ai-user-id";
+            const nextPlayerId = session.participants.find(p => String(p) !== myId);
+            const nextPlayer = nextPlayerId ? String(nextPlayerId) : "ai-user-id";
             state.currentPlayer = nextPlayer;
+
+            console.log(`[TTT] Turn switched from ${myId} to ${nextPlayer}`);
 
             // --- AI Turn Logic ---
             if (nextPlayer === "ai-user-id") {
                 const emptyIndices = state.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
                 if (emptyIndices.length > 0) {
-                    const aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                    // Smart AI Logic:
+                    // 1. Try to win
+                    // 2. Try to block user
+                    // 3. Pick random
+                    const aiSymbol = "O";
+                    const userSymbol = "X";
 
-                    // Robust symbol lookup
-                    const aiSymbol = state.symbols["ai-user-id"] || "O";
+                    const findWinningMove = (symbol) => {
+                        for (const [a, b, c] of winningCombos) {
+                            const cells = [a, b, c];
+                            const vals = cells.map(i => state.board[i]);
+                            const symbolCount = vals.filter(v => v === symbol).length;
+                            const emptyCount = vals.filter(v => v === null).length;
+                            if (symbolCount === 2 && emptyCount === 1) {
+                                return cells[vals.indexOf(null)];
+                            }
+                        }
+                        return null;
+                    };
+
+                    let aiMove = findWinningMove(aiSymbol); // Try to win
+                    if (aiMove === null) aiMove = findWinningMove(userSymbol); // Try to block
+                    if (aiMove === null) aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)]; // Random
+
                     state.board[aiMove] = aiSymbol;
                     state.turnCount++;
 
-                    // Re-check for AI win
-                    let aiWinner = false;
-                    const winningCombos = [
-                        [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
-                    ];
+                    // Re-check for AI win/draw
+                    let aiWinnerFound = false;
                     for (const [a, b, c] of winningCombos) {
                         if (state.board[a] && state.board[a] === state.board[b] && state.board[a] === state.board[c]) {
-                            aiWinner = true;
+                            aiWinnerFound = true;
                             break;
                         }
                     }
 
-                    if (aiWinner) {
+                    if (aiWinnerFound) {
                         session.status = "completed";
                         session.score = 100;
+                        state.lastAction = `${req.user.aiPartnerName || "Sushmita"} placed at ${aiMove} and WON!`;
                     } else if (state.turnCount === 9) {
                         session.status = "completed";
                         session.score = 50;
+                        state.lastAction = `${req.user.aiPartnerName || "Sushmita"} placed at ${aiMove}. It's a draw!`;
                     } else {
                         state.currentPlayer = myId; // Switch back to user
+                        state.lastAction = `${req.user.aiPartnerName || "Sushmita"} placed 'O' at position ${aiMove}. Your turn!`;
                     }
                 }
             }
@@ -731,6 +736,121 @@ router.post("/ttt/action/:id", async (req, res) => {
         res.json({ success: true, session });
     } catch (err) {
         console.error("TTT action error:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+
+// Trigger AI Turn (Ludo or TTT)
+router.post("/ai-turn/:id", async (req, res) => {
+    try {
+        const session = await GameSession.findById(req.params.id);
+        if (!session || session.status === "completed") return res.status(404).json({ message: "Active session not found" });
+
+        const state = session.state;
+        if (state.currentPlayer !== "ai-user-id") return res.status(400).json({ message: "Not AI's turn" });
+
+        const me = await User.findById(req.user._id);
+        const myId = me._id.toString();
+        const aiName = me.aiPartnerName || "Sushmita";
+
+        if (session.gameType === "ludo") {
+            const aiId = "ai-user-id";
+            if (!state.pieces[aiId]) state.pieces[aiId] = [-1, -1, -1, -1];
+            const aiPieces = state.pieces[aiId];
+
+            // Boost 6 chance if all pieces are in base
+            const hasAnyPieceOut = aiPieces.some(p => p > -1);
+            let roll = Math.floor(Math.random() * 6) + 1;
+            if (!hasAnyPieceOut && Math.random() < 0.25) roll = 6;
+
+            state.dice = roll;
+            state.rolled = true;
+
+            const possibleMoves = aiPieces.map((pos, idx) => {
+                if (pos === -1 && roll === 6) return idx;
+                if (pos >= 0 && pos + roll <= 56) return idx;
+                return null;
+            }).filter(v => v !== null);
+
+            if (possibleMoves.length > 0) {
+                // Determine best piece to move (Strategy: Kick User, or progress furthest)
+                let pieceIndex = possibleMoves[0];
+                let highestGlobal = -1;
+                let kickIndex = -1;
+
+                const SAFE_SPOTS = [0, 8, 13, 21, 26, 34, 39, 47];
+
+                possibleMoves.forEach(idx => {
+                    const pos = aiPieces[idx] === -1 ? 0 : aiPieces[idx] + roll;
+                    const aiGlobal = (pos + 26) % 52;
+
+                    // Check if this move kicks user (user pieces are participants[0])
+                    const userPieces = state.pieces[myId] || [];
+                    userPieces.forEach((uPos, uIdx) => {
+                        if (uPos >= 0 && uPos < 51) {
+                            const uGlobal = uPos; // User is participants[0], global == relative
+                            if (aiGlobal === uGlobal && !SAFE_SPOTS.includes(aiGlobal)) {
+                                kickIndex = idx;
+                            }
+                        }
+                    });
+
+                    if (pos > highestGlobal) {
+                        highestGlobal = pos;
+                        pieceIndex = idx;
+                    }
+                });
+
+                if (kickIndex !== -1) pieceIndex = kickIndex;
+
+                const oldPos = aiPieces[pieceIndex];
+                let hasKicked = false;
+
+                if (oldPos === -1) {
+                    aiPieces[pieceIndex] = 0;
+                    state.lastAction = `${aiName} rolled a ${roll} and brought a piece out!`;
+                } else {
+                    aiPieces[pieceIndex] += roll;
+                    state.lastAction = `${aiName} rolled a ${roll} and moved!`;
+
+                    // Handle Kick after move
+                    const aiGlobal = (aiPieces[pieceIndex] + 26) % 52;
+                    const userPieces = state.pieces[myId] || [];
+                    if (aiPieces[pieceIndex] < 51 && !SAFE_SPOTS.includes(aiGlobal)) {
+                        userPieces.forEach((uPos, uIdx) => {
+                            if (uPos >= 0 && uPos < 51) {
+                                if (aiGlobal === uPos) {
+                                    state.pieces[myId][uIdx] = -1;
+                                    hasKicked = true;
+                                    state.lastAction = `${aiName} rolled a ${roll} and KICKED your piece back to base! 😤`;
+                                }
+                            }
+                        });
+                    }
+                }
+
+                let hasReachedHome = aiPieces[pieceIndex] === 56;
+
+                if (aiPieces.every(p => p === 56)) {
+                    session.status = "completed";
+                    session.score = 0;
+                }
+
+                if (roll !== 6 && !hasKicked && !hasReachedHome) state.currentPlayer = myId;
+            } else {
+                state.lastAction = `${aiName} rolled a ${roll} but had no moves.`;
+                state.currentPlayer = myId;
+            }
+            state.rolled = false;
+            state.turnCount++;
+        }
+
+        session.markModified("state");
+        await session.save();
+        res.json({ success: true, session });
+    } catch (err) {
+        console.error("AI turn error:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
