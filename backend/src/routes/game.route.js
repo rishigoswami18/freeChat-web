@@ -1,5 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import mongoose from "mongoose";
 import User from "../models/User.js";
 import GameSession from "../models/GameSession.js";
 import { calculateAge } from "../utils/dateUtils.js";
@@ -20,6 +21,53 @@ const checkMembership = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+/**
+ * Helper: Manually populate participants in game sessions.
+ * Handles both real users (ObjectIds) and AI partners ("ai-user-id").
+ */
+const populateParticipants = async (sessionOrSessions, reqUser) => {
+    if (!sessionOrSessions) return sessionOrSessions;
+
+    const isArray = Array.isArray(sessionOrSessions);
+    const sessions = isArray ? sessionOrSessions : [sessionOrSessions];
+
+    // Collect all unique ObjectIds
+    const allUserIds = new Set();
+    sessions.forEach(s => {
+        if (s.participants) {
+            s.participants.forEach(p => {
+                const pStr = p?.toString();
+                if (pStr && pStr !== "ai-user-id" && mongoose.Types.ObjectId.isValid(pStr)) {
+                    allUserIds.add(pStr);
+                }
+            });
+        }
+    });
+
+    // Fetch all users at once
+    const users = await User.find({ _id: { $in: Array.from(allUserIds) } }).select("fullName profilePic");
+    const userMap = new Map(users.map(u => [u._id.toString(), u]));
+
+    const mapped = sessions.map(s => {
+        const sObj = s.toObject();
+        sObj.participants = s.participants.map(p => {
+            const pStr = p?.toString();
+            if (pStr === "ai-user-id" || !pStr) {
+                return {
+                    _id: "ai-user-id",
+                    fullName: reqUser.aiPartnerName || "Aria",
+                    profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    bio: "Your sweet AI virtual partner. ❤️"
+                };
+            }
+            return userMap.get(pStr) || { _id: pStr, fullName: "Deleted User", profilePic: "/avatar.png" };
+        });
+        return sObj;
+    });
+
+    return isArray ? mapped : mapped[0];
 };
 
 const QUIZ_TEMPLATES = {
@@ -315,25 +363,13 @@ router.post("/start", checkMembership, async (req, res) => {
 // Get session details
 router.get("/session/:id", checkMembership, async (req, res) => {
     try {
-        const session = await GameSession.findById(req.params.id)
-            .populate("participants", "fullName profilePic");
+        const session = await GameSession.findById(req.params.id);
 
         if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
 
-        const sessionObj = session.toObject();
-        sessionObj.participants = sessionObj.participants.map(p => {
-            if (!p || p === "ai-user-id") {
-                return {
-                    _id: "ai-user-id",
-                    fullName: req.user.aiPartnerName || "Aria",
-                    profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
-                    bio: "Your sweet AI virtual partner. ❤️"
-                };
-            }
-            return p;
-        });
+        const sessionObj = await populateParticipants(session, req.user);
 
         if (!sessionObj.participants.some(p => p?._id?.toString() === req.user._id.toString())) {
             return res.status(403).json({ message: "Access denied" });
@@ -352,23 +388,9 @@ router.get("/active", checkMembership, async (req, res) => {
         const sessions = await GameSession.find({
             participants: req.user._id,
             status: "pending"
-        }).populate("participants", "fullName profilePic");
-
-        const mappedSessions = sessions.map(s => {
-            const sObj = s.toObject();
-            sObj.participants = sObj.participants.map(p => {
-                if (!p || p === "ai-user-id") {
-                    return {
-                        _id: "ai-user-id",
-                        fullName: req.user.aiPartnerName || "Aria",
-                        profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
-                        bio: "Your sweet AI virtual partner. ❤️"
-                    };
-                }
-                return p;
-            });
-            return sObj;
         });
+
+        const mappedSessions = await populateParticipants(sessions, req.user);
 
         res.json(mappedSessions);
     } catch (err) {
@@ -383,25 +405,11 @@ router.get("/history", checkMembership, async (req, res) => {
         const sessions = await GameSession.find({
             participants: req.user._id,
             status: "completed"
-        }).populate("participants", "fullName profilePic")
+        })
             .sort({ updatedAt: -1 })
             .limit(10);
 
-        const mappedHistory = sessions.map(s => {
-            const sObj = s.toObject();
-            sObj.participants = sObj.participants.map(p => {
-                if (!p || p === "ai-user-id") {
-                    return {
-                        _id: "ai-user-id",
-                        fullName: req.user.aiPartnerName || "Aria",
-                        profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
-                        bio: "Your sweet AI virtual partner. ❤️"
-                    };
-                }
-                return p;
-            });
-            return sObj;
-        });
+        const mappedHistory = await populateParticipants(sessions, req.user);
 
         res.json(mappedHistory);
     } catch (err) {
