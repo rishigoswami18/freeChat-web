@@ -564,7 +564,8 @@ router.post("/ludo/action/:id", async (req, res) => {
 
             // Turn management
             if (roll !== 6) {
-                state.currentPlayer = session.participants.find(p => p.toString() !== myId).toString();
+                const nextPlayerId = session.participants.find(p => p.toString() !== myId);
+                state.currentPlayer = nextPlayerId ? nextPlayerId.toString() : "ai-user-id";
             }
             state.rolled = false;
             state.turnCount++;
@@ -577,7 +578,16 @@ router.post("/ludo/action/:id", async (req, res) => {
                 state.dice = roll;
                 state.rolled = true;
 
-                const aiPieces = state.pieces["ai-user-id"];
+                // Robust way to find AI pieces
+                const aiId = "ai-user-id";
+                const aiPieces = state.pieces[aiId] || state.pieces["ai-user-id"];
+
+                if (!aiPieces) {
+                    state.currentPlayer = myId;
+                    turnOver = true;
+                    break;
+                }
+
                 const possibleMoves = aiPieces.map((pos, idx) => {
                     if (pos === -1 && roll === 6) return idx;
                     if (pos >= 0 && pos + roll <= 57) return idx;
@@ -677,7 +687,7 @@ router.post("/ttt/action/:id", async (req, res) => {
         } else {
             // Switch turn
             const nextPlayerId = session.participants.find(p => p.toString() !== myId);
-            const nextPlayer = nextPlayerId.toString();
+            const nextPlayer = nextPlayerId ? nextPlayerId.toString() : "ai-user-id";
             state.currentPlayer = nextPlayer;
 
             // --- AI Turn Logic ---
@@ -685,7 +695,10 @@ router.post("/ttt/action/:id", async (req, res) => {
                 const emptyIndices = state.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
                 if (emptyIndices.length > 0) {
                     const aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-                    state.board[aiMove] = state.symbols["ai-user-id"];
+
+                    // Robust symbol lookup
+                    const aiSymbol = state.symbols["ai-user-id"] || "O";
+                    state.board[aiMove] = aiSymbol;
                     state.turnCount++;
 
                     // Re-check for AI win
