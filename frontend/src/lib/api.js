@@ -332,6 +332,11 @@ export const ludoAction = async (sessionId, action, pieceIndex) => {
   return response.data;
 };
 
+export const tttAction = async (sessionId, index) => {
+  const response = await axiosInstance.post(`/games/ttt/action/${sessionId}`, { index });
+  return response.data;
+};
+
 export const updateProfile = async (profileData) => {
   const response = await axiosInstance.put("/users/profile", profileData);
   return response.data;

@@ -7,6 +7,7 @@ import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart, Gamepad2 
 import toast from "react-hot-toast";
 import LoveDestinyGame from "./LoveDestinyGame";
 import LudoGame from "./LudoGame";
+import TicTacToeGame from "./TicTacToeGame";
 
 const CompatibilityQuiz = () => {
     const { sessionId } = useParams();
@@ -68,6 +69,10 @@ const CompatibilityQuiz = () => {
 
     if (session?.gameType === "ludo") {
         return <LudoGame session={session} />;
+    }
+
+    if (session?.gameType === "tic_tac_toe") {
+        return <TicTacToeGame session={session} />;
     }
 
     const myId = authUser?._id?.toString();

@@ -16,7 +16,8 @@ const gameSessionSchema = new mongoose.Schema({
             "never_have_i_ever_naughty",
             "spicy_truth_or_dare",
             "heart_destiny",
-            "ludo"
+            "ludo",
+            "tic_tac_toe"
         ],
         default: "compatibility_quiz"
     },

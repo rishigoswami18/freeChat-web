@@ -206,6 +206,12 @@ const QUIZ_TEMPLATES = {
         description: "Classic Ludo for couples. Race your pieces home and have fun!",
         isBoardGame: true,
         questions: []
+    },
+    tic_tac_toe: {
+        title: "Tic Tac Toe (Zero Cross) ⚔️",
+        description: "A quick match to see who's faster! Strategy vs Luck.",
+        isBoardGame: true,
+        questions: []
     }
 };
 
@@ -272,6 +278,16 @@ router.post("/start", checkMembership, async (req, res) => {
                     [partnerId.toString()]: [-1, -1, -1, -1]
                 },
                 lastRoll: 0,
+                turnCount: 0
+            };
+        } else if (gameType === "tic_tac_toe") {
+            state = {
+                currentPlayer: req.user._id.toString(),
+                board: Array(9).fill(null),
+                symbols: {
+                    [req.user._id.toString()]: "X",
+                    [partnerId.toString()]: "O"
+                },
                 turnCount: 0
             };
         }
@@ -482,6 +498,66 @@ router.post("/ludo/action/:id", async (req, res) => {
         res.json({ success: true, session });
     } catch (err) {
         console.error("Ludo action error:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Tic-Tac-Toe Game Actions
+router.post("/ttt/action/:id", async (req, res) => {
+    try {
+        const { index } = req.body;
+        const session = await GameSession.findById(req.params.id);
+
+        if (!session || session.gameType !== "tic_tac_toe") {
+            return res.status(404).json({ message: "Tic-Tac-Toe session not found" });
+        }
+
+        const myId = req.user._id.toString();
+        const state = session.state;
+
+        if (state.currentPlayer !== myId) {
+            return res.status(403).json({ message: "Not your turn!" });
+        }
+
+        if (state.board[index] !== null) {
+            return res.status(400).json({ message: "Cell already taken" });
+        }
+
+        // Make move
+        state.board[index] = state.symbols[myId];
+        state.turnCount++;
+
+        // Win check
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // cols
+            [0, 4, 8], [2, 4, 6]           // diags
+        ];
+
+        let winner = null;
+        for (const [a, b, c] of winningCombos) {
+            if (state.board[a] && state.board[a] === state.board[b] && state.board[a] === state.board[c]) {
+                winner = state.board[a];
+                break;
+            }
+        }
+
+        if (winner) {
+            session.status = "completed";
+            session.score = 100;
+        } else if (state.turnCount === 9) {
+            session.status = "completed";
+            session.score = 50; // Draw
+        } else {
+            // Switch turn
+            state.currentPlayer = session.participants.find(p => p.toString() !== myId).toString();
+        }
+
+        session.markModified("state");
+        await session.save();
+        res.json({ success: true, session });
+    } catch (err) {
+        console.error("TTT action error:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
