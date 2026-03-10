@@ -166,6 +166,14 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  aiPartnerName: {
+    type: String,
+    default: "Aria",
+  },
+  isCoupledWithAI: {
+    type: Boolean,
+    default: false,
+  },
 }
   , {
     timestamps: true,

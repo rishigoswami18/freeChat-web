@@ -506,3 +506,9 @@ export const boostProfile = async () => {
   const response = await axiosInstance.post("/gems/boost");
   return response.data;
 };
+
+// Link with AI
+export const linkAI = async (partnerName) => {
+  const res = await axiosInstance.post("/couple/link-ai", { partnerName });
+  return res.data;
+};

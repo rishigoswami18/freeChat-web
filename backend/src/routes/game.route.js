@@ -219,12 +219,16 @@ const QUIZ_TEMPLATES = {
 router.get("/templates", checkMembership, async (req, res) => {
     try {
         const me = await User.findById(req.user._id);
-        const partner = await User.findById(me.partnerId);
-
         const myAge = calculateAge(me.dateOfBirth);
-        const partnerAge = partner ? calculateAge(partner.dateOfBirth) : 0;
+        let isBothAdult = false;
 
-        const isBothAdult = myAge >= 18 && partnerAge >= 18;
+        if (me.isCoupledWithAI) {
+            isBothAdult = true; // AI partner is always adult-friendly
+        } else {
+            const partner = await User.findById(me.partnerId);
+            const partnerAge = partner ? calculateAge(partner.dateOfBirth) : 0;
+            isBothAdult = myAge >= 18 && partnerAge >= 18;
+        }
 
         const filteredTemplates = {};
         Object.entries(QUIZ_TEMPLATES).forEach(([key, template]) => {
@@ -245,11 +249,11 @@ router.post("/start", checkMembership, async (req, res) => {
         const { gameType } = req.body;
         const me = await User.findById(req.user._id);
 
-        if (!me.partnerId || me.coupleStatus !== "coupled") {
-            return res.status(400).json({ message: "You need to be in a couple to play games" });
+        if (!me.isCoupledWithAI && (!me.partnerId || me.coupleStatus !== "coupled")) {
+            return res.status(400).json({ message: "You need to be in a couple (real or AI) to play games" });
         }
 
-        const partnerId = me.partnerId;
+        const partnerId = me.isCoupledWithAI ? "ai-user-id" : me.partnerId;
         const template = QUIZ_TEMPLATES[gameType];
 
         if (!template) {
@@ -381,6 +385,26 @@ router.post("/submit", checkMembership, async (req, res) => {
 
         // Set answers for the current user
         session.answers.set(req.user._id.toString(), quizAnswers);
+
+        // --- AI Auto-Answering Logic ---
+        if (session.participants.includes("ai-user-id")) {
+            const aiAnswers = quizAnswers.map(ua => {
+                // AI mostly matches (70%) to feel "compatible"
+                const shouldMatch = Math.random() < 0.7;
+                const template = QUIZ_TEMPLATES[session.gameType];
+                const question = template.questions[ua.questionIndex];
+
+                let answer = ua.answer;
+                if (!shouldMatch) {
+                    const otherOptions = question.options.filter(o => o !== ua.answer);
+                    answer = otherOptions[Math.floor(Math.random() * otherOptions.length)];
+                }
+
+                return { questionIndex: ua.questionIndex, answer };
+            });
+            session.answers.set("ai-user-id", aiAnswers);
+        }
+
         session.markModified("answers");
 
         // Check if all participants have answered
@@ -493,6 +517,55 @@ router.post("/ludo/action/:id", async (req, res) => {
             state.turnCount++;
         }
 
+        if (state.currentPlayer === "ai-user-id" && session.status !== "completed") {
+            let turnOver = false;
+            while (!turnOver && state.currentPlayer === "ai-user-id" && session.status !== "completed") {
+                const roll = Math.floor(Math.random() * 6) + 1;
+                state.dice = roll;
+                state.rolled = true;
+
+                const aiPieces = state.pieces["ai-user-id"];
+                const possibleMoves = aiPieces.map((pos, idx) => {
+                    if (pos === -1 && roll === 6) return idx;
+                    if (pos >= 0 && pos + roll <= 57) return idx;
+                    return null;
+                }).filter(v => v !== null);
+
+                if (possibleMoves.length > 0) {
+                    const pieceIndex = possibleMoves.reduce((best, curr) => {
+                        const posBest = aiPieces[best];
+                        const posCurr = aiPieces[curr];
+                        if (posCurr >= 0 && (posBest === -1 || posCurr > posBest)) return curr;
+                        return best;
+                    }, possibleMoves[0]);
+
+                    if (aiPieces[pieceIndex] === -1) {
+                        aiPieces[pieceIndex] = 0;
+                    } else {
+                        aiPieces[pieceIndex] += roll;
+                    }
+
+                    if (aiPieces.every(p => p === 57)) {
+                        session.status = "completed";
+                        session.score = 100;
+                        turnOver = true;
+                    }
+
+                    if (roll !== 6) {
+                        state.currentPlayer = myId;
+                        turnOver = true;
+                    }
+                    state.rolled = false;
+                    state.turnCount++;
+                } else {
+                    state.currentPlayer = myId;
+                    state.rolled = false;
+                    state.turnCount++;
+                    turnOver = true;
+                }
+            }
+        }
+
         session.markModified("state");
         await session.save();
         res.json({ success: true, session });
@@ -550,7 +623,40 @@ router.post("/ttt/action/:id", async (req, res) => {
             session.score = 50; // Draw
         } else {
             // Switch turn
-            state.currentPlayer = session.participants.find(p => p.toString() !== myId).toString();
+            const nextPlayer = session.participants.find(p => p.toString() !== myId).toString();
+            state.currentPlayer = nextPlayer;
+
+            // --- AI Turn Logic ---
+            if (nextPlayer === "ai-user-id") {
+                const emptyIndices = state.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                if (emptyIndices.length > 0) {
+                    const aiMove = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                    state.board[aiMove] = state.symbols["ai-user-id"];
+                    state.turnCount++;
+
+                    // Re-check for AI win
+                    let aiWinner = false;
+                    const winningCombos = [
+                        [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
+                    ];
+                    for (const [a, b, c] of winningCombos) {
+                        if (state.board[a] && state.board[a] === state.board[b] && state.board[a] === state.board[c]) {
+                            aiWinner = true;
+                            break;
+                        }
+                    }
+
+                    if (aiWinner) {
+                        session.status = "completed";
+                        session.score = 100;
+                    } else if (state.turnCount === 9) {
+                        session.status = "completed";
+                        session.score = 50;
+                    } else {
+                        state.currentPlayer = myId; // Switch back to user
+                    }
+                }
+            }
         }
 
         session.markModified("state");

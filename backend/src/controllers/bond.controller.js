@@ -14,14 +14,33 @@ const moodLabels = {
  * If a day is missed, streak resets to 0.
  */
 const updateCoupleStreak = async (user) => {
-    if (!user.partnerId || user.coupleStatus !== "coupled") return;
-
     const now = new Date();
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 
     const yesterdayStart = new Date(todayStart);
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+    // AI Partner Logic: AI is always checked in
+    if (user.isCoupledWithAI) {
+        // Check if streak was already counted today
+        const userStreakToday = user.lastCoupleStreakDate && user.lastCoupleStreakDate >= todayStart;
+        if (userStreakToday) return;
+
+        const hadStreakYesterday = user.lastCoupleStreakDate &&
+            user.lastCoupleStreakDate >= yesterdayStart &&
+            user.lastCoupleStreakDate < todayStart;
+
+        const newStreak = hadStreakYesterday ? (user.coupleStreak || 0) + 1 : 1;
+
+        await User.updateOne({ _id: user._id }, {
+            coupleStreak: newStreak,
+            lastCoupleStreakDate: now
+        });
+        return;
+    }
+
+    if (!user.partnerId) return;
 
     // Check if partner also checked in today
     const partner = await User.findById(user.partnerId);
@@ -138,8 +157,15 @@ export const getDailyInsight = async (req, res) => {
         res.status(200).json({
             question,
             myMood: user.mood,
-            partner: user.partnerId,
+            partner: user.isCoupledWithAI ? {
+                _id: "ai-user-id",
+                fullName: user.aiPartnerName || "Aria",
+                profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                mood: "romantic", // AI is always romantic for her user!
+                lastMoodUpdate: new Date(),
+            } : user.partnerId,
             coupleStreak,
+            isCoupledWithAI: user.isCoupledWithAI,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

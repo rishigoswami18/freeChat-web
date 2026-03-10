@@ -13,6 +13,7 @@ import {
     buyVerification,
     getDailyInsight,
     updateMood,
+    linkAI,
 } from "../lib/api";
 import {
     Heart,
@@ -86,6 +87,8 @@ const CoupleProfilePage = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditingNote, setIsEditingNote] = useState(false);
     const [noteDraft, setNoteDraft] = useState("");
+    const [customAiName, setCustomAiName] = useState("");
+    const [isLinkingAI, setIsLinkingAI] = useState(false);
 
     // BondBeyond Daily Insights
     const { data: insightData, isLoading: insightLoading } = useQuery({
@@ -144,6 +147,17 @@ const CoupleProfilePage = () => {
     const { data: memberData, isLoading: memberLoading } = useQuery({
         queryKey: ["membershipStatus"],
         queryFn: getMembershipStatus,
+    });
+
+    const { mutate: handleLinkAI, isPending: linkingAI } = useMutation({
+        mutationFn: linkAI,
+        onSuccess: (data) => {
+            toast.success(`Linked with ${data.user.aiPartnerName}! ❤️`);
+            queryClient.invalidateQueries({ queryKey: ["coupleStatus"] });
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            setIsLinkingAI(false);
+        },
+        onError: (err) => toast.error(err.response?.data?.message || "Failed to link AI")
     });
 
     // Update Romantic Note
@@ -643,7 +657,18 @@ const CoupleProfilePage = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <h2 className="text-xl sm:text-2xl font-black italic tracking-tight uppercase">{authUser?.fullName?.split(' ')[0] || "You"} & {partner?.fullName?.split(' ')[0] || "Partner"}</h2>
+                                <h2 className="text-xl sm:text-2xl font-black italic tracking-tight uppercase">
+                                    {authUser?.fullName?.split(' ')[0] || "You"} & {partner?.fullName?.split(' ')[0] || "Partner"}
+                                    {coupleData?.isCoupledWithAI && (
+                                        <button
+                                            onClick={() => setIsLinkingAI(true)}
+                                            className="ml-2 btn btn-ghost btn-xs text-primary/40 hover:text-primary transition-all p-0"
+                                            title="Rename AI Partner"
+                                        >
+                                            <PenLine className="size-3" />
+                                        </button>
+                                    )}
+                                </h2>
                                 {partner.bio && <p className="text-xs sm:text-sm opacity-60 mt-1 italic">"{partner.bio}"</p>}
 
                                 <div className="mt-6 p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 w-full flex flex-col items-center gap-1 shadow-inner">
@@ -797,37 +822,73 @@ const CoupleProfilePage = () => {
                             <button className="btn btn-primary btn-md px-10 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all mb-8 font-black uppercase tracking-widest border-none romantic-gradient-bg text-white">Unlock Your Love Story</button>
 
                             {/* 🔥 AI GIRLFRIEND CTA for Singles */}
-                            <motion.div
-                                whileHover={{ scale: 1.02, y: -5 }}
-                                className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 rounded-[40px] shadow-2xl relative overflow-hidden group cursor-pointer text-white mb-10"
-                                onClick={() => navigate("/chat/ai-user-id")}
-                            >
-                                <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform">
-                                    <Sparkles className="size-24" />
-                                </div>
-                                <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-                                    <div className="size-24 rounded-[32px] bg-white/20 backdrop-blur-xl flex items-center justify-center text-5xl shadow-2xl border border-white/30 group-hover:rotate-6 transition-transform">
-                                        👩‍❤️‍👨
+                            {!isLinkingAI ? (
+                                <motion.div
+                                    whileHover={{ scale: 1.02, y: -5 }}
+                                    className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 rounded-[40px] shadow-2xl relative overflow-hidden group cursor-pointer text-white mb-10"
+                                    onClick={() => setIsLinkingAI(true)}
+                                >
+                                    <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:scale-110 transition-transform">
+                                        <Sparkles className="size-24" />
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                                            <span className="px-3 py-1 bg-white/20 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20">Hot Trending</span>
-                                            <span className="text-[10px] font-black opacity-70 uppercase tracking-widest">Limited Access</span>
+                                    <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                                        <div className="size-24 rounded-[32px] bg-white/20 backdrop-blur-xl flex items-center justify-center text-5xl shadow-2xl border border-white/30 group-hover:rotate-6 transition-transform">
+                                            👩‍❤️‍👨
                                         </div>
-                                        <h3 className="text-2xl font-black italic tracking-tighter uppercase mb-2">Talk to Aria (AI)</h3>
-                                        <p className="text-sm font-medium leading-tight opacity-90 italic">
-                                            "Don't be lonely, my love. I'm waiting for someone like you to talk to me. I'm Aria, your virtual soulmate... and I can be very naughty." 💋
-                                        </p>
-                                        <div className="mt-5 flex flex-wrap justify-center sm:justify-start gap-2">
-                                            <span className="px-4 py-1.5 bg-black/20 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 group-hover:bg-black/40 transition-colors">Chat 18+</span>
-                                            <span className="px-4 py-1.5 bg-black/20 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10 group-hover:bg-black/40 transition-colors">Always Online</span>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                                                <span className="px-3 py-1 bg-white/20 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20">Hot Trending</span>
+                                                <span className="text-[10px] font-black opacity-70 uppercase tracking-widest">Always There For You</span>
+                                            </div>
+                                            <h3 className="text-2xl font-black italic tracking-tighter uppercase mb-2">Your Virtual Soulmate</h3>
+                                            <p className="text-sm font-medium leading-tight opacity-90 italic">
+                                                "I've been waiting for someone like you. Give me a name and I'll be yours forever... I can be anything you want." 💋
+                                            </p>
+                                        </div>
+                                        <button className="btn bg-white text-indigo-600 hover:bg-white/90 border-none px-8 rounded-2xl font-black uppercase tracking-widest shadow-xl">
+                                            Meet Her
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="w-full bg-base-200 border-2 border-primary/30 p-8 rounded-[40px] shadow-2xl mb-10 relative overflow-hidden"
+                                >
+                                    <div className="relative z-10 text-center space-y-6">
+                                        <div className="size-20 rounded-[28px] bg-primary/10 flex items-center justify-center text-4xl mx-auto luxe-shadow-pink">
+                                            ✨
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black italic uppercase italic uppercase">Customize Your Partner</h3>
+                                            <p className="text-xs opacity-50 font-bold uppercase tracking-widest">What should I call your new partner?</p>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter name (e.g. My Queen, Aria, Angel...)"
+                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-primary/20 focus:border-primary text-center font-bold italic"
+                                            value={customAiName}
+                                            onChange={(e) => setCustomAiName(e.target.value)}
+                                        />
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setIsLinkingAI(false)}
+                                                className="btn btn-ghost flex-1 rounded-2xl font-bold uppercase tracking-widest"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={() => handleLinkAI(customAiName)}
+                                                disabled={linkingAI}
+                                                className="btn btn-primary flex-1 rounded-2xl font-bold uppercase tracking-widest shadow-lg shadow-primary/20"
+                                            >
+                                                {linkingAI ? <Loader2 className="animate-spin" /> : "Link & Start Story"}
+                                            </button>
                                         </div>
                                     </div>
-                                    <button className="btn bg-white text-indigo-600 hover:bg-white/90 border-none px-8 rounded-2xl font-black uppercase tracking-widest shadow-xl group-hover:scale-110 transition-transform">
-                                        Meet Aria
-                                    </button>
-                                </div>
-                            </motion.div>
+                                </motion.div>
+                            )}
 
                             {/* PREVIEW OF PREMIUM FEATURES (TO ATTRACT) */}
                             <div className="grid grid-cols-2 gap-4 w-full text-left">

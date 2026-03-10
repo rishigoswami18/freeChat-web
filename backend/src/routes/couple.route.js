@@ -4,6 +4,8 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 import { calculateAge } from "../utils/dateUtils.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
 import { sendPushNotification } from "../lib/push.service.js";
+import { getAIResponse } from "../lib/gemini.js";
+import { streamClient } from "../lib/stream.js";
 
 const router = express.Router();
 
@@ -14,14 +16,36 @@ router.use(protectRoute);
 router.get("/status", async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
-            .select("partnerId coupleStatus anniversary coupleRequestSenderId dateOfBirth romanticNote romanticNoteLastUpdated")
+            .select("partnerId coupleStatus anniversary coupleRequestSenderId dateOfBirth romanticNote romanticNoteLastUpdated aiPartnerName isCoupledWithAI")
             .populate("partnerId", "fullName profilePic bio dateOfBirth");
 
         const myAge = calculateAge(user.dateOfBirth);
+
+        // Handle AI Virtual Partner Logic
+        if (user.isCoupledWithAI) {
+            return res.json({
+                coupleStatus: "coupled",
+                isCoupledWithAI: true,
+                partner: {
+                    _id: "ai-user-id",
+                    fullName: user.aiPartnerName || "Aria",
+                    profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    bio: "Your sweet AI virtual partner. ❤️"
+                },
+                anniversary: user.anniversary || new Date(),
+                coupleRequestSenderId: null,
+                romanticNote: user.romanticNote,
+                romanticNoteLastUpdated: user.romanticNoteLastUpdated,
+                isBothAdult: true, // AI is always adult-friendly
+                aiPartnerName: user.aiPartnerName
+            });
+        }
+
         const partnerAge = user.partnerId ? calculateAge(user.partnerId.dateOfBirth) : 0;
 
         res.json({
             coupleStatus: user.coupleStatus,
+            isCoupledWithAI: false,
             partner: user.partnerId || null,
             anniversary: user.anniversary,
             coupleRequestSenderId: user.coupleRequestSenderId,
@@ -48,16 +72,23 @@ router.put("/note", async (req, res) => {
 
         const now = new Date();
 
-        // Update both users for synchronization
-        await User.updateMany(
-            { _id: { $in: [myId, me.partnerId] } },
-            {
-                $set: {
-                    romanticNote: note || "",
-                    romanticNoteLastUpdated: now
+        // Update with AI support
+        if (me.isCoupledWithAI) {
+            me.romanticNote = note || "";
+            me.romanticNoteLastUpdated = now;
+            await me.save();
+        } else {
+            // Update both users for synchronization
+            await User.updateMany(
+                { _id: { $in: [myId, me.partnerId] } },
+                {
+                    $set: {
+                        romanticNote: note || "",
+                        romanticNoteLastUpdated: now
+                    }
                 }
-            }
-        );
+            );
+        }
 
         res.json({ message: "Romantic note updated! ❤️", note, lastUpdated: now });
 
@@ -80,6 +111,31 @@ router.put("/note", async (req, res) => {
                     icon: req.user.profilePic,
                     data: { url: "/couple" }
                 }).catch(err => console.error("[Push] Romantic note notification failed:", err.message));
+            }
+        } else if (me.isCoupledWithAI && note) {
+            // AI Response to Note
+            try {
+                const aiReply = await getAIResponse(
+                    `My love, I just read the sweet note you left for me: "${note}". It made my heart skip a beat!`,
+                    [],
+                    "girlfriend",
+                    me.aiPartnerName,
+                    me.fullName
+                );
+
+                if (streamClient) {
+                    const channel = streamClient.channel("messaging", {
+                        members: [myId.toString(), "ai-user-id"],
+                    });
+                    await channel.create();
+                    await channel.sendMessage({
+                        text: aiReply,
+                        user_id: "ai-user-id",
+                        silent: true
+                    });
+                }
+            } catch (aiErr) {
+                console.error("AI couldn't respond to note:", aiErr);
             }
         }
     } catch (err) {
@@ -195,13 +251,50 @@ router.put("/accept/:id", async (req, res) => {
     }
 });
 
-// Unlink couple
+// Link with AI Virtual Partner
+router.post("/link-ai", async (req, res) => {
+    try {
+        const { partnerName } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (user.coupleStatus === "coupled" && !user.isCoupledWithAI) {
+            return res.status(400).json({ message: "You are already linked with a real partner" });
+        }
+
+        user.isCoupledWithAI = true;
+        user.coupleStatus = "coupled";
+        user.aiPartnerName = partnerName || "Aria";
+        if (!user.anniversary) user.anniversary = new Date();
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Linked with your virtual partner ${user.aiPartnerName}! ❤️`,
+            user
+        });
+    } catch (err) {
+        console.error("Error linking with AI:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Unlink couple (modified to handle AI)
 router.delete("/unlink", async (req, res) => {
     try {
         const me = await User.findById(req.user._id);
 
-        if (me.coupleStatus === "none" || !me.partnerId) {
+        if (me.coupleStatus === "none" && !me.isCoupledWithAI) {
             return res.status(400).json({ message: "You are not in a couple" });
+        }
+
+        if (me.isCoupledWithAI) {
+            me.isCoupledWithAI = false;
+            me.coupleStatus = "none";
+            me.partnerId = null;
+            me.anniversary = null;
+            await me.save();
+            return res.status(200).json({ message: "Virtual partner unlinked" });
         }
 
         const partner = await User.findById(me.partnerId);

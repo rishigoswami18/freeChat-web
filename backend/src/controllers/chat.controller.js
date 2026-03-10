@@ -85,7 +85,7 @@ export const sendMessage = async (req, res) => {
       // Ensure AI User exists in Stream
       await upsertStreamUser({
         id: "ai-user-id",
-        name: "Aria (AI)",
+        name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
         image: "https://avatar.iran.liara.run/public/girl?username=aria",
         role: "user"
       });
@@ -100,7 +100,7 @@ export const sendMessage = async (req, res) => {
           parts: [{ text: m.text }]
         }));
 
-      const aiReply = await getAIResponse(text, history);
+      const aiReply = await getAIResponse(text, history, "girlfriend", req.user.aiPartnerName, req.user.fullName);
 
       // Send reply as AI via Stream
       await channel.sendMessage({
