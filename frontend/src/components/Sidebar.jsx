@@ -109,6 +109,22 @@ const Sidebar = () => {
   });
 
   const isCoupled = coupleData?.coupleStatus === "coupled";
+  const partnerId = coupleData?.partner?._id;
+  const partnerName = coupleData?.partner?.fullName?.split(' ')[0] || "Partner";
+
+  const dynamicNavItems = [...navItems];
+  if (isCoupled) {
+    // Insert Sacred Chat after Inbox
+    const inboxIndex = dynamicNavItems.findIndex(item => item.to === "/inbox");
+    if (inboxIndex !== -1) {
+      dynamicNavItems.splice(inboxIndex + 1, 0, {
+        to: `/chat/${partnerId || 'ai-user-id'}`,
+        icon: Sparkles,
+        label: `Chat with ${partnerName}`,
+        isSacred: true
+      });
+    }
+  }
 
   return (
     <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen fixed top-0 left-0 font-outfit z-40">
@@ -119,11 +135,12 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
-        {navItems.map(({ to, icon: Icon, labelKey }) => {
+        {dynamicNavItems.map((item) => {
+          const { to, icon: Icon, labelKey, isSacred, label: customLabel } = item;
           const isActive = currentPath === to;
-          const label = t(labelKey);
+          const label = isSacred ? customLabel : t(labelKey);
           const isBond = labelKey === "bond_dashboard";
-          const useRomanticStyle = isBond && isCoupled;
+          const useRomanticStyle = (isBond || isSacred) && isCoupled;
 
           return (
             <Link
@@ -140,7 +157,7 @@ const Sidebar = () => {
                 }`}
             >
               <div className="relative">
-                {isBond && isCoupled ? (
+                {useRomanticStyle ? (
                   <Heart
                     className={`size-[18px] flex-shrink-0 ${isActive ? "text-pink-500 fill-pink-500/20 animate-pulse" : "text-pink-500 opacity-60"
                       }`}

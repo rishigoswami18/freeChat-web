@@ -497,7 +497,7 @@ const CoupleProfilePage = () => {
                             </div>
 
                             <Link
-                                to="/inbox"
+                                to={`/chat/${partner?._id || 'ai-user-id'}`}
                                 className="btn romantic-gradient-bg text-white border-none btn-lg px-8 rounded-2xl font-black uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all gap-3 group/btn"
                             >
                                 <MessageSquare className="size-5 group-hover:rotate-12 transition-transform" />

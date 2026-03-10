@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateProfile } from "../lib/api";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { updateProfile, getCoupleStatus, claimDailyReward } from "../lib/api";
 import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -24,6 +24,7 @@ import {
   ShieldAlert,
   BadgeCheck,
   Gem,
+  Sparkles,
 } from "lucide-react";
 
 import useAuthUser from "../hooks/useAuthUser";
@@ -33,7 +34,6 @@ import ThemeSelector from "./ThemeSelector";
 import CreateStoryModal from "./CreateStoryModal";
 import Logo from "./Logo";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
-import { claimDailyReward } from "../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MobileDrawer = () => {
@@ -59,6 +59,17 @@ const MobileDrawer = () => {
     }
   });
 
+  const { data: coupleData } = useQuery({
+    queryKey: ["coupleStatus"],
+    queryFn: getCoupleStatus,
+    enabled: !!authUser,
+    staleTime: 1000 * 60 * 10
+  });
+
+  const isCoupled = coupleData?.coupleStatus === "coupled";
+  const partnerId = coupleData?.partner?._id;
+  const partnerName = coupleData?.partner?.fullName?.split(' ')[0] || "Partner";
+
   const toggleDrawer = () => setIsOpen(!isOpen);
 
   const navItems = [
@@ -75,6 +86,19 @@ const MobileDrawer = () => {
     { to: "/membership", icon: Crown, label: "Premium" },
     { to: "/profile", icon: User, label: "Profile" },
   ];
+
+  const dynamicNavItems = [...navItems];
+  if (isCoupled) {
+    const inboxIndex = dynamicNavItems.findIndex(item => item.to === "/inbox");
+    if (inboxIndex !== -1) {
+      dynamicNavItems.splice(inboxIndex + 1, 0, {
+        to: `/chat/${partnerId || 'ai-user-id'}`,
+        icon: Sparkles,
+        label: `Chat with ${partnerName}`,
+        isSacred: true
+      });
+    }
+  }
 
   const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[11]];
 
@@ -189,18 +213,22 @@ const MobileDrawer = () => {
         })()}
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto no-scrollbar overscroll-contain">
-          {navItems.map(({ to, icon: Icon, label }) => (
+          {dynamicNavItems.map(({ to, icon: Icon, label, isSacred }) => (
             <Link
               key={to}
               to={to}
               onClick={toggleDrawer}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] ${location.pathname === to
-                ? "bg-primary text-primary-content shadow-md shadow-primary/20"
-                : "hover:bg-base-200 active:bg-base-300"
+                ? (isSacred || (to === "/couple" && isCoupled)) ? "bg-pink-500 text-white shadow-md shadow-pink-500/20" : "bg-primary text-primary-content shadow-md shadow-primary/20"
+                : (isSacred || (to === "/couple" && isCoupled)) ? "text-pink-500 hover:bg-pink-500/5" : "hover:bg-base-200 active:bg-base-300"
                 }`}
             >
               <div className="relative">
-                <Icon className="size-5" />
+                {((to === "/couple" || isSacred) && isCoupled) ? (
+                  <Heart className={`size-5 ${location.pathname === to ? "fill-white/20" : "fill-pink-500/10"}`} />
+                ) : (
+                  <Icon className="size-5" />
+                )}
                 {label === "Inbox" && unreadMessages > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 bg-white text-primary text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary">
                     {unreadMessages > 9 ? "9+" : unreadMessages}
