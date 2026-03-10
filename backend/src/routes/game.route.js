@@ -676,7 +676,8 @@ router.post("/ttt/action/:id", async (req, res) => {
             session.score = 50; // Draw
         } else {
             // Switch turn
-            const nextPlayer = session.participants.find(p => p.toString() !== myId).toString();
+            const nextPlayerId = session.participants.find(p => p.toString() !== myId);
+            const nextPlayer = nextPlayerId.toString();
             state.currentPlayer = nextPlayer;
 
             // --- AI Turn Logic ---
