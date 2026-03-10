@@ -322,11 +322,24 @@ router.get("/session/:id", checkMembership, async (req, res) => {
             return res.status(404).json({ message: "Session not found" });
         }
 
-        if (!session.participants.some(p => p._id.toString() === req.user._id.toString())) {
+        const sessionObj = session.toObject();
+        sessionObj.participants = sessionObj.participants.map(p => {
+            if (!p || p === "ai-user-id") {
+                return {
+                    _id: "ai-user-id",
+                    fullName: req.user.aiPartnerName || "Aria",
+                    profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    bio: "Your sweet AI virtual partner. ❤️"
+                };
+            }
+            return p;
+        });
+
+        if (!sessionObj.participants.some(p => p?._id?.toString() === req.user._id.toString())) {
             return res.status(403).json({ message: "Access denied" });
         }
 
-        res.json(session);
+        res.json(sessionObj);
     } catch (err) {
         console.error("Error fetching session:", err);
         res.status(500).json({ message: "Internal Server Error" });
@@ -341,7 +354,23 @@ router.get("/active", checkMembership, async (req, res) => {
             status: "pending"
         }).populate("participants", "fullName profilePic");
 
-        res.json(sessions);
+        const mappedSessions = sessions.map(s => {
+            const sObj = s.toObject();
+            sObj.participants = sObj.participants.map(p => {
+                if (!p || p === "ai-user-id") {
+                    return {
+                        _id: "ai-user-id",
+                        fullName: req.user.aiPartnerName || "Aria",
+                        profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                        bio: "Your sweet AI virtual partner. ❤️"
+                    };
+                }
+                return p;
+            });
+            return sObj;
+        });
+
+        res.json(mappedSessions);
     } catch (err) {
         console.error("Error fetching sessions:", err);
         res.status(500).json({ message: "Internal Server Error" });
@@ -358,7 +387,23 @@ router.get("/history", checkMembership, async (req, res) => {
             .sort({ updatedAt: -1 })
             .limit(10);
 
-        res.json(sessions);
+        const mappedHistory = sessions.map(s => {
+            const sObj = s.toObject();
+            sObj.participants = sObj.participants.map(p => {
+                if (!p || p === "ai-user-id") {
+                    return {
+                        _id: "ai-user-id",
+                        fullName: req.user.aiPartnerName || "Aria",
+                        profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                        bio: "Your sweet AI virtual partner. ❤️"
+                    };
+                }
+                return p;
+            });
+            return sObj;
+        });
+
+        res.json(mappedHistory);
     } catch (err) {
         console.error("Error fetching game history:", err);
         res.status(500).json({ message: "Internal Server Error" });

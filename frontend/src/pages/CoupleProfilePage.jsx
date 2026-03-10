@@ -37,7 +37,7 @@ import {
     Gem,
     TrendingUp,
     Shield,
-    Infinity,
+    Infinity as InfinityIcon,
     Compass,
     Rocket,
     CheckCircle2,
@@ -689,7 +689,7 @@ const CoupleProfilePage = () => {
                                     className="romantic-card-luxe rounded-[40px] p-8 border-2 border-white/5 relative overflow-hidden group shadow-2xl"
                                 >
                                     <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-all">
-                                        <Infinity className="size-24 text-pink-500" />
+                                        <InfinityIcon className="size-24 text-pink-500" />
                                     </div>
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="size-10 bg-pink-500/20 rounded-xl flex items-center justify-center text-pink-500 shadow-lg shadow-pink-500/10">

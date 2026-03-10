@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const gameSessionSchema = new mongoose.Schema({
     participants: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.Mixed,
         ref: "User",
         required: true
     }],
