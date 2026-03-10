@@ -252,7 +252,13 @@ const EmotionMessage = memo((props) => {
   }
 
   return (
-    <div className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`} style={{ contain: 'layout style' }}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+      className={`stream-message-wrapper relative group ${isFirstInGroup ? "mt-4" : "mt-0.5"}`}
+      style={{ contain: 'layout style' }}
+    >
       {isSnap ? (
         <div className={`flex flex-col ${isMyMessage ? "items-end" : "items-start"} mb-2 ml-12 mr-12`}>
           {isViewed ? (
@@ -372,7 +378,7 @@ const EmotionMessage = memo((props) => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 });
 

@@ -783,6 +783,25 @@ body.is-chat-active {
   border-top-right-radius: 4px !important;
 }
 
+/* Multiline Support & Polish */
+.str-chat__message-simple-text-inner {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  line-height: 1.5 !important;
+  font-size: 15px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.str-chat__message-simple-text-inner p {
+  margin: 0 !important;
+  white-space: pre-wrap !important;
+}
+
+/* Premium Glow for AI messages (others) if they are linked */
+.str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
 /* Bubble Tails (Sharper, more native) */
 .bubble-tail-others::before {
   content: '';
@@ -792,7 +811,7 @@ body.is-chat-active {
   width: 0;
   height: 0;
   border-right: 10px solid oklch(var(--b2));
-  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
   z-index: 1;
 }
 
