@@ -200,6 +200,12 @@ const QUIZ_TEMPLATES = {
                 options: ["Something romantic", "Something high-energy", "Something classic", "Something quirky"],
             }
         ]
+    },
+    ludo: {
+        title: "Ludo Couple Edition 🎲",
+        description: "Classic Ludo for couples. Race your pieces home and have fun!",
+        isBoardGame: true,
+        questions: []
     }
 };
 
@@ -255,12 +261,28 @@ router.post("/start", checkMembership, async (req, res) => {
             return res.json({ success: true, session: existingSession });
         }
 
+        let state = {};
+        if (gameType === "ludo") {
+            state = {
+                currentPlayer: req.user._id.toString(),
+                dice: 1,
+                rolled: false,
+                pieces: {
+                    [req.user._id.toString()]: [-1, -1, -1, -1], // -1 means in base
+                    [partnerId.toString()]: [-1, -1, -1, -1]
+                },
+                lastRoll: 0,
+                turnCount: 0
+            };
+        }
+
         const newSession = await GameSession.create({
             participants: [req.user._id, partnerId],
             gameType,
             questions: template.questions,
             answers: new Map(),
-            status: "pending"
+            status: "pending",
+            state
         });
 
         res.status(201).json({ success: true, session: newSession });
@@ -380,6 +402,86 @@ router.post("/submit", checkMembership, async (req, res) => {
         res.json({ success: true, session });
     } catch (err) {
         console.error("Error submitting answers:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+// Ludo Game Actions
+router.post("/ludo/action/:id", async (req, res) => {
+    try {
+        const { action, pieceIndex } = req.body; // action: 'roll' or 'move'
+        const session = await GameSession.findById(req.params.id);
+
+        if (!session || session.gameType !== "ludo") {
+            return res.status(404).json({ message: "Ludo session not found" });
+        }
+
+        const myId = req.user._id.toString();
+        const state = session.state;
+
+        if (state.currentPlayer !== myId) {
+            return res.status(403).json({ message: "Not your turn!" });
+        }
+
+        if (action === "roll") {
+            if (state.rolled) return res.status(400).json({ message: "Already rolled" });
+
+            const roll = Math.floor(Math.random() * 6) + 1;
+            state.dice = roll;
+            state.rolled = true;
+
+            // Check if any moves are possible
+            const myPieces = state.pieces[myId];
+            const canMove = myPieces.some(pos => {
+                if (pos === -1) return roll === 6; // Need 6 to get out
+                if (pos >= 57) return false; // Already finished
+                if (pos + roll > 57) return false; // Must be exact
+                return true;
+            });
+
+            if (!canMove) {
+                // Switch turn if no moves possible
+                state.rolled = false;
+                state.currentPlayer = session.participants.find(p => p.toString() !== myId).toString();
+                state.turnCount++;
+            }
+        } else if (action === "move") {
+            if (!state.rolled) return res.status(400).json({ message: "Roll first" });
+
+            const myPieces = state.pieces[myId];
+            let pos = myPieces[pieceIndex];
+            const roll = state.dice;
+
+            if (pos === -1) {
+                if (roll !== 6) return res.status(400).json({ message: "Need a 6 to start" });
+                myPieces[pieceIndex] = 0; // Start position
+            } else {
+                if (pos + roll > 57) return res.status(400).json({ message: "Can't move that far" });
+                myPieces[pieceIndex] += roll;
+            }
+
+            // Simple kick logic (if not in safe zone/base/finish)
+            // Let's implement full Ludo logic later if needed, starting with basic racing.
+
+            // Winning check
+            if (myPieces.every(p => p === 57)) {
+                session.status = "completed";
+                session.score = 100;
+            }
+
+            // Turn management
+            if (roll !== 6) {
+                state.currentPlayer = session.participants.find(p => p.toString() !== myId).toString();
+            }
+            state.rolled = false;
+            state.turnCount++;
+        }
+
+        session.markModified("state");
+        await session.save();
+        res.json({ success: true, session });
+    } catch (err) {
+        console.error("Ludo action error:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 });

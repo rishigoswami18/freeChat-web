@@ -327,6 +327,11 @@ export const submitGameAnswers = async (sessionId, quizAnswers) => {
   return response.data;
 };
 
+export const ludoAction = async (sessionId, action, pieceIndex) => {
+  const response = await axiosInstance.post(`/games/ludo/action/${sessionId}`, { action, pieceIndex });
+  return response.data;
+};
+
 export const updateProfile = async (profileData) => {
   const response = await axiosInstance.put("/users/profile", profileData);
   return response.data;

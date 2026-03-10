@@ -15,7 +15,8 @@ const gameSessionSchema = new mongoose.Schema({
             "fantasy_quest_mature",
             "never_have_i_ever_naughty",
             "spicy_truth_or_dare",
-            "heart_destiny"
+            "heart_destiny",
+            "ludo"
         ],
         default: "compatibility_quiz"
     },
@@ -24,6 +25,10 @@ const gameSessionSchema = new mongoose.Schema({
         options: [String],
         correctAnswer: String // For compatibility quiz, this might be "what User A said about Topic X"
     }],
+    state: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
     answers: {
         type: Map,
         of: [{

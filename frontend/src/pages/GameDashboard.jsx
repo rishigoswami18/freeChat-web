@@ -68,7 +68,9 @@ const GameDashboard = () => {
                                             <Gamepad2 className="size-6 text-primary" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold">{session.gameType === "compatibility_quiz" ? "Compatibility Quiz" : "Role Play Game"}</h3>
+                                            <h3 className="font-bold">
+                                                {session.gameType.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                            </h3>
                                             <p className="text-xs opacity-60">Session started {new Date(session.createdAt).toLocaleDateString()}</p>
                                         </div>
                                     </div>

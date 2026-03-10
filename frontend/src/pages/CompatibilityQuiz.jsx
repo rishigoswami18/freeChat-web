@@ -6,6 +6,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import { Loader2, ArrowLeft, Send, CheckCircle2, Trophy, Users, Heart, Gamepad2 } from "lucide-react";
 import toast from "react-hot-toast";
 import LoveDestinyGame from "./LoveDestinyGame";
+import LudoGame from "./LudoGame";
 
 const CompatibilityQuiz = () => {
     const { sessionId } = useParams();
@@ -63,6 +64,10 @@ const CompatibilityQuiz = () => {
     // DISPATCH TO NEW 3D GAME IF TYPE MATCHES
     if (session?.gameType === "heart_destiny") {
         return <LoveDestinyGame session={session} onAnswer={handleAnswer} />;
+    }
+
+    if (session?.gameType === "ludo") {
+        return <LudoGame session={session} />;
     }
 
     const myId = authUser?._id?.toString();
