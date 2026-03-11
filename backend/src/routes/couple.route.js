@@ -21,8 +21,8 @@ router.get("/status", async (req, res) => {
 
         const myAge = calculateAge(user.dateOfBirth);
 
-        // Handle AI Virtual Partner Logic
-        if (user.isCoupledWithAI) {
+        // Handle AI Virtual Partner Logic (Priority: Human Partner > AI Partner)
+        if (user.isCoupledWithAI && !user.partnerId && user.coupleStatus !== "pending") {
             return res.json({
                 coupleStatus: "coupled",
                 isCoupledWithAI: true,
@@ -170,11 +170,12 @@ router.post("/request/:id", async (req, res) => {
             return res.status(400).json({ message: "The partner must be at least 14 years old" });
         }
 
-        if (me.coupleStatus === "coupled") {
+        // Allow sending if NOT coupled with a human (AI doesn't count as a blocker)
+        if (me.coupleStatus === "coupled" && !me.isCoupledWithAI) {
             return res.status(400).json({ message: "You are already in a couple" });
         }
 
-        if (partner.coupleStatus === "coupled") {
+        if (partner.coupleStatus === "coupled" && !partner.isCoupledWithAI) {
             return res.status(400).json({ message: "This user is already in a couple" });
         }
 
@@ -288,7 +289,7 @@ router.delete("/unlink", async (req, res) => {
             return res.status(400).json({ message: "You are not in a couple" });
         }
 
-        if (me.isCoupledWithAI) {
+        if (me.isCoupledWithAI && !me.partnerId && me.coupleStatus !== "pending") {
             me.isCoupledWithAI = false;
             me.coupleStatus = "none";
             me.partnerId = null;

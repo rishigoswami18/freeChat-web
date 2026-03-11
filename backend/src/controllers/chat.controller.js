@@ -30,6 +30,20 @@ export async function getStreamToken(req, res) {
       }
     }
 
+    // Ensure AI Best Friend exists in Stream if friended
+    if (req.user.isFriendedWithAI && streamClient) {
+      try {
+        await upsertStreamUser({
+          id: "ai-friend-id",
+          name: `${req.user.aiFriendName || "Golu"} (Best Friend)`,
+          image: "https://avatar.iran.liara.run/public/boy?username=golu",
+          role: "user"
+        });
+      } catch (upsertErr) {
+        console.error("Failed to ensure AI friend in Stream:", upsertErr);
+      }
+    }
+
     if (!token) {
       console.error("❌ Failed to generate Stream token for user:", userId);
       return res.status(500).json({ message: "Stream token generation failed" });
@@ -124,6 +138,41 @@ export const sendMessage = async (req, res) => {
         text: aiReply,
         user_id: "ai-user-id",
         silent: true // Don't trigger standard notifications
+      });
+
+      return res.status(200).json({ success: true, aiReply });
+    }
+
+    // --- Virtual Best Friend AI Logic ---
+    if (recipientId === "ai-friend-id" && streamClient) {
+      console.log(`🤖 AI Friend Chat Request: ${req.user.fullName} -> AI Friend`);
+
+      // Ensure AI Friend User exists in Stream
+      await upsertStreamUser({
+        id: "ai-friend-id",
+        name: `${req.user.aiFriendName || "Golu"} (Best Friend)`,
+        image: "https://avatar.iran.liara.run/public/boy?username=golu",
+        role: "user"
+      });
+
+      // Fetch history
+      const channel = streamClient.channel("messaging", channelId);
+      const historyRes = await channel.query({ messages: { limit: 15 } });
+      const history = (historyRes.messages || [])
+        .map(m => ({
+          role: m.user.id === "ai-friend-id" ? "model" : "user",
+          parts: [{ text: m.text }]
+        }));
+
+      // Generate AI response
+      let aiReply = await getAIResponse(text, history, "bestfriend", req.user.aiFriendName, req.user.fullName);
+
+      aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
+
+      await channel.sendMessage({
+        text: aiReply,
+        user_id: "ai-friend-id",
+        silent: true 
       });
 
       return res.status(200).json({ success: true, aiReply });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck, Plus } from "lucide-react";
+import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck, Plus, Users } from "lucide-react";
+import CreateGroupModal from "../components/CreateGroupModal";
 import toast from "react-hot-toast";
 import { useChatClient } from "../components/ChatProvider";
 import useAuthUser from "../hooks/useAuthUser";
@@ -23,11 +24,13 @@ const timeAgo = (iso) => {
 
 const InboxPage = () => {
     const chatClient = useChatClient();
+    const navigate = useNavigate();
     const { authUser } = useAuthUser();
     const [conversations, setConversations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [viewingDP, setViewingDP] = useState(null);
+    const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
     useEffect(() => {
         if (!chatClient?.userID || !authUser) return;
@@ -168,13 +171,22 @@ const InboxPage = () => {
                         <MessageSquare className="size-6 text-primary" />
                         Messages
                     </h1>
-                    <button
-                        onClick={() => navigate("/search")}
-                        className="btn btn-primary btn-sm btn-circle shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-90"
-                        title="New Message"
-                    >
-                        <Plus className="size-5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setIsGroupModalOpen(true)}
+                            className="btn btn-ghost btn-sm btn-circle hover:bg-primary/10 text-primary transition-all"
+                            title="Create Group"
+                        >
+                            <Users className="size-5" />
+                        </button>
+                        <button
+                            onClick={() => navigate("/search")}
+                            className="btn btn-primary btn-sm btn-circle shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-90"
+                            title="New Message"
+                        >
+                            <Plus className="size-5" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Search Bar */}
@@ -277,6 +289,11 @@ const InboxPage = () => {
                     <AdSense slot="0987654321" format="horizontal" responsive="true" />
                 </div>
             </div>
+            {/* Group Modal */}
+            <CreateGroupModal
+                isOpen={isGroupModalOpen}
+                onClose={() => setIsGroupModalOpen(false)}
+            />
         </div>
     );
 };

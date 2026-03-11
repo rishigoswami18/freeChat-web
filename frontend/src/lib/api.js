@@ -517,3 +517,9 @@ export const linkAI = async (partnerName) => {
   const res = await axiosInstance.post("/couple/link-ai", { partnerName });
   return res.data;
 };
+
+// Link with AI Best Friend
+export const linkFriendAI = async (friendName) => {
+  const res = await axiosInstance.post("/users/link-friend-ai", { friendName });
+  return res.data;
+};

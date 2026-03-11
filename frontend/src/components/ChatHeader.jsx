@@ -84,10 +84,20 @@ const ChatHeader = memo(() => {
             // AI Partner Fallback
             if (otherMember?.user?.id === "ai-user-id" || channel.id.toLowerCase().includes("ai-user-id")) {
                 return {
-                    name: authUser?.aiPartnerName || otherMember?.user?.name || "Golu",
+                    name: authUser?.aiPartnerName || otherMember?.user?.name || "Aria",
                     image: "https://avatar.iran.liara.run/public/girl?username=aria",
                     id: "ai-user-id",
-                    user: { ...otherMember?.user, online: true, name: authUser?.aiPartnerName || "Golu" },
+                    user: { ...otherMember?.user, online: true, name: authUser?.aiPartnerName || "Aria" },
+                };
+            }
+
+            // AI Best Friend Fallback
+            if (otherMember?.user?.id === "ai-friend-id" || channel.id.toLowerCase().includes("ai-friend-id")) {
+                return {
+                    name: authUser?.aiFriendName || otherMember?.user?.name || "Golu",
+                    image: "https://avatar.iran.liara.run/public/boy?username=golu",
+                    id: "ai-friend-id",
+                    user: { ...otherMember?.user, online: true, name: authUser?.aiFriendName || "Golu" },
                 };
             }
 

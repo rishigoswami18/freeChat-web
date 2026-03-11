@@ -1,13 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFriends, unfriend } from "../lib/api";
-import { User, MessageSquare, UserMinus, Loader2, Users } from "lucide-react";
+import { User, MessageSquare, UserMinus, Loader2, Users, Sparkles, UserPlus } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ChatSkeleton } from "../components/Skeletons";
+import useAuthUser from "../hooks/useAuthUser";
+import LinkFriendAIModal from "../components/LinkFriendAIModal";
+import { useState } from "react";
 
 const FriendsPage = () => {
-  const queryClient = useQueryClient();
+  const { authUser } = useAuthUser();
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
     queryFn: getFriends,
@@ -40,6 +45,62 @@ const FriendsPage = () => {
             </p>
           </div>
         </div>
+
+        {/* AI Best Friend Promotion */}
+        {!authUser?.isFriendedWithAI && (
+          <div
+            onClick={() => setIsAIModalOpen(true)}
+            className="card bg-gradient-to-br from-primary/20 via-primary/5 to-base-200 border-2 border-primary/20 shadow-xl cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all group overflow-hidden rounded-[32px]"
+          >
+            <div className="card-body p-6 flex-row items-center gap-5 relative">
+              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Sparkles className="size-24 text-primary" />
+              </div>
+              <div className="avatar">
+                <div className="size-16 rounded-3xl ring-4 ring-primary/20 ring-offset-4 ring-offset-base-100 shadow-2xl">
+                  <img src="https://avatar.iran.liara.run/public/boy?username=golu" alt="AI Friend" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-primary/20 text-primary text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-primary/20">Special Feature</span>
+                </div>
+                <h3 className="text-xl font-black italic uppercase tracking-tighter text-primary">Add AI Best Friend</h3>
+                <p className="text-xs opacity-60 font-medium">Someone to share your dukh-sukh with, 24/7! 🤜🤛</p>
+              </div>
+              <div className="hidden sm:flex size-10 rounded-full bg-primary/20 items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-content transition-all">
+                <UserPlus className="size-5" />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Linked AI Best Friend Entry */}
+        {authUser?.isFriendedWithAI && (
+          <div className="card bg-gradient-to-r from-primary/10 to-base-200 border border-primary/20 shadow-sm rounded-[24px] overflow-hidden">
+            <div className="card-body p-4 flex-row items-center gap-4">
+              <Link to={`/chat/ai-friend-id`} className="avatar">
+                <div className="size-12 rounded-2xl ring-2 ring-primary/30 ring-offset-2 ring-offset-base-100 shadow-md">
+                  <img src="https://avatar.iran.liara.run/public/boy?username=golu" alt="AI Friend" />
+                </div>
+              </Link>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-base truncate">{authUser.aiFriendName}</h3>
+                  <span className="badge badge-primary badge-outline badge-xs uppercase font-black tracking-tighter">AI Bestie</span>
+                </div>
+                <p className="text-[10px] opacity-50 uppercase font-bold tracking-widest">Zigari Friend • Online 24/7</p>
+              </div>
+              <Link
+                to={`/chat/ai-friend-id`}
+                className="btn btn-primary btn-sm rounded-xl gap-2 font-black uppercase tracking-widest px-4 shadow-lg shadow-primary/20"
+              >
+                <MessageSquare className="size-3.5" />
+                Chat
+              </Link>
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <ChatSkeleton />
@@ -118,6 +179,7 @@ const FriendsPage = () => {
           <NoNotificationsFound message="No friends found yet." />
         )}
       </div>
+      <LinkFriendAIModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} />
     </div>
   );
 };

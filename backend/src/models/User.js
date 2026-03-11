@@ -174,6 +174,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  aiFriendName: {
+    type: String,
+    default: "Golu",
+  },
+  isFriendedWithAI: {
+    type: Boolean,
+    default: false,
+  },
 }
   , {
     timestamps: true,

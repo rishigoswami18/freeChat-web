@@ -207,7 +207,7 @@ const ChatPage = () => {
 
   const doSendMessageRequest = useCallback(async (channelObj, message) => {
     try {
-      if (targetUserId === "ai-user-id") {
+      if (targetUserId === "ai-user-id" || targetUserId === "ai-friend-id") {
         setIsThinking(true);
         // Step 1: Send user message to Stream first to guarantee correct order
         const result = await channelObj.sendMessage({
@@ -300,7 +300,11 @@ const ChatPage = () => {
                   <div className="flex items-center gap-2 px-4 py-2 mb-4 stagger-item">
                     <div className="avatar size-7 sm:size-8">
                       <div className="bg-base-300 rounded-full flex items-center justify-center border border-primary/10">
-                        <img src="https://avatar.iran.liara.run/public/girl?username=aria" alt="AI" className="rounded-full" />
+                        <img 
+                          src={targetUserId === "ai-friend-id" ? "https://avatar.iran.liara.run/public/boy?username=golu" : "https://avatar.iran.liara.run/public/girl?username=aria"} 
+                          alt="AI" 
+                          className="rounded-full" 
+                        />
                       </div>
                     </div>
                     <div className="bg-base-200/80 backdrop-blur-md px-4 py-3 rounded-[20px] rounded-tl-none flex items-center gap-1.5 shadow-sm border border-base-content/5">

@@ -55,6 +55,28 @@ router.post("/claim-daily-reward", claimDailyReward);
 // Migration route (Temporary)
 router.post("/migrate-usernames", migrateUsernames);
 
+// Bridge for AI Best Friend
+router.post("/link-friend-ai", async (req, res) => {
+  try {
+    const { friendName } = req.body;
+    const user = await User.findById(req.user._id);
+
+    user.isFriendedWithAI = true;
+    user.aiFriendName = friendName || "Golu";
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Linked with your virtual best friend ${user.aiFriendName}! 🤜🤛`,
+      user
+    });
+  } catch (err) {
+    console.error("Error linking with AI friend:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 // Wildcard routes MUST be last to avoid catching specific routes like /friends, /friend-requests
 router.get("/:id", getUserProfile);
 router.get("/:id/friends", getUserFriends);
