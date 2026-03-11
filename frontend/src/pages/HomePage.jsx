@@ -89,11 +89,6 @@ const HomePage = () => {
           </div>
         )}
 
-        {/* Sponsored content for income generation (Hidden for Premium) */}
-        <section className="max-w-4xl mx-auto">
-          <div className="text-[10px] font-bold opacity-30 text-center uppercase tracking-widest mb-2">{t('sponsored')}</div>
-          <AdSense slot="5614946399" />
-        </section>
 
         <section>
           <div className="mb-6 sm:mb-8">
