@@ -116,9 +116,9 @@ const features = [
     },
     {
         icon: Heart,
-        title: "Virtual Soulmate",
+        title: "AI Companion",
         description:
-            "Experience companionship like never before with Aria. Your proactive AI soulmate who sends sweet notes and keeps the spark alive.",
+            "Experience a new level of productivity and companionship with Aria. Your proactive AI assistant who helps you stay organized and keeps your day bright.",
         gradient: "from-rose-500/20 to-orange-500/20",
         iconColor: "text-rose-400",
     },
@@ -559,7 +559,35 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* ===== CTA SECTION ===== */}
+            {/* ===== PRICING TRANSPARENCY (FOR AUDIT) ===== */}
+            <section className="py-20 bg-base-100">
+                <div className="container mx-auto px-4 text-center">
+                    <motion.div
+                        className="max-w-xl mx-auto"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <h2 className="text-3xl font-bold mb-4">Simple & Fair Pricing</h2>
+                        <p className="opacity-60 mb-12">BondBeyond is free to use, with optional premium enhancements.</p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-6 rounded-3xl bg-base-200 border border-base-content/5">
+                                <h3 className="font-bold text-lg mb-2">Free Plan</h3>
+                                <p className="text-sm opacity-60">Unlimited messages, calls, and basic AI interactions.</p>
+                                <div className="text-2xl font-black mt-4">$0</div>
+                            </div>
+                            <div className="p-6 rounded-3xl bg-primary/10 border border-primary/20">
+                                <h3 className="font-bold text-lg mb-2 text-primary">Premium</h3>
+                                <p className="text-sm opacity-60">Verified badge, priority support, and enhanced AI memory.</p>
+                                <div className="text-2xl font-black mt-4">$4.99<span className="text-xs opacity-50 font-normal">/month</span></div>
+                            </div>
+                        </div>
+                        <p className="text-[10px] mt-8 opacity-40">All payments are secure and protected by international standards. 15-day refund guarantee applies.</p>
+                    </motion.div>
+                </div>
+            </section>
             <section className="py-20 sm:py-28 relative overflow-hidden">
                 <div className="absolute inset-0 animated-gradient-bg" />
                 <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />

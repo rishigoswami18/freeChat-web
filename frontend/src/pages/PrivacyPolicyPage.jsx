@@ -8,9 +8,9 @@ const PrivacyPolicyPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">1. Introduction</h2>
                     <p className="leading-relaxed">
-                        Welcome to <strong>freeChat</strong> (freechatweb.in). We are committed to protecting your personal information and your right to privacy.
+                        Welcome to <strong>BondBeyond</strong> (freechatweb.in). We are committed to protecting your personal information and your right to privacy.
                         If you have any questions or concerns about our policy, or our practices with regards to your personal information, please contact us at
-                        <span className="text-primary italic px-1 underline underline-offset-4 decoration-primary/40 font-medium">freechatweb00@gmail.com</span>.
+                        <span className="text-primary italic px-1 underline underline-offset-4 decoration-primary/40 font-medium">goswamirishi83@gmail.com</span>.
                     </p>
                 </section>
 
@@ -22,7 +22,7 @@ const PrivacyPolicyPage = () => {
                             <li><strong>Personal Information:</strong> Name, Email Address, Gender, Date of Birth.</li>
                             <li><strong>Content Provided:</strong> Chat messages, posts, reels, and stories.</li>
                             <li><strong>Credentials:</strong> Passwords and similar security info.</li>
-                            <li><strong>Payment Data:</strong> Payment details via Razorpay (not stored on our servers).</li>
+                            <li><strong>Payment Data:</strong> Payment details via our secure third-party payment gateways (not stored on our servers).</li>
                         </ul>
                     </div>
                 </section>
@@ -62,7 +62,7 @@ const PrivacyPolicyPage = () => {
                     <p className="bg-base-200 p-6 rounded-2xl border border-base-300">
                         If you have questions about this policy, you may email us at:
                         <br />
-                        <span className="font-bold text-lg text-primary">freechatweb00@gmail.com</span>
+                        <span className="font-bold text-lg text-primary">goswamirishi83@gmail.com</span>
                     </p>
                 </section>
             </div>

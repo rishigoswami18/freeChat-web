@@ -43,7 +43,7 @@ const LoginPage = () => {
                 <div>
                   <h2 className="text-2xl font-bold tracking-tight">Welcome Back</h2>
                   <p className="text-sm opacity-60 mt-1">
-                    Sign in to continue your journey on freeChat
+                    Sign in to continue your journey on BondBeyond
                   </p>
                 </div>
 
@@ -138,7 +138,7 @@ const LoginPage = () => {
             <div className="relative aspect-square max-w-sm mx-auto">
               <img
                 src="/Video call-bro.png"
-                alt="freeChat connection illustration"
+                alt="BondBeyond connection illustration"
                 className="w-full h-full drop-shadow-lg"
               />
             </div>

@@ -138,7 +138,7 @@ const GemShopPage = () => {
                 key,
                 amount: order.amount,
                 currency: order.currency,
-                name: "freeChat Gems",
+                name: "BondBeyond Gems",
                 description: `${pack.amount} Gems + ${pack.bonus} Bonus`,
                 order_id: order.id,
                 handler: async (response) => {

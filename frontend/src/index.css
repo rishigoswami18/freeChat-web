@@ -560,9 +560,9 @@ body.is-chat-active {
 .str-chat__message-input input,
 .str-chat__message-input textarea,
 .str-chat__input-flat-textarea {
-  color: #ffffff !important;
+  color: oklch(var(--bc)) !important;
   background: transparent !important;
-  -webkit-text-fill-color: #ffffff !important;
+  -webkit-text-fill-color: oklch(var(--bc)) !important;
   font-family: 'Inter', sans-serif !important;
   font-size: 15px !important;
   min-height: 44px !important;
@@ -585,7 +585,7 @@ body.is-chat-active {
 
 .str-chat__message-input-textarea::placeholder,
 .str-chat__message-input textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4) !important;
+  color: oklch(var(--bc) / 0.4) !important;
   font-size: 14px !important;
 }
 

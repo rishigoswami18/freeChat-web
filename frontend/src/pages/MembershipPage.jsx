@@ -64,7 +64,7 @@ const MembershipPage = () => {
                 key,
                 amount: order.amount,
                 currency: order.currency,
-                name: "freeChat Premium",
+                name: "BondBeyond Premium",
                 description: "Monthly Premium Membership — ₹49/month",
                 order_id: order.id,
                 handler: async (response) => {
@@ -136,7 +136,7 @@ const MembershipPage = () => {
                     <Crown className="size-4 text-amber-500" />
                     <span className="text-sm font-semibold text-amber-400">Premium</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2">freeChat Premium</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">BondBeyond Premium</h1>
                 <p className="text-sm opacity-60">Unlock couple profiles and exclusive features</p>
             </div>
 
@@ -149,7 +149,7 @@ const MembershipPage = () => {
                         <p className="text-xs opacity-70">
                             All premium features are free until{" "}
                             {getFreeTrialEnd().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}.
-                            Enjoy everything freeChat has to offer!
+                            Enjoy everything BondBeyond has to offer!
                         </p>
                     </div>
                 </div>

@@ -8,7 +8,7 @@ const TermsPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">1. Agreement to Terms</h2>
                     <p className="leading-relaxed">
-                        By accessing or using <strong>freeChat</strong>, you agree to be bound by these Terms of Service. If you disagree with any part of the terms,
+                        By accessing or using <strong>BondBeyond</strong>, you agree to be bound by these Terms of Service. If you disagree with any part of the terms,
                         you may not access the service. These terms apply to all visitors, users, and others who access the service.
                     </p>
                 </section>
@@ -38,8 +38,8 @@ const TermsPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">4. Intellectual Property</h2>
                     <p className="leading-relaxed">
-                        The Service and its original content, features, and functionality are and will remain the exclusive property of freeChat and its licensors.
-                        Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of freeChat.
+                        The Service and its original content, features, and functionality are and will remain the exclusive property of BondBeyond and its licensors.
+                        Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of BondBeyond.
                     </p>
                 </section>
 
@@ -62,7 +62,7 @@ const TermsPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">7. Contact Us</h2>
                     <p className="leading-relaxed">
-                        If you have any questions about these Terms, please contact us at <span className="text-primary font-bold italic">freechatweb00@gmail.com</span>.
+                        If you have any questions about these Terms, please contact us at <span className="text-primary font-bold italic">goswamirishi83@gmail.com</span>.
                     </p>
                 </section>
             </div>

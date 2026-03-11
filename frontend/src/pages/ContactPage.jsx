@@ -40,7 +40,7 @@ const ContactPage = () => {
                         Contact Us
                     </h1>
                     <p className="mt-4 text-xl text-base-content/60">
-                        Have questions about freeChat Premium? We're here to help.
+                        Have questions about BondBeyond? We're here to help.
                     </p>
                 </div>
 
@@ -50,13 +50,13 @@ const ContactPage = () => {
                         <div>
                             <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
                             <div className="space-y-6">
-                                <a href="mailto:freechatweb00@gmail.com" className="flex items-center gap-4 hover:bg-base-200 p-2 -m-2 rounded-xl transition-colors">
+                                <a href="mailto:goswamirishi83@gmail.com" className="flex items-center gap-4 hover:bg-base-200 p-2 -m-2 rounded-xl transition-colors">
                                     <div className="p-3 bg-primary/10 rounded-xl text-primary">
                                         <Mail className="size-6" />
                                     </div>
                                     <div>
                                         <p className="text-sm opacity-60">Email Address</p>
-                                        <p className="font-medium">freechatweb00@gmail.com</p>
+                                        <p className="font-medium">goswamirishi83@gmail.com</p>
                                     </div>
                                 </a>
 

@@ -80,7 +80,7 @@ const SignUpPage = () => {
                     Create an Account
                   </h2>
                   <p className="text-sm opacity-60 mt-1">
-                    Join freeChat and start connecting with real people
+                    Join BondBeyond and start connecting with real people
                   </p>
                 </div>
 
@@ -297,7 +297,7 @@ const SignUpPage = () => {
             <div className="relative aspect-square max-w-sm mx-auto">
               <img
                 src="/Video call-bro.png"
-                alt="freeChat connection illustration"
+                alt="BondBeyond connection illustration"
                 className="w-full h-full drop-shadow-lg"
               />
             </div>

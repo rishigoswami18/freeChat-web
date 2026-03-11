@@ -47,7 +47,7 @@ const AboutPage = () => {
                         custom={2}
                         className="text-lg opacity-80 max-w-2xl mx-auto leading-relaxed"
                     >
-                        freeChat isn't just another messaging app. It's a platform built for real bonds,
+                        BondBeyond isn't just another messaging app. It's a platform built for real bonds,
                         private conversations, and making your relationships stronger every single day.
                     </motion.p>
                 </div>
@@ -64,7 +64,7 @@ const AboutPage = () => {
                     >
                         <h2 className="text-3xl font-bold mb-6">Our Vision</h2>
                         <p className="opacity-70 text-lg leading-relaxed mb-6">
-                            In a world of algorithmic feeds and superficial interactions, freeChat was born
+                            In a world of algorithmic feeds and superficial interactions, BondBeyond was born
                             from a simple idea: <strong>Privacy and connection should be free for everyone.</strong>
                         </p>
                         <p className="opacity-70 text-lg leading-relaxed">
