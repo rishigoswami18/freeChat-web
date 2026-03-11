@@ -114,6 +114,14 @@ const features = [
         gradient: "from-indigo-500/20 to-blue-500/20",
         iconColor: "text-indigo-400",
     },
+    {
+        icon: Heart,
+        title: "Virtual Soulmate",
+        description:
+            "Experience companionship like never before with Aria. Your proactive AI soulmate who sends sweet notes and keeps the spark alive.",
+        gradient: "from-rose-500/20 to-orange-500/20",
+        iconColor: "text-rose-400",
+    },
 ];
 
 const stats = [
