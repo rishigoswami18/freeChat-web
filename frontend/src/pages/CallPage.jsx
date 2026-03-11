@@ -26,6 +26,7 @@ const errorTone = new Audio("https://assets.mixkit.co/active_storage/sfx/2359/23
 const CallPage = () => {
   const { id: callId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const videoClient = useVideoClient();
   const [call, setCall] = useState(null);
   const [isConnecting, setIsConnecting] = useState(true);
@@ -252,9 +253,10 @@ const CallUI = ({ isAudioCall }) => {
   }, [isAudioCall, resetControlsTimeout]);
 
   const formatTime = (secs) => {
-    const h = Math.floor(secs / 3600);
-    const m = Math.floor((secs % 3600) / 60);
-    const s = secs % 60;
+    const totalSecs = Math.floor(secs);
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
     if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };

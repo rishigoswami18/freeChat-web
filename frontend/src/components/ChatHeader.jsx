@@ -265,7 +265,7 @@ const ChatHeader = memo(() => {
                 </div>
             </div>
 
-            {!isGroup && user?.id !== "system_announcement" && (
+            {!isGroup && user?.id !== "system_announcement" && user?.id !== "ai-user-id" && user?.id !== "ai-friend-id" && (
                 <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-1">
                     <button
                         onClick={handleCoolDown}

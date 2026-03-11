@@ -86,10 +86,23 @@ const InboxPage = () => {
                         const otherMember = Object.values(channel.state.members).find(
                             (m) => m.user?.id !== authUser._id
                         );
+                        
+                        let name = otherMember?.user?.name || "Deleted User";
+                        let avatar = otherMember?.user?.image || "/avatar.png";
+                        const id = otherMember?.user?.id || "unknown";
+
+                        if (id === "ai-user-id") {
+                            name = authUser.aiPartnerName || "Aria";
+                            avatar = authUser.aiPartnerPic || "/ai-girlfriend.png";
+                        } else if (id === "ai-friend-id") {
+                            name = authUser.aiFriendName || "Golu";
+                            avatar = authUser.aiFriendPic || "/ai-bestfriend.png";
+                        }
+
                         partner = {
-                            name: otherMember?.user?.name || "Deleted User",
-                            avatar: otherMember?.user?.image || "/avatar.png",
-                            id: otherMember?.user?.id || "unknown",
+                            name,
+                            avatar,
+                            id,
                             role: otherMember?.user?.role,
                             isVerified: otherMember?.user?.isVerified
                         };
