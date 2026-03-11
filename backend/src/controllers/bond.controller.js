@@ -160,7 +160,7 @@ export const getDailyInsight = async (req, res) => {
             partner: user.isCoupledWithAI ? {
                 _id: "ai-user-id",
                 fullName: user.aiPartnerName || "Aria",
-                profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                profilePic: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-girlfriend.png"}`,
                 mood: "romantic", // AI is always romantic for her user!
                 lastMoodUpdate: new Date(),
             } : user.partnerId,

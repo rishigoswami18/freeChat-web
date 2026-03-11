@@ -2,6 +2,14 @@ import { hasPremiumAccess } from "../utils/freeTrial.js";
 import { generateStreamToken, upsertStreamUser, streamClient } from "../lib/stream.js";
 import { getAIResponse } from "../lib/gemini.js";
 
+// Helper: resolve AI pic (relative paths → full URL)
+const resolveAiPic = (pic, fallback) => {
+  if (!pic) return fallback;
+  if (pic.startsWith("http")) return pic;
+  const base = process.env.CLIENT_URL || "https://freechatweb.in";
+  return `${base}${pic}`;
+};
+
 export async function getStreamToken(req, res) {
   try {
     const userId = req.user?._id;
@@ -22,7 +30,7 @@ export async function getStreamToken(req, res) {
         await upsertStreamUser({
           id: "ai-user-id",
           name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
-          image: "https://avatar.iran.liara.run/public/girl?username=aria",
+          image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-girlfriend.png"),
           role: "user"
         });
       } catch (upsertErr) {
@@ -36,7 +44,7 @@ export async function getStreamToken(req, res) {
         await upsertStreamUser({
           id: "ai-friend-id",
           name: `${req.user.aiFriendName || "Golu"} (Best Friend)`,
-          image: "https://avatar.iran.liara.run/public/boy?username=golu",
+          image: resolveAiPic(req.user.aiFriendPic, "https://freechatweb.in/ai-bestfriend.png"),
           role: "user"
         });
       } catch (upsertErr) {
@@ -114,7 +122,7 @@ export const sendMessage = async (req, res) => {
       await upsertStreamUser({
         id: "ai-user-id",
         name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
-        image: "https://avatar.iran.liara.run/public/girl?username=aria",
+        image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-girlfriend.png"),
         role: "user"
       });
 
@@ -151,7 +159,7 @@ export const sendMessage = async (req, res) => {
       await upsertStreamUser({
         id: "ai-friend-id",
         name: `${req.user.aiFriendName || "Golu"} (Best Friend)`,
-        image: "https://avatar.iran.liara.run/public/boy?username=golu",
+        image: resolveAiPic(req.user.aiFriendPic, "https://freechatweb.in/ai-bestfriend.png"),
         role: "user"
       });
 

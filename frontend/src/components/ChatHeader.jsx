@@ -85,7 +85,7 @@ const ChatHeader = memo(() => {
             if (otherMember?.user?.id === "ai-user-id" || channel.id.toLowerCase().includes("ai-user-id")) {
                 return {
                     name: authUser?.aiPartnerName || otherMember?.user?.name || "Aria",
-                    image: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    image: authUser?.aiPartnerPic || "/ai-girlfriend.png",
                     id: "ai-user-id",
                     user: { ...otherMember?.user, online: true, name: authUser?.aiPartnerName || "Aria" },
                 };
@@ -95,7 +95,7 @@ const ChatHeader = memo(() => {
             if (otherMember?.user?.id === "ai-friend-id" || channel.id.toLowerCase().includes("ai-friend-id")) {
                 return {
                     name: authUser?.aiFriendName || otherMember?.user?.name || "Golu",
-                    image: "https://avatar.iran.liara.run/public/boy?username=golu",
+                    image: authUser?.aiFriendPic || "/ai-bestfriend.png",
                     id: "ai-friend-id",
                     user: { ...otherMember?.user, online: true, name: authUser?.aiFriendName || "Golu" },
                 };

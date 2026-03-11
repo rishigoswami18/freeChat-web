@@ -170,6 +170,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "Aria",
   },
+  aiPartnerPic: {
+    type: String,
+    default: "/ai-girlfriend.png",
+  },
   isCoupledWithAI: {
     type: Boolean,
     default: false,
@@ -177,6 +181,10 @@ const userSchema = new mongoose.Schema({
   aiFriendName: {
     type: String,
     default: "Golu",
+  },
+  aiFriendPic: {
+    type: String,
+    default: "/ai-bestfriend.png",
   },
   isFriendedWithAI: {
     type: Boolean,

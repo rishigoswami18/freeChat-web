@@ -50,7 +50,7 @@ const LinkFriendAIModal = ({ isOpen, onClose }) => {
                     <div className="flex justify-center mb-2">
                         <div className="avatar">
                             <div className="size-24 rounded-[32px] ring-4 ring-primary/20 ring-offset-4 ring-offset-base-100 shadow-2xl">
-                                <img src="https://avatar.iran.liara.run/public/boy?username=golu" alt="AI Friend" />
+                                <img src="/ai-bestfriend.png" alt="AI Friend" />
                             </div>
                         </div>
                     </div>

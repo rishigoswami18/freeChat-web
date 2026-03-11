@@ -29,7 +29,7 @@ router.get("/status", async (req, res) => {
                 partner: {
                     _id: "ai-user-id",
                     fullName: user.aiPartnerName || "Aria",
-                    profilePic: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    profilePic: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-girlfriend.png"}`,
                     bio: "Your sweet AI virtual partner. ❤️"
                 },
                 anniversary: user.anniversary || new Date(),

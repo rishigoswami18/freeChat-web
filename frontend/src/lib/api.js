@@ -523,3 +523,9 @@ export const linkFriendAI = async (friendName) => {
   const res = await axiosInstance.post("/users/link-friend-ai", { friendName });
   return res.data;
 };
+
+// Update AI Companion (Name + DP)
+export const updateAiCompanion = async ({ type, name, pic }) => {
+  const res = await axiosInstance.put("/users/update-ai-companion", { type, name, pic });
+  return res.data;
+};

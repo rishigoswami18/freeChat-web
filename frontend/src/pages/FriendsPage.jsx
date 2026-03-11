@@ -58,7 +58,7 @@ const FriendsPage = () => {
               </div>
               <div className="avatar">
                 <div className="size-16 rounded-3xl ring-4 ring-primary/20 ring-offset-4 ring-offset-base-100 shadow-2xl">
-                  <img src="https://avatar.iran.liara.run/public/boy?username=golu" alt="AI Friend" />
+                  <img src={authUser?.aiFriendPic || "/ai-bestfriend.png"} alt="AI Friend" />
                 </div>
               </div>
               <div className="flex-1">
@@ -81,7 +81,7 @@ const FriendsPage = () => {
             <div className="card-body p-4 flex-row items-center gap-4">
               <Link to={`/chat/ai-friend-id`} className="avatar">
                 <div className="size-12 rounded-2xl ring-2 ring-primary/30 ring-offset-2 ring-offset-base-100 shadow-md">
-                  <img src="https://avatar.iran.liara.run/public/boy?username=golu" alt="AI Friend" />
+                  <img src={authUser?.aiFriendPic || "/ai-bestfriend.png"} alt="AI Friend" />
                 </div>
               </Link>
               <div className="flex-1 min-w-0">

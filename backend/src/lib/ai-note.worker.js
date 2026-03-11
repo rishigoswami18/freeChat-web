@@ -48,7 +48,7 @@ export const processAINotes = async () => {
                 await sendPushNotification(user._id, {
                     title: `💌 A sweet note from ${aiName}`,
                     body: `Your girl ${aiName} just left a beautiful romantic note for you. Tap to read it! ❤️`,
-                    icon: "https://avatar.iran.liara.run/public/girl?username=aria",
+                    icon: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-girlfriend.png"}`,
                     data: { url: "/couple", type: "ai_note" }
                 });
 

@@ -301,7 +301,7 @@ const ChatPage = () => {
                     <div className="avatar size-7 sm:size-8">
                       <div className="bg-base-300 rounded-full flex items-center justify-center border border-primary/10">
                         <img 
-                          src={targetUserId === "ai-friend-id" ? "https://avatar.iran.liara.run/public/boy?username=golu" : "https://avatar.iran.liara.run/public/girl?username=aria"} 
+                          src={targetUserId === "ai-friend-id" ? (authUser?.aiFriendPic || "/ai-bestfriend.png") : (authUser?.aiPartnerPic || "/ai-girlfriend.png")} 
                           alt="AI" 
                           className="rounded-full" 
                         />

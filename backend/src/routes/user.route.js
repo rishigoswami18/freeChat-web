@@ -78,6 +78,32 @@ router.post("/link-friend-ai", async (req, res) => {
   }
 });
 
+// Update AI Companion Settings (Name + DP)
+router.put("/update-ai-companion", async (req, res) => {
+  try {
+    const { type, name, pic } = req.body;
+    // type: "partner" or "friend"
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (type === "partner") {
+      if (name) user.aiPartnerName = name;
+      if (pic) user.aiPartnerPic = pic;
+    } else if (type === "friend") {
+      if (name) user.aiFriendName = name;
+      if (pic) user.aiFriendPic = pic;
+    } else {
+      return res.status(400).json({ message: "Invalid type. Use 'partner' or 'friend'" });
+    }
+
+    await user.save();
+    res.status(200).json({ success: true, message: "AI companion updated!", user });
+  } catch (err) {
+    console.error("Error updating AI companion:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 // Wildcard routes MUST be last to avoid catching specific routes like /friends, /friend-requests
 router.get("/:id", getUserProfile);
 router.get("/:id/friends", getUserFriends);
