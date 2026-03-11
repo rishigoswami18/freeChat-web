@@ -1,4 +1,5 @@
 import express from "express";
+import User from "../models/User.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import {
   getAllUsers,
