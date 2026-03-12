@@ -37,6 +37,10 @@ export const createRelease = async (req, res) => {
     try {
         const { versionCode, versionName, apkFile, releaseNotes, isUpdateRequired } = req.body;
 
+        if (!versionName) {
+            return res.status(400).json({ message: "Version name is required" });
+        }
+
         if (!apkFile) {
             return res.status(400).json({ message: "APK file is required" });
         }
@@ -115,7 +119,16 @@ export const downloadRelease = async (req, res) => {
 
         if (!release) return res.status(404).json({ message: "Release not found" });
 
-        const filename = `BondBeyond_v${release.versionName.replace(/\./g, "_")}.apk`;
+        // Increment download count
+        try {
+            release.downloadCount = (release.downloadCount || 0) + 1;
+            await release.save();
+        } catch (err) {
+            console.error("Failed to increment download count:", err);
+        }
+
+        const vName = release.versionName || "1_0_0";
+        const filename = `BondBeyond_v${vName.replace(/\./g, "_")}.apk`;
         const localFileName = path.basename(release.apkUrl);
         const localFilePath = path.join(APK_DIR, localFileName);
 
@@ -140,5 +153,17 @@ export const downloadRelease = async (req, res) => {
     } catch (error) {
         console.error("Download Error:", error);
         res.status(500).json({ message: "Transmission failure" });
+    }
+};
+
+export const getAppStats = async (req, res) => {
+    try {
+        const apkData = await AppRelease.aggregate([
+            { $group: { _id: null, total: { $sum: "$downloadCount" } } }
+        ]);
+        const totalDownloads = apkData.length > 0 ? apkData[0].total : 0;
+        res.status(200).json({ totalDownloads });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };

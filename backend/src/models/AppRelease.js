@@ -25,6 +25,10 @@ const appReleaseSchema = new mongoose.Schema({
     isUpdateRequired: {
         type: Boolean,
         default: false
+    },
+    downloadCount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Post from "../models/Post.js";
+import AppRelease from "../models/AppRelease.js";
 import { sendPushNotification } from "../lib/push.service.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
 
@@ -18,6 +19,12 @@ export const getAdminStats = async (req, res) => {
         // Daily Active Users (logged in within last 24h)
         const dailyActiveUsers = await User.countDocuments({ lastLoginDate: { $gte: last24h } });
 
+        // Total App Downloads (Sum of all releases)
+        const apkData = await AppRelease.aggregate([
+            { $group: { _id: null, total: { $sum: "$downloadCount" } } }
+        ]);
+        const totalAppDownloads = apkData.length > 0 ? apkData[0].total : 0;
+
         res.status(200).json({
             stats: {
                 totalUsers,
@@ -26,7 +33,8 @@ export const getAdminStats = async (req, res) => {
                 totalPosts,
                 newUsers,
                 newPosts,
-                dailyActiveUsers
+                dailyActiveUsers,
+                totalAppDownloads
             }
         });
     } catch (error) {

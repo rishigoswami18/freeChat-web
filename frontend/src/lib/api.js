@@ -529,3 +529,8 @@ export const updateAiCompanion = async ({ type, name, pic }) => {
   const res = await axiosInstance.put("/users/update-ai-companion", { type, name, pic });
   return res.data;
 };
+
+export const getAppStats = async () => {
+  const response = await axiosInstance.get("/apk/stats");
+  return response.data;
+};

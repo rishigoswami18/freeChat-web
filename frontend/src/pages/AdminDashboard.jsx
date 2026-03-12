@@ -43,6 +43,7 @@ import {
     sweepPendingActions,
     getAdminSupportMessages,
     deleteSupportMessage,
+    sendEmailToUser,
     sendNotificationToUser,
     getAllReleases,
     createRelease,
@@ -502,6 +503,7 @@ const AdminDashboard = () => {
                                 { label: "Onboarded", val: stats.onboardedUsers, icon: CheckCircle2, color: "from-emerald-500 to-teal-600", light: "bg-emerald-500/10 text-emerald-600" },
                                 { label: "Members", val: stats.memberUsers, icon: Star, color: "from-amber-400 to-orange-500", light: "bg-amber-500/10 text-amber-600" },
                                 { label: "Total Posts", val: stats.totalPosts, icon: FileText, color: "from-purple-500 to-fuchsia-600", light: "bg-purple-500/10 text-purple-600" },
+                                { label: "App Downloads", val: stats.totalAppDownloads || 0, icon: Smartphone, color: "from-indigo-500 to-blue-600", light: "bg-indigo-500/10 text-indigo-600" },
                                 { label: "Active Users (24h)", val: stats.dailyActiveUsers || 0, icon: UserCheck, color: "from-orange-500 to-red-600", light: "bg-orange-500/10 text-orange-600" },
                                 { label: "New Users (24h)", val: `+${stats.newUsers}`, icon: UserPlus, color: "from-rose-500 to-pink-600", light: "bg-rose-500/10 text-rose-600" },
                             ].map((s, i) => (
@@ -1137,6 +1139,8 @@ const AdminDashboard = () => {
                                                             <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Build {release.versionCode}</span>
                                                             <div className="size-1 rounded-full bg-base-content/20" />
                                                             <span className="text-[10px] font-bold opacity-40">{new Date(release.createdAt).toLocaleDateString()}</span>
+                                                            <div className="size-1 rounded-full bg-base-content/20" />
+                                                            <span className="text-[10px] font-bold text-primary">{release.downloadCount || 0} Downloads</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1165,7 +1169,7 @@ const AdminDashboard = () => {
                                                     href={`${APK_DOWNLOAD_URL}/${release._id}`}
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        downloadFile(`${APK_DOWNLOAD_URL}/${release._id}`, `BondBeyond_v${release.versionName.replace(/\./g, "_")}.apk`);
+                                                        downloadFile(`${APK_DOWNLOAD_URL}/${release._id}`, `BondBeyond_v${(release.versionName || "1_0_0").replace(/\./g, "_")}.apk`);
                                                     }}
                                                     className="btn btn-sm btn-circle bg-base-200 hover:bg-primary hover:text-white transition-all border-none"
                                                     title="Download Artifact"

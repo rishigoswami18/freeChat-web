@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getLatestRelease } from "../lib/api";
+import { getLatestRelease, getAppStats } from "../lib/api";
 import { motion } from "framer-motion";
 import {
     MessageCircle,
@@ -124,16 +124,10 @@ const features = [
     },
 ];
 
-const stats = [
-    { value: "1K+", label: "Active Users", icon: Users },
-    { value: "Free", label: "Forever", icon: Zap },
-    { value: "HD", label: "Video Calls", icon: Video },
-    { value: "24/7", label: "Available", icon: Globe },
-];
-
 const LandingPage = () => {
     const { t } = useTranslation();
     const [latestApk, setLatestApk] = useState(null);
+    const [totalDownloads, setTotalDownloads] = useState("1K+");
 
     const handleDownload = (e) => {
         e.preventDefault();
@@ -146,14 +140,27 @@ const LandingPage = () => {
     useEffect(() => {
         const fetchApk = async () => {
             try {
-                const data = await getLatestRelease();
-                setLatestApk(data);
+                const [apkData, statsData] = await Promise.all([
+                    getLatestRelease(),
+                    getAppStats()
+                ]);
+                setLatestApk(apkData);
+                if (statsData.totalDownloads > 0) {
+                    setTotalDownloads(`${statsData.totalDownloads}+`);
+                }
             } catch (err) {
-                console.error("Failed to fetch apk:", err);
+                console.error("Failed to fetch apk stats:", err);
             }
         };
         fetchApk();
     }, []);
+
+    const stats = [
+        { value: totalDownloads, label: "Active Users", icon: Users },
+        { value: "Free", label: "Forever", icon: Zap },
+        { value: "HD", label: "Video Calls", icon: Video },
+        { value: "24/7", label: "Available", icon: Globe },
+    ];
 
     const apkUrl = latestApk?.apkUrl || null;
     return (

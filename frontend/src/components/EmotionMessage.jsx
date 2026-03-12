@@ -18,7 +18,7 @@ const handleFileDownload = async (url, type = 'media') => {
     const a = document.createElement('a');
     a.href = blobUrl;
     const ext = type === 'video' ? 'mp4' : type === 'audio' ? 'webm' : 'jpg';
-    a.download = `freechat_${type}_${Date.now()}.${ext}`;
+    a.download = `bondbeyond_${type}_${Date.now()}.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

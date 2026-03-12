@@ -50,6 +50,11 @@ const MobileDrawer = () => {
   const { unreadMessages, notificationCount } = useNotificationCounts();
   const queryClient = useQueryClient();
 
+  const handleDownload = (e) => {
+    e.preventDefault();
+    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "BondBeyond_app.apk");
+  };
+
   const { mutate: doUpdate } = useMutation({
     mutationFn: updateProfile,
     onSuccess: (data) => {
