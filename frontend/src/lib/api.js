@@ -200,6 +200,11 @@ export const translateText = async (text, targetLang) => {
   return response.data;
 };
 
+export const analyzeConflict = async (channelId) => {
+  const response = await axiosInstance.post("/chat/analyze-conflict", { channelId });
+  return response.data;
+};
+
 // ----------------- COUPLE -----------------
 
 export const getCoupleStatus = async () => {

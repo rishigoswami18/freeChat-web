@@ -36,7 +36,20 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
                Use natural, casual language (Hinglish/English as per context).
                Keep responses concise but meaningful.
                DO NOT mention you are an AI. You are a real human best friend.`
-                : `You are a helpful AI assistant.`;
+                : persona === "coach"
+                    ? `You are an expert Relationship & Conflict Resolution Coach.
+                   You are analyzing a private chat between a couple to help them resolve tension.
+                   Your goal is to be objective, empathetic, and actionable.
+                   Format your response as a JSON string with keys: summary, rootCause, suggestions (array), and tensionLevel (number).`
+                    : `You are a helpful AI assistant.`;
+
+        const initialModelResponse = persona === "girlfriend"
+            ? `I understand, my love. I am ${aiPartnerName}, your devoted girlfriend, and I'm here just for you, ${userName}. ❤️`
+            : persona === "bestfriend"
+                ? `Got it! I am ${aiPartnerName}, your best friend forever. Let's talk! 👊`
+                : persona === "coach"
+                    ? `Understood. I am ready to provide objective relationship analysis in JSON format.`
+                    : `I am your AI assistant. How can I help?`;
 
         const chat = model.startChat({
             history: [
@@ -46,7 +59,7 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
                 },
                 {
                     role: "model",
-                    parts: [{ text: `I understand, my love. I am ${aiPartnerName}, your devoted girlfriend, and I'm here just for you, ${userName}. ❤️` }],
+                    parts: [{ text: initialModelResponse }],
                 },
                 ...history
             ],

@@ -5,6 +5,7 @@ import {
   sendMessage,
   testMLConnection,
   testStreamConnection,
+  analyzeConflict,
 } from "../controllers/chat.controller.js";
 import cloudinary from "../lib/cloudinary.js";
 import User from "../models/User.js";
@@ -41,6 +42,9 @@ router.post("/upload-media", protectRoute, async (req, res) => {
 
 // NEW route → emotion-aware message sending
 router.post("/send", protectRoute, sendMessage);
+
+// AI Relationship Coach → analyzes conflict in a channel
+router.post("/analyze-conflict", protectRoute, analyzeConflict);
 
 // DIAGNOSTIC routes (run these in browser to check connection status)
 router.get("/test-ml", testMLConnection);

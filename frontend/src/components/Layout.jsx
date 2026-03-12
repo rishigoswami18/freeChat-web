@@ -6,14 +6,17 @@ import { motion } from "framer-motion";
 
 const Layout = ({ children, showSidebar = false, showFooter = true, showNavbar = true }) => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-base-100 relative overflow-x-hidden">
+      {/* Mesh Gradient Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(var(--p),0.05),transparent_50%)] pointer-events-none" />
+      
       <MobileDrawer />
 
       {/* Fixed sidebar on desktop */}
       {showSidebar && <Sidebar />}
 
       {/* Main content area — pushed right by sidebar width on desktop */}
-      <div className={`flex flex-col min-h-screen ${showSidebar ? "lg:ml-[260px]" : ""}`}>
+      <div className={`flex flex-col min-h-screen relative z-10 ${showSidebar ? "lg:ml-[292px] lg:mr-4 lg:my-4 rounded-[32px] overflow-hidden" : ""}`}>
         {showNavbar && <Navbar />}
 
         {/* If navbar is hidden, remove top padding to allow full-screen content */}

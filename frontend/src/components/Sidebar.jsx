@@ -36,13 +36,13 @@ import Logo from "./Logo";
 
 const navItems = [
   { to: "/", icon: Home, labelKey: "feed" },
-  { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
+  { to: "/inbox", icon: MessageSquare, label: "Messages" },
   { to: "/profile", icon: User, labelKey: "profile" },
-  { to: "/friends", icon: Users, labelKey: "friends" },
+  { to: "/friends", icon: Users, label: "Community" },
   { to: "/search", icon: Search, labelKey: "explore" },
   { to: "/reels", icon: Film, labelKey: "reels" },
   { to: "/notifications", icon: Bell, labelKey: "notifications" },
-  { to: "/couple", icon: HeartHandshake, labelKey: "bond_dashboard" },
+  { to: "/couple", icon: HeartHandshake, label: "Soul Bond" },
   { to: "/games", icon: Gamepad2, labelKey: "games" },
   { to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
   { to: "/membership", icon: Crown, labelKey: "premium" },
@@ -127,44 +127,44 @@ const Sidebar = () => {
   }
 
   return (
-    <aside className="w-[260px] bg-base-200/80 backdrop-blur-xl border-r border-base-300/50 hidden lg:flex flex-col h-screen fixed top-0 left-0 font-outfit z-40">
-      {/* Brand */}
-      <div className="px-5 py-5 border-b border-base-300/50">
-        <Logo className="size-9" fontSize="text-2xl" />
+    <aside className="w-[260px] glass-panel hidden lg:flex flex-col h-[calc(100vh-2rem)] fixed top-4 left-4 font-outfit z-40 rounded-[32px] overflow-hidden border-white/20 luxe-shadow-pink">
+      {/* Brand area */}
+      <div className="px-6 py-6 border-b border-white/10 bg-gradient-to-br from-white/5 to-transparent">
+        <Logo className="size-10" fontSize="text-2xl" />
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
         {dynamicNavItems.map((item) => {
-          const { to, icon: Icon, labelKey, isSacred, label: customLabel } = item;
+          const { to, icon: Icon, labelKey, isSacred, label: directLabel } = item;
           const isActive = currentPath === to;
-          const label = isSacred ? customLabel : t(labelKey);
-          const isBond = labelKey === "bond_dashboard";
+          const label = isSacred || directLabel ? (directLabel || item.label) : t(labelKey);
+          const isBond = labelKey === "bond_dashboard" || directLabel === "Soul Bond";
           const useRomanticStyle = (isBond || isSacred) && isCoupled;
 
           return (
             <Link
               key={to}
               to={to}
-              className={`sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group/navlink
+              className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 group/navlink
                 ${isActive
                   ? useRomanticStyle
-                    ? "bg-pink-500/10 text-pink-500 font-extrabold shadow-lg shadow-pink-500/5 border border-pink-500/10"
-                    : "sidebar-link-active bg-primary/10 text-primary font-semibold shadow-sm shadow-primary/5"
+                    ? "romantic-gradient-bg text-white font-extrabold shadow-xl shadow-pink-500/25 border-none"
+                    : "brand-gradient-bg text-white font-bold shadow-xl shadow-primary/25 border-none"
                   : useRomanticStyle
-                    ? "text-pink-500/70 hover:text-pink-500 hover:bg-pink-500/5"
-                    : "text-base-content/70 hover:text-base-content hover:bg-base-300/50 hover:translate-x-0.5"
+                    ? "text-pink-500/80 hover:text-pink-500 hover:bg-pink-500/10"
+                    : "text-base-content/60 hover:text-base-content hover:bg-white/5 hover:translate-x-1"
                 }`}
             >
               <div className="relative">
                 {useRomanticStyle ? (
                   <Heart
-                    className={`size-[18px] flex-shrink-0 ${isActive ? "text-pink-500 fill-pink-500/20 animate-pulse" : "text-pink-500 opacity-60"
+                    className={`size-[20px] flex-shrink-0 ${isActive ? "text-white fill-white/20 animate-pulse" : "text-pink-500 opacity-60"
                       }`}
                   />
                 ) : (
                   <Icon
-                    className={`size-[18px] flex-shrink-0 ${isActive ? "text-primary" : "opacity-60"
+                    className={`size-[20px] flex-shrink-0 ${isActive ? "text-white" : "opacity-60"
                       }`}
                   />
                 )}

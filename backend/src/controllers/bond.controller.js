@@ -82,6 +82,13 @@ export const updateMood = async (req, res) => {
 
         user.mood = mood;
         user.lastMoodUpdate = new Date();
+        
+        // Push to history (Phase 2: Relationship Doctor logic)
+        user.moodHistory = user.moodHistory || [];
+        user.moodHistory.push({ mood, date: new Date() });
+        // Keep only last 30 days of mood history
+        if (user.moodHistory.length > 30) user.moodHistory.shift();
+
         await user.save();
 
         // Update couple streak after mood update

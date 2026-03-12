@@ -198,3 +198,43 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const analyzeConflict = async (req, res) => {
+  try {
+    const { channelId } = req.body;
+    if (!channelId || !streamClient) {
+      return res.status(400).json({ message: "Channel ID and Stream Client required" });
+    }
+
+    const channel = streamClient.channel("messaging", channelId);
+    const historyRes = await channel.query({ messages: { limit: 50 } });
+    
+    // Format messages for AI analysis
+    const chatTranscript = (historyRes.messages || [])
+      .map(m => `${m.user.name}: ${m.text}`)
+      .join("\n");
+
+    const analysisJson = await getAIResponse(
+      `Please analyze the following chat transcript between a couple and provide a conflict resolution report:\n\n${chatTranscript}`,
+      [],
+      "coach"
+    );
+
+    // Clean potential markdown code blocks from AI response
+    const cleanedJson = analysisJson.replace(/```json|```/g, "").trim();
+    const result = JSON.parse(cleanedJson);
+
+    // Save to DB (Optional: keep a history of coaching)
+    const ConflictAnalysis = (await import("../models/ConflictAnalysis.js")).default;
+    await ConflictAnalysis.create({
+      channelId,
+      users: (historyRes.channel?.members || []).map(m => m.user_id),
+      ...result
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Conflict Analysis Error:", error);
+    res.status(500).json({ message: "AI Coach is unavailable right now." });
+  }
+};

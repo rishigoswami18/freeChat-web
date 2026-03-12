@@ -82,13 +82,13 @@ const MobileDrawer = () => {
 
   const navItems = [
     { to: "/", icon: Home, labelKey: "feed" },
-    { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
-    { to: "/friends", icon: Users, labelKey: "friends" },
+    { to: "/inbox", icon: MessageSquare, label: "Messages" },
+    { to: "/friends", icon: Users, label: "Community" },
     { to: "/reels", icon: Film, labelKey: "reels" },
     { to: "/search", icon: Search, labelKey: "explore" },
     { to: "/notifications", icon: Bell, labelKey: "notifications" },
     { to: "/posts", icon: Pencil, labelKey: "post" },
-    { to: "/couple", icon: Heart, labelKey: "bond_dashboard" },
+    { to: "/couple", icon: Heart, label: "Soul Bond" },
     { to: "/games", icon: Gamepad2, labelKey: "games" },
     { to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
     { to: "/membership", icon: Crown, labelKey: "premium" },
@@ -115,7 +115,7 @@ const MobileDrawer = () => {
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
 
       {/* Mobile Top Bar */}
-      <div className={`lg:hidden sticky top-0 left-0 right-0 z-50 glass-panel-solid border-b border-base-300/50 px-3 py-3.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
+      <div className={`lg:hidden sticky top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 px-3 py-3.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
         }`}>
         <div className="flex items-center gap-2">
           <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
@@ -249,7 +249,7 @@ const MobileDrawer = () => {
                   </span>
                 )}
               </div>
-              {isSacred ? customLabel : t(labelKey)}
+              {customLabel || t(labelKey)}
             </Link>
           ))}
 
@@ -333,7 +333,7 @@ const MobileDrawer = () => {
       <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") || location.pathname.startsWith("/call") ? "hidden" : ""
         }`}>
         <div className="flex items-center justify-around py-1.5 px-1">
-          {bottomTabs.map(({ to, icon: Icon, labelKey }) => {
+          {bottomTabs.map(({ to, icon: Icon, labelKey, label }) => {
             const isActive = location.pathname === to;
             return (
               <Link
@@ -358,7 +358,7 @@ const MobileDrawer = () => {
                     </span>
                   )}
                 </div>
-                <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{t(labelKey)}</span>
+                <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{label || t(labelKey)}</span>
               </Link>
             );
           })}

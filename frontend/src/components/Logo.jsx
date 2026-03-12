@@ -5,18 +5,23 @@ const Logo = ({ className = "size-8", showText = true, fontSize = "text-2xl", st
     return (
         <div className="flex items-center gap-2">
             <Link to="/" className="flex items-center gap-2.5 group">
-                <div className="relative">
-                    <HeartHandshake className={`${className} text-primary group-hover:scale-110 transition-transform duration-300`} />
-                    <div className="absolute -inset-2 bg-primary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative flex items-center justify-center">
+                    <div className="size-10 rounded-2xl brand-gradient-bg flex items-center justify-center relative z-10 shadow-lg shadow-primary/20 group-hover:rotate-6 transition-all duration-500">
+                        <HeartHandshake className={`size-6 text-white`} />
+                    </div>
+                    <div className="absolute -inset-2 bg-primary/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 </div>
                 {showText && (
                     <div className="flex flex-col">
-                        <span className={`${fontSize} font-extrabold tracking-tight gradient-text leading-none`}>
-                            BondBeyond
+                        <span className={`${fontSize} font-black tracking-tight text-base-content leading-none`}>
+                            Bond<span className="gradient-text">Beyond</span>
                         </span>
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 ml-0.5 mt-0.5">
-                            Powered by freechatweb.in
-                        </span>
+                        <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[7px] font-black uppercase tracking-[0.3em] opacity-30">
+                                Powered by freechatweb.in
+                            </span>
+                            <div className="h-[1px] w-4 bg-base-content/10" />
+                        </div>
                     </div>
                 )}
             </Link>

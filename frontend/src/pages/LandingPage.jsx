@@ -164,7 +164,7 @@ const LandingPage = () => {
 
     const apkUrl = latestApk?.apkUrl || null;
     return (
-        <div className="min-h-screen bg-base-100" data-theme="forest">
+        <div className="min-h-screen bg-base-100" data-theme="bondbeyond">
             {/* SEO & Meta Tags */}
             <title>BondBeyond | Free Chat App, Video Calls & AI Companions</title>
             <meta name="description" content="Join BondBeyond, the all-in-one free chat platform. Enjoy high-quality video calls, share reels, play games, and connect with your personalized AI best friend. Bonding redefined at freechatweb.in." />

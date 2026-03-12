@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
@@ -9,6 +10,7 @@ html {
   min-height: 100%;
   overflow-x: clip;
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -18,23 +20,22 @@ body {
   padding: 0;
   overflow-y: auto;
   overflow-x: clip;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-gutter: stable;
+  background-color: oklch(var(--b1));
+  color: oklch(var(--bc));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* When chat is active, we lock the main body scroll */
 body.is-chat-active {
   overflow: hidden !important;
-  /* position: fixed; removed to avoid jumpiness on some browsers, overflow: hidden is usually enough */
   width: 100%;
   height: 100%;
 }
 
 * {
   box-sizing: border-box;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 #root {
@@ -43,14 +44,14 @@ body.is-chat-active {
 }
 
 ::selection {
-  background: oklch(var(--p) / 0.3);
-  color: oklch(var(--pc));
+  background: oklch(var(--p) / 0.2);
+  color: oklch(var(--p));
 }
 
-/* ===== Premium Scrollbar ===== */
+/* ===== Premium Thin Scrollbar ===== */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -58,19 +59,21 @@ body.is-chat-active {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: oklch(var(--bc) / 0.15);
+  background: oklch(var(--bc) / 0.1);
   border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(var(--bc) / 0.25);
+  background: oklch(var(--bc) / 0.2);
 }
 
 /* ===== Focus-Visible Accessibility Ring ===== */
 :focus-visible {
-  outline: 2px solid oklch(var(--p) / 0.6);
+  outline: 2px solid oklch(var(--p) / 0.4);
   outline-offset: 2px;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 /* ===== Link Hover Underline Animation ===== */
@@ -82,13 +85,13 @@ body.is-chat-active {
 .link-hover-underline::after {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: -4px;
   left: 0;
   width: 0;
-  height: 2px;
-  background: oklch(var(--p));
+  height: 1.5px;
+  background: linear-gradient(90deg, oklch(var(--p)), oklch(var(--s)));
   border-radius: 2px;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .link-hover-underline:hover::after {
@@ -114,18 +117,26 @@ body.is-chat-active {
   scrollbar-width: none;
 }
 
-/* ===== Glassmorphism Utilities ===== */
+/* ===== Advanced Glassmorphism Utilities ===== */
 .glass-panel {
-  background: oklch(var(--b2) / 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid oklch(var(--bc) / 0.06);
+  background: oklch(var(--b1) / 0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid oklch(var(--bc) / 0.08);
+  box-shadow: 0 8px 32px 0 oklch(0 0 0 / 0.03);
 }
 
-.glass-panel-solid {
-  background: oklch(var(--b2) / 0.95);
+.glass-panel-heavy {
+  background: oklch(var(--b1) / 0.85);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid oklch(var(--bc) / 0.1);
+}
+
+.glass-panel-flat {
+  background: oklch(var(--b2) / 0.4);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(var(--bc) / 0.05);
 }
 
 /* ===== Animated Gradient Background ===== */
@@ -393,6 +404,14 @@ body.is-chat-active {
 
 
 /* ===== Romantic & Couple UI Utilities ===== */
+/* ===== Premium Gradient Utilities ===== */
+.gradient-text {
+  background: linear-gradient(135deg, oklch(var(--p)) 0%, oklch(var(--s)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .romantic-gradient-text {
   background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
   -webkit-background-clip: text;
@@ -402,6 +421,10 @@ body.is-chat-active {
 
 .romantic-gradient-bg {
   background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+}
+
+.brand-gradient-bg {
+  background: linear-gradient(135deg, oklch(var(--p)) 0%, oklch(var(--s)) 100%);
 }
 
 .romantic-card-luxe {

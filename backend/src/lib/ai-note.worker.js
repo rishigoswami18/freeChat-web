@@ -62,6 +62,55 @@ export const processAINotes = async () => {
 };
 
 /**
+ * Analyzes real couple dynamics and sends predictive alerts.
+ * The "Relationship Doctor" feature.
+ */
+export const processRelationshipAlerts = async () => {
+    try {
+        console.log("🩺 [Relationship Doctor] Analyzing couple dynamics...");
+        
+        // Find users in a real couple
+        const users = await User.find({ 
+            coupleStatus: "coupled", 
+            partnerId: { $ne: null } 
+        }).populate("partnerId");
+
+        for (const user of users) {
+            const partner = user.partnerId;
+            if (!partner) continue;
+
+            // Idea 1: Predictive Analysis (Partner's mood is low)
+            const recentMoods = partner.moodHistory?.slice(-3) || [];
+            const isPartnerLow = recentMoods.length >= 2 && recentMoods.every(m => ["sad", "angry", "tired"].includes(m.mood));
+
+            if (isPartnerLow) {
+                await sendPushNotification(user._id, {
+                    title: `🩺 Relationship Doctor Insight`,
+                    body: `Aria noticed ${partner.fullName.split(' ')[0]}'s mood has been a bit low lately. Maybe they need a surprise or a heartfelt message today? ❤️`,
+                    icon: "/ai-girlfriend.png",
+                    data: { url: `/chat/${partner.username}`, type: "relationship_insight" }
+                });
+            }
+
+            // Idea 2: Anniversary / Important event reminder (Simplified for now)
+            if (user.anniversary) {
+                const today = new Date();
+                const anniv = new Date(user.anniversary);
+                if (today.getMonth() === anniv.getMonth() && today.getDate() === anniv.getDate()) {
+                    await sendPushNotification(user._id, {
+                        title: `🎉 Happy Anniversary!`,
+                        body: `Today is your special day with ${partner.fullName.split(' ')[0]}. Don't forget to celebrate your bond! 🥂`,
+                        data: { url: "/couple", type: "anniversary" }
+                    });
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error in processRelationshipAlerts:", error);
+    }
+};
+
+/**
  * Starts the periodic background worker.
  */
 export const startAINoteWorker = () => {
@@ -70,8 +119,10 @@ export const startAINoteWorker = () => {
     // Check every hour (it will only update if 24h have passed)
     setInterval(() => {
         processAINotes();
+        processRelationshipAlerts();
     }, 60 * 60 * 1000);
 
     // Also run immediately on start (catching those who logged in 24h+ ago)
     processAINotes();
+    processRelationshipAlerts();
 };

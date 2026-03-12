@@ -1,6 +1,6 @@
 import { memo, useState, useMemo } from "react";
 import { useChannelStateContext } from "stream-chat-react";
-import { Video, Phone, ArrowLeft, Wind, BadgeCheck, Heart } from "lucide-react";
+import { Video, Phone, ArrowLeft, Wind, BadgeCheck, Heart, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import { notifyCall, getCoupleStatus } from "../lib/api";
@@ -212,6 +212,22 @@ const ChatHeader = memo(() => {
         }
     };
 
+    const handleAnalyze = async () => {
+        const tid = toast.loading("AI Coach is analyzing your vibes... 🩺");
+        try {
+            const { analyzeConflict } = await import("../lib/api");
+            const result = await analyzeConflict(channel.id);
+            toast.success("Analysis complete! ✨", { id: tid });
+
+            await channel.sendMessage({
+                text: `🩺 **AI Relationship Coach Insight**\n\n**Summary:** ${result.summary}\n\n**Possible Cause:** ${result.rootCause}\n\n**Actionable Steps:**\n${result.suggestions.map(s => `• ${s}`).join("\n")}\n\n*Current Tension: ${result.tensionLevel}/10*`,
+                silent: false,
+            });
+        } catch (error) {
+            toast.error("AI Coach is busy right now.", { id: tid });
+        }
+    };
+
     return (
         <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 border-b border-base-300/20 bg-base-100/90 backdrop-blur-md relative z-[100] shadow-sm w-full flex-shrink-0 chat-header-locked select-none overflow-hidden transition-all">
             <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 overflow-hidden">
@@ -267,6 +283,15 @@ const ChatHeader = memo(() => {
 
             {!isGroup && user?.id !== "system_announcement" && user?.id !== "ai-user-id" && user?.id !== "ai-friend-id" && (
                 <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-1">
+                    {isPartner && (
+                        <button
+                            onClick={handleAnalyze}
+                            className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-primary hover:bg-primary/10 transition-colors"
+                            title="AI Relationship Coach"
+                        >
+                            <Sparkles className="size-4.5 sm:size-5 animate-pulse" />
+                        </button>
+                    )}
                     <button
                         onClick={handleCoolDown}
                         className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-info hover:bg-info/10 transition-colors"

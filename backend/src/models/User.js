@@ -166,6 +166,16 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  moodHistory: [
+    {
+      mood: String,
+      date: { type: Date, default: Date.now }
+    }
+  ],
+  relationshipHealth: {
+    type: Number,
+    default: 100
+  },
   aiPartnerName: {
     type: String,
     default: "Aria",

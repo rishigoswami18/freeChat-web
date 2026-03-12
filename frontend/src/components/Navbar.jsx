@@ -16,9 +16,8 @@ const Navbar = () => {
   const { unreadMessages, notificationCount } = useNotificationCounts();
 
   return (
-    <nav className="glass-panel-solid border-b border-base-300/50 sticky top-0 z-30 h-14 hidden lg:flex items-center">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-end w-full">
+    <nav className="fixed top-4 right-4 z-40 h-14 hidden lg:flex items-center glass-panel rounded-full px-4 border-white/20 luxe-shadow-pink mr-0">
+      <div className="flex items-center gap-2">
           {/* LOGO - ONLY IN THE CHAT PAGE */}
           {isChatPage && (
             <div className="pl-5">
@@ -106,7 +105,6 @@ const Navbar = () => {
               </>
             )}
           </div>
-        </div>
       </div>
     </nav>
   );
