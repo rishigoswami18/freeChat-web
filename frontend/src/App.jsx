@@ -74,37 +74,47 @@ const App = () => {
     authRef.current = { isAuthenticated, isOnboarded };
   }, [isAuthenticated, isOnboarded]);
 
+  // 1. Google OAuth Bridge (Handle popups/callbacks immediately)
   useEffect(() => {
-    // 1. Handle Google OAuth Redirect (Bridge for popups)
     const hash = window.location.hash;
-    if (hash && (hash.includes("access_token") || hash.includes("id_token") || hash.includes("credential"))) {
+    const search = window.location.search;
+    
+    // Check both hash (implicit flow) and search (auth code flow fallbacks)
+    if (hash && (hash.includes("access_token") || hash.includes("id_token") || hash.includes("credential") || hash.includes("code"))) {
       const params = new URLSearchParams(hash.substring(1));
       const accessToken = params.get("access_token");
       const idToken = params.get("id_token");
       const credential = params.get("credential");
+      const code = params.get("code");
 
-      const token = accessToken || idToken;
+      const token = accessToken || idToken || code;
 
-      if (window.opener) {
-        // Send to opener window
-        window.opener.postMessage(
-          { 
-            type: "GOOGLE_OAUTH_TOKEN", 
-            token: token, 
-            credential: credential 
-          }, 
-          window.location.origin
-        );
+      if (token || credential) {
+        // 1. Try messaging the opener
+        if (window.opener) {
+          window.opener.postMessage(
+            { 
+              type: "GOOGLE_OAUTH_TOKEN", 
+              token: token, 
+              credential: credential 
+            }, 
+            "*" // Safer wildcard to ensure delivery across subdomains
+          );
+        }
         
-        // Fallback for polling
+        // 2. Fallback for polling (Sync via localStorage)
         if (token) localStorage.setItem("google_auth_token", token);
         if (credential) localStorage.setItem("google_auth_credential", credential);
         
-        // Close self
-        setTimeout(() => window.close(), 500);
+        // 3. Auto-close if we are in a popup
+        if (window.opener || window.name === "google-auth") {
+          setTimeout(() => window.close(), 400);
+        }
       }
     }
+  }, []); // Run ONLY once on mount
 
+  useEffect(() => {
     // 2. Setup Global Android Bridge Listener (Once on mount)
     window.receiveAndroidToken = async (token) => {
       console.log("[FCM] Bridge: Received token from Android:", token);
