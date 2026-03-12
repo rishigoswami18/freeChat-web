@@ -1,5 +1,15 @@
 export const THEMES = [
   {
+    name: "bondbeyond",
+    label: "BondBeyond",
+    colors: ["#5a67d8", "#8b5cf6", "#75d1f0", "#ffffff"],
+  },
+  {
+    name: "bondbeyonddark",
+    label: "BondBeyond Dark",
+    colors: ["#15172a", "#8b5cf6", "#ec4899", "#ffffff"],
+  },
+  {
     name: "light",
     label: "Light",
     colors: ["#ffffff", "#5a67d8", "#8b5cf6", "#1a202c"],

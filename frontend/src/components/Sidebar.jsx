@@ -222,17 +222,17 @@ const Sidebar = () => {
               animate={{ scale: 1, opacity: 1 }}
               whileHover={{ y: -4, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="mx-3 mb-4 p-5 rounded-[28px] bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-700 shadow-2xl shadow-amber-500/30 border-t border-white/30 relative overflow-hidden group cursor-pointer"
+              className="mx-3 mb-4 p-5 rounded-[28px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 shadow-2xl shadow-purple-500/30 border-t border-white/20 relative overflow-hidden group cursor-pointer"
               onClick={async () => {
                 try {
                   const res = await claimDailyReward();
                   toast.success(res.message, {
-                    icon: '✨',
+                    icon: '💎',
                     style: {
                       borderRadius: '20px',
                       background: '#1a1a1a',
                       color: '#fff',
-                      border: '1px solid #f59e0b'
+                      border: '1px solid #8b5cf6'
                     }
                   });
                   queryClient.invalidateQueries({ queryKey: ["authUser"] });
@@ -256,19 +256,19 @@ const Sidebar = () => {
                     initial={{ opacity: 1, y: 0, x: 0, scale: 0.5, rotate: 0 }}
                     animate={{ opacity: 0, y: -120, x: -50, scale: 1.2, rotate: -270 }}
                     transition={{ duration: 1.2, ease: "easeOut", delay: 0.1 }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-6 bg-yellow-300 rounded-full pointer-events-none"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-6 bg-purple-300 rounded-full pointer-events-none"
                   />
                   <motion.div
                     initial={{ opacity: 1, y: 0, x: 0, scale: 0.5, rotate: 0 }}
                     animate={{ opacity: 0, y: -80, x: 60, scale: 1.8, rotate: 180 }}
                     transition={{ duration: 1.1, ease: "easeOut", delay: 0.2 }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-8 bg-amber-500 rounded-full pointer-events-none"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-8 bg-indigo-500 rounded-full pointer-events-none"
                   />
                   <motion.div
                     initial={{ opacity: 1, y: 0, x: 0, scale: 0.5, rotate: 0 }}
                     animate={{ opacity: 0, y: -150, x: 20, scale: 1.3, rotate: 45 }}
                     transition={{ duration: 1.3, ease: "easeOut", delay: 0.3 }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-7 bg-white rounded-full pointer-events-none"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-7 bg-pink-400 rounded-full pointer-events-none"
                   />
                 </>
               )}
@@ -349,7 +349,7 @@ const Sidebar = () => {
               alt="Profile"
               className="size-10 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all cursor-pointer"
             />
-            <div className="absolute -top-1 -right-1 bg-gradient-to-tr from-amber-400 to-amber-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded-full border border-white/20 shadow-lg luxe-shadow-gold">
+            <div className="absolute -top-1 -right-1 bg-gradient-to-tr from-cyan-400 to-blue-600 text-[8px] font-black text-white px-1.5 py-0.5 rounded-full border border-white/20 shadow-lg luxe-shadow-blue">
               {authUser?.gems || 0}💎
             </div>
             <div className="absolute bottom-0 right-0 size-3 bg-success rounded-full border-2 border-base-100" />

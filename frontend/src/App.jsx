@@ -75,7 +75,37 @@ const App = () => {
   }, [isAuthenticated, isOnboarded]);
 
   useEffect(() => {
-    // 1. Setup Global Android Bridge Listener (Once on mount)
+    // 1. Handle Google OAuth Redirect (Bridge for popups)
+    const hash = window.location.hash;
+    if (hash && (hash.includes("access_token") || hash.includes("id_token") || hash.includes("credential"))) {
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get("access_token");
+      const idToken = params.get("id_token");
+      const credential = params.get("credential");
+
+      const token = accessToken || idToken;
+
+      if (window.opener) {
+        // Send to opener window
+        window.opener.postMessage(
+          { 
+            type: "GOOGLE_OAUTH_TOKEN", 
+            token: token, 
+            credential: credential 
+          }, 
+          window.location.origin
+        );
+        
+        // Fallback for polling
+        if (token) localStorage.setItem("google_auth_token", token);
+        if (credential) localStorage.setItem("google_auth_credential", credential);
+        
+        // Close self
+        setTimeout(() => window.close(), 500);
+      }
+    }
+
+    // 2. Setup Global Android Bridge Listener (Once on mount)
     window.receiveAndroidToken = async (token) => {
       console.log("[FCM] Bridge: Received token from Android:", token);
       if (!token) return;
@@ -100,7 +130,7 @@ const App = () => {
       }
     };
 
-    // 2. Periodic Sync Check (for cases where token arrived before login)
+    // 3. Periodic Sync Check (for cases where token arrived before login)
     if (isAuthenticated && isOnboarded) {
       const syncStoredToken = async () => {
         const storedToken = localStorage.getItem("android_fcm_token");
