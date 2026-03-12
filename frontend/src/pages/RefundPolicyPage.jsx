@@ -40,7 +40,7 @@ const RefundPolicyPage = () => {
                     <p className="bg-base-200 p-6 rounded-2xl border border-base-300">
                         For any refund, cancellation, or billing queries, please reach out to our dedicated support team:
                         <br /><br />
-                        <span className="font-bold text-lg text-primary">goswamirishi83@gmail.com</span>
+                        <span className="font-bold text-lg text-primary">freechatweb00@gmail.com</span>
                         <br />
                         <span className="text-sm opacity-60 italic">Expected response time: Within 24-48 hours.</span>
                     </p>

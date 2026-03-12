@@ -62,7 +62,7 @@ const TermsPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">7. Contact Us</h2>
                     <p className="leading-relaxed">
-                        If you have any questions about these Terms, please contact us at <span className="text-primary font-bold italic">goswamirishi83@gmail.com</span>.
+                        If you have any questions about these Terms, please contact us at <span className="text-primary font-bold italic">freechatweb00@gmail.com</span>.
                     </p>
                 </section>
             </div>
