@@ -14,6 +14,9 @@ export const getAdminStats = async (req, res) => {
         const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const newUsers = await User.countDocuments({ createdAt: { $gte: last24h } });
         const newPosts = await Post.countDocuments({ createdAt: { $gte: last24h } });
+        
+        // Daily Active Users (logged in within last 24h)
+        const dailyActiveUsers = await User.countDocuments({ lastLoginDate: { $gte: last24h } });
 
         res.status(200).json({
             stats: {
@@ -22,7 +25,8 @@ export const getAdminStats = async (req, res) => {
                 memberUsers,
                 totalPosts,
                 newUsers,
-                newPosts
+                newPosts,
+                dailyActiveUsers
             }
         });
     } catch (error) {

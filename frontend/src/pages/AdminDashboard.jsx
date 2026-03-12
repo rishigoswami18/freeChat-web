@@ -502,8 +502,8 @@ const AdminDashboard = () => {
                                 { label: "Onboarded", val: stats.onboardedUsers, icon: CheckCircle2, color: "from-emerald-500 to-teal-600", light: "bg-emerald-500/10 text-emerald-600" },
                                 { label: "Members", val: stats.memberUsers, icon: Star, color: "from-amber-400 to-orange-500", light: "bg-amber-500/10 text-amber-600" },
                                 { label: "Total Posts", val: stats.totalPosts, icon: FileText, color: "from-purple-500 to-fuchsia-600", light: "bg-purple-500/10 text-purple-600" },
-                                { label: "Users (24h)", val: `+${stats.newUsers}`, icon: Users, color: "from-rose-500 to-pink-600", light: "bg-rose-500/10 text-rose-600" },
-                                { label: "Posts (24h)", val: `+${stats.newPosts}`, icon: FileText, color: "from-sky-500 to-blue-600", light: "bg-sky-500/10 text-sky-600" },
+                                { label: "Active Users (24h)", val: stats.dailyActiveUsers || 0, icon: UserCheck, color: "from-orange-500 to-red-600", light: "bg-orange-500/10 text-orange-600" },
+                                { label: "New Users (24h)", val: `+${stats.newUsers}`, icon: UserPlus, color: "from-rose-500 to-pink-600", light: "bg-rose-500/10 text-rose-600" },
                             ].map((s, i) => (
                                 <div key={i} className="relative group perspective-1000">
                                     <div className={`absolute -inset-0.5 bg-gradient-to-br ${s.color} rounded-[2.5rem] opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-500`}></div>
