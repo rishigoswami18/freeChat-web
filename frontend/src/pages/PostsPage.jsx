@@ -6,6 +6,8 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getFriends, getPosts } from "../lib/api";
 import StoryTray from "../components/StoryTray";
 import { PostSkeleton } from "../components/Skeletons";
+import { BadgeCheck, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useIntersection } from "../hooks/useIntersection";
 
 const PostsPage = () => {
@@ -72,8 +74,35 @@ const PostsPage = () => {
         <StoryTray />
       </div>
       
-      <div className="w-full sm:max-w-[470px] mx-auto mb-6">
+      <div className="w-full sm:max-w-[470px] mx-auto mb-6 space-y-6">
         <CreatePost onPost={addPost} authUser={authUser} />
+
+        {/* Verification Promotion Card */}
+        {!authUser?.isVerified && authUser?.role !== "admin" && (
+          <div className="card bg-gradient-to-br from-amber-500/20 via-primary/5 to-base-200 border-2 border-amber-500/20 shadow-xl overflow-hidden rounded-[32px] group relative">
+            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity">
+              <BadgeCheck className="size-24 text-amber-500" />
+            </div>
+            <div className="card-body p-6 flex-row items-center gap-5 relative">
+              <div className="size-16 rounded-[24px] bg-amber-500/10 flex items-center justify-center shrink-0 border border-amber-500/20">
+                <BadgeCheck className="size-8 text-amber-500 animate-pulse" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-amber-500/20 text-amber-600 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-amber-500/20">Premium Status</span>
+                </div>
+                <h3 className="text-xl font-black italic uppercase tracking-tighter text-amber-600">Get Verified</h3>
+                <p className="text-xs opacity-60 font-medium">Build trust and unlock exclusive profile features! ✨</p>
+              </div>
+              <Link 
+                to="/membership" 
+                className="hidden sm:flex size-10 rounded-full bg-amber-500 text-white items-center justify-center hover:scale-110 active:scale-90 transition-all shadow-lg shadow-amber-500/20"
+              >
+                <ArrowRight className="size-5" />
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="space-y-6">

@@ -293,7 +293,7 @@ const MobileDrawer = () => {
           <div className="flex items-center gap-3">
             <div
               className="avatar cursor-pointer active:scale-95 transition-transform"
-              onClick={() => setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+              onClick={() => setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName, isVerified: authUser?.isVerified || authUser?.role === "admin" })}
             >
               <div className="w-12 h-12 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden">
                 <img src={authUser?.profilePic || "/avatar.png"} alt="User Avatar" className="object-cover w-full h-full" />
@@ -303,7 +303,9 @@ const MobileDrawer = () => {
               <p className="font-bold text-base truncate flex items-center gap-1">
                 {authUser?.fullName}
                 {(authUser?.role === "admin" || authUser?.isVerified) && (
-                  <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
+                  <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                    <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                  </div>
                 )}
               </p>
               <p className="text-xs text-success flex items-center gap-1 font-medium">
@@ -379,6 +381,7 @@ const MobileDrawer = () => {
         <ProfilePhotoViewer
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
+          isVerified={viewingDP.isVerified}
           onClose={() => setViewingDP(null)}
           onUpdate={async (base64) => {
             await doUpdate({ profilePic: base64 });

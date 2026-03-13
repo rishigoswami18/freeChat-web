@@ -1,16 +1,38 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getRecommendedUsers } from "../lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getRecommendedUsers, sendFriendRequest, getOutgoingFriendReqs } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
+import { BadgeCheck, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 const RightSidebar = () => {
     const { authUser } = useAuthUser();
     
+    const queryClient = useQueryClient();
+
     // Fetch recommended users for "Suggested for you"
     const { data: recommendedUsers = [], isLoading } = useQuery({
         queryKey: ["users"],
         queryFn: getRecommendedUsers,
         staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    });
+
+    // Fetch outgoing requests to handle button states
+    const { data: outgoingRequests = [] } = useQuery({
+        queryKey: ["outgoingFriendReqs"],
+        queryFn: getOutgoingFriendReqs,
+        staleTime: 1000 * 60,
+    });
+
+    const { mutate: followUser, variables: pendingId } = useMutation({
+        mutationFn: sendFriendRequest,
+        onSuccess: () => {
+            toast.success("Request sent!");
+            queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] });
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || "Failed to follow");
+        }
     });
 
     // Take only the top 5 recommendations
@@ -31,8 +53,13 @@ const RightSidebar = () => {
                         />
                     </div>
                     <div>
-                        <div className="font-semibold text-[15px] leading-tight group-hover:text-white/70 transition-colors">
+                        <div className="font-semibold text-[15px] leading-tight group-hover:text-white/70 transition-colors flex items-center gap-1">
                             {authUser?.fullName?.replace(" ", "_").toLowerCase() || "user"}
+                            {(authUser?.isVerified || authUser?.role === "admin") && (
+                                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                   <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                </div>
+                            )}
                         </div>
                         <div className="text-[14px] text-white/50 font-normal mt-0.5">
                             {authUser?.fullName}
@@ -79,17 +106,36 @@ const RightSidebar = () => {
                                     />
                                 </div>
                                 <div className="min-w-0 flex flex-col justify-center">
-                                    <div className="font-semibold text-[14px] leading-tight group-hover:text-white/70 transition-colors truncate pb-0.5">
+                                    <div className="font-semibold text-[14px] leading-tight group-hover:text-white/70 transition-colors truncate pb-0.5 flex items-center gap-1">
                                         {user.fullName}
+                                        {(user.isVerified || user.role === "admin") && (
+                                            <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                               <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="text-[12px] text-white/50 font-normal truncate">
                                         {user.isTandemMatch ? "Suggested for you" : "New to BondBeyond"}
                                     </div>
                                 </div>
                             </Link>
-                            <button className="text-[12px] font-bold text-blue-500 hover:text-white transition-colors ml-2 flex-shrink-0">
-                                Follow
-                            </button>
+                            {outgoingRequests?.some(req => req.recipient?._id === user._id) ? (
+                                <span className="text-[12px] font-bold text-white/30 ml-2 flex-shrink-0 cursor-default">
+                                    Requested
+                                </span>
+                            ) : (
+                                <button 
+                                    onClick={() => followUser(user._id)}
+                                    disabled={pendingId === user._id}
+                                    className="text-[12px] font-bold text-blue-500 hover:text-white transition-colors ml-2 flex-shrink-0 disabled:opacity-50"
+                                >
+                                    {pendingId === user._id ? (
+                                        <Loader2 className="size-3 animate-spin" />
+                                    ) : (
+                                        "Follow"
+                                    )}
+                                </button>
+                            )}
                         </div>
                     ))
                 ) : (

@@ -572,7 +572,12 @@ const AdminDashboard = () => {
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-sm tracking-tight">{u.fullName}</div>
+                                                            <div className="font-bold text-sm tracking-tight flex items-center gap-1">
+                                                                {u.fullName}
+                                                                {(u.isVerified || u.role === "admin") && (
+                                                                    <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                                                )}
+                                                            </div>
                                                             <div className="text-[10px] opacity-40 italic">{u.email}</div>
                                                         </div>
                                                     </div>
@@ -650,10 +655,15 @@ const AdminDashboard = () => {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <img src={post.userId?.profilePic || "/avatar.png"} alt="" className="size-8 rounded-full" />
-                                            <div>
-                                                <p className="text-xs font-bold tracking-tight">{post.userId?.fullName}</p>
-                                                <p className="text-[9px] opacity-40 font-mono italic">{new Date(post.createdAt).toLocaleString()}</p>
-                                            </div>
+                                                <div>
+                                                    <p className="text-xs font-bold tracking-tight flex items-center gap-1">
+                                                        {post.userId?.fullName}
+                                                        {(post.userId?.isVerified || post.userId?.role === "admin") && (
+                                                            <BadgeCheck className="size-3 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                                        )}
+                                                    </p>
+                                                    <p className="text-[9px] opacity-40 font-mono italic">{new Date(post.createdAt).toLocaleString()}</p>
+                                                </div>
                                         </div>
                                         <button
                                             onClick={() => handleDeletePost(post._id)}

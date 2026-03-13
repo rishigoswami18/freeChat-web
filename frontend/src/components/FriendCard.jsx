@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, BadgeCheck } from "lucide-react";
 import { useState } from "react";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import { LANGUAGE_TO_FLAG } from "../constants";
@@ -25,8 +25,11 @@ const FriendCard = ({ friend }) => {
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-base-200" />
           </div>
           <Link to={`/user/${friend._id}`} className="flex-1 min-w-0 hover:text-primary transition-colors">
-            <h3 className="font-semibold text-sm truncate">
+            <h3 className="font-semibold text-sm truncate flex items-center gap-1">
               {friend.fullName}
+              {(friend.isVerified || friend.role === "admin") && (
+                <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+              )}
             </h3>
             <p className="text-[11px] text-base-content/40 font-medium">
               @{friend.username || "user"}
@@ -58,6 +61,7 @@ const FriendCard = ({ friend }) => {
         <ProfilePhotoViewer
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
+          isVerified={friend.isVerified || friend.role === "admin"}
           onClose={() => setViewingDP(null)}
         />
       )}

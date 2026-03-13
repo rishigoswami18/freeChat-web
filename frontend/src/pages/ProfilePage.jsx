@@ -537,6 +537,7 @@ const ProfilePage = () => {
                     <ProfilePhotoViewer
                         imageUrl={viewingDP.url}
                         fullName={viewingDP.name}
+                        isVerified={authUser?.isVerified || authUser?.role === "admin"}
                         onClose={() => setViewingDP(null)}
                         onUpdate={async (base64) => {
                             await doUpdate({ profilePic: base64 });
@@ -577,9 +578,11 @@ const ProfilePage = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <h1 className="text-xl font-bold tracking-tight truncate max-w-xs mx-auto sm:mx-0 flex items-center justify-center sm:justify-start gap-1">
                             @{authUser?.username || 'user'}
-                            {(authUser?.role === "admin" || authUser?.isVerified) && (
-                                <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
-                            )}
+                             {(authUser?.role === "admin" || authUser?.isVerified) && (
+                                 <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                   <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                 </div>
+                             )}
                         </h1>
                     </div>
 
@@ -717,6 +720,7 @@ const ProfilePage = () => {
                     <ProfilePhotoViewer
                         imageUrl={viewingDP.url}
                         fullName={viewingDP.name}
+                        isVerified={authUser?.isVerified || authUser?.role === "admin"}
                         onClose={() => setViewingDP(null)}
                     />
                 )
@@ -769,7 +773,9 @@ const FriendsListModal = ({ isOpen, onClose }) => {
                                         <Link to={`/user/${friend._id}`} onClick={onClose} className="font-bold text-sm block truncate hover:text-primary transition-colors flex items-center gap-1">
                                             {friend.fullName}
                                             {(friend.role === "admin" || friend.isVerified) && (
-                                                <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+                                                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                                   <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                                </div>
                                             )}
                                         </Link>
                                         <p className="text-[10px] opacity-40 truncate">@{friend.username || 'user'}</p>

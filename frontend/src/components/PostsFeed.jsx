@@ -158,7 +158,7 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
           {/* Story Ring Avatar */}
           <div 
             className="rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-fuchsia-600 p-[2px] cursor-pointer hover:scale-[1.02] transition-transform"
-            onClick={() => setViewingDP({ url: post.profilePic, name: post.fullName })}
+            onClick={() => setViewingDP({ url: post.profilePic, name: post.fullName, isVerified: post.isVerified || post.role === "admin" })}
           >
             <div className="avatar w-8 h-8 rounded-full border-[1.5px] border-base-100 overflow-hidden bg-base-300">
               {post.profilePic ? (
@@ -177,7 +177,9 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
                 {post.fullName || "user"}
               </Link>
               {(post.role === "admin" || post.isVerified) && (
-                <BadgeCheck className="size-3.5 text-blue-500 fill-blue-500" />
+                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                   <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                </div>
               )}
               <span className="mx-1 text-base-content/40 text-[10px]">•</span>
               <span className="text-base-content/40 text-[13px]">{timeAgoShort(post.createdAt)}</span>
@@ -290,9 +292,16 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
       {/* Caption line */}
       {post.mediaUrl && post.content && (
         <div className="px-0 text-[14px] leading-[18px] mb-2">
-          <Link to={`/user/${post.userId}`} className="font-semibold hover:opacity-50 mr-1.5 tracking-tight">
-            {post.fullName || "user"}
-          </Link>
+          <div className="flex items-center gap-1 inline-flex">
+            <Link to={`/user/${post.userId}`} className="font-semibold hover:opacity-50 tracking-tight">
+              {post.fullName || "user"}
+            </Link>
+            {(post.isVerified || post.role === "admin") && (
+                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                   <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                </div>
+            )}
+          </div>
           {post.caption && (
             <span className="text-[14px] mr-1">
               {emotionEmoji[post.caption.toLowerCase()]} {post.caption}
@@ -345,8 +354,15 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
               </div>
               <div className="flex-1 text-[14px] leading-[18px]">
                 <p>
-                  <span className="font-semibold mr-1.5 cursor-pointer hover:opacity-50">{comment.fullName}</span>
-                  <span className="break-words">{comment.text}</span>
+                  <div className="flex items-center flex-wrap gap-x-1">
+                    <span className="font-semibold cursor-pointer hover:opacity-50">{comment.fullName}</span>
+                    {(comment.isVerified || comment.role === "admin") && (
+                        <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                           <BadgeCheck className="size-3 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                        </div>
+                    )}
+                    <span className="break-words ml-0.5">{comment.text}</span>
+                  </div>
                 </p>
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-base-content/50 font-medium">
                   <span>{timeAgoShort(comment.createdAt || Date.now())}</span>
@@ -423,6 +439,7 @@ const PostsFeed = ({ posts, setPosts }) => {
         <ProfilePhotoViewer
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
+          isVerified={viewingDP.isVerified}
           onClose={() => setViewingDP(null)}
         />
       )}

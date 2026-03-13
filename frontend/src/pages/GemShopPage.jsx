@@ -34,12 +34,12 @@ const gemPacks = [
 const shopItems = [
     {
         id: "verify",
-        name: "Verification Badge",
-        description: "Get the golden ✓ badge on your profile & posts",
+        name: "Professional Verification",
+        description: "Official blue ✓ badge on your profile & posts",
         cost: 1000,
         icon: BadgeCheck,
-        color: "text-amber-500",
-        bg: "bg-amber-500/10",
+        color: "text-white fill-[#1d9bf0]",
+        bg: "bg-[#1d9bf0]/10",
         action: "verify",
     },
     {

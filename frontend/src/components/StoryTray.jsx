@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getStories } from "../lib/api";
-import { Plus } from "lucide-react";
+import { Plus, BadgeCheck } from "lucide-react";
 import { useState } from "react";
 import StoryViewer from "./StoryViewer";
 import useAuthUser from "../hooks/useAuthUser";
@@ -45,8 +45,14 @@ const StoryTray = () => {
                         />
                     </div>
                     {/* Instagram-style blue plus badge */}
-                    <div className="absolute bottom-1 right-1 size-5 bg-[#0095f6] rounded-full border-[2.5px] border-base-100 shadow-sm flex items-center justify-center translate-x-1 translate-y-1 z-10">
-                        <Plus className="size-3 text-white" strokeWidth={4} />
+                    <div className="absolute bottom-1 right-1 size-5 bg-white rounded-full border-[2.5px] border-base-100 shadow-sm flex items-center justify-center translate-x-1 translate-y-1 z-10 overflow-hidden">
+                        {authUser?.isVerified || authUser?.role === "admin" ? (
+                            <BadgeCheck className="size-full text-white fill-[#1d9bf0]" strokeWidth={2} />
+                        ) : (
+                            <div className="size-full bg-[#0095f6] flex items-center justify-center">
+                                <Plus className="size-3 text-white" strokeWidth={4} />
+                            </div>
+                        )}
                     </div>
                     {/* Subtle hover overlay */}
                     <div className="absolute inset-[3px] rounded-full bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
@@ -72,6 +78,11 @@ const StoryTray = () => {
                                     className="size-full object-cover group-hover/story:scale-105 transition-transform duration-500"
                                 />
                             </div>
+                            {(group.role === "admin" || group.isVerified) && (
+                                <div className="absolute bottom-1 right-1 size-5 bg-white rounded-full border-[2.5px] border-base-100 shadow-sm flex items-center justify-center translate-x-1 translate-y-1 z-10">
+                                   <BadgeCheck className="size-full text-white fill-[#1d9bf0]" strokeWidth={2} />
+                                </div>
+                            )}
                         </div>
                         <span className="text-[11px] font-medium truncate w-full text-center opacity-60 tracking-tight group-hover/story:opacity-100 transition-opacity">
                             {group.userId === authUser?._id ? "your story" : group.fullName.split(" ")[0].toLowerCase()}

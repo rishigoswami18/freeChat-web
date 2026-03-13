@@ -48,7 +48,7 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                                     key={user._id}
                                     className="flex items-center gap-3 p-3 rounded-2xl transition-all hover:bg-base-200 active:scale-[0.98] group"
                                 >
-                                    <div className="avatar cursor-pointer" onClick={() => setViewingDP({ url: user.profilePic || "/avatar.png", name: user.fullName })}>
+                                    <div className="avatar cursor-pointer" onClick={() => setViewingDP({ url: user.profilePic || "/avatar.png", name: user.fullName, isVerified: user.isVerified || user.role === "admin" })}>
                                         <div className="size-12 rounded-full ring-2 ring-primary/10 group-hover:ring-primary/40 transition-all overflow-hidden bg-base-300">
                                             <img src={user.profilePic || "/avatar.png"} alt={user.fullName} className="object-cover w-full h-full" />
                                         </div>
@@ -57,9 +57,11 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                                         <Link to={`/user/${user._id}`} onClick={onClose} className="hover:text-primary transition-colors">
                                             <p className="font-bold text-sm block truncate flex items-center gap-1">
                                                 {user.fullName}
-                                                {(user.role === "admin" || user.isVerified) && (
-                                                    <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
-                                                )}
+                                            {(user.role === "admin" || user.isVerified) && (
+                                                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                                   <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                                </div>
+                                            )}
                                             </p>
                                         </Link>
                                         <div className="flex items-center gap-1.5 overflow-hidden">
@@ -94,6 +96,7 @@ const LikedByModal = ({ isOpen, onClose, postId }) => {
                 <ProfilePhotoViewer
                     imageUrl={viewingDP.url}
                     fullName={viewingDP.name}
+                    isVerified={viewingDP.isVerified}
                     onClose={() => setViewingDP(null)}
                 />
             )}

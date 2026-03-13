@@ -220,6 +220,11 @@ const Sidebar = () => {
                 alt="Profile"
                 className={`size-7 rounded-full object-cover transition-transform duration-200 group-hover/nav:scale-105 ${currentPath === "/profile" ? "ring-2 ring-base-content ring-offset-2 ring-offset-base-100" : ""}`}
              />
+             {(authUser?.isVerified || authUser?.role === "admin") && (
+                <div className="absolute -bottom-1 -right-1 size-3.5 bg-white rounded-full flex items-center justify-center p-[1px] shadow-sm ring-1 ring-base-content/5 overflow-hidden">
+                   <BadgeCheck className="size-full text-white fill-[#1d9bf0]" strokeWidth={2} />
+                </div>
+             )}
           </div>
           <span className={`hidden xl:block text-[16px] tracking-tight truncate ${currentPath === "/profile" ? "" : "opacity-90"}`}>
             Profile
@@ -321,6 +326,7 @@ const Sidebar = () => {
         <ProfilePhotoViewer
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
+          isVerified={authUser?.isVerified || authUser?.role === "admin"}
           onClose={() => setViewingDP(null)}
           onUpdate={async (base64) => {
             await doUpdate({ profilePic: base64 });

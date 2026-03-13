@@ -260,7 +260,7 @@ const EmotionMessage = memo((props) => {
       style={{ contain: 'layout style' }}
     >
       {isSnap ? (
-        <div className={`flex flex-col ${isMyMessage ? "items-end pr-4" : "items-start pl-12"} mb-3`}>
+        <div className={`flex flex-col ${isMyMessage ? "items-end pr-3" : "items-start pl-10"} mb-3`}>
           {isViewed ? (
             <div className="flex items-center gap-2 bg-base-200/40 px-3.5 py-1.5 rounded-full border border-base-300/50 opacity-50 select-none">
               <CheckCheck className="size-3.5 text-success/70" />
@@ -283,7 +283,7 @@ const EmotionMessage = memo((props) => {
           {isViewingSnap && <SnapViewer message={message} onClose={handleMarkViewed} />}
         </div>
       ) : isVoice ? (
-        <div className={`flex flex-col ${isMyMessage ? "items-end pr-4" : "items-start pl-12"} mb-3`}>
+        <div className={`flex flex-col ${isMyMessage ? "items-end pr-3" : "items-start pl-10"} mb-3`}>
           <VoiceMessagePlayer
             url={message.mediaUrl || extra.mediaUrl}
             duration={message.duration || extra.duration}
@@ -291,7 +291,7 @@ const EmotionMessage = memo((props) => {
           />
         </div>
       ) : (
-        <div className={`w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'} px-2`}>
+        <div className={`w-full flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
           <div
             className={`message-bubble-scaling flex flex-col ${isMyMessage ? 'items-end' : 'items-start'} max-w-[85%] sm:max-w-none ${isWhisper ? 'opacity-60' : ''}`}
             style={{
@@ -320,7 +320,7 @@ const EmotionMessage = memo((props) => {
         </div>
       )}
 
-      <div className={`flex flex-col ${isMyMessage ? "items-end mr-14" : "items-start ml-14"} -mt-1 mb-1 gap-1.5`}>
+      <div className={`flex flex-col ${isMyMessage ? "items-end mr-12" : "items-start ml-12"} -mt-1 mb-1 gap-1.5`}>
         <div className="flex items-center gap-3">
           {emotionStyle && (
             <div className="flex items-center gap-1.5 opacity-70">

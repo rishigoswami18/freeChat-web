@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Heart, MessageCircle, Share2, Play, Pause, Music, Send, X, Loader2, FastForward, Rewind, Settings, Maximize, Minimize, Gift, CheckCircle, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, Share2, Play, Pause, Music, Send, X, Loader2, FastForward, Rewind, Settings, Maximize, Minimize, Gift, BadgeCheck, ExternalLink } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { likePost, commentOnPost, sharePost, sendGift } from "../lib/api";
 import toast from "react-hot-toast";
@@ -344,7 +344,7 @@ const ReelPost = ({ post, isActive }) => {
                             <div>
                                 <div className="flex items-center gap-1">
                                     <h3 className="font-bold text-base drop-shadow-md">@{post.fullName?.replace(/\s+/g, '').toLowerCase() || 'user'}</h3>
-                                    <CheckCircle className="size-4 text-primary fill-white" />
+                                    <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
                                 </div>
                                 <span className="text-[10px] text-primary font-black uppercase tracking-widest pl-0.5">Sponsored</span>
                             </div>
@@ -357,7 +357,7 @@ const ReelPost = ({ post, isActive }) => {
                             <div>
                                 <div className="flex items-center gap-1">
                                     <h3 className="font-bold text-base drop-shadow-md group-hover:text-primary transition-colors">@{post.fullName?.replace(/\s+/g, '').toLowerCase() || 'user'}</h3>
-                                    {post.isVerified && <CheckCircle className="size-4 text-primary fill-white" />}
+                                    {post.isVerified && <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />}
                                 </div>
                                 <p className="text-[10px] opacity-60 font-medium">View Profile</p>
                             </div>

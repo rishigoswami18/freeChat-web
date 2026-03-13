@@ -1,4 +1,4 @@
-import { X, Camera, Loader2 } from "lucide-react";
+import { X, Camera, Loader2, BadgeCheck } from "lucide-react";
 import { useState } from "react";
 
 /**
@@ -8,7 +8,7 @@ import { useState } from "react";
  * @param {function} onClose - Function to close the viewer.
  * @param {function} onUpdate - Optional. If provided, shows an Update button and handles base64 upload.
  */
-const ProfilePhotoViewer = ({ imageUrl, fullName, onClose, onUpdate }) => {
+const ProfilePhotoViewer = ({ imageUrl, fullName, isVerified, onClose, onUpdate }) => {
     const [isUpdating, setIsUpdating] = useState(false);
     const isOwn = onUpdate !== undefined;
 
@@ -82,8 +82,13 @@ const ProfilePhotoViewer = ({ imageUrl, fullName, onClose, onUpdate }) => {
                     />
 
                     <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-full text-center">
-                        <h2 className="text-white font-black text-lg sm:text-2xl tracking-tight drop-shadow-lg">
+                        <h2 className="text-white font-black text-lg sm:text-2xl tracking-tight drop-shadow-lg flex items-center justify-center gap-2">
                             {fullName}
+                            {(isVerified) && (
+                                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                   <BadgeCheck className="size-6 sm:size-7 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                </div>
+                            )}
                         </h2>
                     </div>
                 </div>

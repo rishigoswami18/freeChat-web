@@ -555,7 +555,7 @@ body.is-chat-active {
 
 /* ===== Message List ===== */
 .str-chat__list {
-  padding: 8px 6px;
+  padding: 8px 0px;
   background: oklch(var(--b1));
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;

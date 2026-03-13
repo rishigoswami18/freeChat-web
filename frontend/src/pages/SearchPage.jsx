@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRecommendedUsers, sendFriendRequest } from "../lib/api";
-import { Search, UserPlus, Check, X, Loader2, Star } from "lucide-react";
+import { Search, UserPlus, Check, X, Loader2, Star, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { ChatSkeleton } from "../components/Skeletons";
 
@@ -77,6 +77,11 @@ const SearchPage = () => {
                             <Link to={`/user/${user._id}`} className="flex-1 min-w-0 group-hover:text-primary transition-colors">
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-bold text-base tracking-tight">{user.fullName}</h3>
+                                    {(user.role === "admin" || user.isVerified) && (
+                                        <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                            <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                        </div>
+                                    )}
                                     {user.isTandemMatch && (
                                         <span className="badge badge-primary badge-sm gap-1 py-2.5 font-bold animate-pulse">
                                             <Star className="size-3 fill-current" />

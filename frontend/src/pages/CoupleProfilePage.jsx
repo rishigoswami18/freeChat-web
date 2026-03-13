@@ -42,6 +42,7 @@ import {
     Rocket,
     CheckCircle2,
     Calendar,
+    BadgeCheck,
 } from "lucide-react";
 import { Flame } from "lucide-react";
 import { motion } from "framer-motion";
@@ -336,7 +337,6 @@ const CoupleProfilePage = () => {
                                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
                             </>
                         )}
-                        |
                         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-8">
                             <div className="flex items-center gap-8">
                                 <motion.div
@@ -657,8 +657,16 @@ const CoupleProfilePage = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <h2 className="text-xl sm:text-2xl font-black italic tracking-tight uppercase">
-                                    {authUser?.fullName?.split(' ')[0] || "You"} & {partner?.fullName?.split(' ')[0] || "Partner"}
+                                <h2 className="text-xl sm:text-2xl font-black italic tracking-tight uppercase flex items-center justify-center gap-1">
+                                    {authUser?.fullName?.split(' ')[0] || "You"}
+                                    {(authUser?.isVerified || authUser?.role === "admin") && (
+                                        <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                    )}
+                                    <span className="mx-1">&</span>
+                                    {partner?.fullName?.split(' ')[0] || "Partner"}
+                                    {(partner?.isVerified || partner?.role === "admin") && (
+                                        <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                    )}
                                     {coupleData?.isCoupledWithAI && (
                                         <button
                                             onClick={() => setIsLinkingAI(true)}

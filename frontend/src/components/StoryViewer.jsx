@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Trash2, ChevronLeft, ChevronRight, Eye, Heart, MessageCircle, Send } from "lucide-react";
+import { X, Trash2, ChevronLeft, ChevronRight, Eye, Heart, MessageCircle, Send, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import { viewStory, likeStory, commentOnStory } from "../lib/api";
@@ -199,13 +199,20 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setIsPaused(true);
-                                        setViewingDP({ url: group.profilePic || "/avatar.png", name: group.fullName });
+                                        setViewingDP({ url: group.profilePic || "/avatar.png", name: group.fullName, isVerified: group.isVerified || group.role === "admin" });
                                     }}
                                 >
                                     <img src={group.profilePic || "/avatar.png"} alt="" className="size-full rounded-full object-cover border-[1.5px] border-black" />
                                 </div>
                                 <div className="min-w-0 pr-2">
-                                    <p className="font-semibold text-[13px] tracking-tight truncate drop-shadow-md text-white">{group.fullName}</p>
+                                    <p className="font-semibold text-[13px] tracking-tight truncate drop-shadow-md text-white flex items-center gap-1">
+                                        {group.fullName}
+                                        {(group.role === "admin" || group.isVerified) && (
+                                            <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                               <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                            </div>
+                                        )}
+                                    </p>
                                     <p className="text-[10px] font-medium opacity-70 drop-shadow-md">
                                         {new Date(story.createdAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
                                     </p>
@@ -429,9 +436,14 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                                                 <img src={comment.profilePic || "/avatar.png"} alt="" className="size-full object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0 pt-0.5">
-                                                <p className="text-[13px] leading-snug break-words">
-                                                    <span className="font-semibold mr-1.5">{comment.fullName}</span>
-                                                    {comment.text}
+                                                <p className="text-[13px] leading-snug break-words flex items-center flex-wrap gap-x-1">
+                                                    <span className="font-semibold">{comment.fullName}</span>
+                                                    {(comment.isVerified || comment.role === "admin") && (
+                                                       <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                                          <BadgeCheck className="size-3 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                                       </div>
+                                                    )}
+                                                    <span>{comment.text}</span>
                                                 </p>
                                                 <p className="font-medium opacity-50 mt-1 text-[11px]">
                                                     {new Date(comment.createdAt).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })}
@@ -517,7 +529,14 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                                                 <div className="size-11 rounded-full overflow-hidden bg-base-300 border border-base-content/5">
                                                     <img src={viewer.profilePic} alt="" className="size-full object-cover" />
                                                 </div>
-                                                <p className="font-semibold text-[14px]">{viewer.fullName}</p>
+                                                <p className="font-semibold text-[14px] flex items-center gap-1">
+                                                   {viewer.fullName}
+                                                   {(viewer.isVerified || viewer.role === "admin") && (
+                                                       <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                                          <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                                       </div>
+                                                   )}
+                                                </p>
                                             </div>
                                             <button className="text-[12px] font-bold text-blue-500 hover:text-white px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-lg transition-colors">
                                                 View
@@ -540,6 +559,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                 <ProfilePhotoViewer
                     imageUrl={viewingDP.url}
                     fullName={viewingDP.name}
+                    isVerified={viewingDP.isVerified}
                     onClose={() => {
                         setViewingDP(null);
                         setIsPaused(false);

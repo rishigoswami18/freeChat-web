@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceptFriendRequest, getFriendRequests } from "../lib/api";
-import { Bell, Clock, MessageSquare, UserCheck, Inbox, Heart, Sparkles, CheckCircle2 } from "lucide-react";
+import { Bell, Clock, MessageSquare, UserCheck, Inbox, Heart, Sparkles, CheckCircle2, BadgeCheck } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import { ChatSkeleton } from "../components/Skeletons";
 import { motion, AnimatePresence } from "framer-motion";
@@ -121,8 +121,13 @@ const NotificationsPage = () => {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-black text-base-content truncate group-hover:text-primary transition-colors">
+                          <h3 className="text-lg font-black text-base-content truncate group-hover:text-primary transition-colors flex items-center gap-1.5">
                             {request.sender.fullName}
+                            {(request.sender.isVerified || request.sender.role === "admin") && (
+                                <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                   <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                </div>
+                            )}
                           </h3>
                           <div className="flex flex-wrap gap-2 mt-2">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-black rounded-full border border-secondary/10">
@@ -174,7 +179,14 @@ const NotificationsPage = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-black text-sm">{notification.recipient.fullName}</h3>
+                            <h3 className="font-black text-sm flex items-center gap-1">
+                                {notification.recipient.fullName}
+                                {(notification.recipient.isVerified || notification.recipient.role === "admin") && (
+                                    <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                       <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                    </div>
+                                )}
+                            </h3>
                             <span className="size-1 bg-base-content/20 rounded-full" />
                             <span className="text-[10px] text-success font-black uppercase tracking-widest flex items-center gap-1">
                               <CheckCircle2 className="size-3" />

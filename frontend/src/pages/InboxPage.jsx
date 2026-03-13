@@ -240,7 +240,7 @@ const InboxPage = () => {
                                 <div className="relative flex-shrink-0" onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    setViewingDP({ url: conv.partner.avatar, name: conv.partner.name });
+                                    setViewingDP({ url: conv.partner.avatar, name: conv.partner.name, isVerified: conv.partner.isVerified || conv.partner.role === "admin" });
                                 }}>
                                     <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 shrink-0">
                                         <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
@@ -253,7 +253,9 @@ const InboxPage = () => {
                                     <h2 className="font-medium text-[15px] text-white truncate flex items-center gap-1.5 leading-tight">
                                         {conv.partner.name}
                                         {(conv.partner.role === "admin" || conv.partner.isVerified) && (
-                                            <BadgeCheck className="size-3.5 text-blue-500 fill-blue-500" />
+                                            <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                                               <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                                            </div>
                                         )}
                                     </h2>
                                     <div className="flex items-center gap-1.5 mt-0.5">
@@ -293,6 +295,7 @@ const InboxPage = () => {
                 <ProfilePhotoViewer
                     imageUrl={viewingDP.url}
                     fullName={viewingDP.name}
+                    isVerified={viewingDP.isVerified}
                     onClose={() => setViewingDP(null)}
                 />
             )}

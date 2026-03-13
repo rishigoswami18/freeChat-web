@@ -35,7 +35,7 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
 
   return (
     <div className="flex-shrink-0 z-50 bg-black backdrop-blur-md pb-safe">
-      <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-[600px] mx-auto w-full border-t border-white/10">
+      <div className="flex flex-col gap-2 p-2 sm:p-3 sm:max-w-[600px] mx-auto w-full border-t border-white/10">
         {showShoutSlider && (
           <div className="flex items-center gap-4 bg-white/5 px-4 py-3 rounded-2xl shadow-xl mb-1 border border-white/10">
             <input
@@ -334,7 +334,7 @@ const ChatPage = () => {
 
   return (
     <div
-      className="absolute inset-0 flex flex-col bg-black text-white font-outfit overflow-hidden w-full max-w-[600px] mx-auto border-x border-white/10"
+      className="absolute inset-0 flex flex-col bg-black text-white font-outfit overflow-hidden w-full sm:max-w-[600px] mx-auto sm:border-x border-white/10"
       style={{
         height: `${viewportHeight}px`,
         top: window.visualViewport?.offsetTop || 0,

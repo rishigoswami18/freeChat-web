@@ -239,7 +239,7 @@ const ChatHeader = memo(() => {
                     <ArrowLeft className="size-5 sm:size-6 text-white group-active:scale-90 transition-transform" strokeWidth={2} />
                 </button>
 
-                <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name })}>
+                <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name, isVerified: user?.isVerified || user?.role === "admin" })}>
                     <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-white/10 bg-black shrink-0">
                         <img src={displayData.image} alt={displayData.name} className="object-cover w-full h-full" />
                     </div>
@@ -252,7 +252,9 @@ const ChatHeader = memo(() => {
                     <h3 className="font-semibold text-[15px] sm:text-[16px] leading-tight truncate text-white flex items-center gap-1.5">
                         {displayData.name}
                         {(user?.role === "admin" || user?.isVerified) && (
-                            <BadgeCheck className="size-3.5 text-blue-500 fill-blue-500" />
+                            <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                               <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                            </div>
                         )}
                         {isPartner && <Heart className="size-3.5 text-pink-500 fill-pink-500 ml-0.5" />}
                     </h3>
@@ -307,6 +309,7 @@ const ChatHeader = memo(() => {
                 <ProfilePhotoViewer
                     imageUrl={viewingDP.url}
                     fullName={viewingDP.name}
+                    isVerified={viewingDP.isVerified}
                     onClose={() => setViewingDP(null)}
                 />
             )}

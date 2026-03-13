@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { createPost, getSongs } from "../lib/api";
-import { ImageIcon, VideoIcon, X, Loader2, Play } from "lucide-react";
+import { ImageIcon, VideoIcon, X, Loader2, Play, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -202,6 +202,11 @@ const CreatePost = ({ onPost, authUser }) => {
               alt={authUser?.fullName}
               className="object-cover w-full h-full"
             />
+            {(authUser?.isVerified || authUser?.role === "admin") && (
+              <div className="absolute -bottom-1 -right-1 size-4 bg-white rounded-full flex items-center justify-center p-[1px] shadow-sm ring-1 ring-base-content/5 overflow-hidden">
+                <BadgeCheck className="size-full text-white fill-[#1d9bf0]" strokeWidth={2} />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex-1 min-w-0 relative group">

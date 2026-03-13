@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFriends, unfriend } from "../lib/api";
-import { User, MessageSquare, UserMinus, Loader2, Users, Sparkles, UserPlus } from "lucide-react";
+import { User, MessageSquare, UserMinus, Loader2, Users, Sparkles, UserPlus, BadgeCheck } from "lucide-react";
 import NoNotificationsFound from "../components/NoNotificationsFound";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -130,8 +130,13 @@ const FriendsPage = () => {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <Link to={`/user/${friend._id}`} className="hover:text-primary transition-colors">
+                      <Link to={`/user/${friend._id}`} className="hover:text-primary transition-colors flex items-center gap-1">
                         <h3 className="font-semibold text-sm sm:text-base truncate">{friend.fullName}</h3>
+                        {(friend.role === "admin" || friend.isVerified) && (
+                          <div className="flex items-center justify-center shrink-0" title="Verified Professional">
+                             <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
+                          </div>
+                        )}
                       </Link>
                       <div className="flex flex-wrap gap-1 mt-0.5">
                         <span className="badge badge-xs sm:badge-sm badge-outline">
