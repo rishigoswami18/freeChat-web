@@ -236,11 +236,13 @@ router.put("/accept/:id", async (req, res) => {
 
         const now = new Date();
         me.coupleStatus = "coupled";
+        me.isCoupledWithAI = false; // Disconnect virtual partner if transitioning to humans
         me.anniversary = now;
         me.coupleRequestSenderId = null;
         await me.save();
 
         partner.coupleStatus = "coupled";
+        partner.isCoupledWithAI = false; // Disconnect their virtual partner too
         partner.anniversary = now;
         partner.coupleRequestSenderId = null;
         await partner.save();

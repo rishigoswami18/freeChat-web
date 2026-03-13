@@ -15,6 +15,7 @@ export const processAINotes = async () => {
         // OR whose note has NEVER been updated.
         const users = await User.find({
             isCoupledWithAI: true,
+            partnerId: null, // Ensure they do not have a real human partner
             $or: [
                 { romanticNoteLastUpdated: { $lte: oneDayAgo } },
                 { romanticNoteLastUpdated: null }
