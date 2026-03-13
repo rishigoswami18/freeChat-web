@@ -110,7 +110,7 @@ const ReelPost = ({ post, isActive }) => {
                     event: 'command',
                     func: command,
                     args: ''
-                }), '*');
+                }), 'https://www.youtube.com');
             } catch (err) {
                 console.error("YouTube postMessage error:", err);
             }

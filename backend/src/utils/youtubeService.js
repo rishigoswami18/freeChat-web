@@ -10,6 +10,7 @@ const CURATED_SHORTS = [
     { id: "svJlZpJ-_Hc", title: "Iced coffee rocks! ☕", author: "Zach King" },
     { id: "8Wj8G-299sM", title: "The Magic Chalk 🖍️", author: "Zach King" },
     { id: "uC3V_K774I4", title: "Floating Coffee ☕", author: "Zach King" },
+    { id: "QvshXF8O6OQ", title: "3D Graffiti Magic 🎨", author: "Zach King" },
 
     // --- DANIEL LABELLE (Comedy) ---
     { id: "3N1Daeo8QoM", title: "If Cleaning Was a Timed Sport 🧹", author: "Daniel LaBelle" },
@@ -17,10 +18,11 @@ const CURATED_SHORTS = [
     { id: "XXuIoPSAXRE", title: "Running vs Walking 🏃", author: "Daniel LaBelle" },
     { id: "uK4btYaLcto", title: "The Art of Sneaking 🤫", author: "Daniel LaBelle" },
     { id: "S6UreNq6Bik", title: "People who are always late ⏰", author: "Daniel LaBelle" },
+    { id: "p4cQuW6u9qE", title: "If animals acted like people 🐕", author: "Daniel LaBelle" },
 
     // --- SATISFYING & ASMR ---
     { id: "n799T_W3yH8", title: "Hydro Dipping Masterpiece 🌊", author: "Art Hub" },
-    { id: "qA3vY_767f4", title: "Restoration of Antique Car 🏎️", author: "Restore Pro" },
+    { id: "FvNpE_U8B-s", title: "Satisfying Soap Cutting 🧼", author: "ASMR Bliss" },
     { id: "rS_8u8w-H-A", title: "Satisfying Hydraulic Press 💎", author: "Press Guru" },
     { id: "3N0F-S-H_hE", title: "Oddly Satisfying Sand ⏳", author: "Zen Space" },
 
@@ -28,17 +30,17 @@ const CURATED_SHORTS = [
     { id: "G9NRzrx7m4U", title: "Switzerland: Heaven on Earth 🏔️", author: "Travel Pro" },
     { id: "X6wbeR-N-i4", title: "Stunning Iceland Views ❄️", author: "Sky Watcher" },
     { id: "N6O_v-8-vG0", title: "Hidden Gems in Japan 🇯🇵", author: "Wanderlust" },
-    { id: "S6u_w-9-vH1", title: "Deep Sea Giants 🐳", author: "Nature Bliss" },
+    { id: "f_WvA2mFkU8", title: "Majestic Waterfall 🌊", author: "Nature Bliss" },
 
     // --- MR BEAST & CHALLENGES ---
     { id: "k_9fG9pGf4c", title: "1 Subscriber = 1 Penny for Charity 💰", author: "MrBeast" },
     { id: "uUToL69r7_w", title: "Giving away a car! 🚗", author: "MrBeast" },
-    { id: "Y7H8J9K0L7H", title: "1 Cent vs 1 Million Dollar Car 🏎️", author: "MrBeast" },
+    { id: "Ybc6v_VqHmc", title: "1 Cent vs $1,000,000 House 🏠", author: "MrBeast" },
 
     // --- ANIMALS ---
-    { id: "8Wj8G-299sk", title: "Golden Retriever vs Sizzling Steak 🥩", author: "Dog Lover" },
-    { id: "v_78_w8-n-i", title: "Baby Panda Sneezing 🐼", author: "Animal World" },
-    { id: "S6u_u-9-u-i", title: "Talking Husky argument 🐕", author: "Luna & Max" },
+    { id: "6n3pFEPSlDU", title: "Funny Cat Fails 🐱", author: "Pet Paradise" },
+    { id: "7r_2fM6bU-Y", title: "Cute Panda Moments 🐼", author: "Animal World" },
+    { id: "XpS_u-9-u-i", title: "Talking Husky argument 🐕", author: "Luna & Max" },
 ];
 
 /**
