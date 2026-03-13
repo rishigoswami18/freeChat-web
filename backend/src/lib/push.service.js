@@ -123,16 +123,21 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
     }
 };
 
-/**
- * Save FCM token for a user
- */
 export const saveFcmToken = async (userId, token) => {
     if (!token) return;
     try {
+        // Remove this token from ANY other users to prevent cross-account notifications
+        // on the same device when logging in/out
+        await User.updateMany(
+            { fcmTokens: token },
+            { $pull: { fcmTokens: token } }
+        );
+
+        // Add to the current user
         await User.findByIdAndUpdate(userId, {
             $addToSet: { fcmTokens: token }
         });
-        console.log(`[Push] Token saved for user ${userId}`);
+        console.log(`[Push] Token saved/moved for user ${userId}`);
     } catch (error) {
         console.error("[Push] Error saving FCM token:", error.message);
     }
