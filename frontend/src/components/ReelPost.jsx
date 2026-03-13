@@ -187,7 +187,9 @@ const ReelPost = ({ post, isActive }) => {
         // Source URL might already have params or be a raw embed link
         let baseUrl = post.mediaUrl.split('?')[0];
         const videoId = baseUrl.split('/').pop();
-        return `${baseUrl}?enablejsapi=1&autoplay=0&mute=0&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&iv_load_policy=3`;
+        // Add current origin to correctly enable JS API across different domains (fixes prod block)
+        const origin = window.location.origin;
+        return `${baseUrl}?enablejsapi=1&origin=${encodeURIComponent(origin)}&autoplay=0&mute=0&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&iv_load_policy=3`;
     };
 
     return (
