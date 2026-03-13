@@ -143,6 +143,12 @@ router.get("/videos", async (req, res) => {
     if (!hasMore || isDiscoveryRequest) {
       console.log(`🌊 Reels: Entering Advanced Discovery Mode (Page ${discoveryPage})...`);
       
+      // CRITICAL: If this is a discovery page, we don't want to show the same original posts again.
+      if (isDiscoveryRequest) {
+        paginatedPosts = [];
+        hasMore = true; // Stay in discovery loop
+      }
+
       // 1. Fetch from YouTube Shorts (Verified Stable IDs)
       const ytCount = Math.floor(limitNum / 3);
       const ytPosts = await getYouTubeShorts(ytCount, discoveryPage);
