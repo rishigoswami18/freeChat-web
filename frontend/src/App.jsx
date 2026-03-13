@@ -305,7 +305,9 @@ const App = () => {
                     path="/call/:id"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <CallPage />
+                        <Layout showSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
+                          <CallPage />
+                        </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
                       )
@@ -318,7 +320,7 @@ const App = () => {
 
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={false} showFooter={false} showNavbar={false}>
+                        <Layout showSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
                           <ChatPage />
                         </Layout>
                       ) : (
@@ -330,7 +332,7 @@ const App = () => {
                     path="/reels"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={false} showFooter={false} showNavbar={false}>
+                        <Layout showSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
                           <ReelsPage />
                         </Layout>
                       ) : (
