@@ -140,7 +140,20 @@ router.get("/videos", async (req, res) => {
       
       // 1. Fetch from Pexels (Half of the page)
       const pexelsCount = Math.ceil(limitNum / 2);
-      const externalPosts = await getPexelsVideos(pexelsCount);
+      let externalPosts = await getPexelsVideos(pexelsCount);
+      
+      // 1.1 Attach random trending songs to Pexels videos
+      const trendingSongs = await Song.find({ isTrending: true }).limit(10);
+      if (trendingSongs.length > 0) {
+        externalPosts = externalPosts.map((post, idx) => {
+          const song = trendingSongs[idx % trendingSongs.length];
+          return {
+            ...post,
+            songName: `${song.title} - ${song.artist}`,
+            audioUrl: song.audioUrl
+          };
+        });
+      }
       
       // 2. Sample from local DB (The other half, avoiding repeats in THIS page)
       const excludeIds = paginatedPosts.map(p => p._id);
