@@ -1,5 +1,3 @@
-import axios from "axios";
-
 /**
  * Fetches high-quality vertical videos from Pexels to supplement user content.
  * @param {number} perPage - Number of videos to fetch.
@@ -13,25 +11,30 @@ export const getPexelsVideos = async (perPage = 5) => {
   }
 
   try {
-    // Queries like 'nature', 'city', 'lifestyle' for high quality vertical content
     const queries = ["lifestyle", "travel", "aesthetic", "nature"];
     const randomQuery = queries[Math.floor(Math.random() * queries.length)];
     
-    const response = await axios.get(`https://api.pexels.com/videos/search`, {
+    const url = new URL("https://api.pexels.com/videos/search");
+    url.searchParams.append("query", randomQuery);
+    url.searchParams.append("per_page", perPage);
+    url.searchParams.append("orientation", "portrait");
+    url.searchParams.append("size", "medium");
+
+    const response = await fetch(url.toString(), {
       headers: {
         Authorization: apiKey,
       },
-      params: {
-        query: randomQuery,
-        per_page: perPage,
-        orientation: "portrait",
-        size: "medium",
-      },
     });
 
-    console.log(`✅ Pexels: Fetched ${response.data.videos.length} global reels.`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
 
-    return response.data.videos.map((vid) => {
+    const data = await response.json();
+    console.log(`✅ Pexels: Fetched ${data.videos?.length || 0} global reels.`);
+
+    return (data.videos || []).map((vid) => {
       // Find a medium quality vertical file
       const videoFile = vid.video_files.find(f => f.quality === "sd" || f.quality === "hd") || vid.video_files[0];
       
@@ -56,7 +59,7 @@ export const getPexelsVideos = async (perPage = 5) => {
       };
     });
   } catch (error) {
-    console.error("❌ Pexels API Error:", error.response?.data || error.message);
+    console.error("❌ Pexels API Error:", error.message);
     return [];
   }
 };
