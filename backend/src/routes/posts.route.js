@@ -141,7 +141,7 @@ router.get("/videos", async (req, res) => {
     
     // If we reach the end of chronological posts OR this is already a discovery request
     if (!hasMore || isDiscoveryRequest) {
-      console.log(`🌊 Reels: Entering Advanced Discovery Mode (Page ${discoveryPage})...`);
+      console.log(`🌊 Reels: Entering Advanced Discovery Mode (V3, Page ${discoveryPage})...`);
       
       const prevPostsLength = paginatedPosts.length;
       if (isDiscoveryRequest) {
