@@ -134,14 +134,18 @@ router.get("/videos", async (req, res) => {
 
     // --- INFINITE DISCOVERY STRATEGY ---
     const isDiscoveryRequest = lastId?.toString().startsWith("discovery-");
+    let discoveryPage = 0;
+    if (isDiscoveryRequest) {
+      discoveryPage = parseInt(lastId.split("-")[1]) || 0;
+    }
     
     // If we reach the end of chronological posts OR this is already a discovery request
     if (!hasMore || isDiscoveryRequest) {
-      console.log("🌊 Reels: Entering Advanced Discovery Mode...");
+      console.log(`🌊 Reels: Entering Advanced Discovery Mode (Page ${discoveryPage})...`);
       
       // 1. Fetch from YouTube Shorts (High Quality Original Audio)
       const ytCount = Math.ceil(limitNum / 1.5);
-      const externalPosts = await getYouTubeShorts(ytCount);
+      const externalPosts = await getYouTubeShorts(ytCount, discoveryPage);
       
       // 2. Sample from local DB (The remaining slots)
       const excludeIds = paginatedPosts.map(p => p._id);
@@ -175,8 +179,8 @@ router.get("/videos", async (req, res) => {
 
       paginatedPosts = [...paginatedPosts, ...externalPosts, ...discoveryPosts];
       
-      // 3. Create a synthetic cursor to keep the loop going
-      nextCursor = `discovery-${Date.now()}`;
+      // 3. Create a synthetic cursor for NEXT page
+      nextCursor = `discovery-${discoveryPage + 1}`;
     }
 
     // Shuffle final results slightly so Pexels and Local are mixed
