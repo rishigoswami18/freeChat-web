@@ -51,7 +51,7 @@ const ReelPost = ({ post, isActive }) => {
         const DOUBLE_TAP_DELAY = 300;
         if (now - lastTap.current < DOUBLE_TAP_DELAY) {
             if (!liked) {
-                toggleLike.mutate();
+                toggleLike();
             }
             setShowHeart(true);
             setTimeout(() => setShowHeart(false), 800);
@@ -103,15 +103,14 @@ const ReelPost = ({ post, isActive }) => {
             const iframe = youtubeRef.current;
             if (!iframe) return;
 
-            // YouTube IFrame API command
-            const command = isActive ? 'playVideo' : 'pauseVideo';
+            // YouTube IFrame API command - respond to both section activity and manual play/pause
+            const command = (isActive && isPlaying) ? 'playVideo' : 'pauseVideo';
             iframe.contentWindow?.postMessage(JSON.stringify({
                 event: 'command',
                 func: command,
                 args: ''
             }), '*');
             
-            setIsPlaying(isActive);
             return;
         }
 
@@ -119,7 +118,7 @@ const ReelPost = ({ post, isActive }) => {
         const audio = audioRef.current;
         if (!video) return;
 
-        if (isActive) {
+        if (isActive && isPlaying) {
             video.playbackRate = playbackRate;
             video.play().catch(() => { });
             if (audio) {
@@ -130,29 +129,34 @@ const ReelPost = ({ post, isActive }) => {
             } else {
                 video.muted = false;
             }
-            setIsPlaying(true);
         } else {
             video.pause();
             if (audio) audio.pause();
-            video.currentTime = 0;
-            setIsPlaying(false);
+            // Don't reset time on pause, let it resume if only paused manually
+            if (!isActive) video.currentTime = 0;
         }
 
         return () => {
             video.pause();
             if (audio) audio.pause();
         };
-    }, [isActive, playbackRate, post.mediaType]);
+    }, [isActive, isPlaying, playbackRate, post.mediaType]);
+
+    // Update isPlaying state when isActive change
+    useEffect(() => {
+        setIsPlaying(isActive);
+    }, [isActive]);
 
     const togglePlay = (e) => {
         if (handleDoubleTap(e)) return;
+        setIsPlaying(!isPlaying);
 
-        if (videoRef.current?.paused) {
-            videoRef.current.play();
-            setIsPlaying(true);
-        } else {
-            videoRef.current?.pause();
-            setIsPlaying(false);
+        if (post.mediaType !== "youtube" && videoRef.current) {
+            if (videoRef.current.paused) {
+                videoRef.current.play();
+            } else {
+                videoRef.current.pause();
+            }
         }
     };
 
