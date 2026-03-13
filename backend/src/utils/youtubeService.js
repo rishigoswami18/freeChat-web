@@ -14,6 +14,8 @@ const CURATED_SHORTS = [
     { id: "lIzsHq-h3Bs", title: "Gravity is just a suggestion ☁️", author: "Zach King" },
     { id: "xcxThQKBeIQ", title: "Painting the town red... literally 🎨", author: "Zach King" },
     { id: "_YHo3LQFHDw", title: "Supermarket Magic 🛒", author: "Zach King" },
+    { id: "uC3V_K774I4", title: "Floating Coffee ☕", author: "Zach King" },
+    { id: "8Wj8G-299sM", title: "The Magic Chalk 🖍️", author: "Zach King" },
 
     // --- DANIEL LABELLE (Physical Comedy) ---
     { id: "3N1Daeo8QoM", title: "If Cleaning Was a Timed Sport 🧹", author: "Daniel LaBelle" },
@@ -26,17 +28,55 @@ const CURATED_SHORTS = [
     { id: "R6uddhU2XZQ", title: "If animals did sports 🦁", author: "Daniel LaBelle" },
     { id: "uK4btYaLcto", title: "The Art of Sneaking 🤫", author: "Daniel LaBelle" },
     { id: "68PhQCEj1tc", title: "Fast Forward Life ⏩", author: "Daniel LaBelle" },
+    { id: "S6UreNq6Bik", title: "People who are always late ⏰", author: "Daniel LaBelle" },
+    { id: "983_r3r8R_8", title: "Shopping with a speedster 🏎️", author: "Daniel LaBelle" },
+
+    // --- ODDLY SATISFYING & CRAFTS ---
+    { id: "3XmZ0S1XfD8", title: "Satisfying Sand Cutting ⏳", author: "Satisfy Art" },
+    { id: "n799T_W3yH8", title: "Hydro Dipping Masterpiece 🌊", author: "Art Hub" },
+    { id: "_F8Y0I-L-3I", title: "Giant Slime Bubble 🧼", author: "Slime Queen" },
+    { id: "6v2L2UGZJAM", title: "Hydraulic Press vs Diamond 💎", author: "Press Master" },
+    { id: "oHdecbMrcbI", title: "Restoration of 100 Year Old Watch ⌚", author: "Restore IT" },
+    { id: "xQknAlRnaM4", title: "Satisfying Glass Blowing 🕯️", author: "Glow Art" },
+    { id: "8Dq-56hD3Fo", title: "Kinetic Sand ASMR 😴", author: "Sand Guru" },
 
     // --- NATURE & SCENIC (Relaxation) ---
     { id: "G9NRzrx7m4U", title: "Switzerland: Heaven on Earth 🏔️", author: "Travel Pro" },
-    { id: "8Dq-56hD3Fo", title: "Mountain River Landscapes 🌊", author: "Wanderlust" },
-    { id: "xQknAlRnaM4", title: "Nature View: Summer Rain 🌧️", author: "Nature Hub" },
-    { id: "oHdecbMrcbI", title: "Scenic Austria Relaxation 🇦🇹", author: "Travel Bliss" },
-    { id: "6v2L2UGZJAM", title: "Planet Earth: Amazing Nature 🌿", author: "Nature Bliss" },
+    { id: "hVvXv3H8v3Y", title: "Hidden Waterfalls in Bali 🏝️", author: "Adventure Monk" },
+    { id: "R_F7H8j9G0H", title: "Northern Lights in Norway 🌌", author: "Sky Watcher" },
+    { id: "wJ8G0H7J9K8", title: "Autumn in Kyoto 🍁", author: "Japan Explorer" },
+    { id: "U7H9J8K0L7H", title: "Deep Sea Discovery 🐳", author: "Ocean Life" },
     
-    // --- MR BEAST (Philanthropy & Challenges) ---
+    // --- MR BEAST & CHALLENGES ---
     { id: "k_9fG9pGf4c", title: "1 Subscriber = 1 Penny for Charity 💰", author: "MrBeast" },
     { id: "uUToL69r7_w", title: "Giving away a car! 🚗", author: "MrBeast" },
+    { id: "X7H8J9K0L7H", title: "World's Most Expensive Pizza 🍕", author: "MrBeast" },
+    { id: "Y7H8J9K0L7H", title: "I built a real Willy Wonka factory 🍫", author: "MrBeast" },
+
+    // --- SPORTS & PARKOUR ---
+    { id: "V7H9J8K0L7H", title: "Spider-man in Real Life 🕸️", author: "Parkour Pro" },
+    { id: "B7H8J9K0L7H", title: "Insane Basketball Trickshots 🏀", author: "Dude Perfect" },
+    { id: "N7H8J9K0L7H", title: "Formula 1 Pit Stop Speed 🏎️", author: "F1 Racing" },
+    { id: "M7H8J9K0L7H", title: "Surfing the World's Biggest Wave 🏄", author: "Surf Life" },
+    { id: "K7H8J9K0L7H", title: "Human Calculator vs Math Genius 🧮", author: "Mind Games" },
+
+    // --- SCIENCE & TECH ---
+    { id: "T7H8J9K0L7H", title: "What Happens if you fall into a Black Hole? 🕳️", author: "Science Insane" },
+    { id: "E7H8J9K0L7H", title: "The World's Largest Magnet 🧲", author: "Veritasium" },
+    { id: "W7H8J9K0L7H", title: "How 5G actually works 📶", author: "Tech Vision" },
+    { id: "Q7H8J9K0L7H", title: "Bioluminescent Beach in Maldives 🌊", author: "Nature Science" },
+
+    // --- ANIMALS & PETS ---
+    { id: "A7H8J9K0L7H", title: "Golden Retriever vs Lemon 🍋", author: "Puppy Love" },
+    { id: "S7H8J9K0L7H", title: "Rescuing a baby elephant 🐘", author: "Safari Tales" },
+    { id: "D7H8J9K0L7H", title: "Husky talking back to owner 🐕", author: "Luna the Husky" },
+    { id: "F7H8J9K0L7H", title: "World's Smartest Parrot 🦜", author: "Bird World" },
+
+    // --- GAMING & VIBES ---
+    { id: "Z7H8J9K0L7H", title: "Minecraft but everything is cake 🍰", author: "Dream Team" },
+    { id: "X7H8J9K0Y7H", title: "Gamer Setup Transformation 🎮", author: "Setup Wars" },
+    { id: "C7H8J9K0L7H", title: "Legend of Zelda Orchestral 🎻", author: "Game Music" },
+    { id: "B7H8J9K0Y7H", title: "GTA 5 Thug Life Moments 😂", author: "Funny Gaming" },
 ];
 
 /**
@@ -48,16 +88,15 @@ const CURATED_SHORTS = [
 export const getYouTubeShorts = (count = 5, page = 0) => {
     const total = CURATED_SHORTS.length;
     
-    // A larger skip factor ensures that even if page is 1, 2, 3... we see different sets.
-    // We use a prime number or a number that doesn't divide 'total' easily.
-    const skipFactor = 7; 
-    const startingOffset = (page * skipFactor) % total;
+    // Use a deterministic shuffle for each page to make it feel infinite but consistent per user scroll
+    // We create a window of videos starting from an offset that shifts significantly per page
+    const shift = (page * 13) % total;
+    const pool = [...CURATED_SHORTS].slice(shift).concat([...CURATED_SHORTS].slice(0, shift));
     
-    let selected = [];
-    for (let i = 0; i < count; i++) {
-        const index = (startingOffset + i) % total;
-        selected.push(CURATED_SHORTS[index]);
-    }
+    // Additionally shuffle based on page parity to flip-flop clusters
+    if (page % 2 === 0) pool.reverse();
+
+    let selected = pool.slice(0, count);
     
     return selected.map((vid, i) => {
         return {

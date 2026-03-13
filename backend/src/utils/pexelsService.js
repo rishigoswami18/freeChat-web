@@ -3,7 +3,7 @@
  * @param {number} perPage - Number of videos to fetch.
  * @returns {Array} - Array of formatted post-like objects.
  */
-export const getPexelsVideos = async (perPage = 5) => {
+export const getPexelsVideos = async (perPage = 5, page = 1) => {
   const apiKey = process.env.PEXELS_API_KEY;
   if (!apiKey) {
     console.warn("⚠️ PEXELS_API_KEY is missing in .env. Falling back to empty discovery.");
@@ -17,6 +17,7 @@ export const getPexelsVideos = async (perPage = 5) => {
     const url = new URL("https://api.pexels.com/videos/search");
     url.searchParams.append("query", randomQuery);
     url.searchParams.append("per_page", perPage);
+    url.searchParams.append("page", page);
     url.searchParams.append("orientation", "portrait");
     url.searchParams.append("size", "medium");
 

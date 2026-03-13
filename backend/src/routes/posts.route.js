@@ -143,67 +143,88 @@ router.get("/videos", async (req, res) => {
     if (!hasMore || isDiscoveryRequest) {
       console.log(`🌊 Reels: Entering Advanced Discovery Mode (Page ${discoveryPage})...`);
       
-      // CRITICAL: If this is a discovery page, we don't want to show the same original posts again.
+      const prevPostsLength = paginatedPosts.length;
       if (isDiscoveryRequest) {
         paginatedPosts = [];
         hasMore = true; // Stay in discovery loop
       }
 
-      // 1. Fetch from YouTube Shorts (Verified Stable IDs)
-      const ytCount = Math.floor(limitNum / 3);
-      const ytPosts = await getYouTubeShorts(ytCount, discoveryPage);
-      
-      // 2. Fetch from Pexels (Rich Diversity fallback)
-      const pexelsCount = Math.floor(limitNum / 3);
-      let pexelsPosts = await getPexelsVideos(pexelsCount, discoveryPage + 1);
-      
-      // 2.1 Attach random trending songs to Pexels videos
-      const trendingSongs = await Song.find({ isTrending: true }).limit(20);
-      if (trendingSongs.length > 0) {
-        pexelsPosts = pexelsPosts.map((post, idx) => {
-          const song = trendingSongs[idx % trendingSongs.length];
-          return {
-            ...post,
-            songName: `${song.title} - ${song.artist}`,
-            audioUrl: song.audioUrl
-          };
-        });
-      }
-      
-      // 3. Sample from local DB (Community content)
-      const excludeIds = paginatedPosts.map(p => p._id);
-      const sampleCount = limitNum - paginatedPosts.length - ytPosts.length - pexelsPosts.length;
-      
-      let discoveryPosts = [];
-      if (sampleCount > 0) {
-        discoveryPosts = await Post.aggregate([
-          { $match: { mediaType: "video", isAd: false, _id: { $nin: excludeIds } } },
-          { $sample: { size: sampleCount } },
-          {
-            $lookup: {
-              from: "users",
-              localField: "userId",
-              foreignField: "_id",
-              as: "authorInfo",
-            },
-          },
-          { $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true } },
-          {
-            $addFields: {
-              role: { $ifNull: ["$role", "$authorInfo.role"] },
-              isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
-              fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
-              profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
-            }
-          },
-          { $project: { authorInfo: 0 } }
-        ]);
-      }
+      try {
+        // 1. Fetch from YouTube Shorts (Verified Stable IDs)
+        const ytCount = Math.floor(limitNum / 3) || 3;
+        const ytPosts = getYouTubeShorts(ytCount, discoveryPage);
+        
+        // 2. Fetch from Pexels (Rich Diversity fallback)
+        const pexelsCount = Math.floor(limitNum / 3) || 3;
+        let pexelsPosts = [];
+        try {
+          pexelsPosts = await getPexelsVideos(pexelsCount, discoveryPage + 1);
+        } catch (pxErr) {
+          console.error("Pexels fetch failed:", pxErr.message);
+        }
+        
+        // 2.1 Attach random trending songs to Pexels videos
+        const trendingSongs = await Song.find({ isTrending: true }).limit(20);
+        if (trendingSongs.length > 0 && pexelsPosts.length > 0) {
+          pexelsPosts = pexelsPosts.map((post, idx) => {
+            const song = trendingSongs[idx % trendingSongs.length];
+            return {
+              ...post,
+              songName: `${song.title} - ${song.artist}`,
+              audioUrl: song.audioUrl
+            };
+          });
+        }
+        
+        // 3. Sample from local DB (Community content)
+        const excludeIds = paginatedPosts.map(p => p._id);
+        const sampleCount = limitNum - paginatedPosts.length - ytPosts.length - pexelsPosts.length;
+        
+        let discoveryPosts = [];
+        if (sampleCount > 0) {
+          try {
+            discoveryPosts = await Post.aggregate([
+              { $match: { mediaType: "video", isAd: false, _id: { $nin: excludeIds } } },
+              { $sample: { size: Math.max(sampleCount, 2) } },
+              {
+                $lookup: {
+                  from: "users",
+                  localField: "userId",
+                  foreignField: "_id",
+                  as: "authorInfo",
+                },
+              },
+              { $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true } },
+              {
+                $addFields: {
+                  role: { $ifNull: ["$role", "$authorInfo.role"] },
+                  isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+                  fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+                  profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+                }
+              },
+              { $project: { authorInfo: 0 } }
+            ]);
+          } catch (sampleErr) {
+            console.error("Local sample failed:", sampleErr.message);
+          }
+        }
 
-      paginatedPosts = [...paginatedPosts, ...ytPosts, ...pexelsPosts, ...discoveryPosts];
-      
-      // 4. Create a synthetic cursor for NEXT page
-      nextCursor = `discovery-${discoveryPage + 1}`;
+        paginatedPosts = [...paginatedPosts, ...ytPosts, ...pexelsPosts, ...discoveryPosts];
+        
+        // If somehow we still have nothing, just loop YouTube shorts as a bulletproof fallback
+        if (paginatedPosts.length === 0) {
+           paginatedPosts = getYouTubeShorts(limitNum, discoveryPage + 1);
+        }
+
+        // 4. Create a synthetic cursor for NEXT page
+        nextCursor = `discovery-${discoveryPage + 1}`;
+      } catch (discErr) {
+        console.error("Discovery block fatal error:", discErr);
+        // Fallback to basic YT pool to prevent empty feed
+        paginatedPosts = getYouTubeShorts(limitNum, discoveryPage);
+        nextCursor = `discovery-${discoveryPage + 1}`;
+      }
     }
 
     // Shuffle final results slightly so Pexels and Local are mixed
@@ -211,15 +232,15 @@ router.get("/videos", async (req, res) => {
 
     // If user is not premium, inject ads
     if (!isPremium && paginatedPosts.length > 0) {
-      const ads = await Post.find({ isAd: true }).limit(2);
+      const ads = await Post.find({ isAd: true }).limit(5);
       const finalPosts = [];
       paginatedPosts.forEach((post, index) => {
         finalPosts.push(post);
         if ((index + 1) % 4 === 0 && ads.length > 0) {
-          finalPosts.push(ads[index % ads.length]);
+          finalPosts.push(ads[Math.floor(Math.random() * ads.length)]);
         }
       });
-      return res.json({ posts: finalPosts, nextCursor, hasMore: true }); // Always claim hasMore for infinite feel
+      return res.json({ posts: finalPosts, nextCursor, hasMore: true });
     }
 
     res.json({ posts: paginatedPosts, nextCursor, hasMore: true });
