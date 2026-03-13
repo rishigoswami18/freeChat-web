@@ -32,7 +32,7 @@ const FriendsPage = () => {
   });
 
   return (
-    <div className="p-3 sm:p-6 lg:p-8">
+    <div className="p-0 sm:p-6 lg:p-8">
       <div className="container mx-auto max-w-4xl space-y-6">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-primary/10 rounded-2xl text-primary">

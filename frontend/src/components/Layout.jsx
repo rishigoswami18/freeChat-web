@@ -24,7 +24,7 @@ const Layout = ({ children, showSidebar = false, showFooter = true, showNavbar =
       <div className={`flex flex-col min-h-screen relative z-10 ${showSidebar ? "md:ml-[80px] xl:ml-[244px]" : ""}`}>
         
         {/* Feed & Right Sidebar Master Container */}
-        <div className={`flex-1 flex w-full ${isFluid ? "" : "max-w-[1000px] px-4 xl:px-0"} xl:gap-8 2xl:gap-12 justify-center mx-auto`}>
+        <div className={`flex-1 flex w-full ${isFluid ? "" : "max-w-[1000px] px-0 sm:px-4 xl:px-0"} xl:gap-8 2xl:gap-12 justify-center mx-auto`}>
             
           {/* Center Content Area */}
           <div className={`flex flex-col w-full ${isFluid ? "" : "max-w-[630px]"}`}>

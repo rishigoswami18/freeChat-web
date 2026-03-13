@@ -72,7 +72,7 @@ const PostsPage = () => {
         <StoryTray />
       </div>
       
-      <div className="max-w-[470px] mx-auto mb-6">
+      <div className="w-full sm:max-w-[470px] mx-auto mb-6">
         <CreatePost onPost={addPost} authUser={authUser} />
       </div>
 

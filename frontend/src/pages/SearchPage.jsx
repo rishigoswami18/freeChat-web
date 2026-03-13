@@ -36,7 +36,7 @@ const SearchPage = () => {
     });
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
+        <div className="px-0 py-4 sm:p-6 lg:p-8 sm:max-w-2xl mx-auto space-y-6">
             <div className="relative group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" />
                 <input

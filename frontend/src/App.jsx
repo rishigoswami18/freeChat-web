@@ -203,7 +203,7 @@ const App = () => {
                     path="/"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true}>
+                        <Layout showSidebar={true} isFluid={true}>
                           <PostsPage />
                         </Layout>
                       ) : isAuthenticated ? (
@@ -269,7 +269,7 @@ const App = () => {
                     path="/posts"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true}>
+                        <Layout showSidebar={true} isFluid={true}>
                           <PostsPage />
                         </Layout>
                       ) : (

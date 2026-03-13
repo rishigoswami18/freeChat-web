@@ -176,7 +176,7 @@ const InboxPage = () => {
     };
 
     return (
-        <div className="w-full max-w-[600px] mx-auto bg-black min-h-screen pb-10 font-outfit text-white">
+        <div className="w-full sm:max-w-[600px] mx-auto bg-black min-h-screen pb-10 font-outfit text-white">
             {/* Sticky Header */}
             <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-md border-b border-white/10 pt-4 px-4 pb-3">
                 <div className="flex items-center justify-between mb-4">
