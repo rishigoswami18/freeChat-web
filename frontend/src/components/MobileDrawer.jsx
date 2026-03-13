@@ -170,9 +170,13 @@ const MobileDrawer = () => {
       >
         <div className="p-4 flex justify-between items-center border-b border-base-300">
           <Logo className="size-6" fontSize="text-lg" />
-          <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
-            <X className="size-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <LanguageSelector />
+            <ThemeSelector />
+            <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform ml-1">
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
 
         {/* DAILY REWARDS (MOBILE GEM DROP) */}
