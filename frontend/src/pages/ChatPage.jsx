@@ -21,6 +21,7 @@ import ChatHeader from "../components/ChatHeader";
 import EmotionMessage from "../components/EmotionMessage";
 import VoiceRecorder from "../components/VoiceRecorder";
 import SmartReply from "../components/SmartReply";
+import InboxPage from "./InboxPage";
 
 const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlider, setShowShoutSlider, handleSnapClick, handleVoiceSend }) => {
   if (targetUserId === "system_announcement") {
@@ -334,17 +335,25 @@ const ChatPage = () => {
 
   return (
     <div
-      className="absolute inset-0 flex flex-col bg-black text-white font-outfit overflow-hidden w-full sm:max-w-[600px] mx-auto sm:border-x border-white/10"
+      className="absolute inset-0 flex bg-black text-white font-outfit overflow-hidden w-full lg:max-w-none sm:border-x border-white/10"
       style={{
         height: `${viewportHeight}px`,
         top: window.visualViewport?.offsetTop || 0,
-        contain: 'layout size style' // Optimized rendering hints
+        contain: 'layout size style'
       }}
     >
-      {/* Optional subtle noise / gradient for a premium black look, mostly solid black */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-[#0a0a0a] pointer-events-none z-0" />
-      {chatUI}
-      <Thread />
+      {/* Inbox Panel (Hidden on Mobile, Visible on Desktop) */}
+      <div className="hidden lg:block shrink-0 h-full border-r border-white/10 w-[350px]">
+         <InboxPage isSideNav={true} />
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-black">
+        {/* Optional subtle noise / gradient for a premium black look, mostly solid black */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-[#0a0a0a] pointer-events-none z-0" />
+        {chatUI}
+        <Thread />
+      </div>
     </div>
   );
 };

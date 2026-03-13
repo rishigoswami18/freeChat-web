@@ -22,7 +22,7 @@ const timeAgo = (iso) => {
     return `${days}d`;
 };
 
-const InboxPage = () => {
+const InboxPage = ({ isSideNav = false }) => {
     const chatClient = useChatClient();
     const navigate = useNavigate();
     const { authUser } = useAuthUser();
@@ -176,8 +176,11 @@ const InboxPage = () => {
     };
 
     return (
-        <div className="w-full sm:max-w-[600px] mx-auto bg-black min-h-screen pb-10 font-outfit text-white">
-            {/* Sticky Header */}
+        <div className={`flex w-full h-[100dvh] bg-black text-white font-outfit ${!isSideNav ? "lg:flex-row flex-col" : ""}`}>
+            {/* Left Panel: Inbox List */}
+            <div className={`flex flex-col h-full overflow-hidden shrink-0 ${isSideNav ? "w-full lg:w-[350px]" : "w-full lg:w-[350px] lg:border-r border-white/10"}`}>
+                <div className="flex-1 overflow-y-auto w-full sm:max-w-[600px] lg:max-w-none mx-auto pb-10 no-scrollbar">
+                    {/* Sticky Header */}
             <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-md border-b border-white/10 pt-4 px-4 pb-3">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 cursor-pointer">
@@ -290,6 +293,20 @@ const InboxPage = () => {
                     </div>
                 )}
             </div>
+            </div>
+            </div>
+
+            {/* Right Panel: Empty State (only visible on large screens when not used as a side nav in ChatPage) */}
+            {!isSideNav && (
+                <div className="hidden lg:flex flex-1 flex-col items-center justify-center bg-black h-full">
+                    <div className="size-24 rounded-full border-2 border-white/20 flex flex-col items-center justify-center mb-4">
+                        <MessageSquare className="size-10 text-white" />
+                    </div>
+                    <h2 className="text-xl font-bold text-white mb-2 font-outfit">Your Messages</h2>
+                    <p className="text-white/50 text-sm mb-6 font-outfit">Send private messages to a friend or group.</p>
+                    <button className="btn btn-primary rounded-xl font-outfit font-bold px-8 shadow-lg shadow-primary/20" onClick={() => setIsGroupModalOpen(true)}>Send Message</button>
+                </div>
+            )}
 
             {viewingDP && (
                 <ProfilePhotoViewer
