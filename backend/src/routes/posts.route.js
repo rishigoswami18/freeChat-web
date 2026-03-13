@@ -102,35 +102,41 @@ router.get("/videos", async (req, res) => {
     }
 
     // Fetch real video posts with author status
-    let posts = await Post.aggregate([
-      { $match: matchQuery }, // Exclude ads and previous pages
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "authorInfo",
+    let posts = [];
+    try {
+      posts = await Post.aggregate([
+        { $match: matchQuery }, // Exclude ads and previous pages
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "authorInfo",
+          },
         },
-      },
-      {
-        $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true }
-      },
-      {
-        $addFields: {
-          role: { $ifNull: ["$role", "$authorInfo.role"] },
-          isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
-          fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
-          profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
-        }
-      },
-      { $sort: { _id: -1 } },
-      { $limit: limitNum + 1 },
-      { $project: { authorInfo: 0 } }
-    ]);
+        {
+          $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true }
+        },
+        {
+          $addFields: {
+            role: { $ifNull: ["$role", "$authorInfo.role"] },
+            isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+            fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+            profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+          }
+        },
+        { $sort: { _id: -1 } },
+        { $limit: limitNum + 1 },
+        { $project: { authorInfo: 0 } }
+      ]);
+    } catch (dbErr) {
+      console.error("🌊 Reels: Database fetch failed, falling back to discovery:", dbErr.message);
+      // Keep posts as empty and proceed to discovery logic
+    }
 
     let hasMore = posts.length > limitNum;
     let paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
-    let nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
+    let nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]?._id : null;
 
     // --- INFINITE DISCOVERY STRATEGY ---
     const isDiscoveryRequest = lastId?.toString().startsWith("discovery-");
