@@ -5,7 +5,8 @@ import MobileDrawer from "./MobileDrawer";
 import Footer from "./Footer";
 import { motion } from "framer-motion";
 
-const Layout = ({ children, showSidebar = false, showFooter = true, showNavbar = true, isFluid = false }) => {
+const Layout = ({ children, showSidebar = false, showRightSidebar, showFooter = true, showNavbar = true, isFluid = false }) => {
+  const displayRightSidebar = showRightSidebar !== undefined ? showRightSidebar : showSidebar;
   return (
     <div className="min-h-screen bg-base-300 relative overflow-x-hidden">
       {/* Premium ambient animated background (Global) */}
@@ -43,7 +44,7 @@ const Layout = ({ children, showSidebar = false, showFooter = true, showNavbar =
           </div>
 
           {/* Right Sidebar (Suggestions & Footer) */}
-          {showSidebar && (
+          {displayRightSidebar && (
             <div className="hidden lg:block relative z-20 w-[320px] shrink-0">
               <RightSidebar />
             </div>

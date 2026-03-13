@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
 import { axiosInstance } from "../lib/axios";
 import { notifyMessage } from "../lib/api";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Smile, Image as ImageIcon, Sticker } from "lucide-react";
 
 import {
   Channel,
@@ -20,7 +20,6 @@ import ChatLoader from "../components/ChatLoader";
 import ChatHeader from "../components/ChatHeader";
 import EmotionMessage from "../components/EmotionMessage";
 import VoiceRecorder from "../components/VoiceRecorder";
-import SmartReply from "../components/SmartReply";
 import InboxPage from "./InboxPage";
 
 const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlider, setShowShoutSlider, handleSnapClick, handleVoiceSend }) => {
@@ -36,7 +35,7 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
 
   return (
     <div className="flex-shrink-0 z-50 bg-black backdrop-blur-md pb-safe">
-      <div className="flex flex-col gap-2 p-2 sm:p-3 sm:max-w-[600px] mx-auto w-full border-t border-white/10">
+      <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-4xl mx-auto w-full">
         {showShoutSlider && (
           <div className="flex items-center gap-4 bg-white/5 px-4 py-3 rounded-2xl shadow-xl mb-1 border border-white/10">
             <input
@@ -48,34 +47,29 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
-          {/* Action Row - Instagram Style Input Box */}
-          <div className="flex items-end gap-2.5 px-1 py-1">
-            <button
-               onClick={handleSnapClick}
-               className="p-2 bg-blue-500 rounded-full flex items-center justify-center shrink-0 hover:bg-blue-600 transition-colors mb-0.5"
-               title="Send a Snap"
-            >
-              <Camera className="size-5 sm:size-[22px] text-white" strokeWidth={2} />
+        <div className="flex w-full items-end justify-center px-1">
+          <div className="instagram-input-container flex w-full">
+            
+            <button className="p-2.5 px-3 text-white/90 hover:text-white transition-colors shrink-0 outline-none mb-[2px]" title="Emoji">
+              <Smile className="w-[26px] h-[26px]" strokeWidth={1.5} />
             </button>
             
-            <div className="flex-1 flex flex-col min-h-[44px] bg-white/10 rounded-[22px] border border-white/10 focus-within:bg-white/15 focus-within:border-white/20 transition-all font-outfit relative">
+            <div className="flex-1 min-w-0 min-h-[44px]">
                <MessageInput focus grow />
-               
-               {/* Overlay buttons to the top right of input container - or we could place them below, but absolute is easier here for a custom UI */}
-               <div className="absolute right-2 bottom-1.5 flex items-center gap-1">
-                 <button
-                   onClick={() => setShowShoutSlider(!showShoutSlider)}
-                   className={`p-1.5 rounded-full transition-colors ${showShoutSlider ? 'text-blue-500 bg-blue-500/10' : 'text-white/60 hover:text-white/90'}`}
-                   title="Adjust Text Size"
-                 >
-                   <span className="text-[14px] font-bold tracking-tight">AA</span>
-                 </button>
-                 <div className="text-white/60 hover:text-white/90 transition-colors">
-                    <VoiceRecorder onSend={handleVoiceSend} />
-                 </div>
-               </div>
             </div>
+
+            <div className="custom-action-icons flex items-center pr-2 gap-1.5 shrink-0 text-white/90 mb-[2px] z-10 transition-all duration-200">
+               <div className="hover:text-white cursor-pointer transition-colors p-[6px] action-voice">
+                 <VoiceRecorder onSend={handleVoiceSend} />
+               </div>
+               <button onClick={handleSnapClick} className="hover:text-white transition-colors p-[6px]" title="Image">
+                 <ImageIcon className="w-[26px] h-[26px]" strokeWidth={1.5} />
+               </button>
+               <button className="hover:text-white transition-colors p-[6px]" title="Sticker">
+                 <Sticker className="w-[26px] h-[26px]" strokeWidth={1.5} />
+               </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -261,10 +255,6 @@ const ChatPage = () => {
     }
   }, [channel, targetUserId]);
 
-  const handleSmartReply = useCallback((text) => {
-    if (channel) channel.sendMessage({ text, fontSize: 1 });
-  }, [channel]);
-
   const MemoizedDateSeparator = useCallback(() => null, []);
 
   // Performance Optimization: Memoize the chat wrapper and message list separately
@@ -306,12 +296,6 @@ const ChatPage = () => {
                     </div>
                   </div>
                 )}
-
-                {targetUserId !== "system_announcement" && (
-                  <div className="flex-shrink-0 px-2 z-20">
-                    <SmartReply channel={channel} onSelect={handleSmartReply} />
-                  </div>
-                )}
               </div>
 
               <ChatInputArea
@@ -329,7 +313,7 @@ const ChatPage = () => {
         </Channel>
       </Chat>
     );
-  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, handleSmartReply, MemoizedDateSeparator]);
+  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, MemoizedDateSeparator]);
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
 

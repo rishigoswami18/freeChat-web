@@ -293,7 +293,7 @@ const App = () => {
                     path="/inbox"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true} showFooter={false} showNavbar={false} isFluid={true}>
+                        <Layout showSidebar={true} showRightSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
                           <InboxPage />
                         </Layout>
                       ) : (
@@ -320,7 +320,7 @@ const App = () => {
 
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true} showFooter={false} showNavbar={false} isFluid={true}>
+                        <Layout showSidebar={true} showRightSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
                           <ChatPage />
                         </Layout>
                       ) : (

@@ -167,7 +167,7 @@ const RightSidebar = () => {
                     <a href="#" className="hover:underline">Language</a>
                 </div>
                 <div className="uppercase">
-                    © 2026 BONDBEYOND FROM VIBECORP
+                    © 2026 BONDBEYOND FROM freechatweb.in
                 </div>
             </div>
         </aside>

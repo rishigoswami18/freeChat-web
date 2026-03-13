@@ -1683,3 +1683,96 @@ a[href*="getstream.com"] {
     bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ===== Instagram Style Chat Input ===== */
+.instagram-input-container {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+  background-color: transparent;
+  align-items: flex-end;
+  transition: border-color 0.2s;
+  padding: 2px;
+}
+
+.instagram-input-container:focus-within {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.instagram-input-container .str-chat__message-input {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  width: 100%;
+}
+
+.instagram-input-container .str-chat__input-flat-wrapper {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: flex-end !important;
+}
+
+.instagram-input-container .str-chat__fileupload-wrapper,
+.instagram-input-container .str-chat__emojipicker-icon {
+  display: none !important;
+}
+
+.instagram-input-container .str-chat__input-flat {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.instagram-input-container textarea {
+  color: white !important;
+  font-size: 15px !important;
+  padding: 12px 6px 12px 0px !important;
+  min-height: 44px !important;
+  max-height: 120px !important;
+  line-height: 20px !important;
+}
+
+.instagram-input-container textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 15px !important;
+}
+
+/* Make Stream Chat Send Button Text-based 'Send' */
+.instagram-input-container .str-chat__send-button {
+  background: transparent !important;
+  padding: 0 16px 10px 8px !important;
+  margin: 0 !important;
+}
+
+.instagram-input-container .str-chat__send-button svg {
+  display: none !important;
+}
+
+.instagram-input-container .str-chat__send-button::after {
+  content: "Send";
+  color: #0095f6;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* Hide Send Button when disabled */
+.instagram-input-container .str-chat__send-button:disabled,
+.instagram-input-container .str-chat__send-button[disabled] {
+  display: none !important;
+}
+
+/* Hide custom actions when send button is NOT disabled (meaning user is typing) */
+.instagram-input-container:has(.str-chat__send-button:not([disabled])) .custom-action-icons {
+  display: none !important;
+}
+.instagram-input-container:has(.str-chat__send-button:not(:disabled)) .custom-action-icons {
+  display: none !important;
+}
+
+/* Hide if Stream chat react uses this class for text presence */
+.instagram-input-container:has(.str-chat__message-input-flat--has-text) .custom-action-icons {
+  display: none !important;
+}
