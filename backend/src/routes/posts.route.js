@@ -127,8 +127,41 @@ router.get("/videos", async (req, res) => {
     ]);
 
     const hasMore = posts.length > limitNum;
-    const paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
-    const nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
+    let paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
+    let nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
+
+    // INFINITE FEED STRATEGY: 
+    // If we reached the end (no more new posts), fallback to "Discovery Mode" 
+    // by sampling random videos to keep the feed alive.
+    if (!hasMore && paginatedPosts.length < limitNum) {
+      console.log("🔄 Reels: Reached end of chronological feed, entering Discovery Mode...");
+      const discoveryPosts = await Post.aggregate([
+        { $match: { mediaType: "video", isAd: false, _id: { $nin: paginatedPosts.map(p => p._id) } } },
+        { $sample: { size: limitNum - paginatedPosts.length } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "authorInfo",
+          },
+        },
+        { $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true } },
+        {
+          $addFields: {
+            role: { $ifNull: ["$role", "$authorInfo.role"] },
+            isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+            fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+            profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+          }
+        },
+        { $project: { authorInfo: 0 } }
+      ]);
+      
+      paginatedPosts = [...paginatedPosts, ...discoveryPosts];
+      // Since it's discovery mode, we keep nextCursor null to signify this is the "shuffle" area
+      // or we could implement a logic to keep shuffling indefinitely.
+    }
 
     // If user is not premium, inject ads
     if (!isPremium && paginatedPosts.length > 0) {
@@ -140,10 +173,10 @@ router.get("/videos", async (req, res) => {
           finalPosts.push(ads[index % ads.length]);
         }
       });
-      return res.json({ posts: finalPosts, nextCursor, hasMore });
+      return res.json({ posts: finalPosts, nextCursor, hasMore: true }); // Always claim hasMore for infinite feel
     }
 
-    res.json({ posts: paginatedPosts, nextCursor, hasMore });
+    res.json({ posts: paginatedPosts, nextCursor, hasMore: true });
   } catch (err) {
     console.error("Error fetching video posts:", err.message);
     res.status(500).json({ message: "Internal Server Error" });
