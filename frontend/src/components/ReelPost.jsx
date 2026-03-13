@@ -11,6 +11,7 @@ import useAuthUser from "../hooks/useAuthUser";
 const ReelPost = ({ post, isActive }) => {
     const { authUser } = useAuthUser();
     const videoRef = useRef(null);
+    const youtubeRef = useRef(null);
     const audioRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -98,6 +99,22 @@ const ReelPost = ({ post, isActive }) => {
     };
 
     useEffect(() => {
+        if (post.mediaType === "youtube") {
+            const iframe = youtubeRef.current;
+            if (!iframe) return;
+
+            // YouTube IFrame API command
+            const command = isActive ? 'playVideo' : 'pauseVideo';
+            iframe.contentWindow?.postMessage(JSON.stringify({
+                event: 'command',
+                func: command,
+                args: ''
+            }), '*');
+            
+            setIsPlaying(isActive);
+            return;
+        }
+
         const video = videoRef.current;
         const audio = audioRef.current;
         if (!video) return;
@@ -125,7 +142,7 @@ const ReelPost = ({ post, isActive }) => {
             video.pause();
             if (audio) audio.pause();
         };
-    }, [isActive, playbackRate]);
+    }, [isActive, playbackRate, post.mediaType]);
 
     const togglePlay = (e) => {
         if (handleDoubleTap(e)) return;
@@ -161,14 +178,17 @@ const ReelPost = ({ post, isActive }) => {
     return (
         <div className={`relative h-full w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-500 ${isTheaterMode ? 'sm:max-w-none' : 'sm:max-w-[450px] sm:aspect-[9/16]'}`}>
             {post.mediaType === "youtube" ? (
-                <div className={`h-full w-full pointer-events-none relative transition-all duration-500 bg-black ${isTheaterMode ? 'aspect-video' : 'aspect-[9/16]'}`}>
+                <div className={`h-full w-full relative transition-all duration-500 bg-black ${isTheaterMode ? 'aspect-video' : 'aspect-[9/16]'}`}>
                     <iframe
-                        src={`${post.mediaUrl}?autoplay=${isActive ? 1 : 0}&mute=0&controls=0&loop=1&playlist=${post.mediaUrl.split('/').pop()}&modestbranding=1&rel=0&enablejsapi=1&iv_load_policy=3`}
-                        className="absolute inset-0 w-full h-full pointer-events-auto"
+                        ref={youtubeRef}
+                        src={`${post.mediaUrl}?enablejsapi=1&autoplay=0&mute=0&controls=0&loop=1&playlist=${post.mediaUrl.split('/').pop()}&modestbranding=1&rel=0&iv_load_policy=3&widgetid=1`}
+                        className="absolute inset-0 w-full h-full"
                         allow="autoplay"
                         allowFullScreen
                         title={post.content}
                     />
+                    {/* Dark Overlay to cover YT branding and handle clicks */}
+                    <div className="absolute inset-0 z-10 cursor-pointer" onClick={togglePlay} />
                 </div>
             ) : (
                 <video

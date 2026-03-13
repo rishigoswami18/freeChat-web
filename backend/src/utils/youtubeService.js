@@ -1,21 +1,19 @@
 /**
- * Curated list of high-quality YouTube Shorts to provide a "100% Real" Instagram experience.
- * These are hand-picked for different categories (Comedy, Fitness, Travel, Aesthetic).
+ * Curated list of high-quality REAL YouTube Shorts to provide a "100% Real" Instagram experience.
+ * These are hand-picked from trending categories to ensure original audio and professional content.
  */
 const CURATED_SHORTS = [
-    // COMEDY / RELATABLE
-    { id: "vD_v1GfIn0g", title: "When you're the first one to wake up 😂", author: "Relatable Humour" },
-    { id: "S2_5x1_xZ2c", title: "Siblings be like... 💀", author: "Comedy Central" },
-    { id: "v9H_K34p8c8", title: "Morning routine expectations vs reality", author: "Life Hacks" },
+    // NATURE & TRAVEL (Cinematic/Relaxing)
+    { id: "xQknAlRnaM4", title: "Nature view | Summer rain (4K) 🌧️", author: "Nature Hub" },
+    { id: "G9NRzrx7m4U", title: "Switzerland 4K | Beautiful scenery 🏔️", author: "Travel Pro" },
+    { id: "8Dq-56hD3Fo", title: "Mountain river landscapes 🌊", author: "Wanderlust" },
+    { id: "RM485oUuOhg", title: "Switzerland: Land of Pure Nature 🇨🇭", author: "Swiss Vibe" },
     
-    // FITNESS / MOTIVATION
-    { id: "3B_N9x2pG7c", title: "Never give up! 🏋️‍♂️", author: "Fitness Pro" },
-    { id: "5G_x2p8Gv9c", title: "The ultimate 5 min workout ⚡", author: "Gym Shark" },
-    
-    // AESTHETIC / TRAVEL
-    { id: "9B_GvA2p3Hc", title: "Sunsets in Bali are different 🌅", author: "Wanderlust" },
-    { id: "v8xG2p8G7v9", title: "Dream hotel in Maldives 🌴", author: "Luxury Travel" },
-    { id: "3G_x2p8Vv9c", title: "Aesthetic Morning in Paris ☕", author: "City Vibes" },
+    // COMEDY & RELATABLE (Indian/Global)
+    { id: "_pwFHaCm134", title: "Power ka sahi istemaal 😂", author: "Funny Relatable" },
+    { id: "Crkkq9ybqo4", title: "Online wala pyar ❤️", author: "Modern Comedy" },
+    { id: "8DiNEagiLks", title: "When you are temporary shopkeeper 🏪", author: "Store Diaries" },
+    { id: "td7DREk6sNo", title: "That childhood moment of pride ⭐", author: "Nostalgia" },
 ];
 
 /**
@@ -37,9 +35,8 @@ export const getYouTubeShorts = (count = 5) => {
             isVerified: true,
             content: vid.title,
             caption: "Featured on YouTube",
-            // For YouTube posts, the mediaUrl is the embed link
             mediaUrl: `https://www.youtube.com/embed/${vid.id}`,
-            mediaType: "youtube", // Special type to handle iframe in frontend
+            mediaType: "youtube",
             songName: "Original Audio",
             audioUrl: "",
             likes: Array(Math.floor(Math.random() * 5000)).fill("0"),
