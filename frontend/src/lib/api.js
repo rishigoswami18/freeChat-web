@@ -63,8 +63,10 @@ export const getUserFriends = async (userId) => {
   return response.data;
 };
 
-export const getRecommendedUsers = async (query = "") => {
-  const response = await axiosInstance.get("/users", { params: { q: query } });
+export const getRecommendedUsers = async (q = "") => {
+  // TanStack Query passes an object as first arg, we need a string or nothing
+  const queryStr = typeof q === 'string' ? q : "";
+  const response = await axiosInstance.get("/users", { params: { q: queryStr } });
   return response.data;
 };
 

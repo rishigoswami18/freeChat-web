@@ -1,6 +1,6 @@
 /**
  * BondBeyond — All Rights Reserved © 2026
- * Powered by freechatweb.in
+ * The Ultimate Relationship Platform
  */
 import express from "express";
 import "dotenv/config";

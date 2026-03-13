@@ -29,7 +29,6 @@ export async function getRecommendedUsers(req, res) {
       $and: [
         { _id: { $ne: currentUserId } },
         { _id: { $nin: currentUser.friends } },
-        { isOnboarded: true },
         { isPublic: true },
       ],
     };
@@ -44,13 +43,13 @@ export async function getRecommendedUsers(req, res) {
       });
     }
 
-    let recommendedUsers = await User.find(query);
+    let recommendedUsers = await User.find(query).limit(20); // Limit to top 20 to avoid over-fetching
     console.log(`Found ${recommendedUsers.length} users for query: "${q || 'none'}"`);
 
     // Calculate match scores
     recommendedUsers = recommendedUsers.map(user => {
       const userObj = user.toObject();
-      let matchScore = 0;
+      let matchScore = 10; // Give a base score so everyone shows up
       let isTandemMatch = false;
 
       const userNative = (user.nativeLanguage || "").toLowerCase();
@@ -60,18 +59,23 @@ export async function getRecommendedUsers(req, res) {
 
       const isBoosted = user.boostUntil && new Date(user.boostUntil) > new Date();
 
-      // Perfect Match: B speaks L (what A learns) AND B learns N (what A speaks)
+      // Perfect Match
       if (userNative === currentLearning && userLearning === currentNative && currentLearning !== "") {
-        matchScore = 100;
+        matchScore += 90;
         isTandemMatch = true;
       }
-      // High Match: B speaks L (what A learns)
+      // High Match
       else if (userNative === currentLearning && currentLearning !== "") {
-        matchScore = 50;
+        matchScore += 40;
       }
-      // Medium Match: B learns N (what A speaks)
+      // Medium Match
       else if (userLearning === currentNative && currentNative !== "") {
-        matchScore = 25;
+        matchScore += 20;
+      }
+
+      // Proximity score (if they are both in the same location)
+      if (user.location && currentUser.location && user.location.toLowerCase() === currentUser.location.toLowerCase()) {
+         matchScore += 30;
       }
 
       return { ...userObj, matchScore, isTandemMatch, isBoosted };
@@ -145,9 +149,9 @@ export async function sendFriendRequest(req, res) {
     sendNotificationEmail(recipient.email, {
       emoji: "👋",
       title: "New Friend Request!",
-      body: `<strong>${req.user.fullName}</strong> wants to be your friend on freeChat! Log in to accept or decline their request.`,
+      body: `<strong>${req.user.fullName}</strong> wants to be your friend on BondBeyond! Log in to accept or decline their request.`,
       ctaText: "View Request",
-      ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/notifications`,
+      ctaUrl: `${process.env.CLIENT_URL || "https://www.bondbeyond.in"}/notifications`,
     });
 
     // Send push notification (fire-and-forget)
@@ -155,7 +159,7 @@ export async function sendFriendRequest(req, res) {
       const { sendPushNotification } = await import("../lib/push.service.js");
       sendPushNotification(recipientId, {
         title: "👋 New Friend Request!",
-        body: `${req.user.fullName} wants to be your friend on freeChat!`,
+        body: `${req.user.fullName} wants to be your friend on BondBeyond!`,
         icon: req.user.profilePic,
         data: { url: "/notifications" }
       });
@@ -267,7 +271,7 @@ export async function updateProfile(req, res) {
     if (profilePic && profilePic.startsWith("data:image")) {
       // Upload new profile pic to Cloudinary
       const uploadResponse = await cloudinary.uploader.upload(profilePic, {
-        folder: "freechat_profiles",
+        folder: "bondbeyond_profiles",
       });
       updateData.profilePic = uploadResponse.secure_url;
     }

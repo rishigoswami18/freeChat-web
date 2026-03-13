@@ -67,19 +67,12 @@ const PostsPage = () => {
   const addPost = (post) => setLocalPosts((prev) => [post, ...prev]);
 
   return (
-    <div className="px-2 py-4 sm:p-6 lg:p-10 max-w-4xl mx-auto w-full min-h-[120vh]">
-      <div className="mb-6 lg:mb-10 w-full overflow-hidden">
+    <div className="px-0 sm:px-2 py-4 sm:py-6 lg:py-8 max-w-[630px] mx-auto w-full min-h-[120vh]">
+      <div className="mb-4 sm:mb-6 w-full overflow-hidden max-w-[470px] mx-auto lg:max-w-[630px]">
         <StoryTray />
       </div>
       
-      <div className="flex items-center justify-between mb-8 px-2">
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tighter text-base-content relative inline-block">
-          Feed
-          <span className="absolute -bottom-2 left-0 w-1/3 h-1.5 bg-gradient-to-r from-primary to-transparent rounded-full"></span>
-        </h1>
-      </div>
-      
-      <div className="glass-panel-flat p-4 sm:p-6 rounded-[28px] mb-8 shadow-sm border border-base-content/5">
+      <div className="max-w-[470px] mx-auto mb-6">
         <CreatePost onPost={addPost} authUser={authUser} />
       </div>
 

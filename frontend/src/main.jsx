@@ -1,6 +1,6 @@
 /**
  * BondBeyond — All Rights Reserved © 2026
- * Powered by freechatweb.in
+ * The Ultimate Relationship Platform
  */
 // main.jsx
 

@@ -47,8 +47,8 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
                     Urgency: "high"
                 },
                 notification: {
-                    icon: icon || "https://www.freechatweb.in/logo.png",
-                    badge: "https://www.freechatweb.in/logo.png",
+                    icon: icon || "https://www.bondbeyond.in/logo.png",
+                    badge: "https://www.bondbeyond.in/logo.png",
                     requireInteraction: data?.type === "incoming_call",
                     timestamp: Date.now(),
                     silent: false,
@@ -59,7 +59,7 @@ export const sendPushNotification = async (userId, { title, body, data, icon }) 
                     ] : []
                 },
                 fcmOptions: {
-                    link: data?.url ? `https://www.freechatweb.in${data.url}` : "https://www.freechatweb.in"
+                    link: data?.url ? `https://www.bondbeyond.in${data.url}` : "https://www.bondbeyond.in"
                 }
             }
         };

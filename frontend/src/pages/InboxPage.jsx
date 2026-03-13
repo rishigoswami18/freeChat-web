@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck, Plus, Users } from "lucide-react";
+import { MessageSquare, Search, ArrowRight, X, Loader2, BadgeCheck, Plus, Users, ChevronDown, Edit } from "lucide-react";
 import CreateGroupModal from "../components/CreateGroupModal";
 import toast from "react-hot-toast";
 import { useChatClient } from "../components/ChatProvider";
@@ -176,109 +176,113 @@ const InboxPage = () => {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto bg-base-100 min-h-full pb-10">
-            {/* Sticky Header & Search area */}
-            <div className="sticky top-0 z-20 bg-base-100/95 backdrop-blur-md border-b border-base-content/5">
-                <div className="px-4 py-6 flex items-center justify-between">
-                    <h1 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-2">
-                        <MessageSquare className="size-6 text-primary" />
-                        Messages
-                    </h1>
-                    <div className="flex items-center gap-2">
+        <div className="w-full max-w-[600px] mx-auto bg-black min-h-screen pb-10 font-outfit text-white">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-md border-b border-white/10 pt-4 px-4 pb-3">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 cursor-pointer">
+                        <h1 className="text-xl font-bold tracking-tight">{authUser?.fullName || "Messages"}</h1>
+                        <ChevronDown className="size-4 text-white/70" />
+                    </div>
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsGroupModalOpen(true)}
-                            className="btn btn-ghost btn-sm btn-circle hover:bg-primary/10 text-primary transition-all"
+                            className="hover:opacity-70 transition-opacity"
                             title="Create Group"
                         >
-                            <Users className="size-5" />
+                            <Users className="size-6" strokeWidth={2} />
                         </button>
                         <button
                             onClick={() => navigate("/search")}
-                            className="btn btn-primary btn-sm btn-circle shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-90"
+                            className="hover:opacity-70 transition-opacity"
                             title="New Message"
                         >
-                            <Plus className="size-5" />
+                            <Edit className="size-6" strokeWidth={2} />
                         </button>
                     </div>
                 </div>
 
                 {/* Search Bar */}
-                <div className="px-4 pb-4">
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4.5 text-base-content/30 group-focus-within:text-primary transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search for a name..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-11 pr-5 py-3 rounded-2xl bg-base-200 focus:bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-2 focus:ring-primary/40 transition-all text-sm font-medium"
-                        />
-                    </div>
+                <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/50 group-focus-within:text-white/80 transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/10 focus:bg-white/15 border-none outline-none transition-all text-[15px] placeholder:text-white/50"
+                    />
                 </div>
             </div>
 
             {/* Conversation List */}
-            <div className="px-1">
+            <div className="pt-2">
+                <div className="px-4 py-2 flex items-center justify-between">
+                    <h2 className="text-[15px] font-semibold text-white">Messages</h2>
+                    <span className="text-[14px] text-white/50 font-medium cursor-pointer hover:text-white/80 transition-colors">Requests</span>
+                </div>
+
                 {isLoading ? (
                     <ChatSkeleton />
                 ) : filtered.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 gap-4">
-                        <div className="empty-state-icon">
-                            <MessageSquare className="size-8 text-primary/50" />
-                        </div>
-                        <p className="font-bold uppercase tracking-widest text-xs opacity-30">No active chats</p>
-                        <p className="text-xs opacity-40 max-w-xs text-center">Start a conversation from your Friends page</p>
+                    <div className="flex flex-col items-center justify-center py-20 gap-3 opacity-60">
+                        <MessageSquare className="size-12 opacity-50 font-light" strokeWidth={1} />
+                        <p className="text-[15px] font-medium">No messages found.</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col divide-y divide-base-content/5">
+                    <div className="flex flex-col">
                         {filtered.map((conv) => (
                             <Link
                                 key={conv.id}
                                 to={`/chat/${conv.targetUserId}`}
-                                className="group flex items-center gap-4 px-4 py-5 hover:bg-base-200/50 transition-all active:bg-base-200 stagger-item rounded-xl mx-1 hover:scale-[1.005]"
+                                className="group flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors active:bg-white/10 relative"
                             >
                                 <div className="relative flex-shrink-0" onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     setViewingDP({ url: conv.partner.avatar, name: conv.partner.name });
                                 }}>
-                                    <div className="avatar ring-2 ring-primary/15 rounded-full p-0.5 cursor-pointer hover:ring-primary/40 transition-all active:scale-95">
-                                        <div className="w-14 h-14 rounded-full overflow-hidden shadow-sm group-active:scale-95 transition-transform">
-                                            <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
-                                        </div>
+                                    <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 shrink-0">
+                                        <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
                                     </div>
-                                    <span className="absolute bottom-0.5 right-0.5 size-3.5 bg-success rounded-full border-2 border-base-100" />
+                                    {/* Active Status Dot Placeholder */}
+                                    <span className="absolute bottom-0 right-0 size-3.5 bg-green-500 rounded-full border-2 border-black" />
                                 </div>
 
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-baseline gap-2 mb-1.5">
-                                        <h2 className="font-bold italic text-base uppercase tracking-tight text-base-content truncate flex items-center gap-1">
-                                            {conv.partner.name}
-                                            {(conv.partner.role === "admin" || conv.partner.isVerified) && (
-                                                <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
-                                            )}
-                                        </h2>
-                                        <span className="text-[10px] uppercase font-black opacity-25 whitespace-nowrap">
-                                            {timeAgo(conv.timestamp)}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <p className={`text-sm truncate flex-1 leading-snug ${conv.unread ? "font-bold text-base-content" : "opacity-40"}`}>
+                                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                    <h2 className="font-medium text-[15px] text-white truncate flex items-center gap-1.5 leading-tight">
+                                        {conv.partner.name}
+                                        {(conv.partner.role === "admin" || conv.partner.isVerified) && (
+                                            <BadgeCheck className="size-3.5 text-blue-500 fill-blue-500" />
+                                        )}
+                                    </h2>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <p className={`text-[14px] truncate leading-tight ${conv.unread ? "font-semibold text-white" : "text-white/60 font-normal"}`}>
                                             {conv.lastMessage}
                                         </p>
-                                        {conv.unread && (
-                                            <div className="size-2.5 rounded-full bg-primary shadow-sm shadow-primary/40 animate-pulse" />
-                                        )}
+                                        <span className={`text-[13px] whitespace-nowrap leading-tight ${conv.unread ? "font-semibold text-white" : "text-white/60"}`}>
+                                            · {timeAgo(conv.timestamp)}
+                                        </span>
                                     </div>
                                 </div>
 
-                                <X
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleDelete(conv.id);
-                                    }}
-                                    className="hidden group-hover:block size-4 text-error/30 hover:text-error transition-all"
-                                />
+                                {conv.unread && (
+                                    <div className="size-2.5 bg-blue-500 rounded-full shrink-0 mr-1" />
+                                )}
+
+                                <div className="absolute right-4 hidden group-hover:flex items-center gap-3 bg-gradient-to-l from-[#121212] via-[#121212] to-transparent pl-8 py-2">
+                                     <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            handleDelete(conv.id);
+                                        }}
+                                        className="p-1.5 text-white/40 hover:text-red-500 transition-colors bg-white/5 rounded-full"
+                                        title="Delete Conversation"
+                                    >
+                                        <X className="size-4" />
+                                    </button>
+                                </div>
                             </Link>
                         ))}
                     </div>

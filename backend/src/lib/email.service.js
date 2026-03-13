@@ -13,7 +13,7 @@ async function sendViaBrevo(to, replyTo, subject, htmlContent) {
     const senderEmail = process.env.SMTP_USER || process.env.OWNER_EMAIL;
 
     const body = {
-        sender: { name: "freeChat Support", email: senderEmail },
+        sender: { name: "BondBeyond Support", email: senderEmail },
         to: [{ email: to }],
         subject: subject,
         htmlContent: htmlContent,
@@ -80,7 +80,7 @@ async function sendEmail(to, replyTo, subject, text, html) {
     // Method 2: SMTP fallback (works on localhost)
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
         try {
-            const from = `"freeChat" <${process.env.SMTP_USER}>`;
+            const from = `"BondBeyond" <${process.env.SMTP_USER}>`;
             return await sendViaSMTP(from, to, replyTo, subject, text, html);
         } catch (err) {
             console.warn("[Email] SMTP failed:", err.message);
@@ -122,20 +122,20 @@ export const sendOTPEmail = async (email, otp) => {
     return await sendEmail(
         email,
         undefined,
-        `${otp} is your freeChat verification code`,
+        `${otp} is your BondBeyond verification code`,
         `Your verification code is: ${otp}`,
         `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:10px;background:#fff;">
-            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">freeChat</h1></div>
+            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">BondBeyond</h1></div>
             <div style="padding:20px;border-top:2px solid #6366f1;">
                 <h2 style="color:#333;margin-top:0;">Verify your email</h2>
-                <p style="color:#666;">Thank you for joining freeChat! Use the following code:</p>
+                <p style="color:#666;">Thank you for joining BondBeyond! Use the following code:</p>
                 <div style="margin:30px 0;text-align:center;">
                     <span style="display:inline-block;padding:10px 30px;background:#f3f4f6;color:#6366f1;font-size:32px;font-weight:bold;letter-spacing:5px;border-radius:8px;border:1px dashed #6366f1;">${otp}</span>
                 </div>
                 <p style="color:#999;font-size:14px;">This code expires in 10 minutes.</p>
             </div>
             <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee;">
-                <p style="color:#aaa;font-size:12px;">© 2026 freeChat. All rights reserved.</p>
+                <p style="color:#aaa;font-size:12px;">© 2026 BondBeyond. All rights reserved.</p>
             </div>
         </div>`
     );
@@ -148,10 +148,10 @@ export const sendResetPasswordEmail = async (email, otp) => {
     return await sendEmail(
         email,
         undefined,
-        `${otp} is your freeChat password reset code`,
+        `${otp} is your BondBeyond password reset code`,
         `Your password reset code is: ${otp}`,
         `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:10px;background:#fff;">
-            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">freeChat</h1></div>
+            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">BondBeyond</h1></div>
             <div style="padding:20px;border-top:2px solid #6366f1;">
                 <h2 style="color:#333;margin-top:0;">Reset your password</h2>
                 <p style="color:#666;">Use the following code to reset your password:</p>
@@ -161,7 +161,7 @@ export const sendResetPasswordEmail = async (email, otp) => {
                 <p style="color:#999;font-size:14px;">This code expires in 10 minutes.</p>
             </div>
             <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee;">
-                <p style="color:#aaa;font-size:12px;">© 2026 freeChat. All rights reserved.</p>
+                <p style="color:#aaa;font-size:12px;">© 2026 BondBeyond. All rights reserved.</p>
             </div>
         </div>`
     );
@@ -177,7 +177,7 @@ export const sendBroadcastEmail = async (email, subject, message) => {
         subject,
         message,
         `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:10px;background:#fff;">
-            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">freeChat</h1></div>
+            <div style="text-align:center;margin-bottom:20px;"><h1 style="color:#6366f1;margin:0;font-style:italic;">BondBeyond</h1></div>
             <div style="padding:20px;border-top:2px solid #6366f1;">
                 <h2 style="color:#333;margin-top:0;">Special Announcement</h2>
                 <div style="color:#444;line-height:1.6;font-size:16px;">
@@ -185,8 +185,8 @@ export const sendBroadcastEmail = async (email, subject, message) => {
                 </div>
             </div>
             <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #eee;">
-                <p style="color:#aaa;font-size:12px;">You received this because you are a registered member of freeChat.</p>
-                <p style="color:#aaa;font-size:12px;">© 2026 freeChat. All rights reserved.</p>
+                <p style="color:#aaa;font-size:12px;">You received this because you are a registered member of BondBeyond.</p>
+                <p style="color:#aaa;font-size:12px;">© 2026 BondBeyond. All rights reserved.</p>
             </div>
         </div>`
     );
@@ -207,11 +207,11 @@ export const sendInviteEmail = async (email, customSubject, customMessage) => {
         email,
         undefined,
         subject,
-        `You've been personally invited to join freeChat! Visit ${appUrl} to get started.`,
+        `You've been personally invited to join BondBeyond! Visit ${appUrl} to get started.`,
         `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
             <!-- Header -->
             <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);padding:40px 30px;text-align:center;">
-                <h1 style="color:#ffffff;margin:0;font-size:36px;font-style:italic;font-weight:900;letter-spacing:-1px;">freeChat</h1>
+                <h1 style="color:#ffffff;margin:0;font-size:36px;font-style:italic;font-weight:900;letter-spacing:-1px;">BondBeyond</h1>
                 <p style="color:rgba(255,255,255,0.8);margin:8px 0 0 0;font-size:13px;text-transform:uppercase;letter-spacing:3px;font-weight:600;">You're Invited</p>
             </div>
 
@@ -237,7 +237,7 @@ export const sendInviteEmail = async (email, customSubject, customMessage) => {
                 <!-- CTA Button -->
                 <div style="text-align:center;margin:32px 0;">
                     <a href="${appUrl}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;padding:16px 48px;border-radius:50px;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
-                        Join freeChat Now →
+                        Join BondBeyond Now →
                     </a>
                 </div>
 
@@ -248,8 +248,8 @@ export const sendInviteEmail = async (email, customSubject, customMessage) => {
 
             <!-- Footer -->
             <div style="background:#f9fafb;padding:20px 30px;text-align:center;border-top:1px solid #e5e7eb;">
-                <p style="color:#9ca3af;font-size:11px;margin:0;">This invitation was sent from freeChat. If you didn't expect this, you can safely ignore it.</p>
-                <p style="color:#d1d5db;font-size:11px;margin:8px 0 0 0;">© 2026 freeChat. All rights reserved.</p>
+                <p style="color:#9ca3af;font-size:11px;margin:0;">This invitation was sent from BondBeyond. If you didn't expect this, you can safely ignore it.</p>
+                <p style="color:#d1d5db;font-size:11px;margin:8px 0 0 0;">© 2026 BondBeyond. All rights reserved.</p>
             </div>
         </div>`
     );
@@ -271,7 +271,7 @@ export const sendNotificationEmail = async (toEmail, { emoji, title, body, ctaTe
             body,
             `<div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:560px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
                 <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);padding:30px 24px;text-align:center;">
-                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-style:italic;font-weight:900;letter-spacing:-1px;">freeChat</h1>
+                    <h1 style="color:#ffffff;margin:0;font-size:28px;font-style:italic;font-weight:900;letter-spacing:-1px;">BondBeyond</h1>
                 </div>
                 <div style="padding:32px 24px;">
                     <div style="text-align:center;margin-bottom:20px;">
@@ -286,7 +286,7 @@ export const sendNotificationEmail = async (toEmail, { emoji, title, body, ctaTe
                     </div>
                 </div>
                 <div style="background:#f9fafb;padding:16px 24px;text-align:center;border-top:1px solid #e5e7eb;">
-                    <p style="color:#9ca3af;font-size:10px;margin:0;">You received this because you're a member of freeChat. <a href="${appUrl}" style="color:#6366f1;">Manage preferences</a></p>
+                    <p style="color:#9ca3af;font-size:10px;margin:0;">You received this because you're a member of BondBeyond. <a href="${appUrl}" style="color:#6366f1;">Manage preferences</a></p>
                 </div>
             </div>`
         );

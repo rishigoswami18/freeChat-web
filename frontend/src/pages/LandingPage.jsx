@@ -167,8 +167,8 @@ const LandingPage = () => {
         <div className="min-h-screen bg-base-100" data-theme="bondbeyond">
             {/* SEO & Meta Tags */}
             <title>BondBeyond | Free Chat App, Video Calls & AI Companions</title>
-            <meta name="description" content="Join BondBeyond, the all-in-one free chat platform. Enjoy high-quality video calls, share reels, play games, and connect with your personalized AI best friend. Bonding redefined at freechatweb.in." />
-            <meta name="keywords" content="free chat, video call app, AI girlfriend, AI best friend, social media app, ludo online, bondbeyond, freechatweb" />
+            <meta name="description" content="Join BondBeyond, the all-in-one free chat platform. Enjoy high-quality video calls, share reels, play games, and connect with your personalized AI best friend. Bonding redefined." />
+            <meta name="keywords" content="free chat, video call app, AI girlfriend, AI best friend, social media app, ludo online, bondbeyond" />
 
             {/* ===== NAVIGATION ===== */}
             <nav className="navbar bg-base-100/80 backdrop-blur-lg border-b border-base-300/50 sticky top-0 z-50">
@@ -219,7 +219,7 @@ const LandingPage = () => {
                                 BondBeyond
                             </span>
                             <div className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 -mt-1 mb-4 flex justify-center">
-                                Powered by freechatweb.in
+                                Premium Relationship Experience
                             </div>
                             <span className="text-base-content text-3xl sm:text-4xl lg:text-5xl block mt-2">
                                 {t('hero_title')}
@@ -710,8 +710,7 @@ const LandingPage = () => {
                     <div className="section-divider" />
                     <div className="text-center text-sm opacity-50">
                         <p>
-                            © {new Date().getFullYear()} BondBeyond — freechatweb.in | Free Chat
-                            App for Messaging, Video Calls & Social Networking
+                            © {new Date().getFullYear()} BondBeyond | Premium Relationship Platform
                         </p>
                     </div>
                 </div>

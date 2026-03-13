@@ -167,91 +167,106 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[999] bg-black flex flex-col items-center justify-center sm:p-4 backdrop-blur-xl overflow-hidden">
+        <div className="fixed inset-0 z-[999] bg-black/95 flex flex-col items-center justify-center sm:p-4 backdrop-blur-xl overflow-hidden font-outfit">
             {story.audioUrl && (
                 <audio ref={audioRef} src={story.audioUrl} loop />
             )}
 
-            {/* Top Bar Controls */}
-            <div className="absolute top-0 inset-x-0 z-50 p-4 sm:p-6 bg-gradient-to-b from-black/80 to-transparent">
-                <div className="max-w-md mx-auto">
-                    {/* Progress Bars */}
-                    <div className="flex gap-1.5 mb-5 px-1">
-                        {group.stories.map((_, idx) => (
-                            <div key={idx} className="h-0.5 flex-1 bg-white/20 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-white transition-all duration-100 ease-linear"
-                                    style={{
-                                        width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? "100%" : "0%",
-                                    }}
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="flex items-center justify-between text-white">
-                        <div className="flex items-center gap-3">
-                            <div
-                                className="size-10 rounded-full p-[1.5px] bg-gradient-to-tr from-orange-400 to-rose-600 cursor-pointer active:scale-95 transition-transform"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsPaused(true);
-                                    setViewingDP({ url: group.profilePic || "/avatar.png", name: group.fullName });
-                                }}
-                            >
-                                <img src={group.profilePic || "/avatar.png"} alt="" className="size-full rounded-full object-cover border-2 border-black" />
-                            </div>
-                            <div>
-                                <p className="font-bold text-sm tracking-tight">{group.fullName}</p>
-                                <p className="text-[10px] font-medium opacity-60">
-                                    {new Date(story.createdAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                            </div>
+            {/* Premium Center Frame for Desktop */}
+            <div className="relative w-full h-full sm:h-[90vh] sm:max-w-[420px] bg-black sm:rounded-[40px] shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex items-center justify-center sm:border sm:border-white/10 shrink-0">
+                
+                {/* Top Bar Controls */}
+                <div className="absolute top-0 inset-x-0 z-50 p-4 sm:p-5 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none">
+                    <div className="w-full h-full pointer-events-auto">
+                        {/* Progress Bars */}
+                        <div className="flex gap-1 mb-4 w-full">
+                            {group.stories.map((_, idx) => (
+                                <div key={idx} className="h-0.5 flex-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+                                    <div
+                                        className="h-full bg-white transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+                                        style={{
+                                            width: idx === currentIndex ? `${progress}%` : idx < currentIndex ? "100%" : "0%",
+                                        }}
+                                    />
+                                </div>
+                            ))}
                         </div>
-                        <div className="flex items-center gap-2">
-                            {isOwner && (
-                                <button
-                                    onClick={() => setShowViewers(true)}
-                                    className="flex items-center gap-1 bg-white/10 hover:bg-white/20 transition-colors px-2 py-1 rounded-full text-[11px] font-bold"
+
+                        <div className="flex items-center justify-between text-white w-full">
+                            <div className="flex items-center gap-3 shrink-0 min-w-0">
+                                <div
+                                    className="size-9 rounded-full p-[2px] bg-gradient-to-tr from-orange-400 via-pink-500 to-purple-500 cursor-pointer active:scale-95 transition-transform shrink-0"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsPaused(true);
+                                        setViewingDP({ url: group.profilePic || "/avatar.png", name: group.fullName });
+                                    }}
                                 >
-                                    <Eye className="size-3.5" />
-                                    {story.views?.length || 0}
+                                    <img src={group.profilePic || "/avatar.png"} alt="" className="size-full rounded-full object-cover border-[1.5px] border-black" />
+                                </div>
+                                <div className="min-w-0 pr-2">
+                                    <p className="font-semibold text-[13px] tracking-tight truncate drop-shadow-md text-white">{group.fullName}</p>
+                                    <p className="text-[10px] font-medium opacity-70 drop-shadow-md">
+                                        {new Date(story.createdAt).toLocaleTimeString("en-US", { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {/* Action Buttons (Top Right) */}
+                            <div className="flex items-center gap-2 shrink-0">
+                                {isOwner && (
+                                    <>
+                                        <button
+                                            onClick={() => setShowViewers(true)}
+                                            className="flex items-center gap-1.5 bg-black/40 hover:bg-black/60 backdrop-blur-md transition-colors px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white shadow-sm"
+                                        >
+                                            <Eye className="size-3.5 opacity-80" />
+                                            {story.views?.length || 0}
+                                        </button>
+                                        <button
+                                            onClick={handleDeleteStory}
+                                            className="p-1.5 hover:bg-red-500/20 rounded-full transition-colors active:scale-90 text-white"
+                                            title="Delete Story"
+                                        >
+                                            <Trash2 className="size-[18px] text-white/90 hover:text-red-400" />
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    onClick={onClose}
+                                    className="p-1.5 hover:bg-white/10 rounded-full transition-colors active:scale-90 ml-1"
+                                >
+                                    <X className="size-6 text-white" />
                                 </button>
-                            )}
-                            <button
-                                onClick={onClose}
-                                className="p-1.5 hover:bg-white/10 rounded-full transition-colors active:scale-90"
-                            >
-                                <X className="size-6 text-white" />
-                            </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Story Content */}
-            <div className="relative w-full h-full sm:h-auto sm:max-w-md sm:aspect-[9/16] bg-black sm:rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center">
+                {/* Animated Story Media Container */}
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={story._id}
-                        initial={{ opacity: 0, scale: 1.1 }}
+                        initial={{ opacity: 0, scale: 1.05 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.4 }}
-                        className="absolute inset-0 flex items-center justify-center"
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        className="absolute inset-0 flex items-center justify-center w-full h-full"
                     >
+                        {/* Background Blur Fill */}
                         <div className="absolute inset-0 z-0">
                             {story.mediaType === 'video' ? (
-                                <video src={story.imageUrl} className="w-full h-full object-cover blur-3xl opacity-30 scale-150" muted playsInline />
+                                <video src={story.imageUrl} className="w-full h-full object-cover blur-3xl opacity-40 scale-125 saturate-150" muted playsInline />
                             ) : (
-                                <img src={story.imageUrl} alt="" className="w-full h-full object-cover blur-3xl opacity-30 scale-150" />
+                                <img src={story.imageUrl} alt="" className="w-full h-full object-cover blur-3xl opacity-40 scale-125 saturate-150" />
                             )}
                         </div>
 
+                        {/* Foreground Media */}
                         {story.mediaType === 'video' ? (
                             <video
                                 src={story.imageUrl}
-                                className="relative z-10 w-full h-full object-contain select-none shadow-2xl shadow-black/50"
+                                className="relative z-10 w-full h-full object-contain select-none"
                                 autoPlay
                                 muted
                                 loop
@@ -262,7 +277,7 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                             <img
                                 src={story.imageUrl}
                                 alt=""
-                                className="relative z-10 w-full h-full object-contain select-none shadow-2xl shadow-black/50"
+                                className="relative z-10 w-full h-full object-contain select-none"
                                 onContextMenu={(e) => e.preventDefault()}
                             />
                         )}
@@ -273,162 +288,198 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
                 <AnimatePresence>
                     {doubleTapHeart && (
                         <motion.div
-                            initial={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.5 }}
+                            initial={{ opacity: 0, scale: 0.5, rotate: -15 }}
+                            animate={{ opacity: 1, scale: 1.2, rotate: 0 }}
+                            exit={{ opacity: 0, scale: 1, y: -50 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
                             className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none"
                         >
-                            <Heart className="size-24 text-red-500 fill-red-500 drop-shadow-2xl" />
+                            <Heart className="size-28 text-[#ff3040] fill-[#ff3040] drop-shadow-[0_0_30px_rgba(255,48,64,0.6)]" />
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 {/* Interaction Overlay (tap left/right) */}
                 <div className="absolute inset-0 z-30 flex">
-                    <div className="flex-1 cursor-pointer" onClick={(e) => { handleDoubleTap(e); handlePrev(); }} />
-                    <div className="flex-1 cursor-pointer" onClick={(e) => { handleDoubleTap(e); handleNext(); }} />
+                    <div className="flex-1 cursor-pointer pointer-events-auto" onClick={(e) => { handleDoubleTap(e); handlePrev(); }} />
+                    <div className="flex-1 cursor-pointer pointer-events-auto" onClick={(e) => { handleDoubleTap(e); handleNext(); }} />
                 </div>
 
                 {/* Caption */}
                 {story.caption && (
-                    <div className="absolute bottom-28 inset-x-0 z-35 px-6 text-center">
-                        <p className="text-white text-sm font-medium drop-shadow-lg bg-black/30 backdrop-blur-sm rounded-xl px-4 py-2 inline-block max-w-full">
+                    <div className="absolute bottom-24 inset-x-0 z-30 px-6 text-center pointer-events-none">
+                        <p className="text-white text-[14px] font-medium drop-shadow-xl bg-black/50 backdrop-blur-md rounded-2xl px-5 py-2.5 inline-block max-w-full">
                             {story.caption}
                         </p>
                     </div>
                 )}
-            </div>
 
-            {/* Bottom Action Bar */}
-            <div className="absolute bottom-24 sm:bottom-0 inset-x-0 z-50 bg-gradient-to-t from-black/80 to-transparent">
-                <div className="max-w-md mx-auto px-4 pb-6 pt-10 flex items-center gap-3">
-                    {/* Comment Input */}
-                    <div className="flex-1 relative">
-                        <input
-                            type="text"
-                            placeholder="Send a message..."
-                            className="w-full bg-white/10 backdrop-blur-md text-white placeholder-white/40 text-sm px-4 py-3 rounded-full border border-white/20 focus:border-white/40 focus:outline-none transition-all"
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            onFocus={() => setIsPaused(true)}
-                            onBlur={() => { if (!showComments && !commentText) setIsPaused(false); }}
-                            onKeyDown={(e) => { if (e.key === "Enter") handleComment(); }}
-                        />
-                        {commentText.trim() && (
+                {/* Bottom Action Bar */}
+                <div className="absolute bottom-0 inset-x-0 z-50 bg-gradient-to-t from-black/80 via-black/40 to-transparent pb-4 sm:pb-6 pt-16 pointer-events-none">
+                    <div className="w-full px-4 flex items-center justify-between gap-3 pointer-events-auto">
+                        {/* Comment Input */}
+                        <div className="flex-1 relative group">
+                            <input
+                                type="text"
+                                placeholder="Send a message..."
+                                className="w-full bg-black/40 backdrop-blur-md hover:bg-black/50 text-white placeholder-white/60 text-[14px] px-5 py-2.5 rounded-[24px] border border-white/20 focus:border-white/50 focus:bg-black/60 outline-none transition-all shadow-lg"
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                onFocus={() => setIsPaused(true)}
+                                onBlur={() => { if (!showComments && !commentText) setIsPaused(false); }}
+                                onKeyDown={(e) => { if (e.key === "Enter") handleComment(); }}
+                            />
+                            <AnimatePresence>
+                                {commentText.trim() && (
+                                    <motion.button
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        onClick={handleComment}
+                                        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 bg-white text-black rounded-full active:scale-90 transition-transform shadow-md"
+                                    >
+                                        <Send className="size-4" />
+                                    </motion.button>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Actions Right Side */}
+                        <div className="flex items-center gap-1 shrink-0">
+                            {/* Like Button */}
                             <button
-                                onClick={handleComment}
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-primary rounded-full active:scale-90 transition-transform"
+                                onClick={handleLike}
+                                className={`p-2.5 rounded-full transition-all active:scale-90 group/like ${isLiked ? '' : 'hover:bg-white/10'}`}
                             >
-                                <Send className="size-4 text-primary-content" />
+                                <Heart 
+                                    className={`size-[26px] transition-all duration-300 ${isLiked ? 'text-[#ff3040] fill-[#ff3040]' : 'text-white'} ${isStoryLikeAnimating ? 'scale-125' : ''} group-hover/like:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]`} 
+                                    strokeWidth={isLiked ? 2 : 2.5}
+                                />
+                                {currentLikes.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                                        {currentLikes.length}
+                                    </span>
+                                )}
                             </button>
-                        )}
+
+                            {/* Comment Button */}
+                            <button
+                                onClick={openComments}
+                                className="p-2.5 rounded-full hover:bg-white/10 transition-all active:scale-90 relative"
+                            >
+                                <MessageCircle className="size-[26px] text-white" strokeWidth={2.5} style={{ transform: 'scaleX(-1)' }} />
+                                {currentComments.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                                        {currentComments.length}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
-
-                    {/* Like Button */}
-                    <button
-                        onClick={handleLike}
-                        className={`p-2.5 rounded-full transition-all active:scale-90 ${isLiked ? 'bg-red-500/20' : 'bg-white/10 hover:bg-white/20'}`}
-                    >
-                        <Heart className={`size-6 transition-all ${isLiked ? 'text-red-500 fill-red-500' : 'text-white'} ${isStoryLikeAnimating ? 'scale-125' : ''}`} />
-                    </button>
-
-                    {/* Comment Button */}
-                    <button
-                        onClick={openComments}
-                        className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 transition-all active:scale-90 relative"
-                    >
-                        <MessageCircle className="size-6 text-white" />
-                        {currentComments.length > 0 && (
-                            <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-primary text-primary-content text-[9px] font-bold rounded-full flex items-center justify-center">
-                                {currentComments.length}
-                            </span>
-                        )}
-                    </button>
-
-                    {/* Like count */}
-                    {currentLikes.length > 0 && (
-                        <span className="text-white/60 text-xs font-bold tabular-nums">
-                            {currentLikes.length}
-                        </span>
-                    )}
                 </div>
+
             </div>
 
-            {/* Owner Actions */}
-            {isOwner && (
-                <div className="absolute bottom-40 right-4 sm:right-auto sm:bottom-20 z-50">
-                    <button
-                        onClick={handleDeleteStory}
-                        className="btn btn-error btn-sm rounded-full gap-2 px-5 shadow-lg shadow-error/20"
-                    >
-                        <Trash2 className="size-4" />
-                        Delete
-                    </button>
-                </div>
-            )}
+            {/* Desktop Side Navigation Arrows */}
+            <div className="hidden sm:block absolute top-1/2 -translate-y-1/2 left-[calc(50%-260px)] z-40">
+                <button 
+                    onClick={handlePrev} 
+                    className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white shadow-xl transition-all active:scale-90"
+                >
+                    <ChevronLeft className="size-6" />
+                </button>
+            </div>
+            <div className="hidden sm:block absolute top-1/2 -translate-y-1/2 right-[calc(50%-260px)] z-40">
+                <button 
+                    onClick={handleNext} 
+                    className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white shadow-xl transition-all active:scale-90"
+                >
+                    <ChevronRight className="size-6" />
+                </button>
+            </div>
 
             {/* Comments Modal */}
             <AnimatePresence>
                 {showComments && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: "100%" }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+                        exit={{ opacity: 0, y: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-[110] bg-black/40 sm:bg-black/60 backdrop-blur-sm"
                         onClick={() => { setShowComments(false); setIsPaused(false); }}
                     >
                         <div
-                            className="bg-base-100 w-full max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden border border-base-300 flex flex-col max-h-[60vh]"
+                            className="bg-base-100 w-full sm:max-w-md rounded-t-[32px] sm:rounded-3xl overflow-hidden border border-base-300 flex flex-col h-[60vh] sm:h-auto sm:max-h-[60vh] shadow-2xl"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="p-4 border-b flex justify-between items-center bg-base-200/50">
-                                <h3 className="font-bold uppercase tracking-widest text-xs opacity-50">
-                                    Comments ({currentComments.length})
+                            <div className="p-4 border-b border-base-content/10 flex justify-between items-center bg-base-200/50">
+                                <h3 className="font-bold text-[15px] pl-2">
+                                    Comments <span className="text-base-content/50 text-sm ml-1 font-medium">{currentComments.length}</span>
                                 </h3>
-                                <button onClick={() => { setShowComments(false); setIsPaused(false); }}>
-                                    <X className="size-4" />
+                                <button onClick={() => { setShowComments(false); setIsPaused(false); }} className="p-1.5 hover:bg-base-300 rounded-full transition-colors">
+                                    <X className="size-5 text-base-content/70" />
                                 </button>
                             </div>
-                            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                            <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
                                 {currentComments.length > 0 ? (
                                     currentComments.map((comment, idx) => (
-                                        <div key={idx} className="flex items-start gap-3 p-2.5 hover:bg-base-200 rounded-xl transition-colors">
-                                            <div className="size-8 rounded-full overflow-hidden bg-base-300 flex-shrink-0">
+                                        <div key={idx} className="flex items-start gap-3 p-3 hover:bg-base-200/50 rounded-2xl transition-colors">
+                                            <div className="size-9 rounded-full overflow-hidden bg-base-300 flex-shrink-0 border border-base-content/5">
                                                 <img src={comment.profilePic || "/avatar.png"} alt="" className="size-full object-cover" />
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-bold text-xs">
-                                                    {comment.fullName}
-                                                    <span className="font-normal opacity-40 ml-2 text-[10px]">
-                                                        {new Date(comment.createdAt).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+                                            <div className="flex-1 min-w-0 pt-0.5">
+                                                <p className="text-[13px] leading-snug break-words">
+                                                    <span className="font-semibold mr-1.5">{comment.fullName}</span>
+                                                    {comment.text}
                                                 </p>
-                                                <p className="text-sm mt-0.5 break-words">{comment.text}</p>
+                                                <p className="font-medium opacity-50 mt-1 text-[11px]">
+                                                    {new Date(comment.createdAt).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })}
+                                                    <span className="ml-3 font-semibold cursor-pointer hover:opacity-100">Reply</span>
+                                                </p>
                                             </div>
+                                            <button className="pt-2">
+                                                <Heart className="size-3 text-base-content/40 hover:text-base-content" />
+                                            </button>
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="py-10 text-center opacity-30 italic text-sm">No comments yet. Be the first!</div>
+                                    <div className="py-12 text-center flex flex-col items-center justify-center opacity-50">
+                                        <MessageCircle className="size-12 mb-3 opacity-20" />
+                                        <p className="font-medium text-[14px]">No comments yet.</p>
+                                        <p className="text-sm mt-1">Start the conversation.</p>
+                                    </div>
                                 )}
                             </div>
                             {/* Comment input inside modal */}
-                            <div className="p-3 border-t border-base-300 flex gap-2">
-                                <input
-                                    ref={commentInputRef}
-                                    type="text"
-                                    placeholder="Write a comment..."
-                                    className="input input-bordered input-sm flex-1 rounded-full bg-base-200"
-                                    value={commentText}
-                                    onChange={(e) => setCommentText(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === "Enter") handleComment(); }}
-                                />
-                                <button
-                                    onClick={handleComment}
-                                    disabled={!commentText.trim()}
-                                    className="btn btn-primary btn-sm btn-circle"
-                                >
-                                    <Send className="size-4" />
-                                </button>
+                            <div className="p-3 border-t border-base-content/10 bg-base-100">
+                                <div className="flex items-center gap-2 bg-base-200/70 p-1.5 rounded-full border border-base-content/5 focus-within:border-base-content/20 transition-colors">
+                                    <div className="size-8 rounded-full overflow-hidden bg-base-300 shrink-0 ml-1">
+                                         <img src={authUser?.profilePic || "/avatar.png"} className="size-full object-cover" />
+                                    </div>
+                                    <input
+                                        ref={commentInputRef}
+                                        type="text"
+                                        placeholder={`Add a comment for ${group.fullName}...`}
+                                        className="bg-transparent border-none w-full text-[14px] outline-none px-2"
+                                        value={commentText}
+                                        onChange={(e) => setCommentText(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === "Enter") handleComment(); }}
+                                    />
+                                    <AnimatePresence>
+                                        {commentText.trim() && (
+                                            <motion.button
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.8 }}
+                                                onClick={handleComment}
+                                                className="btn btn-primary btn-sm btn-circle shrink-0"
+                                            >
+                                                <Send className="size-3.5" />
+                                            </motion.button>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -439,32 +490,45 @@ const StoryViewer = ({ group, onClose, onDelete }) => {
             <AnimatePresence>
                 {showViewers && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: "100%" }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+                        exit={{ opacity: 0, y: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-[110] bg-black/40 sm:bg-black/60 backdrop-blur-sm"
                         onClick={() => setShowViewers(false)}
                     >
                         <div
-                            className="bg-base-100 w-full max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden border border-base-300 flex flex-col max-h-[60vh]"
+                            className="bg-base-100 w-full sm:max-w-sm rounded-t-[32px] sm:rounded-3xl overflow-hidden border border-base-300 flex flex-col h-[50vh] sm:h-auto sm:max-h-[60vh] shadow-2xl"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="p-4 border-b flex justify-between items-center bg-base-200/50">
-                                <h3 className="font-bold uppercase tracking-widest text-xs opacity-50">Viewed by</h3>
-                                <button onClick={() => setShowViewers(false)}><X className="size-4" /></button>
+                            <div className="p-4 border-b border-base-content/10 flex justify-between items-center bg-base-200/50">
+                                <h3 className="font-bold text-[15px] pl-2">
+                                    Viewers <span className="text-base-content/50 text-sm ml-1 font-medium">{story.views?.length || 0}</span>
+                                </h3>
+                                <button onClick={() => setShowViewers(false)} className="p-1.5 hover:bg-base-300 rounded-full transition-colors">
+                                    <X className="size-5 text-base-content/70" />
+                                </button>
                             </div>
-                            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                            <div className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
                                 {story.views?.length > 0 ? (
                                     story.views.map((viewer, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 p-2 hover:bg-base-200 rounded-xl transition-colors">
-                                            <div className="size-8 rounded-full overflow-hidden bg-base-300">
-                                                <img src={viewer.profilePic} alt="" className="size-full object-cover" />
+                                        <div key={idx} className="flex items-center justify-between p-2.5 hover:bg-base-200/50 rounded-2xl transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-11 rounded-full overflow-hidden bg-base-300 border border-base-content/5">
+                                                    <img src={viewer.profilePic} alt="" className="size-full object-cover" />
+                                                </div>
+                                                <p className="font-semibold text-[14px]">{viewer.fullName}</p>
                                             </div>
-                                            <p className="font-bold text-sm">{viewer.fullName}</p>
+                                            <button className="text-[12px] font-bold text-blue-500 hover:text-white px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500 rounded-lg transition-colors">
+                                                View
+                                            </button>
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="py-10 text-center opacity-30 italic text-sm">No views yet</div>
+                                    <div className="py-12 text-center flex flex-col items-center justify-center opacity-50">
+                                        <Eye className="size-12 mb-3 opacity-20" />
+                                        <p className="font-medium text-[14px]">No views yet.</p>
+                                    </div>
                                 )}
                             </div>
                         </div>

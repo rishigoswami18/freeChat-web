@@ -192,11 +192,11 @@ const CreatePost = ({ onPost, authUser }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* User Info Row */}
-      <div className="flex items-center gap-4">
-        <div className="avatar">
-          <div className="w-12 h-12 rounded-full border border-base-content/10 shadow-sm overflow-hidden bg-base-300">
+    <div className="flex flex-col gap-3 p-4 bg-base-100 rounded-[8px] border border-base-content/10 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
+      {/* User Info Row & Input */}
+      <div className="flex items-start gap-3">
+        <div className="avatar flex-shrink-0">
+          <div className="w-10 h-10 rounded-full border border-base-content/10 overflow-hidden bg-base-300">
             <img
               src={authUser?.profilePic || "/avatar.png"}
               alt={authUser?.fullName}
@@ -204,23 +204,17 @@ const CreatePost = ({ onPost, authUser }) => {
             />
           </div>
         </div>
-        <div className="flex flex-col">
-          <span className="font-bold text-base tracking-tight">{authUser?.fullName}</span>
-          <span className="text-xs font-medium opacity-50 uppercase tracking-widest mt-0.5">Author Mode</span>
+        <div className="flex-1 min-w-0 relative group">
+          <textarea
+            className="w-full bg-transparent resize-none text-[15px] focus:outline-none placeholder:opacity-50 min-h-[40px] leading-relaxed pt-2 pb-1"
+            placeholder="Share your thoughts..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={2}
+          />
+          {/* Animated focus indicator line */}
+          <div className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-primary group-focus-within:w-full transition-all duration-300 ease-out"></div>
         </div>
-      </div>
-
-      {/* Text Input */}
-      <div className="relative group">
-        <textarea
-          className="w-full bg-transparent resize-none text-base sm:text-lg focus:outline-none placeholder:opacity-40 min-h-[90px] font-medium leading-relaxed"
-          placeholder="Share your thoughts, experiences, or a memory..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={3}
-        />
-        {/* Animated focus indicator line */}
-        <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-primary group-focus-within:w-full transition-all duration-300 ease-out"></div>
       </div>
 
       {/* Media Preview */}

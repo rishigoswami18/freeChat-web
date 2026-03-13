@@ -18,7 +18,7 @@ const Logo = ({ className = "size-8", showText = true, fontSize = "text-2xl", st
                         </span>
                         <div className="flex items-center gap-1.5 mt-1">
                             <span className="text-[7px] font-black uppercase tracking-[0.3em] opacity-30">
-                                Powered by freechatweb.in
+                                Official Relationship App
                             </span>
                             <div className="h-[1px] w-4 bg-base-content/10" />
                         </div>

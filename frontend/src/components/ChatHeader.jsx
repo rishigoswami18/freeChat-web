@@ -229,51 +229,43 @@ const ChatHeader = memo(() => {
     };
 
     return (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 border-b border-base-300/20 bg-base-100/90 backdrop-blur-md relative z-[100] shadow-sm w-full flex-shrink-0 chat-header-locked select-none overflow-hidden transition-all">
-            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 overflow-hidden">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-white/10 bg-black/95 backdrop-blur-md relative z-[100] w-full flex-shrink-0 select-none transition-all font-outfit text-white">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                 <button
                     onClick={() => navigate("/inbox")}
-                    className="flex-shrink-0 btn btn-ghost btn-xs sm:btn-sm btn-circle hover:bg-primary/10 text-primary transition-colors"
+                    className="flex-shrink-0 p-1.5 hover:bg-white/10 rounded-full transition-colors group"
                     aria-label="Go back to inbox"
                 >
-                    <ArrowLeft className="size-5 sm:size-6" />
+                    <ArrowLeft className="size-5 sm:size-6 text-white group-active:scale-90 transition-transform" strokeWidth={2} />
                 </button>
 
-                <div className="relative flex-shrink-0 group cursor-pointer">
-                    <div className="avatar" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name })}>
-                        <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full ring-2 transition-all overflow-hidden bg-base-300 ${isPartner ? 'ring-pink-500 shadow-lg shadow-pink-500/20' : 'ring-primary/10 group-hover:ring-primary/30'}`}>
-                            <img src={displayData.image} alt={displayData.name} className="object-cover" />
-                        </div>
+                <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name })}>
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-white/10 bg-black shrink-0">
+                        <img src={displayData.image} alt={displayData.name} className="object-cover w-full h-full" />
                     </div>
                     {isOnline && !isGroup && (
-                        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-base-100 shadow-sm dot-pulse ${isPartner ? 'bg-pink-500' : 'bg-success'}`} />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black bg-green-500 shadow-sm" />
                     )}
                 </div>
 
                 <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/user/${user?.id}`)}>
-                    <h3 className="font-extrabold text-[14px] sm:text-[16px] leading-tight truncate tracking-tight text-base-content/90 flex items-center gap-1">
+                    <h3 className="font-semibold text-[15px] sm:text-[16px] leading-tight truncate text-white flex items-center gap-1.5">
                         {displayData.name}
                         {(user?.role === "admin" || user?.isVerified) && (
-                            <BadgeCheck className="size-4 text-amber-500 fill-amber-500/10" />
+                            <BadgeCheck className="size-3.5 text-blue-500 fill-blue-500" />
                         )}
-                        {isPartner && <Heart className="size-3.5 text-pink-500 fill-pink-500 animate-pulse ml-0.5" />}
+                        {isPartner && <Heart className="size-3.5 text-pink-500 fill-pink-500 ml-0.5" />}
                     </h3>
-                    <div className="flex items-center gap-1.5">
-                        <p
-                            className={`text-[10px] sm:text-[12px] font-semibold truncate tracking-wide ${isOnline && !isGroup
-                                ? isPartner ? "text-pink-500" : "text-success animate-pulse"
-                                : "text-base-content/50"
-                                }`}
-                        >
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <p className={`text-[12px] sm:text-[13px] font-normal truncate ${isOnline && !isGroup ? "text-white/80" : "text-white/50"}`}>
                             {isGroup
                                 ? `${Object.keys(channel.state.members).length} members`
                                 : isOnline
-                                    ? "Online"
+                                    ? "Active now"
                                     : formatLastSeen(user?.last_active)}
                         </p>
                         {isPartner && (
-                            <span className="text-[10px] font-black bg-pink-500/10 text-pink-500 px-1.5 py-0 rounded flex items-center gap-1 uppercase tracking-tighter">
-                                <span className="size-1 bg-pink-500 rounded-full animate-ping" />
+                            <span className="text-[10px] font-medium bg-pink-500/10 text-pink-400 px-1.5 py-0.5 rounded flex items-center gap-1">
                                 Linked
                             </span>
                         )}
@@ -281,40 +273,35 @@ const ChatHeader = memo(() => {
                 </div>
             </div>
 
-            {!isGroup && user?.id !== "system_announcement" && user?.id !== "ai-user-id" && user?.id !== "ai-friend-id" && (
-                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-1">
-                    {isPartner && (
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2">
+                {!isGroup && user?.id !== "system_announcement" && user?.id !== "ai-user-id" && user?.id !== "ai-friend-id" && (
+                    <>
+                        {isPartner && (
+                            <button
+                                onClick={handleAnalyze}
+                                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                                title="AI Relationship Coach"
+                            >
+                                <Sparkles className="size-5 sm:size-[22px] text-white/90" strokeWidth={1.5} />
+                            </button>
+                        )}
                         <button
-                            onClick={handleAnalyze}
-                            className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-primary hover:bg-primary/10 transition-colors"
-                            title="AI Relationship Coach"
+                            onClick={handleAudioCall}
+                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                            aria-label="Voice call"
                         >
-                            <Sparkles className="size-4.5 sm:size-5 animate-pulse" />
+                            <Phone className="size-5 sm:size-[22px] text-white/90" strokeWidth={1.5} />
                         </button>
-                    )}
-                    <button
-                        onClick={handleCoolDown}
-                        className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-info hover:bg-info/10 transition-colors"
-                        title="Cool Down"
-                    >
-                        <Wind className="size-4.5 sm:size-5" />
-                    </button>
-                    <button
-                        onClick={handleCall}
-                        className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-primary hover:bg-primary/10 transition-colors"
-                        aria-label="Video call"
-                    >
-                        <Video className="size-4.5 sm:size-5" />
-                    </button>
-                    <button
-                        onClick={handleAudioCall}
-                        className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-success hover:bg-success/10 transition-colors"
-                        aria-label="Voice call"
-                    >
-                        <Phone className="size-4.5 sm:size-5" />
-                    </button>
-                </div>
-            )}
+                        <button
+                            onClick={handleCall}
+                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                            aria-label="Video call"
+                        >
+                            <Video className="size-5 sm:size-[22px] text-white/90" strokeWidth={1.5} />
+                        </button>
+                    </>
+                )}
+            </div>
 
             {viewingDP && (
                 <ProfilePhotoViewer

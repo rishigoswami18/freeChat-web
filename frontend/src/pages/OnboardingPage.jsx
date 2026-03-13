@@ -67,7 +67,7 @@ const OnboardingPage = () => {
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-center mb-1">Complete Your Profile</h1>
           <div className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 text-center mb-6">
-            Powered by freechatweb.in
+            Premium Relationship Experience
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

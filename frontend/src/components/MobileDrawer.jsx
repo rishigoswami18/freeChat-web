@@ -108,51 +108,58 @@ const MobileDrawer = () => {
     }
   }
 
-  const bottomTabs = [navItems[0], navItems[1], navItems[3], navItems[4], navItems[11]];
+  // Matches the screenshot order: Home, Reels, Messages, Search, Profile
+  const bottomTabs = [
+    navItems[0], // Home
+    navItems[3], // Reels
+    navItems[1], // Inbox/Messages
+    navItems[4], // Search
+    navItems[11] // Profile
+  ];
 
   return (
     <>
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={() => setIsStoryModalOpen(false)} />
 
-      {/* Mobile Top Bar */}
-      <div className={`lg:hidden sticky top-0 left-0 right-0 z-50 glass-panel border-b border-white/10 px-3 py-3.5 flex items-center justify-between safe-area-top ${location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") ? "hidden" : ""
-        }`}>
-        <div className="flex items-center gap-2">
-          <button onClick={toggleDrawer} className="btn btn-ghost btn-sm btn-circle active:scale-90 transition-transform">
-            <Menu className="size-5" />
-          </button>
-          <Logo className="size-6" fontSize="text-lg" />
+      {/* Mobile Top Bar - Re-architected for a professional premium look */}
+      <div className={`lg:hidden sticky top-0 left-0 right-0 z-50 glass-panel-solid border-b border-white/5 px-4 py-3 flex items-center justify-between safe-area-top ${
+        location.pathname.startsWith("/chat") || location.pathname.startsWith("/reels") || location.pathname.startsWith("/call") ? "hidden" : ""
+      }`}>
+        {/* Left: Create Post Action */}
+        <div className="flex items-center">
+           <button 
+             onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                toast("Create post is at the top of your feed!", { icon: "✨" })
+             }} 
+             className="p-1 hover:opacity-60 active:scale-90 transition-all text-base-content"
+           >
+             <Pencil className="size-[22px]" strokeWidth={2.5} />
+           </button>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          {authUser?.streak > 0 && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-orange-500/20 to-red-500/10 rounded-full border border-orange-500/30 text-orange-500">
-              <Flame className="size-3.5 fill-current" />
-              <span className="font-bold text-[11px] tabular-nums">{authUser.streak}</span>
-            </div>
-          )}
-          <LanguageSelector size="btn-sm" />
-          <ThemeSelector size="btn-sm" />
-          <button
-            onClick={() => logoutMutation()}
-            disabled={isLoggingOut}
-            className="btn btn-ghost btn-xs btn-circle active:scale-95 transition-all duration-200 hover:bg-error/10 hover:text-error group"
-            title="Logout"
-          >
-            {isLoggingOut ? (
-              <span className="loading loading-spinner loading-[10px]" />
-            ) : (
-              <LogOut className="size-4 opacity-70 group-hover:opacity-100 group-active:scale-90 transition-transform" />
+        {/* Center: Logo */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+           <span className="text-xl font-black italic tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
+             BondBeyond
+           </span>
+        </div>
+
+        {/* Right Actions: Activity (Heart) & Menu */}
+        <div className="flex items-center gap-4">
+          <Link to="/notifications" className="relative p-1 hover:opacity-60 active:scale-90 transition-all">
+            <Heart className="size-[22px] text-base-content" strokeWidth={2.5} />
+            {notificationCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 size-2 bg-error rounded-full ring-2 ring-base-100" />
             )}
-          </button>
-          <div
-            className="avatar ring-2 ring-primary/20 rounded-full p-0.5 cursor-pointer"
-            onClick={() => setViewingDP({ url: authUser?.profilePic || "/avatar.png", name: authUser?.fullName })}
+          </Link>
+          
+          <button 
+            onClick={toggleDrawer} 
+            className="p-1 hover:opacity-60 active:scale-90 transition-all text-base-content"
           >
-            <div className="w-7 h-7 rounded-full overflow-hidden">
-              <img src={authUser?.profilePic || "/avatar.png"} alt="You" className="object-cover w-full h-full" />
-            </div>
-          </div>
+            <Menu className="size-[22px]" strokeWidth={2.5} />
+          </button>
         </div>
       </div>
 
@@ -335,30 +342,33 @@ const MobileDrawer = () => {
         <div className="flex items-center justify-around py-1.5 px-1">
           {bottomTabs.map(({ to, icon: Icon, labelKey, label }) => {
             const isActive = location.pathname === to;
+            const isProfile = to === "/profile";
+            
             return (
               <Link
                 key={to}
                 to={to}
-                className={`relative flex flex-col items-center gap-0.5 py-2 px-4 rounded-2xl transition-all duration-200 active:scale-90 ${isActive ? "text-primary bg-primary/8" : "text-base-content/40"
+                className={`relative flex flex-col items-center gap-0.5 py-2 px-3 rounded-2xl transition-all duration-200 active:scale-90 ${isActive ? "text-primary" : "text-base-content/60"
                   }`}
               >
-                {isActive && (
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-7 h-1 bg-primary rounded-full shadow-sm shadow-primary/40" />
-                )}
                 <div className="relative">
-                  <Icon className={`size-5 transition-transform ${isActive ? "scale-110" : ""}`} />
+                  {isProfile ? (
+                    <div className={`size-6 rounded-full overflow-hidden border-2 transition-all ${isActive ? "border-primary scale-110" : "border-transparent"}`}>
+                       <img src={authUser?.profilePic || "/avatar.png"} alt="Me" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <Icon className={`size-[26px] transition-transform ${isActive ? "scale-110" : ""}`} strokeWidth={isActive ? 2.5 : 2} />
+                  )}
+                  
                   {labelKey === "inbox" && unreadMessages > 0 && (
-                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-primary text-primary-content text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-error text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
                       {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
-                  {labelKey === "notifications" && notificationCount > 0 && (
-                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 px-0.5 bg-error text-error-content text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-base-100">
-                      {notificationCount > 9 ? "9+" : notificationCount}
-                    </span>
-                  )}
                 </div>
-                <span className={`text-[10px] font-semibold ${isActive ? "font-bold" : ""}`}>{label || t(labelKey)}</span>
+                <span className={`text-[9px] font-bold tracking-tighter uppercase transition-opacity ${isActive ? "opacity-100" : "opacity-0"}`}>
+                  {label || t(labelKey)}
+                </span>
               </Link>
             );
           })}

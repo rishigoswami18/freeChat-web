@@ -76,113 +76,111 @@ const GameDashboard = () => {
                     </div>
                 </header>
 
-                <div className="grid lg:grid-cols-3 gap-10">
-                    {/* LEFT COLUMN: ACTIVE SESSIONS */}
-                    <div className="lg:col-span-1 space-y-8">
-                        {activeSessions?.length > 0 && (
-                            <section>
-                                <h2 className="text-xs font-black uppercase tracking-[0.4em] text-amber-400 mb-6 flex items-center gap-2">
-                                    <Zap className="size-4 animate-pulse" /> Continue Royale
-                                </h2>
-                                <div className="space-y-4">
-                                    {activeSessions.map((session) => (
-                                        <motion.div
-                                            key={session._id}
-                                            whileHover={{ x: 5 }}
-                                            className="p-5 bg-white/[0.03] rounded-[32px] border border-white/5 border-l-amber-500/50 flex items-center justify-between group transition-all"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="size-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
-                                                    <Gamepad2 className="size-7 text-amber-500" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-black uppercase tracking-tighter text-sm italic">{session.gameType.split('_').join(' ')}</h3>
-                                                    <p className="text-[9px] font-bold opacity-30 uppercase">In Progress</p>
-                                                </div>
-                                            </div>
-                                            <Link to={`/game/${session._id}`} className="p-3 bg-amber-500 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:scale-110 active:scale-95 transition-all">
-                                                <Play className="size-4 fill-white text-white" />
-                                            </Link>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-
-                        <section>
-                            <h2 className="text-xs font-black uppercase tracking-[0.4em] text-primary mb-6 flex items-center gap-2">
-                                <Trophy className="size-4" /> Global Ranking
-                            </h2>
-                            <div className="p-8 bg-gradient-to-br from-primary/20 to-pink-500/20 rounded-[40px] border border-white/10 text-center space-y-4 relative overflow-hidden group">
-                                <Heart className="absolute -bottom-6 -right-6 size-32 text-white/5 group-hover:scale-125 transition-transform duration-1000" />
-                                <div className="text-4xl font-black italic tracking-tighter">LVL 42</div>
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Your Couple Synergy</p>
-                                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mt-6">
-                                    <div className="h-full bg-primary w-[70%] shadow-[0_0_15px_rgba(139,92,246,0.6)]" />
-                                </div>
+                <div className="flex flex-col gap-10">
+                    
+                    {/* TOP HIGHLIGHT: GLOBAL RANKING */}
+                    <section>
+                        <h2 className="text-xs font-black uppercase tracking-[0.4em] text-primary mb-6 flex items-center gap-2">
+                            <Trophy className="size-4" /> Global Ranking
+                        </h2>
+                        <div className="p-8 bg-gradient-to-br from-primary/20 to-pink-500/20 rounded-[40px] border border-white/10 text-center space-y-4 relative overflow-hidden group">
+                            <Heart className="absolute -bottom-6 -right-6 size-32 text-white/5 group-hover:scale-125 transition-transform duration-1000" />
+                            <div className="text-4xl font-black italic tracking-tighter">LVL 42</div>
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Your Couple Synergy</p>
+                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mt-6">
+                                <div className="h-full bg-primary w-[70%] shadow-[0_0_15px_rgba(139,92,246,0.6)]" />
                             </div>
-                        </section>
-                    </div>
+                        </div>
+                    </section>
 
-                    {/* RIGHT COLUMN: GAME TEMPLATES */}
-                    <div className="lg:col-span-2 space-y-10">
+                    {/* ACTIVE SESSIONS ROW */}
+                    {activeSessions?.length > 0 && (
                         <section>
-                            <h2 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-8">Choose Your Arena</h2>
-                            <div className="grid sm:grid-cols-2 gap-6">
-                                {processedTemplates.map((template) => (
+                            <h2 className="text-xs font-black uppercase tracking-[0.4em] text-amber-400 mb-6 flex items-center gap-2">
+                                <Zap className="size-4 animate-pulse" /> Continue Royale
+                            </h2>
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                {activeSessions.map((session) => (
                                     <motion.div
-                                        key={template.type}
+                                        key={session._id}
                                         whileHover={{ y: -5 }}
-                                        className="relative group p-8 rounded-[40px] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all overflow-hidden cursor-pointer"
-                                        onClick={() => handleStartGame(template.type)}
+                                        className="p-5 bg-white/[0.03] rounded-[32px] border border-white/5 border-b-amber-500/50 flex items-center justify-between group transition-all"
                                     >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                        <div className="relative z-10 flex flex-col h-full space-y-6">
-                                            <div className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-500">
-                                                <Gamepad2 className="size-8 text-primary group-hover:text-white transition-colors" />
+                                        <div className="flex items-center gap-4">
+                                            <div className="size-14 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:scale-110 transition-transform">
+                                                <Gamepad2 className="size-7 text-amber-500" />
                                             </div>
                                             <div>
-                                                <h3 className="text-3xl font-black italic tracking-tighter uppercase mb-2">{template.name}</h3>
-                                                <p className="text-xs text-white/40 font-bold leading-relaxed">{template.description}</p>
-                                            </div>
-                                            <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
-                                                <div className="flex items-center gap-2">
-                                                    <Users className="size-3 text-primary" />
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-primary">2 PLAYERS</span>
-                                                </div>
-                                                <div className="px-5 py-2 rounded-full bg-white/5 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                                                    Start Match <Sparkles className="size-3 text-amber-400" />
-                                                </div>
+                                                <h3 className="font-black uppercase tracking-tighter text-sm italic">{session.gameType.split('_').join(' ')}</h3>
+                                                <p className="text-[9px] font-bold opacity-30 uppercase">In Progress</p>
                                             </div>
                                         </div>
+                                        <Link to={`/game/${session._id}`} className="p-3 bg-amber-500 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:scale-110 active:scale-95 transition-all">
+                                            <Play className="size-4 fill-white text-white" />
+                                        </Link>
                                     </motion.div>
                                 ))}
                             </div>
                         </section>
+                    )}
 
-                        {/* Recent History */}
-                        {gameHistory?.length > 0 && (
-                            <section>
-                                <h2 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-8 flex items-center gap-2">
-                                    <History className="size-4" /> Match History
-                                </h2>
-                                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                    {gameHistory.slice(0, 6).map((session) => (
-                                        <div key={session._id} className="p-5 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center gap-4">
-                                            <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center">
-                                                <Trophy className={`size-5 ${session.score >= 50 ? "text-yellow-400" : "text-white/20"}`} />
+                    {/* GAME TEMPLATES */}
+                    <section>
+                        <h2 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-8">Choose Your Arena</h2>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                            {processedTemplates.map((template) => (
+                                <motion.div
+                                    key={template.type}
+                                    whileHover={{ y: -5 }}
+                                    className="relative group p-8 rounded-[40px] bg-white/[0.03] border border-white/10 hover:border-primary/50 transition-all overflow-hidden cursor-pointer"
+                                    onClick={() => handleStartGame(template.type)}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                    <div className="relative z-10 flex flex-col h-full space-y-6">
+                                        <div className="size-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-500">
+                                            <Gamepad2 className="size-8 text-primary group-hover:text-white transition-colors" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-3xl font-black italic tracking-tighter uppercase mb-2">{template.name}</h3>
+                                            <p className="text-xs text-white/40 font-bold leading-relaxed">{template.description}</p>
+                                        </div>
+                                        <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/5">
+                                            <div className="flex items-center gap-2">
+                                                <Users className="size-3 text-primary" />
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-primary">2 PLAYERS</span>
                                             </div>
-                                            <div className="min-w-0">
-                                                <h4 className="text-[10px] font-black uppercase italic truncate">{session.gameType.split('_').join(' ')}</h4>
-                                                <p className="text-[11px] font-bold text-primary">{session.score}% SYNC</p>
+                                            <div className="px-5 py-2 rounded-full bg-white/5 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                                                Start Match <Sparkles className="size-3 text-amber-400" />
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-                    </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* RECENT HISTORY */}
+                    {gameHistory?.length > 0 && (
+                        <section>
+                            <h2 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-8 flex items-center gap-2">
+                                <History className="size-4" /> Match History
+                            </h2>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {gameHistory.slice(0, 6).map((session) => (
+                                    <div key={session._id} className="p-5 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center gap-4">
+                                        <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center">
+                                            <Trophy className={`size-5 ${session.score >= 50 ? "text-yellow-400" : "text-white/20"}`} />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-[10px] font-black uppercase italic truncate">{session.gameType.split('_').join(' ')}</h4>
+                                            <p className="text-[11px] font-bold text-primary">{session.score}% SYNC</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </div>
             </div>
             <style dangerouslySetInnerHTML={{ __html: `.shadow-glow { box-shadow: 0 0 30px -5px currentColor; }` }} />
