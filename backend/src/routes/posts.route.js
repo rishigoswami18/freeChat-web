@@ -143,13 +143,30 @@ router.get("/videos", async (req, res) => {
     if (!hasMore || isDiscoveryRequest) {
       console.log(`🌊 Reels: Entering Advanced Discovery Mode (Page ${discoveryPage})...`);
       
-      // 1. Fetch from YouTube Shorts (High Quality Original Audio)
-      const ytCount = Math.ceil(limitNum / 1.5);
-      const externalPosts = await getYouTubeShorts(ytCount, discoveryPage);
+      // 1. Fetch from YouTube Shorts (Verified Stable IDs)
+      const ytCount = Math.floor(limitNum / 3);
+      const ytPosts = await getYouTubeShorts(ytCount, discoveryPage);
       
-      // 2. Sample from local DB (The remaining slots)
+      // 2. Fetch from Pexels (Rich Diversity fallback)
+      const pexelsCount = Math.floor(limitNum / 3);
+      let pexelsPosts = await getPexelsVideos(pexelsCount, discoveryPage + 1);
+      
+      // 2.1 Attach random trending songs to Pexels videos
+      const trendingSongs = await Song.find({ isTrending: true }).limit(20);
+      if (trendingSongs.length > 0) {
+        pexelsPosts = pexelsPosts.map((post, idx) => {
+          const song = trendingSongs[idx % trendingSongs.length];
+          return {
+            ...post,
+            songName: `${song.title} - ${song.artist}`,
+            audioUrl: song.audioUrl
+          };
+        });
+      }
+      
+      // 3. Sample from local DB (Community content)
       const excludeIds = paginatedPosts.map(p => p._id);
-      const sampleCount = limitNum - paginatedPosts.length - externalPosts.length;
+      const sampleCount = limitNum - paginatedPosts.length - ytPosts.length - pexelsPosts.length;
       
       let discoveryPosts = [];
       if (sampleCount > 0) {
@@ -177,9 +194,9 @@ router.get("/videos", async (req, res) => {
         ]);
       }
 
-      paginatedPosts = [...paginatedPosts, ...externalPosts, ...discoveryPosts];
+      paginatedPosts = [...paginatedPosts, ...ytPosts, ...pexelsPosts, ...discoveryPosts];
       
-      // 3. Create a synthetic cursor for NEXT page
+      // 4. Create a synthetic cursor for NEXT page
       nextCursor = `discovery-${discoveryPage + 1}`;
     }
 
