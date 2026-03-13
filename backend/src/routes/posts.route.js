@@ -6,6 +6,7 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 import cloudinary from "../lib/cloudinary.js";
 import { detectEmotion } from "../utils/emotionService.js";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
+import { getPexelsVideos } from "../utils/pexelsService.js";
 
 const router = express.Router();
 
@@ -159,8 +160,13 @@ router.get("/videos", async (req, res) => {
       ]);
       
       paginatedPosts = [...paginatedPosts, ...discoveryPosts];
-      // Since it's discovery mode, we keep nextCursor null to signify this is the "shuffle" area
-      // or we could implement a logic to keep shuffling indefinitely.
+
+      // ENHANCED DISCOVERY: If we still have room after sampling local DB, 
+      // fetch premium content from Pexels.
+      if (paginatedPosts.length < limitNum) {
+        const externalPosts = await getPexelsVideos(limitNum - paginatedPosts.length);
+        paginatedPosts = [...paginatedPosts, ...externalPosts];
+      }
     }
 
     // If user is not premium, inject ads
