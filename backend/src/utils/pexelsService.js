@@ -29,6 +29,8 @@ export const getPexelsVideos = async (perPage = 5) => {
       },
     });
 
+    console.log(`✅ Pexels: Fetched ${response.data.videos.length} global reels.`);
+
     return response.data.videos.map((vid) => {
       // Find a medium quality vertical file
       const videoFile = vid.video_files.find(f => f.quality === "sd" || f.quality === "hd") || vid.video_files[0];

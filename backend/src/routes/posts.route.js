@@ -131,43 +131,55 @@ router.get("/videos", async (req, res) => {
     let paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
     let nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
 
-    // INFINITE FEED STRATEGY: 
-    // If we reached the end (no more new posts), fallback to "Discovery Mode" 
-    // by sampling random videos to keep the feed alive.
-    if (!hasMore && paginatedPosts.length < limitNum) {
-      console.log("🔄 Reels: Reached end of chronological feed, entering Discovery Mode...");
-      const discoveryPosts = await Post.aggregate([
-        { $match: { mediaType: "video", isAd: false, _id: { $nin: paginatedPosts.map(p => p._id) } } },
-        { $sample: { size: limitNum - paginatedPosts.length } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "userId",
-            foreignField: "_id",
-            as: "authorInfo",
-          },
-        },
-        { $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true } },
-        {
-          $addFields: {
-            role: { $ifNull: ["$role", "$authorInfo.role"] },
-            isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
-            fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
-            profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
-          }
-        },
-        { $project: { authorInfo: 0 } }
-      ]);
+    // --- INFINITE DISCOVERY STRATEGY ---
+    const isDiscoveryRequest = lastId?.toString().startsWith("discovery-");
+    
+    // If we reach the end of chronological posts OR this is already a discovery request
+    if (!hasMore || isDiscoveryRequest) {
+      console.log("🌊 Reels: Entering Advanced Discovery Mode...");
       
-      paginatedPosts = [...paginatedPosts, ...discoveryPosts];
-
-      // ENHANCED DISCOVERY: If we still have room after sampling local DB, 
-      // fetch premium content from Pexels.
-      if (paginatedPosts.length < limitNum) {
-        const externalPosts = await getPexelsVideos(limitNum - paginatedPosts.length);
-        paginatedPosts = [...paginatedPosts, ...externalPosts];
+      // 1. Fetch from Pexels (Half of the page)
+      const pexelsCount = Math.ceil(limitNum / 2);
+      const externalPosts = await getPexelsVideos(pexelsCount);
+      
+      // 2. Sample from local DB (The other half, avoiding repeats in THIS page)
+      const excludeIds = paginatedPosts.map(p => p._id);
+      const sampleCount = limitNum - paginatedPosts.length - externalPosts.length;
+      
+      let discoveryPosts = [];
+      if (sampleCount > 0) {
+        discoveryPosts = await Post.aggregate([
+          { $match: { mediaType: "video", isAd: false, _id: { $nin: excludeIds } } },
+          { $sample: { size: sampleCount } },
+          {
+            $lookup: {
+              from: "users",
+              localField: "userId",
+              foreignField: "_id",
+              as: "authorInfo",
+            },
+          },
+          { $unwind: { path: "$authorInfo", preserveNullAndEmptyArrays: true } },
+          {
+            $addFields: {
+              role: { $ifNull: ["$role", "$authorInfo.role"] },
+              isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
+              fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
+              profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] }
+            }
+          },
+          { $project: { authorInfo: 0 } }
+        ]);
       }
+
+      paginatedPosts = [...paginatedPosts, ...externalPosts, ...discoveryPosts];
+      
+      // 3. Create a synthetic cursor to keep the loop going
+      nextCursor = `discovery-${Date.now()}`;
     }
+
+    // Shuffle final results slightly so Pexels and Local are mixed
+    paginatedPosts.sort(() => Math.random() - 0.5);
 
     // If user is not premium, inject ads
     if (!isPremium && paginatedPosts.length > 0) {
