@@ -17,10 +17,10 @@ const adVariants = [
         id: "invite",
         badge: "Spread the Word",
         badgeColor: "badge-primary",
-        title: "Invite Friends to freeChat!",
+        title: "Invite Friends to BondBeyond!",
         description:
-            "Know someone who'd love freeChat? Share the app and grow your circle. The more friends, the more fun!",
-        cta: "Share freeChat",
+            "Know someone who'd love BondBeyond? Share the app and grow your circle. The more friends, the more fun!",
+        cta: "Share BondBeyond",
         ctaLink: null, // Will trigger share
         icon: Users,
         iconColor: "text-blue-400",
@@ -84,7 +84,7 @@ const adVariants = [
         badgeColor: "badge-neutral",
         title: "Stealth Mode — Instant Privacy",
         description:
-            "One tap to hide everything. freeChat's Stealth Mode gives you total control over your privacy.",
+            "One tap to hide everything. BondBeyond's Stealth Mode gives you total control over your privacy.",
         cta: "Learn More",
         ctaLink: "/profile",
         icon: Shield,
@@ -101,8 +101,8 @@ const PostAd = ({ index = 0 }) => {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: "freeChat — Free Chat App",
-                    text: "Check out freeChat! Free messaging, video calls, reels, and more. Join me!",
+                    title: "BondBeyond — Connect & Play",
+                    text: "Check out BondBeyond! Free messaging, video calls, reels, and more. Join me!",
                     url: "https://www.freechatweb.in",
                 });
             } catch (err) {
@@ -120,7 +120,7 @@ const PostAd = ({ index = 0 }) => {
                 {/* Promo Banner Image */}
                 <img
                     src="/promo-banner.png"
-                    alt="freeChat promotion"
+                    alt="BondBeyond promotion"
                     className="w-full h-48 sm:h-56 object-cover opacity-90"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-base-200 via-base-200/50 to-transparent" />
@@ -177,11 +177,11 @@ const PostAd = ({ index = 0 }) => {
                     </Link>
                 </div>
 
-                {/* freeChat branding */}
+                {/* BondBeyond branding */}
                 <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-base-300/50">
                     <MessageCircle className="size-3 text-primary" />
                     <span className="text-[10px] font-semibold opacity-40">
-                        freeChat — freechatweb.in
+                        BondBeyond — freechatweb.in
                     </span>
                 </div>
             </div>

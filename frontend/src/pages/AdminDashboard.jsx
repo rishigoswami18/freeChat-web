@@ -889,7 +889,7 @@ const AdminDashboard = () => {
                                 <div className="card bg-base-200 p-12 rounded-3xl text-center border border-base-content/5">
                                     <UserCheck className="size-12 text-success mx-auto mb-4 opacity-50" />
                                     <h3 className="text-xl font-black uppercase italic tracking-tight">All Caught Up!</h3>
-                                    <p className="text-sm opacity-50 mt-2">Every Firebase user has already joined freeChat. 🎉</p>
+                                    <p className="text-sm opacity-50 mt-2">Every Firebase user has already joined BondBeyond. 🎉</p>
                                 </div>
                             ) : (
                                 <>

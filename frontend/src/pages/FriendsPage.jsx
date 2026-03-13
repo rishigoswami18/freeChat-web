@@ -11,6 +11,7 @@ import { useState } from "react";
 
 const FriendsPage = () => {
   const { authUser } = useAuthUser();
+  const queryClient = useQueryClient();
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   const { data: friends = [], isLoading } = useQuery({

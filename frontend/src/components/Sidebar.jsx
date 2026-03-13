@@ -42,10 +42,10 @@ import Logo from "./Logo";
 const navItems = [
   { to: "/", icon: Home, labelKey: "Home" },
   { to: "/search", icon: Search, labelKey: "Search" },
-  { to: "/explore", icon: Compass, labelKey: "Explore" }, // Replaced community with explore aesthetic
+  { to: "/friends", icon: Compass, labelKey: "Explore" },
   { to: "/reels", icon: Film, labelKey: "Reels" },
-  { to: "/inbox", icon: MessageSquare, label: "Messages" },
-  { to: "/notifications", icon: Heart, labelKey: "Notifications" },
+  { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
+  { to: "/notifications", icon: Heart, labelKey: "notifications" },
   { to: "/games", icon: Gamepad2, labelKey: "Games" },
   { to: "/couple", icon: HeartHandshake, label: "Soul Bond" },
   { to: "/gem-shop", icon: Crown, labelKey: "Premium" },
@@ -149,7 +149,7 @@ const Sidebar = () => {
         {dynamicNavItems.map((item) => {
           const { to, icon: Icon, labelKey, isSacred, label: directLabel } = item;
           const isActive = currentPath === to;
-          const label = isSacred || directLabel ? (directLabel || item.label) : t(labelKey) || labelKey;
+          const displayLabel = isSacred || directLabel ? (directLabel || item.label) : t(labelKey) || labelKey;
 
           return (
             <Link
@@ -158,7 +158,7 @@ const Sidebar = () => {
               className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav
                 ${isActive ? "font-bold text-base-content" : "text-base-content hover:bg-base-content/5"}
               `}
-              title={label}
+              title={displayLabel}
             >
               <div className="relative shrink-0 flex items-center justify-center w-8">
                 <Icon
@@ -175,14 +175,14 @@ const Sidebar = () => {
                     {unreadMessages > 9 ? "9+" : unreadMessages}
                   </span>
                 )}
-                {labelKey === "Notifications" && notificationCount > 0 && (
+                {labelKey === "notifications" && notificationCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
               </div>
               <span className={`hidden xl:block text-[16px] tracking-tight truncate ${isActive ? "" : "opacity-90"} ${isSacred ? "text-pink-500 font-semibold" : ""}`}>
-                {label}
+                {displayLabel}
               </span>
             </Link>
           );

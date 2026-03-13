@@ -8,7 +8,7 @@ import {
   sendFriendRequest,
 } from "../lib/api";
 import { Link } from "react-router-dom";
-import { CheckCircle, MapPin, UserPlus, Users, TrendingUp } from "lucide-react";
+import { BadgeCheck, MapPin, UserPlus, Users, TrendingUp } from "lucide-react";
 
 import { capitialize } from "../lib/utils";
 
@@ -170,7 +170,7 @@ const HomePage = () => {
                       >
                         {hasRequestBeenSent ? (
                           <>
-                            <CheckCircle className="size-4 mr-2" />
+                            <BadgeCheck className="size-4 mr-2" />
                             {t('request_sent')}
                           </>
                         ) : (

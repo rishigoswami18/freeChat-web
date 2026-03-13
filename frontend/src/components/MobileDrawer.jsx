@@ -82,7 +82,7 @@ const MobileDrawer = () => {
 
   const navItems = [
     { to: "/", icon: Home, labelKey: "feed" },
-    { to: "/inbox", icon: MessageSquare, label: "Messages" },
+    { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
     { to: "/friends", icon: Users, label: "Community" },
     { to: "/reels", icon: Film, labelKey: "reels" },
     { to: "/search", icon: Search, labelKey: "explore" },
