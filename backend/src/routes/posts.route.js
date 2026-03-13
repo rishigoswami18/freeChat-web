@@ -128,7 +128,7 @@ router.get("/videos", async (req, res) => {
       { $project: { authorInfo: 0 } }
     ]);
 
-    const hasMore = posts.length > limitNum;
+    let hasMore = posts.length > limitNum;
     let paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
     let nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
 
@@ -344,6 +344,9 @@ router.get("/:id/likes", async (req, res) => {
 // Toggle like
 router.put("/:id/like", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Interaction not supported on discovery content" });
+    }
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
@@ -370,6 +373,10 @@ router.post("/:id/comment", async (req, res) => {
     const { text } = req.body;
     if (!text?.trim()) {
       return res.status(400).json({ message: "Comment text is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Comments not supported on discovery content" });
     }
 
     const post = await Post.findById(req.params.id);
@@ -406,6 +413,9 @@ router.post("/:id/comment", async (req, res) => {
 // Increment share count
 router.put("/:id/share", async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: "Share tracking not supported on discovery content" });
+    }
     const post = await Post.findByIdAndUpdate(
       req.params.id,
       { $inc: { shareCount: 1 } },
