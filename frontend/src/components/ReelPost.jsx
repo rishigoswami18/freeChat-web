@@ -103,13 +103,17 @@ const ReelPost = ({ post, isActive }) => {
             const iframe = youtubeRef.current;
             if (!iframe) return;
 
-            // YouTube IFrame API command - respond to both section activity and manual play/pause
-            const command = (isActive && isPlaying) ? 'playVideo' : 'pauseVideo';
-            iframe.contentWindow?.postMessage(JSON.stringify({
-                event: 'command',
-                func: command,
-                args: ''
-            }), '*');
+            try {
+                // YouTube IFrame API command - respond to both section activity and manual play/pause
+                const command = (isActive && isPlaying) ? 'playVideo' : 'pauseVideo';
+                iframe.contentWindow?.postMessage(JSON.stringify({
+                    event: 'command',
+                    func: command,
+                    args: ''
+                }), '*');
+            } catch (err) {
+                console.error("YouTube postMessage error:", err);
+            }
             
             return;
         }
@@ -132,7 +136,6 @@ const ReelPost = ({ post, isActive }) => {
         } else {
             video.pause();
             if (audio) audio.pause();
-            // Don't reset time on pause, let it resume if only paused manually
             if (!isActive) video.currentTime = 0;
         }
 
@@ -142,18 +145,18 @@ const ReelPost = ({ post, isActive }) => {
         };
     }, [isActive, isPlaying, playbackRate, post.mediaType]);
 
-    // Update isPlaying state when isActive change
+    // Update isPlaying state when isActive changes
     useEffect(() => {
         setIsPlaying(isActive);
     }, [isActive]);
 
     const togglePlay = (e) => {
         if (handleDoubleTap(e)) return;
-        setIsPlaying(!isPlaying);
+        setIsPlaying(prev => !prev);
 
         if (post.mediaType !== "youtube" && videoRef.current) {
             if (videoRef.current.paused) {
-                videoRef.current.play();
+                videoRef.current.play().catch(() => {});
             } else {
                 videoRef.current.pause();
             }
@@ -170,7 +173,7 @@ const ReelPost = ({ post, isActive }) => {
     };
 
     const handleProgressBarClick = (e) => {
-        if (!videoRef.current) return;
+        if (!videoRef.current || isNaN(videoRef.current.duration)) return;
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const clickedPos = (x / rect.width);
@@ -179,15 +182,23 @@ const ReelPost = ({ post, isActive }) => {
         if (audioRef.current) audioRef.current.currentTime = newTime;
     };
 
+    // Safely extract video ID for YouTube
+    const getYouTubeUrl = () => {
+        // Source URL might already have params or be a raw embed link
+        let baseUrl = post.mediaUrl.split('?')[0];
+        const videoId = baseUrl.split('/').pop();
+        return `${baseUrl}?enablejsapi=1&autoplay=0&mute=0&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&iv_load_policy=3`;
+    };
+
     return (
         <div className={`relative h-full w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-500 ${isTheaterMode ? 'sm:max-w-none' : 'sm:max-w-[450px] sm:aspect-[9/16]'}`}>
             {post.mediaType === "youtube" ? (
                 <div className={`h-full w-full relative transition-all duration-500 bg-black ${isTheaterMode ? 'aspect-video' : 'aspect-[9/16]'}`}>
                     <iframe
                         ref={youtubeRef}
-                        src={`${post.mediaUrl}?enablejsapi=1&autoplay=0&mute=0&controls=0&loop=1&playlist=${post.mediaUrl.split('/').pop()}&modestbranding=1&rel=0&iv_load_policy=3&widgetid=1`}
+                        src={getYouTubeUrl()}
                         className="absolute inset-0 w-full h-full"
-                        allow="autoplay"
+                        allow="autoplay; encrypted-media"
                         allowFullScreen
                         title={post.content}
                     />
@@ -204,7 +215,10 @@ const ReelPost = ({ post, isActive }) => {
                     preload="auto"
                     onClick={togglePlay}
                     muted={!!post.audioUrl}
-                    onTimeUpdate={(e) => setProgress((e.target.currentTime / e.target.duration) * 100)}
+                    onTimeUpdate={(e) => {
+                        const dur = e.target.duration;
+                        if (dur > 0) setProgress((e.target.currentTime / dur) * 100);
+                    }}
                     onEnded={(e) => {
                         e.target.currentTime = 0;
                         e.target.play().catch(() => { });
@@ -327,7 +341,7 @@ const ReelPost = ({ post, isActive }) => {
                             </div>
                             <div>
                                 <div className="flex items-center gap-1">
-                                    <h3 className="font-bold text-base drop-shadow-md">@{post.fullName.replace(/\s+/g, '').toLowerCase()}</h3>
+                                    <h3 className="font-bold text-base drop-shadow-md">@{post.fullName?.replace(/\s+/g, '').toLowerCase() || 'user'}</h3>
                                     <CheckCircle className="size-4 text-primary fill-white" />
                                 </div>
                                 <span className="text-[10px] text-primary font-black uppercase tracking-widest pl-0.5">Sponsored</span>
@@ -340,7 +354,7 @@ const ReelPost = ({ post, isActive }) => {
                             </div>
                             <div>
                                 <div className="flex items-center gap-1">
-                                    <h3 className="font-bold text-base drop-shadow-md group-hover:text-primary transition-colors">@{post.fullName.replace(/\s+/g, '').toLowerCase()}</h3>
+                                    <h3 className="font-bold text-base drop-shadow-md group-hover:text-primary transition-colors">@{post.fullName?.replace(/\s+/g, '').toLowerCase() || 'user'}</h3>
                                     {post.isVerified && <CheckCircle className="size-4 text-primary fill-white" />}
                                 </div>
                                 <p className="text-[10px] opacity-60 font-medium">View Profile</p>
