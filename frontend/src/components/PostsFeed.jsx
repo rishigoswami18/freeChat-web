@@ -151,12 +151,12 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
   };
 
   return (
-    <div className="card bg-base-200 shadow-sm hover:shadow-md transition-shadow rounded-2xl overflow-hidden">
-      <div className="card-body p-3 sm:p-5">
-        {/* Header */}
-        <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5">
+    <div className="glass-panel-flat p-5 sm:p-7 rounded-[28px] shadow-sm border border-base-content/5 hover:border-base-content/10 transition-colors animate-in fade-in duration-500">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3.5">
           <div
-            className="avatar w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden bg-base-300 flex-shrink-0 cursor-pointer hover:ring-4 ring-primary/20 transition-all active:scale-95"
+            className="avatar w-12 h-12 rounded-full overflow-hidden bg-base-300 flex-shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-all shadow-sm border border-base-content/10"
             onClick={() =>
               setViewingDP({ url: post.profilePic, name: post.fullName })
             }
@@ -169,238 +169,257 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <User className="w-5 h-5 opacity-40" />
+                <User className="size-5 opacity-40" />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-[11px] text-success font-medium">Online</p>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toast("Streak Protection is Premium!", { icon: "🛡️" });
-                }}
-                className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/10 hover:bg-blue-500/20 rounded-md border border-blue-500/20 text-[9px] font-black text-blue-500 uppercase tracking-tighter transition-all hover:scale-105 active:scale-95"
-              >
-                <Shield className="size-2.5" />
-                Protect
-              </button>
-            </div>
+          <div className="flex flex-col">
             <Link
               to={`/user/${post.userId}`}
-              className="hover:text-primary transition-colors"
+              className="hover:text-primary transition-colors inline-block"
             >
-              <h3 className="font-semibold text-sm truncate flex items-center gap-1">
+              <h3 className="font-bold text-base tracking-tight flex items-center gap-1.5 leading-none mb-1">
                 {post.fullName || "Unknown User"}
                 {(post.role === "admin" || post.isVerified) && (
-                  <BadgeCheck className="size-3.5 text-amber-500 fill-amber-500/10" />
+                  <BadgeCheck className="size-4 text-primary fill-primary/10" />
                 )}
               </h3>
             </Link>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] text-base-content/40 font-medium">
-                {timeAgo(post.createdAt)}
-              </span>
+            <div className="flex items-center gap-2 flex-wrap mt-[2px]">
+              <div className="flex items-center gap-1 opacity-70">
+                <span className="size-1.5 bg-success rounded-full animate-pulse"></span>
+                <span className="text-xs font-semibold uppercase tracking-wider">{timeAgo(post.createdAt)}</span>
+              </div>
+              
               {post.caption && (
-                <span className="badge badge-xs badge-outline gap-0.5 capitalize">
-                  {emotionEmoji[post.caption.toLowerCase()] || "💬"}{" "}
-                  {post.caption}
-                </span>
+                <>
+                  <span className="text-base-content/20 text-xs">•</span>
+                  <span className="badge badge-sm badge-ghost border-none bg-base-content/5 gap-1 capitalize font-medium">
+                    <span className="text-[10px]">{emotionEmoji[post.caption.toLowerCase()] || "💬"}</span>
+                    {post.caption}
+                  </span>
+                </>
               )}
             </div>
           </div>
+        </div>
 
-          {/* Delete Button */}
+        {/* Action/Menu Button */}
+        <div className="flex items-center gap-2">
+           <button
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               toast("Streak Protection is Premium!", { icon: "🛡️" });
+             }}
+             className="btn btn-ghost btn-xs btn-circle hover:bg-info/10 hover:text-info text-base-content/40 active:scale-90 transition-all border border-base-content/5"
+             title="Protect Streak"
+           >
+             <Shield className="size-3.5" />
+           </button>
+           
           {post.userId === authUser?._id && (
             <button
               onClick={handleDelete}
-              className="btn btn-ghost btn-xs btn-circle text-error active:scale-90 transition-transform"
+              className="btn btn-ghost btn-xs btn-circle hover:bg-error/10 hover:text-error text-base-content/40 active:scale-90 transition-all border border-base-content/5"
               disabled={isDeleting}
+              title="Delete Post"
             >
               {isDeleting ? (
-                <span className="loading loading-spinner loading-xs"></span>
+                <span className="loading loading-spinner size-3.5"></span>
               ) : (
                 <Trash2 className="size-3.5" />
               )}
             </button>
           )}
         </div>
+      </div>
 
-        {/* Content */}
-        {post.content && (
-          <p className="text-sm sm:text-base whitespace-pre-wrap mb-2.5 leading-relaxed">
-            {post.content}
-          </p>
-        )}
+      {/* Content */}
+      {post.content && (
+        <p className="text-base leading-[1.6] mb-4 text-base-content/90 font-medium whitespace-pre-wrap">
+          {post.content}
+        </p>
+      )}
 
-        {/* Media with Double-Tap Support */}
-        {post.mediaUrl && (
-          <div
-            className="relative rounded-xl overflow-hidden bg-base-300 mb-2.5 -mx-3 sm:-mx-5 cursor-pointer select-none group/media"
-            onClick={handleDoubleTap}
+      {/* Media with Double-Tap Support */}
+      {post.mediaUrl && (
+        <div
+          className="relative rounded-[20px] overflow-hidden bg-black/5 mb-4 border border-base-content/5 cursor-pointer group/media selection:bg-transparent"
+          onClick={handleDoubleTap}
+        >
+          {/* Double Tap Heart Animation */}
+          <AnimatePresence>
+            {showHeart && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
+              >
+                <Heart className="size-28 text-white fill-white filter drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {post.mediaType === "image" ? (
+            <img
+              src={post.mediaUrl}
+              alt="Post image"
+              className="w-full max-h-[600px] object-cover sm:object-contain transition-transform duration-[1.5s] ease-out group-hover/media:scale-105"
+              loading="lazy"
+            />
+          ) : post.mediaType === "video" ? (
+            <video
+              src={post.mediaUrl}
+              controls
+              className="w-full max-h-[600px] object-contain bg-black"
+              playsInline
+              preload="metadata"
+            />
+          ) : null}
+          
+          {/* Subtle vignette for premium feel on images */}
+          {post.mediaType === "image" && (
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-transparent opacity-0 group-hover/media:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+          )}
+        </div>
+      )}
+
+      {/* QUICK REACTION BAR (ADDICTIVE ENGAGEMENT) */}
+      <div className="flex items-center justify-center gap-4 bg-base-100/50 backdrop-blur-md rounded-[18px] p-2 mb-4 opacity-0 hover:opacity-100 transition-opacity duration-300 relative overflow-hidden border border-base-content/5 shadow-sm max-w-sm mx-auto -mt-16 z-10 translate-y-8 hover:translate-y-0 invisible hover:visible">
+        {['❤️', '🔥', '🙌', '😍', '📈'].map((emoji, i) => (
+          <motion.button
+            key={i}
+            whileHover={{ scale: i === 4 ? 1.2 : 1.5, y: -5 }}
+            whileTap={{ scale: 0.8 }}
+            onClick={(e) => {
+              if (!isLiked) handleLike();
+              setShowHeart(true);
+              setTimeout(() => setShowHeart(false), 800);
+
+              // Particle Burst Logic
+              const rect = e.currentTarget.getBoundingClientRect();
+              const newParticles = Array.from({ length: 8 }).map((_, idx) => ({
+                id: Date.now() + idx + Math.random(), // Ensure unique ID
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2,
+                offsetX: Math.random() * 40 - 20, // Random horizontal offset
+                offsetY: Math.random() * -60 - 20, // Random upward offset
+                rotation: Math.random() * 360,
+                emoji
+              }));
+              setParticles((prev) => [...prev, ...newParticles]);
+              // Remove particles after animation
+              setTimeout(() => {
+                setParticles((prev) => prev.filter(p => !newParticles.some(np => np.id === p.id)));
+              }, 1000); // Match animation duration
+            }}
+            className="text-2xl filter drop-shadow-sm hover:drop-shadow-md transition-all cursor-pointer relative z-10"
           >
-            {/* Double Tap Heart Animation */}
-            <AnimatePresence>
-              {showHeart && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: [0, 1.5, 1], opacity: [0, 1, 0] }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
-                >
-                  <Heart className="size-24 text-white fill-white drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {post.mediaType === "image" ? (
-              <img
-                src={post.mediaUrl}
-                alt="Post media"
-                className="w-full max-h-[500px] object-cover sm:object-contain transition-transform duration-700 group-hover/media:scale-[1.02]"
-                loading="lazy"
-              />
-            ) : post.mediaType === "video" ? (
-              <video
-                src={post.mediaUrl}
-                controls
-                className="w-full max-h-[500px]"
-                playsInline
-                preload="metadata"
-              />
-            ) : null}
-          </div>
-        )}
-
-        {/* Stats Row */}
-        {(likeCount > 0 || commentCount > 0 || post.shareCount > 0) && (
-          <div className="flex items-center justify-between text-[11px] text-base-content/40 px-0.5 mb-1.5 font-medium">
-            <span
-              className="cursor-pointer hover:underline hover:text-primary transition-colors active:scale-95"
-              onClick={() => likeCount > 0 && setLikedByPostId(post._id)}
+            {emoji}
+          </motion.button>
+        ))}
+        <AnimatePresence>
+          {particles.map((p) => (
+            <motion.div
+              key={p.id}
+              initial={{ x: p.x, y: p.y, opacity: 1, scale: 0.8, rotate: p.rotation }}
+              animate={{
+                x: p.x + p.offsetX,
+                y: p.y + p.offsetY,
+                opacity: 0,
+                scale: 1.5,
+                rotate: p.rotation + (Math.random() * 180 - 90), // Add more rotation
+              }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="absolute text-2xl pointer-events-none"
+              style={{
+                left: 0, // Position relative to the viewport
+                top: 0,
+                transform: `translate(-50%, -50%)`, // Center the emoji
+              }}
             >
-              {likeCount > 0 && `${likeCount} like${likeCount !== 1 ? "s" : ""}`}
-            </span>
-            <div className="flex gap-3">
-              {commentCount > 0 && (
-                <button
-                  onClick={() => setShowComments(!showComments)}
-                  className="hover:underline"
-                >
-                  {commentCount} comment{commentCount !== 1 ? "s" : ""}
-                </button>
-              )}
-              {post.shareCount > 0 && (
-                <span>
-                  {post.shareCount} share{post.shareCount !== 1 ? "s" : ""}
-                </span>
-              )}
+              {p.emoji}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleLike}
+          className={`btn flex-1 btn-ghost h-10 min-h-10 rounded-xl gap-2 font-bold active:scale-95 transition-all text-sm group ${isLiked ? "text-primary hover:bg-primary/10" : "text-base-content/70 hover:bg-base-content/5"}`}
+          disabled={isLiking}
+        >
+          <Heart
+            className={`size-5 transition-transform duration-300 ${isLiked ? "fill-primary text-primary" : "group-hover:scale-110"
+              } ${likeAnimationPulse ? "scale-[1.3] text-primary" : ""}`}
+            strokeWidth={isLiked ? 2 : 1.5}
+          />
+          {likeCount > 0 ? (
+             <span onClick={(e) => { e.stopPropagation(); setLikedByPostId(post._id); }} className="hover:underline hover:text-primary transition-colors cursor-pointer">
+               {likeCount}
+             </span>
+          ) : "Like"}
+        </button>
+
+        <button
+          onClick={() => setShowComments(!showComments)}
+          className={`btn flex-1 btn-ghost h-10 min-h-10 rounded-xl gap-2 font-bold active:scale-95 transition-all text-sm group ${showComments ? "bg-base-content/5 text-base-content" : "text-base-content/70 hover:bg-base-content/5"}`}
+        >
+          <MessageCircle className={`size-5 transition-transform duration-300 ${showComments ? "fill-base-content/20 scale-105" : "group-hover:scale-110"}`} strokeWidth={showComments ? 2 : 1.5} />
+          {commentCount > 0 ? commentCount : "Comment"}
+        </button>
+
+        <button
+          onClick={handleShare}
+          className="btn flex-1 btn-ghost h-10 min-h-10 rounded-xl gap-2 font-bold text-base-content/70 hover:bg-base-content/5 active:scale-95 transition-all text-sm group"
+        >
+          <Share2 className="size-4.5 transition-transform duration-300 group-hover:scale-110 group-hover:text-success" strokeWidth={1.5} />
+          {post.shareCount > 0 ? post.shareCount : "Share"}
+        </button>
+      </div>
+
+      {/* Comments Section */}
+      {showComments && (
+        <div className="mt-4 pt-4 border-t border-base-content/5 animate-in slide-in-from-top-2 fade-in duration-300">
+          
+          {/* Add Comment Input */}
+          <div className="flex gap-3 mb-5">
+            <div className="avatar w-9 h-9 rounded-full overflow-hidden flex-shrink-0 shadow-sm">
+              <img
+                src={authUser?.profilePic || "/avatar.png"}
+                alt="You"
+                className="object-cover w-full h-full"
+              />
+            </div>
+            <div className="flex-1 relative group rounded-2xl bg-base-100 overflow-hidden border border-base-content/10 transition-colors focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 shadow-sm">
+              <input
+                type="text"
+                placeholder="Write a comment..."
+                className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-sm py-2.5 pl-4 pr-12 font-medium"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleComment()}
+              />
+              <button
+                onClick={handleComment}
+                disabled={!commentText.trim() || isCommenting}
+                className="absolute right-1 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs btn-circle text-primary active:scale-90 transition-all hover:bg-primary/10"
+              >
+                <Send className={`size-4 ${commentText.trim() ? 'translate-x-[1px]' : 'opacity-40'}`} />
+              </button>
             </div>
           </div>
-        )}
 
-        {/* QUICK REACTION BAR (ADDICTIVE ENGAGEMENT) */}
-        <div className="flex items-center justify-around bg-base-300/50 backdrop-blur-sm rounded-2xl py-2 mb-2 group/reactions opacity-0 group-hover:opacity-100 transition-opacity duration-300 relative overflow-hidden">
-          {['❤️', '🔥', '🙌', '😍', '📈'].map((emoji, i) => (
-            <motion.button
-              key={i}
-              whileHover={{ scale: i === 4 ? 1.2 : 1.5, y: -5 }}
-              whileTap={{ scale: 0.8 }}
-              onClick={(e) => {
-                if (!isLiked) handleLike();
-                setShowHeart(true);
-                setTimeout(() => setShowHeart(false), 800);
-
-                // Particle Burst Logic
-                const rect = e.currentTarget.getBoundingClientRect();
-                const newParticles = Array.from({ length: 8 }).map((_, idx) => ({
-                  id: Date.now() + idx + Math.random(), // Ensure unique ID
-                  x: rect.left + rect.width / 2,
-                  y: rect.top + rect.height / 2,
-                  offsetX: Math.random() * 40 - 20, // Random horizontal offset
-                  offsetY: Math.random() * -60 - 20, // Random upward offset
-                  rotation: Math.random() * 360,
-                  emoji
-                }));
-                setParticles((prev) => [...prev, ...newParticles]);
-                // Remove particles after animation
-                setTimeout(() => {
-                  setParticles((prev) => prev.filter(p => !newParticles.some(np => np.id === p.id)));
-                }, 1000); // Match animation duration
-              }}
-              className="text-xl filter drop-shadow-sm hover:drop-shadow-md transition-all cursor-pointer relative z-10"
-            >
-              {emoji}
-            </motion.button>
-          ))}
-          <AnimatePresence>
-            {particles.map((p) => (
-              <motion.div
-                key={p.id}
-                initial={{ x: p.x, y: p.y, opacity: 1, scale: 0.8, rotate: p.rotation }}
-                animate={{
-                  x: p.x + p.offsetX,
-                  y: p.y + p.offsetY,
-                  opacity: 0,
-                  scale: 1.5,
-                  rotate: p.rotation + (Math.random() * 180 - 90), // Add more rotation
-                }}
-                exit={{ opacity: 0, scale: 0 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="absolute text-xl pointer-events-none"
-                style={{
-                  left: 0, // Position relative to the viewport
-                  top: 0,
-                  transform: `translate(-50%, -50%)`, // Center the emoji
-                }}
-              >
-                {p.emoji}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {/* Action Buttons — optimized for mobile touch */}
-        <div className="flex items-center border-t border-base-300/50 pt-1.5 -mx-1">
-          <button
-            onClick={handleLike}
-            className={`btn btn-ghost btn-sm flex-1 gap-1.5 rounded-xl active:scale-95 transition-transform ${isLiked ? "text-red-500" : ""
-              }`}
-            disabled={isLiking}
-          >
-            <Heart
-              className={`size-[18px] transition-transform ${isLiked ? "fill-red-500" : ""
-                } ${likeAnimationPulse ? "scale-125" : ""}`}
-            />
-            <span className="text-xs font-medium">Like</span>
-          </button>
-
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="btn btn-ghost btn-sm flex-1 gap-1.5 rounded-xl active:scale-95 transition-transform"
-          >
-            <MessageCircle className="size-[18px]" />
-            <span className="text-xs font-medium">Comment</span>
-          </button>
-
-          <button
-            onClick={handleShare}
-            className="btn btn-ghost btn-sm flex-1 gap-1.5 rounded-xl active:scale-95 transition-transform"
-          >
-            <Share2 className="size-[18px]" />
-            <span className="text-xs font-medium">Share</span>
-          </button>
-        </div>
-
-        {/* Comments Section */}
-        {showComments && (
-          <div className="mt-2.5 space-y-2.5 animate-slide-in">
-            {/* Existing Comments */}
+          {/* Existing Comments */}
+          <div className="space-y-4">
             {post.comments?.map((comment, index) => (
-              <div key={comment._id || index} className="flex gap-2">
-                <div className="avatar w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-base-300 flex-shrink-0">
+              <div key={comment._id || index} className="flex gap-3 animate-in fade-in duration-300" style={{ animationDelay: `${index * 50}ms` }}>
+                <div className="avatar w-8 h-8 rounded-full overflow-hidden bg-base-300 flex-shrink-0 border border-base-content/5 mt-0.5">
                   {comment.profilePic ? (
                     <img
                       src={comment.profilePic}
@@ -409,60 +428,43 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <User className="w-3 h-3 opacity-40" />
+                      <User className="w-4 h-4 opacity-40" />
                     </div>
                   )}
                 </div>
-                <div className="bg-base-300 rounded-2xl px-3 py-2 flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="font-semibold text-xs flex items-center gap-1">
-                      {comment.fullName}
+                <div className="flex-1 min-w-0">
+                  <div className="bg-base-200/50 rounded-2xl rounded-tl-sm px-4 py-2.5 inline-block max-w-full">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <p className="font-bold text-xs">
+                        {comment.fullName}
+                      </p>
                       {(comment.role === "admin" || comment.isVerified) && (
-                        <BadgeCheck className="size-3 text-amber-500 fill-amber-500/10" />
+                        <BadgeCheck className="size-[14px] text-primary fill-primary/10" />
                       )}
-                    </p>
-                    {comment.caption && (
-                      <span className="badge badge-xs badge-outline gap-0.5 capitalize">
-                        {emotionEmoji[comment.caption.toLowerCase()] || "💬"}{" "}
-                        {comment.caption}
-                      </span>
-                    )}
+                      {comment.caption && (
+                        <>
+                          <span className="text-base-content/20 text-xs mx-0.5">•</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-base-content/50">
+                            {emotionEmoji[comment.caption.toLowerCase()] || "💬"} {comment.caption}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-[13px] font-medium leading-snug break-words text-base-content/80">{comment.text}</p>
                   </div>
-                  <p className="text-[13px] break-words">{comment.text}</p>
                 </div>
               </div>
             ))}
-
-            {/* Add Comment Input */}
-            <div className="flex items-center gap-2">
-              <div className="avatar w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden bg-base-300 flex-shrink-0">
-                <img
-                  src={authUser?.profilePic || "/avatar.png"}
-                  alt="You"
-                  className="object-cover w-full h-full"
-                />
+            
+            {(!post.comments || post.comments.length === 0) && (
+              <div className="text-center py-6">
+                <p className="text-xs font-bold uppercase tracking-widest opacity-30">No comments yet</p>
+                <p className="text-[10px] uppercase tracking-widest opacity-20 mt-1">Be the first to share your thoughts</p>
               </div>
-              <div className="flex-1 flex items-center gap-1 bg-base-300 rounded-full px-3 py-1">
-                <input
-                  type="text"
-                  placeholder="Write a comment..."
-                  className="input input-ghost input-sm flex-1 bg-transparent focus:outline-none h-8 text-sm min-w-0"
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleComment()}
-                />
-                <button
-                  onClick={handleComment}
-                  disabled={!commentText.trim() || isCommenting}
-                  className="btn btn-ghost btn-xs btn-circle text-primary active:scale-90 transition-transform flex-shrink-0"
-                >
-                  <Send className="size-3.5" />
-                </button>
-              </div>
-            </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

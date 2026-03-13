@@ -6,7 +6,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getFriends, getPosts } from "../lib/api";
 import StoryTray from "../components/StoryTray";
 import { PostSkeleton } from "../components/Skeletons";
-import { useIntersection } from "../hooks/useIntersection"; // I'll create this or use vanilla
+import { useIntersection } from "../hooks/useIntersection";
 
 const PostsPage = () => {
   const { authUser } = useAuthUser();
@@ -67,36 +67,52 @@ const PostsPage = () => {
   const addPost = (post) => setLocalPosts((prev) => [post, ...prev]);
 
   return (
-    <div className="px-2 py-3 sm:p-6 lg:p-8 max-w-3xl mx-auto w-full min-h-[120vh]">
-      <div className="mt-2 sm:mt-0">
+    <div className="px-2 py-4 sm:p-6 lg:p-10 max-w-4xl mx-auto w-full min-h-[120vh]">
+      <div className="mb-6 lg:mb-10 w-full overflow-hidden">
         <StoryTray />
       </div>
-      <div className="mt-5 mb-4 sm:mt-8 sm:mb-6 px-1">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-base-content/90">Feed</h1>
+      
+      <div className="flex items-center justify-between mb-8 px-2">
+        <h1 className="text-3xl sm:text-5xl font-black tracking-tighter text-base-content relative inline-block">
+          Feed
+          <span className="absolute -bottom-2 left-0 w-1/3 h-1.5 bg-gradient-to-r from-primary to-transparent rounded-full"></span>
+        </h1>
       </div>
-      <CreatePost onPost={addPost} authUser={authUser} />
+      
+      <div className="glass-panel-flat p-4 sm:p-6 rounded-[28px] mb-8 shadow-sm border border-base-content/5">
+        <CreatePost onPost={addPost} authUser={authUser} />
+      </div>
 
-      {isLoading && localPosts.length === 0 ? (
-        <PostSkeleton />
-      ) : (
-        <>
-          <PostsFeed posts={localPosts} setPosts={setLocalPosts} />
+      <div className="space-y-6">
+        {isLoading && localPosts.length === 0 ? (
+          <>
+            <PostSkeleton />
+            <PostSkeleton />
+          </>
+        ) : (
+          <>
+            <PostsFeed posts={localPosts} setPosts={setLocalPosts} />
 
-          {/* Infinite Scroll Trigger */}
-          <div ref={loadMoreRef} className="py-10 flex justify-center">
-            {isFetchingNextPage ? (
-              <div className="flex flex-col items-center gap-2 opacity-60">
-                <span className="loading loading-dots loading-md text-primary"></span>
-                <p className="text-[10px] font-black uppercase tracking-widest">Gathering Moments...</p>
-              </div>
-            ) : hasNextPage ? (
-              <div className="h-10" />
-            ) : allPosts.length > 0 ? (
-              <div className="divider opacity-20 text-[10px] font-black uppercase tracking-[0.2em]">You're all caught up</div>
-            ) : null}
-          </div>
-        </>
-      )}
+            {/* Infinite Scroll Trigger */}
+            <div ref={loadMoreRef} className="py-12 flex justify-center">
+              {isFetchingNextPage ? (
+                <div className="flex flex-col items-center gap-3 opacity-70">
+                  <span className="loading loading-spinner text-primary loading-lg"></span>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em]">Loading More...</p>
+                </div>
+              ) : hasNextPage ? (
+                <div className="h-10" />
+              ) : allPosts.length > 0 ? (
+                <div className="flex items-center gap-4 w-full max-w-xs opacity-30 mt-8">
+                  <div className="h-[1px] flex-1 bg-base-content"></div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Caught Up</span>
+                  <div className="h-[1px] flex-1 bg-base-content"></div>
+                </div>
+              ) : null}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

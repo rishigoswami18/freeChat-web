@@ -192,191 +192,192 @@ const CreatePost = ({ onPost, authUser }) => {
   };
 
   return (
-    <>
-      <div className="card bg-base-200 shadow-sm sm:shadow-md mb-4 sm:mb-6 overflow-hidden rounded-2xl">
-        <div className="card-body p-3 sm:p-5">
-          {/* User Info Row */}
-          <div className="flex items-center gap-2.5 mb-2.5">
-            <div className="avatar">
-              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 border-primary/20 overflow-hidden">
-                <img
-                  src={authUser?.profilePic || "/avatar.png"}
-                  alt={authUser?.fullName}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </div>
-            <div>
-              <p className="font-semibold text-sm">{authUser?.fullName}</p>
-              <p className="text-[11px] text-base-content/40">What's on your mind?</p>
-            </div>
-          </div>
-
-          {/* Text Input */}
-          <textarea
-            className="textarea textarea-ghost w-full bg-base-100 resize-none text-[15px] sm:text-base placeholder:italic focus:bg-base-100 min-h-[70px] sm:min-h-[80px] p-0 mb-2"
-            placeholder="Share your thoughts, a photo, or a video..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={2}
-          />
-
-          {/* Media Preview */}
-          {mediaPreview && (
-            <div className="relative mt-2 rounded-xl overflow-hidden bg-base-300 -mx-3 sm:-mx-5">
-              <button
-                onClick={removeMedia}
-                className="absolute top-2 right-2 btn btn-circle btn-sm bg-black/60 hover:bg-black/80 text-white border-none z-10 active:scale-90 transition-transform"
-              >
-                <X className="size-4" />
-              </button>
-              {mediaType === "image" ? (
-                <img
-                  src={mediaPreview}
-                  alt="Preview"
-                  className="w-full max-h-72 sm:max-h-80 object-cover sm:object-contain"
-                />
-              ) : (
-                <video
-                  src={mediaPreview}
-                  controls
-                  playsInline
-                  className="w-full max-h-72 sm:max-h-80"
-                />
-              )}
-            </div>
-          )}
-
-          {/* Upload Progress Bar */}
-          {loading && uploadProgress > 0 && uploadProgress < 100 && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="opacity-60">Uploading...</span>
-                <span className="font-bold text-primary">{uploadProgress}%</span>
-              </div>
-              <progress
-                className="progress progress-primary w-full"
-                value={uploadProgress}
-                max="100"
-              />
-            </div>
-          )}
-
-          {/* Song Name Input (Only for Videos) */}
-          {mediaType === "video" && (
-            <div className="mt-3 space-y-3">
-              <div className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  placeholder="Searching for a song..."
-                  className="input input-bordered input-sm w-full bg-base-100 focus:border-primary rounded-xl"
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  value={searchQuery}
-                />
-                <input
-                  type="text"
-                  placeholder="Selected Song"
-                  className="input input-bordered input-sm w-full bg-base-100 border-primary font-bold rounded-xl"
-                  readOnly
-                  value={songName || "No song selected"}
-                />
-              </div>
-              <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1 custom-scrollbar">
-                <span className="text-[10px] font-bold opacity-40 w-full uppercase tracking-wider sticky top-0 bg-base-200 z-10">
-                  {searchQuery ? "Search Results" : "Trending Audio"}
-                </span>
-                {filteredSongs.length > 0 ? filteredSongs.map((song) => {
-                  const label = `${song.title} - ${song.artist}`;
-                  const isSelected = songName === label;
-                  return (
-                    <div key={song._id} className="flex items-center gap-1">
-                      <button
-                        onClick={() => {
-                          setSongName(label);
-                          setAudioUrl(song.audioUrl);
-                        }}
-                        className={`badge badge-sm cursor-pointer transition-all active:scale-95 ${isSelected ? 'badge-primary' : 'badge-outline opacity-60 hover:bg-primary hover:text-primary-content'}`}
-                      >
-                        {label}
-                      </button>
-                      {song.audioUrl && (
-                        <button
-                          className="btn btn-ghost btn-xs btn-circle text-primary"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            const audio = new Audio(song.audioUrl);
-                            audio.play().catch(err => toast.error("Wait for audio to load"));
-                            toast.success(`Previewing ${song.title}`, { duration: 2000 });
-                            setTimeout(() => audio.pause(), 5000); // 5 sec preview
-                          }}
-                        >
-                          <Play className="size-3" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                }) : (
-                  <span className="text-[10px] opacity-40">{searchQuery ? "No songs found" : "Loading songs..."}</span>
-                )}
-                {!searchQuery && songs.length === 0 && (
-                  <button
-                    onClick={() => {
-                      setSongName("Original Audio");
-                      setAudioUrl("");
-                    }}
-                    className={`badge badge-sm cursor-pointer transition-colors active:scale-95 ${songName === "Original Audio" ? 'badge-primary' : 'badge-outline opacity-60 hover:bg-primary hover:text-primary-content'}`}
-                  >
-                    Original Audio
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Actions Row */}
-          <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-base-300/50">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <label className="text-base-content/50 hover:text-success active:scale-90 cursor-pointer transition-all p-1">
-                <ImageIcon className="size-5 sm:size-6" />
-                <input
-                  ref={imageInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleFileSelect(e, "image")}
-                />
-              </label>
-
-              <label className="text-base-content/50 hover:text-info active:scale-90 cursor-pointer transition-all p-1">
-                <VideoIcon className="size-5 sm:size-6" />
-                <input
-                  ref={videoInputRef}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) => handleFileSelect(e, "video")}
-                />
-              </label>
-            </div>
-
-            <button
-              className="btn btn-primary btn-sm px-6 sm:px-8 rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-transform"
-              onClick={handlePost}
-              disabled={loading || (!content.trim() && !mediaFile)}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  {uploadProgress > 0 && uploadProgress < 100 ? `${uploadProgress}%` : "Posting..."}
-                </>
-              ) : (
-                "Post"
-              )}
-            </button>
+    <div className="flex flex-col gap-4">
+      {/* User Info Row */}
+      <div className="flex items-center gap-4">
+        <div className="avatar">
+          <div className="w-12 h-12 rounded-full border border-base-content/10 shadow-sm overflow-hidden bg-base-300">
+            <img
+              src={authUser?.profilePic || "/avatar.png"}
+              alt={authUser?.fullName}
+              className="object-cover w-full h-full"
+            />
           </div>
         </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-base tracking-tight">{authUser?.fullName}</span>
+          <span className="text-xs font-medium opacity-50 uppercase tracking-widest mt-0.5">Author Mode</span>
+        </div>
       </div>
-    </>
+
+      {/* Text Input */}
+      <div className="relative group">
+        <textarea
+          className="w-full bg-transparent resize-none text-base sm:text-lg focus:outline-none placeholder:opacity-40 min-h-[90px] font-medium leading-relaxed"
+          placeholder="Share your thoughts, experiences, or a memory..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={3}
+        />
+        {/* Animated focus indicator line */}
+        <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-primary group-focus-within:w-full transition-all duration-300 ease-out"></div>
+      </div>
+
+      {/* Media Preview */}
+      {mediaPreview && (
+        <div className="relative mt-2 rounded-2xl overflow-hidden bg-base-300 border border-base-content/10 mx-auto w-full max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <button
+            onClick={removeMedia}
+            className="absolute top-3 right-3 btn btn-circle btn-sm bg-black/60 hover:bg-black/90 text-white border-none z-10 active:scale-90 transition-all backdrop-blur-md shadow-lg"
+          >
+            <X className="size-4" />
+          </button>
+          {mediaType === "image" ? (
+            <img
+              src={mediaPreview}
+              alt="Preview"
+              className="w-full max-h-[400px] object-cover"
+            />
+          ) : (
+            <video
+              src={mediaPreview}
+              controls
+              playsInline
+              className="w-full max-h-[400px] bg-black"
+            />
+          )}
+        </div>
+      )}
+
+      {/* Upload Progress Bar */}
+      {loading && uploadProgress > 0 && uploadProgress < 100 && (
+        <div className="mt-2 w-full animate-in fade-in duration-300">
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5 px-0.5">
+            <span className="opacity-50">Syncing to cloud</span>
+            <span className="text-primary">{uploadProgress}%</span>
+          </div>
+          <div className="h-1.5 w-full bg-base-300 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary transition-all duration-300 ease-out relative"
+              style={{ width: `${uploadProgress}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_1s_infinite]"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Song Name Input (Only for Videos) */}
+      {mediaType === "video" && (
+        <div className="mt-4 p-4 rounded-2xl bg-base-200/50 border border-base-content/5 space-y-4 animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              placeholder="Search trending audio..."
+              className="input-premium w-full flex-1 rounded-xl text-sm"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
+            />
+            {songName && (
+              <div className="flex-1 px-4 py-2.5 bg-primary/10 rounded-xl border border-primary/20 flex items-center shadow-inner">
+                <span className="text-xs font-black text-primary uppercase tracking-wider truncate w-full">
+                  {songName}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+            {filteredSongs.length > 0 ? filteredSongs.map((song) => {
+              const label = `${song.title} - ${song.artist}`;
+              const isSelected = songName === label;
+              return (
+                <div key={song._id} className={`flex items-center gap-1 pl-3 pr-1 py-1 rounded-full border transition-all ${isSelected ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-base-100 border-base-content/10 hover:border-primary/50 text-base-content/70'}`}>
+                  <button
+                    onClick={() => {
+                      setSongName(label);
+                      setAudioUrl(song.audioUrl);
+                    }}
+                    className="text-xs font-semibold cursor-pointer truncate max-w-[120px] sm:max-w-xs transition-colors"
+                  >
+                    {label}
+                  </button>
+                  {song.audioUrl && (
+                    <button
+                      className={`btn btn-ghost btn-xs btn-circle ${isSelected ? 'text-primary' : 'text-base-content/40 hover:text-primary'}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const audio = new Audio(song.audioUrl);
+                        audio.play().catch(err => toast.error("Wait for audio to load"));
+                        toast.success(`Previewing ${song.title}`, { duration: 2000 });
+                        setTimeout(() => audio.pause(), 5000); // 5 sec preview
+                      }}
+                    >
+                      <Play className="size-3.5 fill-current" />
+                    </button>
+                  )}
+                </div>
+              );
+            }) : (
+              <span className="text-[10px] font-semibold uppercase tracking-widest opacity-40 px-2 py-1">{searchQuery ? "No songs found" : "Loading library..."}</span>
+            )}
+            {!searchQuery && songs.length === 0 && (
+              <button
+                onClick={() => {
+                  setSongName("Original Audio");
+                  setAudioUrl("");
+                }}
+                className={`text-xs font-semibold px-4 py-1.5 rounded-full border transition-all cursor-pointer ${songName === "Original Audio" ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-base-100 border-base-content/10 hover:border-primary/50 text-base-content/70'}`}
+              >
+                Original Audio
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Actions Row */}
+      <div className="flex items-center justify-between mt-2 pt-4 border-t border-base-content/5">
+        <div className="flex items-center gap-2">
+          <label className="group flex items-center justify-center size-10 rounded-full hover:bg-base-200 cursor-pointer transition-colors">
+            <ImageIcon className="size-5 text-base-content/50 group-hover:text-success transition-colors" />
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileSelect(e, "image")}
+            />
+          </label>
+
+          <label className="group flex items-center justify-center size-10 rounded-full hover:bg-base-200 cursor-pointer transition-colors">
+            <VideoIcon className="size-5 text-base-content/50 group-hover:text-info transition-colors" />
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => handleFileSelect(e, "video")}
+            />
+          </label>
+        </div>
+
+        <button
+          className="btn btn-primary rounded-xl px-8 shadow-[0_4px_14px_0_oklch(var(--p)/0.3)] hover:shadow-[0_6px_20px_oklch(var(--p)/0.23)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-sm font-bold h-10 min-h-10"
+          onClick={handlePost}
+          disabled={loading || (!content.trim() && !mediaFile)}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              <span className="opacity-90">{uploadProgress > 0 && uploadProgress < 100 ? `${uploadProgress}%` : "Posting"}</span>
+            </>
+          ) : (
+            "Publish"
+          )}
+        </button>
+      </div>
+    </div>
   );
 };
 
