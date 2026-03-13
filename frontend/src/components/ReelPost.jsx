@@ -160,21 +160,33 @@ const ReelPost = ({ post, isActive }) => {
 
     return (
         <div className={`relative h-full w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-500 ${isTheaterMode ? 'sm:max-w-none' : 'sm:max-w-[450px] sm:aspect-[9/16]'}`}>
-            <video
-                ref={videoRef}
-                src={post.mediaUrl}
-                className={`h-full w-full transition-all duration-500 ${isTheaterMode ? 'object-contain' : 'object-cover'}`}
-                loop
-                playsInline
-                preload="auto"
-                onClick={togglePlay}
-                muted={!!post.audioUrl}
-                onTimeUpdate={(e) => setProgress((e.target.currentTime / e.target.duration) * 100)}
-                onEnded={(e) => {
-                    e.target.currentTime = 0;
-                    e.target.play().catch(() => { });
-                }}
-            />
+            {post.mediaType === "youtube" ? (
+                <div className={`h-full w-full pointer-events-none relative transition-all duration-500 bg-black ${isTheaterMode ? 'aspect-video' : 'aspect-[9/16]'}`}>
+                    <iframe
+                        src={`${post.mediaUrl}?autoplay=${isActive ? 1 : 0}&mute=0&controls=0&loop=1&playlist=${post.mediaUrl.split('/').pop()}&modestbranding=1&rel=0&enablejsapi=1&iv_load_policy=3`}
+                        className="absolute inset-0 w-full h-full pointer-events-auto"
+                        allow="autoplay"
+                        allowFullScreen
+                        title={post.content}
+                    />
+                </div>
+            ) : (
+                <video
+                    ref={videoRef}
+                    src={post.mediaUrl}
+                    className={`h-full w-full transition-all duration-500 ${isTheaterMode ? 'object-contain' : 'object-cover'}`}
+                    loop
+                    playsInline
+                    preload="auto"
+                    onClick={togglePlay}
+                    muted={!!post.audioUrl}
+                    onTimeUpdate={(e) => setProgress((e.target.currentTime / e.target.duration) * 100)}
+                    onEnded={(e) => {
+                        e.target.currentTime = 0;
+                        e.target.play().catch(() => { });
+                    }}
+                />
+            )}
 
             {/* Double Tap Heart Animation */}
             <AnimatePresence>

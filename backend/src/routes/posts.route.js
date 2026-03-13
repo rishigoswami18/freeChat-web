@@ -7,6 +7,7 @@ import cloudinary from "../lib/cloudinary.js";
 import { detectEmotion } from "../utils/emotionService.js";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
 import { getPexelsVideos } from "../utils/pexelsService.js";
+import { getYouTubeShorts } from "../utils/youtubeService.js";
 
 const router = express.Router();
 
@@ -138,24 +139,11 @@ router.get("/videos", async (req, res) => {
     if (!hasMore || isDiscoveryRequest) {
       console.log("🌊 Reels: Entering Advanced Discovery Mode...");
       
-      // 1. Fetch from Pexels (Half of the page)
-      const pexelsCount = Math.ceil(limitNum / 2);
-      let externalPosts = await getPexelsVideos(pexelsCount);
+      // 1. Fetch from YouTube Shorts (High Quality Original Audio)
+      const ytCount = Math.ceil(limitNum / 1.5);
+      const externalPosts = await getYouTubeShorts(ytCount);
       
-      // 1.1 Attach random trending songs to Pexels videos
-      const trendingSongs = await Song.find({ isTrending: true }).limit(10);
-      if (trendingSongs.length > 0) {
-        externalPosts = externalPosts.map((post, idx) => {
-          const song = trendingSongs[idx % trendingSongs.length];
-          return {
-            ...post,
-            songName: `${song.title} - ${song.artist}`,
-            audioUrl: song.audioUrl
-          };
-        });
-      }
-      
-      // 2. Sample from local DB (The other half, avoiding repeats in THIS page)
+      // 2. Sample from local DB (The remaining slots)
       const excludeIds = paginatedPosts.map(p => p._id);
       const sampleCount = limitNum - paginatedPosts.length - externalPosts.length;
       
