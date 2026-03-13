@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { generateUniqueUsername } from "../utils/usernameUtils.js";
 import { OAuth2Client } from "google-auth-library";
 import OTP from "../models/OTP.js";
-import { sendOTPEmail, sendResetPasswordEmail } from "../lib/email.service.js";
+import { sendOTPEmail, sendResetPasswordEmail, sendWelcomeEmail } from "../lib/email.service.js";
 
 const throwawayDomains = [
   "yopmail.com", "mailinator.com", "guerrillamail.com", "temp-mail.org",
@@ -67,6 +67,9 @@ export async function googleLogin(req, res) {
       } catch (error) {
         console.log("Error syncing Stream user (Google):", error);
       }
+
+      // Send welcome email asynchronously
+      sendWelcomeEmail(user.email, user.fullName);
     } else {
       // Link googleId if not already linked
       if (!user.googleId) {
@@ -177,6 +180,9 @@ export async function googleLoginWithAccessToken(req, res) {
       } catch (streamErr) {
         console.error("Stream Sync Error:", streamErr.message);
       }
+
+      // Send welcome email asynchronously
+      sendWelcomeEmail(user.email, user.fullName);
     } else {
       console.log("Logging in existing user:", email);
       if (!user.googleId) user.googleId = googleId;
@@ -256,6 +262,9 @@ export async function syncFirebaseUser(req, res) {
       } catch (error) {
         console.log("Error syncing Stream user:", error);
       }
+
+      // Send welcome email asynchronously
+      sendWelcomeEmail(user.email, user.fullName);
     }
 
     // Generate JWT so the Android app can make authorized MERN calls
@@ -359,6 +368,9 @@ export async function signup(req, res) {
     } catch (error) {
       console.log("Error creating Stream user:", error);
     }
+
+    // Send welcome email asynchronously
+    sendWelcomeEmail(newUser.email, newUser.fullName);
 
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",
