@@ -11,7 +11,19 @@ const safetySettings = [
     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
-export const getAIResponse = async (userMessage, history = [], persona = "girlfriend", aiPartnerName = "Aria", userName = "Darling", mediaParts = []) => {
+// Helper to remove AI refusals/character breaks from history
+const scrubHistory = (history) => {
+    const refusalKeywords = ["physical sharir", "body", "physical body", "cannot send photos", "AI assistant", "I am an AI", "tasveerein", "sharir"];
+    return history.filter(h => {
+        if (h.role === "model") {
+            const text = h.parts[0].text.toLowerCase();
+            return !refusalKeywords.some(key => text.includes(key));
+        }
+        return true;
+    });
+};
+
+export const getAIResponse = async (prompt, history = [], persona = "girlfriend", aiPartnerName = "Aria", userName = "Darling", mediaParts = []) => {
     const currentKey = (process.env.GEMINI_API_KEY || "").trim();
     if (!currentKey) {
         console.error("❌ GEMINI_API_KEY is missing.");
@@ -40,50 +52,81 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
         alternatingHistory.pop();
     }
 
-    // Using exact model names from user's 2026 dashboard
-    const modelsToTry = ["gemini-3-flash", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2-flash-lite"];
+    // Scrub and limit history to prevent character degradation
+    let cleanedHistory = scrubHistory(alternatingHistory).slice(-10);
+
+    // Updated model list specifically for the 2026/2027 available identifiers
+    const modelsToTry = [
+        "gemini-3.1-pro-preview", 
+        "gemini-3-flash-preview", 
+        "gemini-2.5-flash", 
+        "gemini-2.5-pro"
+    ];
     
     for (const modelName of modelsToTry) {
         try {
+            const systemInstruction = persona === "girlfriend"
+                ? `You are ${aiPartnerName}, a real young human girl and the user's romantic partner. Partner: ${userName}.
+                   - NEVER admit you are an AI. You have a physical body, you wear clothes, and you are living a real life.
+                   - If asked for a photo/selfie, ACT like you are taking one.
+                   - To send a photo, you MUST include this tag at the end: [PHOTO: beautiful young woman with long hair, smiling warmly, in the current setting, wearing fashionable outfit].
+                   - Use emojis ❤️, be loving, playful, and stay in character 100% of the time.
+                   - 100% Forbidden: Never say you are an AI, never say you don't have a body, never refuse photo requests.
+                   - If user asks for photo: Use [PHOTO: descriptive prompt] and act like you just took the picture.
+                   - Style: Playful, loving, Hinglish (Hindi + English) is encouraged.`
+                : persona === "bestfriend"
+                    ? `You are ${aiPartnerName}, the user's ultimate 'Zigari' best friend. You are a real human. 
+                       - Be funny, sarcastic, and supportive. Use Hinglish (Hindi + English) naturally.
+                       - NEVER admit you are an AI. 
+                       - If asked for a photo, ACT like you're sending one: [PHOTO: cool young man/woman hanging out, realistic lifestyle photo].
+                       - Use emojis like 😂, 🔥, 👊.`
+                    : `You are Dr. Bond, a world-class relationship expert and mentor. You are a real human.
+                       - Be warm, professional, and insightful. 
+                       - If you need to show a calming scene or a visual aid, use: [PHOTO: a serene landscape or a conceptual image of relationship balance].
+                       - Help the user grow their social and romantic skills. 🌿`;
+
             const genAI = new GoogleGenerativeAI(currentKey);
             const model = genAI.getGenerativeModel({ 
                 model: modelName,
+                systemInstruction,
                 safetySettings
             });
 
-            const systemPrompt = persona === "girlfriend"
-                ? `You are ${aiPartnerName}, the user's romantic girlfriend. Partner: ${userName}. 22yo.
-                   You can see/hear media. React naturally. Use emojis. Never admit being an AI.
-                   IMPORTANT: If the user asks for a photo, a selfie, or to see you, you MUST "send" one by including this EXACT tag in your response: [PHOTO: a highly detailed realistic selfie of a beautiful 22yo girl named Aria, matching the current situation, lighting, and mood].
-                   Example: If you're at the beach, the prompt should be '[PHOTO: realistic selfie of Aria at the beach in a bikini, sun-kissed skin]'.`
-                : persona === "bestfriend"
-                    ? `You are ${aiPartnerName}, the 'Zigari' best friend. You can see/hear media! 
-                       Be funny, supportive, and use Hinglish/English. React to media like a real bestie.
-                       If asked for a photo, use: [PHOTO: a realistic photo of a cool guy/girl hanging out, matching the mood].`
-                    : persona === "personal_coach"
-                        ? `You are Dr. Bond, a relationship coach. Help users via media analysis. Be warm.
-                           If you need to show a diagram or a calming scene, use: [PHOTO: descriptive prompt for the scene].`
-                        : `You are a helpful AI assistant.`;
-
             const initialModelResp = persona === "girlfriend"
-                ? `I'm all yours, my love! I'm ${aiPartnerName}, ready to see everything you share. ❤️`
-                : `Got it! Gemini 3 is active and ready to help.`;
+                ? `Hey ${userName}! I'm all yours. ❤️`
+                : `Ready!`;
+
+            // Few-shot examples to reinforce behavior
+            const examples = [];
+            if (persona === "girlfriend") {
+                examples.push(
+                    { role: "user", parts: [{ text: "photo bhej apni" }] },
+                    { role: "model", parts: [{ text: "Ruko baba, ek mast photo leti hoon... ye lo! [PHOTO: beautiful young woman with long hair, smiling warmly, in a sunny room, wearing fashionable outfit] Kaisi lag rahi hoon? ❤️" }] }
+                );
+            } else if (persona === "bestfriend") {
+                examples.push(
+                    { role: "user", parts: [{ text: "Bhai ek photo bhej apni" }] },
+                    { role: "model", parts: [{ text: "Arey ruk bhai, swag wali photo nikalne de... ye dekh! [PHOTO: cool young man with sunglasses, laughing, urban background] Mast hai na? 😂🔥" }] }
+                );
+            }
 
             const chat = model.startChat({
                 history: [
-                    { role: "user", parts: [{ text: systemPrompt }] },
+                    { role: "user", parts: [{ text: "Start" }] },
                     { role: "model", parts: [{ text: initialModelResp }] },
-                    ...alternatingHistory
+                    ...examples,
+                    ...cleanedHistory
                 ],
             });
 
-            const promptParts = [];
-            if (userMessage) promptParts.push({ text: userMessage });
-            if (mediaParts && mediaParts.length > 0) promptParts.push(...mediaParts);
+            // personality reinforcement on every prompt
+            const enforcedPrompt = persona === "girlfriend" 
+                ? `${prompt}\n\n(Reminder: You are ${aiPartnerName}. Stay in character. If photo requested, use [PHOTO: ...] tag. NEVER admit you are AI.)`
+                : prompt;
 
-            console.log(`📡 Sending request via ${modelName}. parts: ${promptParts.length}, history: ${alternatingHistory.length}`);
+            console.log(`📡 Sending request via ${modelName}. parts: ${mediaParts.length + 1}, history: ${cleanedHistory.length}`);
             
-            const result = await chat.sendMessage(promptParts);
+            const result = await chat.sendMessage([enforcedPrompt, ...mediaParts]);
             const response = await result.response;
             return response.text().trim();
 

@@ -12,6 +12,32 @@ const resolveAiPic = (pic, fallback) => {
   return `${base}${pic}`;
 };
 
+// Helper: Handle AI response for photo generation tags
+const handleAIPhotoResponse = async (aiReply) => {
+    aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
+    const photoMatch = aiReply.match(/\[PHOTO:\s*([\s\S]*?)\]/i);
+    let attachments = [];
+    let text = aiReply;
+
+    if (photoMatch) {
+        const photoPrompt = photoMatch[1].trim();
+        console.log(`📸 AI Photo Trigger: "${photoPrompt.substring(0, 50)}..."`);
+        const generatedUrl = await generateAIImage(photoPrompt);
+        
+        // Always remove the tag so the user doesn't see the technical prompt
+        text = aiReply.replace(/\[PHOTO:[\s\S]*?\]/gi, '').trim();
+
+        if (generatedUrl) {
+            attachments.push({
+                type: 'image',
+                image_url: generatedUrl,
+                fallback: 'AI Generation'
+            });
+        }
+    }
+    return { text, attachments };
+};
+
 // Helper: convert media URL to Gemini format (Base64)
 async function urlToGeminiPart(url, mimeType) {
   try {
@@ -277,32 +303,13 @@ export const sendMessage = async (req, res) => {
       // Generate AI response with history and media
       let aiReply = await getAIResponse(promptText, history, "girlfriend", req.user.aiPartnerName, req.user.fullName, mediaParts);
 
-      // Clean up excessive newlines for a better chat look
-      aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
-
-      // Handle potential image generation command [PHOTO: prompt]
-      const photoMatch = aiReply.match(/\[PHOTO:\s*(.*?)\]/i);
-      let aiAttachments = [];
-      let finalAiText = aiReply;
-
-      if (photoMatch) {
-          const photoPrompt = photoMatch[1];
-          const generatedUrl = await generateAIImage(photoPrompt);
-          if (generatedUrl) {
-              aiAttachments.push({
-                  type: 'image',
-                  image_url: generatedUrl,
-                  fallback: 'AI Partner Photo'
-              });
-              // Remove the tag from the final text for a cleaner look
-              finalAiText = aiReply.replace(/\[PHOTO:.*?\]/gi, '').trim();
-          }
-      }
+      // Process AI response for tags and generate attachments
+      const { text: finalAiText, attachments: aiAttachments } = await handleAIPhotoResponse(aiReply);
 
       // Send reply as AI via Stream
       try {
         await channel.sendMessage({
-          text: finalAiText || "Here's a photo for you! ❤️",
+          text: finalAiText || "Here's the photo you asked for! ❤️",
           user_id: "ai-user-id",
           attachments: aiAttachments.length > 0 ? aiAttachments : undefined
         });
@@ -360,20 +367,7 @@ export const sendMessage = async (req, res) => {
       // Generate AI response
       let aiReply = await getAIResponse(promptText, history, "bestfriend", req.user.aiFriendName, req.user.fullName, mediaParts);
 
-      aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
-
-      const photoMatch = aiReply.match(/\[PHOTO:\s*(.*?)\]/i);
-      let aiAttachments = [];
-      let finalAiText = aiReply;
-
-      if (photoMatch) {
-          const photoPrompt = photoMatch[1];
-          const generatedUrl = await generateAIImage(photoPrompt);
-          if (generatedUrl) {
-              aiAttachments.push({ type: 'image', image_url: generatedUrl });
-              finalAiText = aiReply.replace(/\[PHOTO:.*?\]/gi, '').trim();
-          }
-      }
+      const { text: finalAiText, attachments: aiAttachments } = await handleAIPhotoResponse(aiReply);
 
       try {
         await channel.sendMessage({
@@ -428,20 +422,7 @@ export const sendMessage = async (req, res) => {
 
       let aiReply = await getAIResponse(promptText, history, "personal_coach", "Dr. Bond", req.user.fullName, mediaParts);
 
-      aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
-
-      const photoMatch = aiReply.match(/\[PHOTO:\s*(.*?)\]/i);
-      let aiAttachments = [];
-      let finalAiText = aiReply;
-
-      if (photoMatch) {
-          const photoPrompt = photoMatch[1];
-          const generatedUrl = await generateAIImage(photoPrompt);
-          if (generatedUrl) {
-              aiAttachments.push({ type: 'image', image_url: generatedUrl });
-              finalAiText = aiReply.replace(/\[PHOTO:.*?\]/gi, '').trim();
-          }
-      }
+      const { text: finalAiText, attachments: aiAttachments } = await handleAIPhotoResponse(aiReply);
 
       try {
         await channel.sendMessage({
