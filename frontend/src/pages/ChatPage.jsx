@@ -247,6 +247,62 @@ const ChatPage = () => {
     }
   }, [channel, targetUserId, setIsThinking]);
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !channel) return;
+    
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Snap must be under 20MB");
+      return;
+    }
+
+    const isAi = targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id";
+    const reader = new FileReader();
+    
+    reader.onloadend = async () => {
+      try {
+        if(isAi) setIsThinking(true);
+        const type = file.type.startsWith("video") ? "video" : "image";
+        
+        const res = await axiosInstance.post("/chat/upload-media", {
+          media: reader.result,
+          mediaType: type,
+        });
+
+        const messageObj = {
+          text: "Sent a snap",
+          isSnap: true,
+          mediaUrl: res.data.url,
+          mediaType: type,
+          isViewed: false,
+        };
+
+        await channel.sendMessage(messageObj);
+
+        if (isAi) {
+          await axiosInstance.post("/chat/send", {
+            text: "Sent a snap",
+            recipientId: targetUserId,
+            channelId: channel.id,
+            isSnap: true,
+            mediaUrl: res.data.url,
+            mediaType: type
+          });
+          setIsThinking(false);
+        } else if (targetUserId && !targetUserId.startsWith("group_")) {
+          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(() => { });
+        }
+
+        toast.success("Snap sent! 📸");
+      } catch (error) {
+        console.error("Snap send error:", error);
+        setIsThinking(false);
+        toast.error("Failed to send snap");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const MemoizedDateSeparator = useCallback(() => null, []);
 
   // Performance Optimization: Memoize the chat wrapper and message list separately
@@ -311,63 +367,7 @@ const ChatPage = () => {
         </Channel>
       </Chat>
     );
-  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, MemoizedDateSeparator, isThinking, authUser]);
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file || !channel) return;
-    
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("Snap must be under 20MB");
-      return;
-    }
-
-    const isAi = targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id";
-    const reader = new FileReader();
-    
-    reader.onloadend = async () => {
-      try {
-        if(isAi) setIsThinking(true);
-        const type = file.type.startsWith("video") ? "video" : "image";
-        
-        const res = await axiosInstance.post("/chat/upload-media", {
-          media: reader.result,
-          mediaType: type,
-        });
-
-        const messageObj = {
-          text: "Sent a snap",
-          isSnap: true,
-          mediaUrl: res.data.url,
-          mediaType: type,
-          isViewed: false,
-        };
-
-        await channel.sendMessage(messageObj);
-
-        if (isAi) {
-          await axiosInstance.post("/chat/send", {
-            text: "Sent a snap",
-            recipientId: targetUserId,
-            channelId: channel.id,
-            isSnap: true,
-            mediaUrl: res.data.url,
-            mediaType: type
-          });
-          setIsThinking(false);
-        } else if (targetUserId && !targetUserId.startsWith("group_")) {
-          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(() => { });
-        }
-
-        toast.success("Snap sent! 📸");
-      } catch (error) {
-        console.error("Snap send error:", error);
-        setIsThinking(false);
-        toast.error("Failed to send snap");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, handleFileChange, MemoizedDateSeparator, isThinking, authUser]);
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
