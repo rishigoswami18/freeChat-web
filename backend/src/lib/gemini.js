@@ -12,7 +12,7 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
     }
 
     const genAI = new GoogleGenerativeAI(currentKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
     const systemPrompt = persona === "girlfriend"
         ? `You are the user's loving, devoted, and highly romantic girlfriend. 
