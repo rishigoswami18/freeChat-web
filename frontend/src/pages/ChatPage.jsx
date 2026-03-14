@@ -167,23 +167,31 @@ const ChatPage = () => {
         setIsThinking(true);
         
         // Step 1: Send user message to Stream first
+        // This ensures the message is saved and media is uploaded to CDN
         const result = await channel.sendMessage({
           ...message,
           fontSize: fontSize,
           extra_data: { ...message.extra_data, fontSize: fontSize }
         });
 
+        // Step 2: Trigger AI response generation on backend
+        // We use 'result' because it contains the final CDN URLs for attachments
+        await axiosInstance.post("/chat/send", {
+          messageId: result.message.id,
+          text: result.message.text,
+          recipientId: targetUserId,
+          channelId: channel.id,
+          attachments: result.message.attachments,
+          isVoice: result.message.isVoice,
+          voiceUrl: result.message.url || result.message.voiceUrl,
+          isSnap: result.message.isSnap,
+          mediaUrl: result.message.mediaUrl,
+          mediaType: result.message.mediaType
+        });
+
         // Reset UI state
         setFontSize(1);
         setShowShoutSlider(false);
-
-        // Step 2: Trigger AI response generation on backend
-        await axiosInstance.post("/chat/send", {
-          text: message.text,
-          recipientId: targetUserId,
-          channelId: channel.id,
-          attachments: message.attachments
-        });
 
         setIsThinking(false);
         return result;

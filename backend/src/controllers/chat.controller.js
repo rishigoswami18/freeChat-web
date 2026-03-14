@@ -171,10 +171,10 @@ export const testAIConnection = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, recipientId, channelId, attachments, isVoice, voiceUrl, isSnap, mediaUrl, mediaType } = req.body;
+    const { messageId, text, recipientId, channelId, attachments, isVoice, voiceUrl, isSnap, mediaUrl, mediaType } = req.body;
     
     console.log(`📩 AI Send Request:`, { 
-      text, recipientId, channelId, 
+      messageId, text, recipientId, channelId, 
       hasAttachments: !!attachments?.length,
       isVoice, voiceUrl: !!voiceUrl,
       isSnap, mediaUrl: !!mediaUrl
@@ -236,11 +236,41 @@ export const sendMessage = async (req, res) => {
       // Fetch history and map to Gemini format properly
       const channel = streamClient.channel("messaging", channelId);
       const historyRes = await channel.query({ messages: { limit: 15 } });
-      const history = (historyRes.messages || [])
-        .filter(m => m.text !== text) // Filter out the current message already in history
-        .map(m => ({
-          role: m.user.id === "ai-user-id" ? "model" : "user",
-          parts: [{ text: m.text }]
+      
+      const history = await Promise.all((historyRes.messages || [])
+        .filter(m => m.id !== messageId) // Avoid current message if already in history
+        .map(async (m, index, arr) => {
+          const role = m.user.id === "ai-user-id" ? "model" : "user";
+          const parts = [{ text: m.text || (m.attachments?.length ? "Shared an attachment" : "") }];
+          
+          // Optimization: Only fetch media for the single most recent user message with media
+          // This saves tokens and stays within Rate Limits (RPM/TPM)
+          const latestMediaMsg = arr.filter(msg => (msg.user.id !== "ai-user-id" && msg.user.id !== "ai-friend-id" && msg.user.id !== "ai-coach-id") && (msg.attachments?.length || msg.isSnap || msg.isVoice)).slice(-1)[0];
+          
+          if (latestMediaMsg && m.id === latestMediaMsg.id && role === "user") {
+            // Check attachments
+            if (m.attachments && m.attachments.length > 0) {
+              for (const att of m.attachments) {
+                const url = att.image_url || att.asset_url || att.thumb_url || att.url;
+                if (url) {
+                  const part = await urlToGeminiPart(url, att.type === "video" ? "video/mp4" : "image/jpeg");
+                  if (part) parts.push(part);
+                }
+              }
+            }
+            // Check snaps
+            if (m.isSnap && m.mediaUrl) {
+              const part = await urlToGeminiPart(m.mediaUrl, m.mediaType === "video" ? "video/mp4" : "image/jpeg");
+              if (part) parts.push(part);
+            }
+            // Check voice
+            if (m.isVoice && (m.url || m.voiceUrl)) {
+              const part = await urlToGeminiPart(m.url || m.voiceUrl, "audio/mp3");
+              if (part) parts.push(part);
+            }
+          }
+
+          return { role, parts };
         }));
 
       // Generate AI response with history and media
@@ -274,14 +304,36 @@ export const sendMessage = async (req, res) => {
         role: "user"
       });
 
-      // Fetch history
+      // Fetch history with multi-modal parts
       const channel = streamClient.channel("messaging", channelId);
       const historyRes = await channel.query({ messages: { limit: 15 } });
-      const history = (historyRes.messages || [])
-        .filter(m => m.text !== text)
-        .map(m => ({
-          role: m.user.id === "ai-friend-id" ? "model" : "user",
-          parts: [{ text: m.text }]
+      const history = await Promise.all((historyRes.messages || [])
+        .filter(m => m.id !== req.body.messageId)
+        .map(async (m, index, arr) => {
+          const role = m.user.id === "ai-friend-id" ? "model" : "user";
+          const parts = [{ text: m.text || (m.attachments?.length ? "Shared a file" : "") }];
+          
+          const latestMediaMsg = arr.filter(msg => (msg.user.id !== "ai-friend-id") && (msg.attachments?.length || msg.isSnap || msg.isVoice)).slice(-1)[0];
+          if (latestMediaMsg && m.id === latestMediaMsg.id && role === "user") {
+            if (m.attachments) {
+              for (const att of m.attachments) {
+                const url = att.image_url || att.asset_url || att.thumb_url || att.url;
+                if (url) {
+                  const part = await urlToGeminiPart(url, att.type === "video" ? "video/mp4" : "image/jpeg");
+                  if (part) parts.push(part);
+                }
+              }
+            }
+            if (m.isSnap && m.mediaUrl) {
+              const part = await urlToGeminiPart(m.mediaUrl, m.mediaType === "video" ? "video/mp4" : "image/jpeg");
+              if (part) parts.push(part);
+            }
+            if (m.isVoice && (m.url || m.voiceUrl)) {
+              const part = await urlToGeminiPart(m.url || m.voiceUrl, "audio/mp3");
+              if (part) parts.push(part);
+            }
+          }
+          return { role, parts };
         }));
 
       // Generate AI response
@@ -314,11 +366,29 @@ export const sendMessage = async (req, res) => {
 
       const channel = streamClient.channel("messaging", channelId);
       const historyRes = await channel.query({ messages: { limit: 15 } });
-      const history = (historyRes.messages || [])
-        .filter(m => m.text !== text)
-        .map(m => ({
-          role: m.user.id === "ai-coach-id" ? "model" : "user",
-          parts: [{ text: m.text }]
+      const history = await Promise.all((historyRes.messages || [])
+        .filter(m => m.id !== req.body.messageId)
+        .map(async (m, index, arr) => {
+          const role = m.user.id === "ai-coach-id" ? "model" : "user";
+          const parts = [{ text: m.text || "Shared media" }];
+          
+          const latestMediaMsg = arr.filter(msg => (msg.user.id !== "ai-coach-id") && (msg.attachments?.length || msg.isSnap)).slice(-1)[0];
+          if (latestMediaMsg && m.id === latestMediaMsg.id && role === "user") {
+            if (m.attachments) {
+              for (const att of m.attachments) {
+                const url = att.image_url || att.asset_url || att.thumb_url || att.url;
+                if (url) {
+                  const part = await urlToGeminiPart(url, att.type === "video" ? "video/mp4" : "image/jpeg");
+                  if (part) parts.push(part);
+                }
+              }
+            }
+            if (m.isSnap && m.mediaUrl) {
+              const part = await urlToGeminiPart(m.mediaUrl, m.mediaType === "video" ? "video/mp4" : "image/jpeg");
+              if (part) parts.push(part);
+            }
+          }
+          return { role, parts };
         }));
 
       let aiReply = await getAIResponse(promptText, history, "personal_coach", "Dr. Bond", req.user.fullName, mediaParts);
