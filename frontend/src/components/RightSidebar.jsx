@@ -53,7 +53,7 @@ const RightSidebar = () => {
                         />
                     </div>
                     <div>
-                        <div className="font-semibold text-[15px] leading-tight group-hover:text-white/70 transition-colors flex items-center gap-1">
+                        <div className="font-semibold text-[15px] leading-tight group-hover:text-primary transition-colors flex items-center gap-1">
                             {authUser?.fullName?.replace(" ", "_").toLowerCase() || "user"}
                             {(authUser?.isVerified || authUser?.role === "admin") && (
                                 <div className="flex items-center justify-center shrink-0" title="Verified Professional">
@@ -61,20 +61,20 @@ const RightSidebar = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="text-[14px] text-white/50 font-normal mt-0.5">
+                        <div className="text-[14px] text-base-content/60 font-normal mt-0.5">
                             {authUser?.fullName}
                         </div>
                     </div>
                 </Link>
-                <button className="text-[12px] font-bold text-blue-500 hover:text-white transition-colors">
+                <button className="text-[12px] font-bold text-primary hover:opacity-70 transition-colors">
                     Switch
                 </button>
             </div>
 
             {/* Suggested for You Header */}
             <div className="flex items-center justify-between mb-4 mt-2">
-                <span className="text-[14px] font-semibold text-white/50">Suggested for you</span>
-                <Link to="/search" className="text-[12px] font-semibold hover:text-white/70 transition-colors">
+                <span className="text-[14px] font-semibold text-base-content/50">Suggested for you</span>
+                <Link to="/search" className="text-[12px] font-semibold hover:text-primary transition-colors">
                     See all
                 </Link>
             </div>
@@ -94,17 +94,17 @@ const RightSidebar = () => {
                             />
                         </div>
                         <div className="min-w-0 flex flex-col justify-center">
-                            <div className="font-semibold text-[14px] leading-tight group-hover:text-white/70 transition-colors truncate pb-0.5 flex items-center gap-1">
+                            <div className="font-semibold text-[14px] leading-tight group-hover:text-primary transition-colors truncate pb-0.5 flex items-center gap-1">
                                 Dr. Bond <Sparkles className="size-3.5 text-green-400" />
                             </div>
-                            <div className="text-[12px] text-green-400/80 font-medium truncate">
+                            <div className="text-[12px] text-green-500 font-medium truncate">
                                 AI Relationship Coach
                             </div>
                         </div>
                     </Link>
                     <Link 
                         to="/chat/ai-coach-id"
-                        className="text-[12px] font-bold text-base-100 bg-white px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors ml-2 flex-shrink-0"
+                        className="text-[12px] font-bold text-primary-content bg-primary px-3 py-1.5 rounded-full hover:opacity-90 transition-colors ml-2 flex-shrink-0"
                     >
                         Chat
                     </Link>
@@ -135,7 +135,7 @@ const RightSidebar = () => {
                                     />
                                 </div>
                                 <div className="min-w-0 flex flex-col justify-center">
-                                    <div className="font-semibold text-[14px] leading-tight group-hover:text-white/70 transition-colors truncate pb-0.5 flex items-center gap-1">
+                                    <div className="font-semibold text-[14px] leading-tight group-hover:text-primary transition-colors truncate pb-0.5 flex items-center gap-1">
                                         {user.fullName}
                                         {(user.isVerified || user.role === "admin") && (
                                             <div className="flex items-center justify-center shrink-0" title="Verified Professional">
@@ -143,7 +143,7 @@ const RightSidebar = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="text-[12px] text-white/50 font-normal truncate">
+                                    <div className="text-[12px] text-base-content/50 font-normal truncate">
                                         {user.isTandemMatch ? "Suggested for you" : "New to BondBeyond"}
                                     </div>
                                 </div>
@@ -156,7 +156,7 @@ const RightSidebar = () => {
                                 <button 
                                     onClick={() => followUser(user._id)}
                                     disabled={pendingId === user._id}
-                                    className="text-[12px] font-bold text-blue-500 hover:text-white transition-colors ml-2 flex-shrink-0 disabled:opacity-50"
+                                    className="text-[12px] font-bold text-primary hover:opacity-70 transition-colors ml-2 flex-shrink-0 disabled:opacity-50"
                                 >
                                     {pendingId === user._id ? (
                                         <Loader2 className="size-3 animate-spin" />
@@ -175,27 +175,27 @@ const RightSidebar = () => {
             </div>
 
             {/* Links Section placeholder - matching IG style lightly */}
-            <div className="mt-8 text-[12px] text-white/30 space-y-4">
+            <div className="mt-10 text-[12px] text-base-content/40 space-y-4">
                 <div className="flex flex-wrap gap-x-2 gap-y-1">
-                    <a href="#" className="hover:underline">About</a>
+                    <a href="#" className="hover:underline hover:text-primary">About</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Help</a>
+                    <a href="#" className="hover:underline hover:text-primary">Help</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Press</a>
+                    <a href="#" className="hover:underline hover:text-primary">Press</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">API</a>
+                    <a href="#" className="hover:underline hover:text-primary">API</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Jobs</a>
+                    <a href="#" className="hover:underline hover:text-primary">Jobs</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Privacy</a>
+                    <a href="#" className="hover:underline hover:text-primary">Privacy</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Terms</a>
+                    <a href="#" className="hover:underline hover:text-primary">Terms</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Locations</a>
+                    <a href="#" className="hover:underline hover:text-primary">Locations</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline">Language</a>
+                    <a href="#" className="hover:underline hover:text-primary">Language</a>
                 </div>
-                <div className="uppercase">
+                <div className="uppercase tracking-wider font-semibold opacity-60">
                     © 2026 BONDBEYOND FROM freechatweb.in
                 </div>
             </div>

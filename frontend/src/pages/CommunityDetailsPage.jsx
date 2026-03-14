@@ -77,23 +77,23 @@ export default function CommunityDetailsPage() {
   const canViewFeed = !community.isPrivate || isMember;
 
   return (
-    <div className="max-w-2xl mx-auto w-full pb-20 font-outfit min-h-screen bg-black">
+    <div className="max-w-2xl mx-auto w-full pb-20 font-outfit min-h-screen bg-base-100 text-base-content">
       {/* Header Banner */}
-      <div className="h-48 md:h-64 relative bg-gray-900 overflow-hidden">
+      <div className="h-48 md:h-64 relative bg-base-300 overflow-hidden">
         {community.banner ? (
           <img src={community.banner} alt={community.name} className="w-full h-full object-cover opacity-60" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-purple-900 opacity-60"></div>
+          <div className="w-full h-full bg-gradient-to-br from-primary/30 to-secondary/30 opacity-60"></div>
         )}
-        <Link to="/communities" className="absolute top-4 left-4 p-2 bg-black/50 rounded-full hover:bg-black/80 transition-colors text-white backdrop-blur-md">
+        <Link to="/communities" className="absolute top-4 left-4 p-2 bg-base-100/50 rounded-full hover:bg-base-100 transition-colors text-base-content backdrop-blur-md border border-base-content/10">
           <ChevronLeft size={24} />
         </Link>
       </div>
 
       <div className="px-4 pb-4 md:px-6 relative -mt-16">
         <div className="flex items-end justify-between mb-4">
-          <div className="w-32 h-32 rounded-3xl bg-gray-800 border-4 border-black overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
-             {community.icon ? <img src={community.icon} alt="icon" className="w-full h-full object-cover" /> : <Users className="text-white/30 w-12 h-12" />}
+          <div className="w-32 h-32 rounded-3xl bg-base-200 border-4 border-base-100 overflow-hidden flex items-center justify-center shrink-0 shadow-2xl">
+             {community.icon ? <img src={community.icon} alt="icon" className="w-full h-full object-cover" /> : <Users className="text-base-content/30 w-12 h-12" />}
           </div>
           <div className="flex gap-2">
             <button
@@ -101,8 +101,8 @@ export default function CommunityDetailsPage() {
                disabled={joinMutation.isPending}
                className={`px-6 py-2.5 rounded-full font-bold transition-all shadow-lg ${
                  isMember 
-                 ? "bg-white/10 text-white hover:bg-red-500/20 hover:text-red-400 border border-white/20" 
-                 : "bg-blue-600 text-white hover:bg-blue-500 hover:scale-105"
+                 ? "bg-base-content/10 text-base-content hover:bg-red-500/20 hover:text-red-400 border border-base-content/20" 
+                 : "bg-primary text-primary-content hover:opacity-90 hover:scale-105"
                }`}
             >
                {joinMutation.isPending ? "..." : isMember ? "Joined" : "Join Community"}
@@ -111,32 +111,32 @@ export default function CommunityDetailsPage() {
         </div>
 
         <div>
-          <h1 className="text-3xl font-extrabold text-white flex items-center gap-2">
+          <h1 className="text-3xl font-extrabold text-base-content flex items-center gap-2">
             {community.name}
-            {community.isPrivate && <Lock size={20} className="text-white/40" title="Private Community" />}
+            {community.isPrivate && <Lock size={20} className="text-base-content/40" title="Private Community" />}
           </h1>
-          <p className="text-white/70 mt-3 text-lg leading-relaxed">{community.description}</p>
-          <div className="flex items-center gap-4 mt-4 text-white/50 text-sm font-medium">
-            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"><Users size={16} /> {community.members.length} Members</span>
-            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">Created by <span className="text-white ml-1">{community.creatorId?.fullName}</span></span>
+          <p className="text-base-content/70 mt-3 text-lg leading-relaxed">{community.description}</p>
+          <div className="flex items-center gap-4 mt-4 text-base-content/50 text-sm font-medium">
+            <span className="flex items-center gap-1.5 bg-base-content/5 px-3 py-1.5 rounded-lg border border-base-content/5"><Users size={16} /> {community.members.length} Members</span>
+            <span className="flex items-center gap-1.5 bg-base-content/5 px-3 py-1.5 rounded-lg border border-base-content/5">Created by <span className="text-primary ml-1">{community.creatorId?.fullName}</span></span>
           </div>
         </div>
       </div>
 
-      <div className="mt-6 border-t border-white/10"></div>
+      <div className="mt-6 border-t border-base-content/10"></div>
 
       <div className="px-4 md:px-6 pt-6">
         {canViewFeed ? (
           <>
             {/* Create Post Input */}
-            <form onSubmit={handlePostSubmit} className="mb-8 bg-white/5 border border-white/10 rounded-2xl p-4 shadow-xl">
+            <form onSubmit={handlePostSubmit} className="mb-8 bg-base-content/5 border border-base-content/10 rounded-2xl p-4 shadow-xl">
               <div className="flex gap-3">
-                <img src={authUser?.profilePic} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-white/20 shrink-0" />
+                <img src={authUser?.profilePic} alt="avatar" className="w-10 h-10 rounded-full object-cover border border-base-content/20 shrink-0" />
                 <div className="flex-1">
                   <textarea 
                     value={content} onChange={e => setContent(e.target.value)}
                     placeholder={`Post to ${community.name}...`}
-                    className="w-full bg-transparent text-white outline-none resize-none pt-2 text-lg placeholder:text-white/40"
+                    className="w-full bg-transparent text-base-content outline-none resize-none pt-2 text-lg placeholder:text-base-content/40"
                     rows={content.length > 50 ? 3 : 1}
                   />
                   {media && (
@@ -146,11 +146,11 @@ export default function CommunityDetailsPage() {
                     </div>
                   )}
                   <div className="flex items-center justify-between mt-4">
-                    <label className="text-blue-400 hover:text-blue-300 transition-colors p-2 hover:bg-blue-500/10 rounded-full cursor-pointer">
+                    <label className="text-primary hover:opacity-70 transition-colors p-2 hover:bg-primary/10 rounded-full cursor-pointer">
                       <ImageIcon size={22} />
                       <input type="file" accept="image/*,video/*" className="hidden" onChange={handleMediaUpload} />
                     </label>
-                    <button type="submit" disabled={postMutation.isPending || (!content.trim() && !media)} className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white px-5 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-blue-500/25">
+                    <button type="submit" disabled={postMutation.isPending || (!content.trim() && !media)} className="btn btn-primary btn-sm rounded-full font-bold shadow-lg h-10 px-6">
                       {postMutation.isPending ? "Posting..." : "Post"}
                     </button>
                   </div>
@@ -160,11 +160,11 @@ export default function CommunityDetailsPage() {
 
             {/* Posts Feed */}
             {isPostsLoading ? (
-              <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>
+              <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
             ) : posts.length === 0 ? (
-              <div className="text-center py-20 bg-white/5 rounded-2xl border border-white/5">
-                <Sparkles className="mx-auto w-12 h-12 text-white/20 mb-3" />
-                <p className="text-white/60 font-medium">It's quiet here. Be the first to post!</p>
+              <div className="text-center py-20 bg-base-content/5 rounded-2xl border border-base-content/10">
+                <Sparkles className="mx-auto w-12 h-12 text-base-content/20 mb-3" />
+                <p className="text-base-content/60 font-medium">It's quiet here. Be the first to post!</p>
               </div>
             ) : (
               <div className="flex flex-col gap-6">
@@ -173,11 +173,11 @@ export default function CommunityDetailsPage() {
             )}
           </>
         ) : (
-          <div className="text-center py-24 bg-white/5 rounded-3xl border border-white/10 shadow-2xl mx-2">
-            <Lock className="w-20 h-20 text-white/10 mx-auto mb-6" />
-            <h3 className="text-2xl font-bold text-white mb-3">Private Community</h3>
-            <p className="text-white/60 max-w-sm mx-auto mb-8 text-lg">You must join this community to see member posts and discussions.</p>
-            <button onClick={() => joinMutation.mutate(community._id)} disabled={joinMutation.isPending} className="bg-white text-black hover:bg-white/90 px-8 py-3 rounded-full font-bold text-lg shadow-xl shadow-white/10 transition-transform active:scale-95">
+          <div className="text-center py-24 bg-base-content/5 rounded-3xl border border-base-content/10 shadow-2xl mx-2">
+            <Lock className="w-20 h-20 text-base-content/10 mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-base-content mb-3">Private Community</h3>
+            <p className="text-base-content/60 max-w-sm mx-auto mb-8 text-lg">You must join this community to see member posts and discussions.</p>
+            <button onClick={() => joinMutation.mutate(community._id)} disabled={joinMutation.isPending} className="btn bg-base-content text-base-100 hover:opacity-90 px-8 py-3 rounded-full font-bold text-lg shadow-xl shadow-base-content/10 transition-transform active:scale-95 h-auto">
               Request to Join
             </button>
           </div>

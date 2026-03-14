@@ -250,7 +250,7 @@ const ChatHeader = memo(() => {
                 </button>
 
                 <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name, isVerified: user?.isVerified || user?.role === "admin" })}>
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-white/10 bg-black shrink-0">
+                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-base-content/10 bg-black shrink-0">
                         <img src={displayData.image} alt={displayData.name} className="object-cover w-full h-full" />
                     </div>
                     {isOnline && !isGroup && (
@@ -259,7 +259,7 @@ const ChatHeader = memo(() => {
                 </div>
 
                 <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/user/${user?.id}`)}>
-                    <h3 className="font-semibold text-[15px] sm:text-[16px] leading-tight truncate text-white flex items-center gap-1.5">
+                    <h3 className="font-semibold text-[15px] sm:text-[16px] leading-tight truncate text-base-content flex items-center gap-1.5">
                         {displayData.name}
                         {(user?.role === "admin" || user?.isVerified) && (
                             <div className="flex items-center justify-center shrink-0" title="Verified Professional">
@@ -269,7 +269,7 @@ const ChatHeader = memo(() => {
                         {isPartner && <Heart className="size-3.5 text-pink-500 fill-pink-500 ml-0.5" />}
                     </h3>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                        <p className={`text-[12px] sm:text-[13px] font-normal truncate ${isOnline && !isGroup ? "text-white/80" : "text-white/50"}`}>
+                        <p className={`text-[12px] sm:text-[13px] font-normal truncate ${isOnline && !isGroup ? "text-base-content/80" : "text-base-content/50"}`}>
                             {isGroup
                                 ? `${Object.keys(channel.state.members).length} members`
                                 : isOnline
@@ -291,25 +291,25 @@ const ChatHeader = memo(() => {
                         {isPartner && (
                             <button
                                 onClick={handleAnalyze}
-                                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                                className="p-2 hover:bg-base-content/10 rounded-full transition-colors"
                                 title="AI Relationship Coach"
                             >
-                                <Sparkles className="size-5 sm:size-[22px] text-white/90" strokeWidth={1.5} />
+                                <Sparkles className="size-5 sm:size-[22px] text-base-content/90" strokeWidth={1.5} />
                             </button>
                         )}
                         <button
                             onClick={handleAudioCall}
-                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                            className="p-2 hover:bg-base-content/10 rounded-full transition-colors"
                             aria-label="Voice call"
                         >
-                            <Phone className="size-5 sm:size-[22px] text-white/90" strokeWidth={1.5} />
+                            <Phone className="size-5 sm:size-[22px] text-base-content/90" strokeWidth={1.5} />
                         </button>
                         <button
                             onClick={handleCall}
-                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                            className="p-2 hover:bg-base-content/10 rounded-full transition-colors"
                             aria-label="Video call"
                         >
-                            <Video className="size-5 sm:size-[22px] text-white/90" strokeWidth={1.5} />
+                            <Video className="size-5 sm:size-[22px] text-base-content/90" strokeWidth={1.5} />
                         </button>
                     </>
                 )}

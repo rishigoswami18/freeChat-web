@@ -179,16 +179,16 @@ const InboxPage = ({ isSideNav = false }) => {
     };
 
     return (
-        <div className={`flex w-full h-[100dvh] bg-black text-white font-outfit ${!isSideNav ? "lg:flex-row flex-col" : ""}`}>
+        <div className={`flex w-full h-[100dvh] bg-base-100 text-base-content font-outfit ${!isSideNav ? "lg:flex-row flex-col" : ""}`}>
             {/* Left Panel: Inbox List */}
-            <div className={`flex flex-col h-full overflow-hidden shrink-0 ${isSideNav ? "w-full lg:w-[350px]" : "w-full lg:w-[350px] lg:border-r border-white/10"}`}>
+            <div className={`flex flex-col h-full overflow-hidden shrink-0 ${isSideNav ? "w-full lg:w-[350px]" : "w-full lg:w-[350px] lg:border-r border-base-content/10"}`}>
                 <div className="flex-1 overflow-y-auto w-full sm:max-w-[600px] lg:max-w-none mx-auto pb-10 no-scrollbar">
                     {/* Sticky Header */}
-            <div className="sticky top-0 z-20 bg-black/95 backdrop-blur-md border-b border-white/10 pt-4 px-4 pb-3">
+            <div className="sticky top-0 z-20 bg-base-100/95 backdrop-blur-md border-b border-base-content/10 pt-4 px-4 pb-3">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 cursor-pointer">
                         <h1 className="text-xl font-bold tracking-tight">{authUser?.fullName || "Messages"}</h1>
-                        <ChevronDown className="size-4 text-white/70" />
+                        <ChevronDown className="size-4 text-base-content/70" />
                     </div>
                     <div className="flex items-center gap-4">
                         <button
@@ -210,13 +210,13 @@ const InboxPage = ({ isSideNav = false }) => {
 
                 {/* Search Bar */}
                 <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-white/50 group-focus-within:text-white/80 transition-colors" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-base-content/50 group-focus-within:text-base-content/80 transition-colors" />
                     <input
                         type="text"
                         placeholder="Search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/10 focus:bg-white/15 border-none outline-none transition-all text-[15px] placeholder:text-white/50"
+                        className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-base-content/5 focus:bg-base-content/10 border-none outline-none transition-all text-[15px] placeholder:text-base-content/50"
                     />
                 </div>
             </div>
@@ -224,8 +224,8 @@ const InboxPage = ({ isSideNav = false }) => {
             {/* Conversation List */}
             <div className="pt-2">
                 <div className="px-4 py-2 flex items-center justify-between">
-                    <h2 className="text-[15px] font-semibold text-white">Messages</h2>
-                    <span className="text-[14px] text-white/50 font-medium cursor-pointer hover:text-white/80 transition-colors">Requests</span>
+                    <h2 className="text-[15px] font-semibold text-base-content">Messages</h2>
+                    <span className="text-[14px] text-base-content/50 font-medium cursor-pointer hover:text-base-content/80 transition-colors">Requests</span>
                 </div>
 
                 {isLoading ? (
@@ -241,22 +241,22 @@ const InboxPage = ({ isSideNav = false }) => {
                             <Link
                                 key={conv.id}
                                 to={`/chat/${conv.targetUserId}`}
-                                className="group flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors active:bg-white/10 relative"
+                                className="group flex items-center gap-3 px-4 py-2.5 hover:bg-base-content/5 transition-colors active:bg-base-content/10 relative"
                             >
                                 <div className="relative flex-shrink-0" onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     setViewingDP({ url: conv.partner.avatar, name: conv.partner.name, isVerified: conv.partner.isVerified || conv.partner.role === "admin" });
                                 }}>
-                                    <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 shrink-0">
+                                    <div className="w-14 h-14 rounded-full overflow-hidden border border-base-content/10 shrink-0">
                                         <img src={conv.partner.avatar} alt={conv.partner.name} className="object-cover w-full h-full" />
                                     </div>
                                     {/* Active Status Dot Placeholder */}
-                                    <span className="absolute bottom-0 right-0 size-3.5 bg-green-500 rounded-full border-2 border-black" />
+                                    <span className="absolute bottom-0 right-0 size-3.5 bg-green-500 rounded-full border-2 border-base-100" />
                                 </div>
 
                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                    <h2 className="font-medium text-[15px] text-white truncate flex items-center gap-1.5 leading-tight">
+                                    <h2 className="font-medium text-[15px] text-base-content truncate flex items-center gap-1.5 leading-tight">
                                         {conv.partner.name}
                                         {(conv.partner.role === "admin" || conv.partner.isVerified) && (
                                             <div className="flex items-center justify-center shrink-0" title="Verified Professional">
@@ -265,10 +265,10 @@ const InboxPage = ({ isSideNav = false }) => {
                                         )}
                                     </h2>
                                     <div className="flex items-center gap-1.5 mt-0.5">
-                                        <p className={`text-[14px] truncate leading-tight ${conv.unread ? "font-semibold text-white" : "text-white/60 font-normal"}`}>
+                                        <p className={`text-[14px] truncate leading-tight ${conv.unread ? "font-semibold text-base-content" : "text-base-content/60 font-normal"}`}>
                                             {conv.lastMessage}
                                         </p>
-                                        <span className={`text-[13px] whitespace-nowrap leading-tight ${conv.unread ? "font-semibold text-white" : "text-white/60"}`}>
+                                        <span className={`text-[13px] whitespace-nowrap leading-tight ${conv.unread ? "font-semibold text-base-content" : "text-base-content/60"}`}>
                                             · {timeAgo(conv.timestamp)}
                                         </span>
                                     </div>
@@ -278,14 +278,14 @@ const InboxPage = ({ isSideNav = false }) => {
                                     <div className="size-2.5 bg-blue-500 rounded-full shrink-0 mr-1" />
                                 )}
 
-                                <div className="absolute right-4 hidden group-hover:flex items-center gap-3 bg-gradient-to-l from-[#121212] via-[#121212] to-transparent pl-8 py-2">
+                                <div className="absolute right-4 hidden group-hover:flex items-center gap-3 bg-gradient-to-l from-base-100 via-base-100 to-transparent pl-8 py-2">
                                      <button
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             handleDelete(conv.id);
                                         }}
-                                        className="p-1.5 text-white/40 hover:text-red-500 transition-colors bg-white/5 rounded-full"
+                                        className="p-1.5 text-base-content/40 hover:text-red-500 transition-colors bg-base-content/5 rounded-full"
                                         title="Delete Conversation"
                                     >
                                         <X className="size-4" />
@@ -301,12 +301,12 @@ const InboxPage = ({ isSideNav = false }) => {
 
             {/* Right Panel: Empty State (only visible on large screens when not used as a side nav in ChatPage) */}
             {!isSideNav && (
-                <div className="hidden lg:flex flex-1 flex-col items-center justify-center bg-black h-full">
-                    <div className="size-24 rounded-full border-2 border-white/20 flex flex-col items-center justify-center mb-4">
-                        <MessageSquare className="size-10 text-white" />
+                <div className="hidden lg:flex flex-1 flex-col items-center justify-center bg-base-100 h-full">
+                    <div className="size-24 rounded-full border-2 border-base-content/20 flex flex-col items-center justify-center mb-4">
+                        <MessageSquare className="size-10 text-base-content" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2 font-outfit">Your Messages</h2>
-                    <p className="text-white/50 text-sm mb-6 font-outfit">Send private messages to a friend or group.</p>
+                    <h2 className="text-xl font-bold text-base-content mb-2 font-outfit">Your Messages</h2>
+                    <p className="text-base-content/50 text-sm mb-6 font-outfit">Send private messages to a friend or group.</p>
                     <button className="btn btn-primary rounded-xl font-outfit font-bold px-8 shadow-lg shadow-primary/20" onClick={() => setIsGroupModalOpen(true)}>Send Message</button>
                 </div>
             )}

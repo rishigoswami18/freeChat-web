@@ -195,7 +195,7 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
         {/* Header Right: Follow or More */}
         <div className="flex items-center gap-3">
            {!isOwnPost && (
-              <button className="text-blue-500 font-bold text-[13px] px-2 py-1 hover:text-white transition-colors">
+              <button className="text-primary font-bold text-[13px] px-2 py-1 hover:opacity-70 transition-colors">
                 Follow
               </button>
            )}
@@ -213,7 +213,7 @@ const PostCard = ({ post, setPosts, setLikedByPostId, setViewingDP }) => {
 
       {/* Edge-to-Edge Media */}
       <div
-        className="relative w-full sm:rounded-[4px] overflow-hidden bg-base-300/30 flex justify-center items-center cursor-pointer selection:bg-transparent mb-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] sm:border-x border-y border-base-content/10"
+        className="relative w-full sm:rounded-[4px] overflow-hidden bg-base-300/30 flex justify-center items-center cursor-pointer selection:bg-transparent mb-3 shadow-[inset_0_0_0_1px_oklch(var(--bc)/0.05)] sm:border-x border-y border-base-content/10"
         onClick={handleDoubleTap}
         onDoubleClick={(e) => e.preventDefault()}
       >
