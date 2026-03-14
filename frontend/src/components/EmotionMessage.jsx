@@ -71,7 +71,7 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-[0_5px_15px_-3px_rgba(0,0,0,0.1)] min-w-[200px] sm:min-w-[260px] border backdrop-blur-md ${isMyMessage ? 'bg-gradient-to-br from-primary/50 to-primary/80 text-white border-white/10' : 'bg-base-200/80 text-base-content border-base-300'}`}>
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-[0_5px_15px_-3px_rgba(0,0,0,0.1)] min-w-[200px] sm:min-w-[260px] border backdrop-blur-md ${isMyMessage ? 'bg-gradient-to-br from-primary/50 to-primary/80 text-primary-content border-white/10' : 'bg-base-200/80 text-base-content border-base-300'}`}>
       <audio
         ref={audioRef}
         src={url}
@@ -88,14 +88,14 @@ const VoiceMessagePlayer = memo(({ url, duration, isMyMessage }) => {
       </button>
 
       <div className="flex-1 space-y-1.5">
-        <div className={`h-1.5 w-full rounded-full overflow-hidden relative ${isMyMessage ? 'bg-white/20' : 'bg-base-content/10'}`}>
+        <div className={`h-1.5 w-full rounded-full overflow-hidden relative ${isMyMessage ? 'bg-primary-content/20' : 'bg-base-content/10'}`}>
           <div
-            className={`h-full transition-all duration-100 ease-linear ${isMyMessage ? 'bg-white' : 'bg-primary'}`}
+            className={`h-full transition-all duration-100 ease-linear ${isMyMessage ? 'bg-primary-content' : 'bg-primary'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="flex justify-between items-center px-0.5">
-          <span className={`text-[10px] font-bold ${isMyMessage ? 'text-white/80' : 'opacity-60'}`}>
+          <span className={`text-[10px] font-bold ${isMyMessage ? 'text-primary-content/80' : 'opacity-60'}`}>
             {isPlaying ? formatTime(currentTime) : <div className="flex items-center gap-1.5"><Mic className="size-2.5" />{formatTime(duration)}</div>}
           </span>
         </div>
@@ -199,12 +199,12 @@ const EmotionMessage = memo((props) => {
 
   const MessageFooter = useCallback(() => (
     <div className="absolute bottom-1 right-2 flex items-center gap-1 select-none pointer-events-none z-10">
-      <span className={`text-[10px] font-bold tracking-tight ${isMyMessage ? 'text-white/70' : 'text-base-content/30'}`}>
+      <span className={`text-[10px] font-bold tracking-tight ${isMyMessage ? 'text-primary-content/70' : 'text-base-content/30'}`}>
         {timestamp}
       </span>
       {isMyMessage && (
         <div className="flex -space-x-1.5 translate-y-[1px]">
-          <CheckCheck className={`size-3.5 stroke-[2.5px] ${message.status === 'read' ? 'text-sky-300' : 'text-white/40'}`} />
+          <CheckCheck className={`size-3.5 stroke-[2.5px] ${message.status === 'read' ? 'text-sky-300' : 'text-primary-content/40'}`} />
         </div>
       )}
     </div>

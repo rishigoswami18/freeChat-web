@@ -239,14 +239,14 @@ const ChatHeader = memo(() => {
     };
 
     return (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-white/10 bg-black/95 backdrop-blur-md relative z-[100] w-full flex-shrink-0 select-none transition-all font-outfit text-white">
+        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-base-content/10 bg-base-100/95 backdrop-blur-md relative z-[100] w-full flex-shrink-0 select-none transition-all font-outfit text-base-content">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                 <button
                     onClick={() => navigate("/inbox")}
-                    className="flex-shrink-0 p-1.5 hover:bg-white/10 rounded-full transition-colors group"
+                    className="flex-shrink-0 p-1.5 hover:bg-base-content/10 rounded-full transition-colors group"
                     aria-label="Go back to inbox"
                 >
-                    <ArrowLeft className="size-5 sm:size-6 text-white group-active:scale-90 transition-transform" strokeWidth={2} />
+                    <ArrowLeft className="size-5 sm:size-6 text-base-content group-active:scale-90 transition-transform" strokeWidth={2} />
                 </button>
 
                 <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name, isVerified: user?.isVerified || user?.role === "admin" })}>

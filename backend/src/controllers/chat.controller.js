@@ -122,6 +122,15 @@ export const testMLConnection = async (req, res) => {
     });
   }
 };
+export const testAIConnection = async (req, res) => {
+  try {
+    const response = await getAIResponse("Hi, tell me your model and version and if you are online.", [], "personal_coach", "Dr. Bond", req.user.fullName);
+    res.status(200).json({ status: "success", ai_response: response });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
 export const sendMessage = async (req, res) => {
   try {
     const { text, recipientId, channelId } = req.body;
@@ -145,6 +154,7 @@ export const sendMessage = async (req, res) => {
       const channel = streamClient.channel("messaging", channelId);
       const historyRes = await channel.query({ messages: { limit: 15 } });
       const history = (historyRes.messages || [])
+        .filter(m => m.text !== text) // Filter out the current message already in history
         .map(m => ({
           role: m.user.id === "ai-user-id" ? "model" : "user",
           parts: [{ text: m.text }]
@@ -157,11 +167,14 @@ export const sendMessage = async (req, res) => {
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
       // Send reply as AI via Stream
-      await channel.sendMessage({
-        text: aiReply,
-        user_id: "ai-user-id",
-        silent: true // Don't trigger standard notifications
-      });
+      try {
+        await channel.sendMessage({
+          text: aiReply,
+          user_id: "ai-user-id"
+        });
+      } catch (streamErr) {
+        console.error("Stream Send Failure (Girlfriend):", streamErr.message);
+      }
 
       return res.status(200).json({ success: true, aiReply });
     }
@@ -182,6 +195,7 @@ export const sendMessage = async (req, res) => {
       const channel = streamClient.channel("messaging", channelId);
       const historyRes = await channel.query({ messages: { limit: 15 } });
       const history = (historyRes.messages || [])
+        .filter(m => m.text !== text)
         .map(m => ({
           role: m.user.id === "ai-friend-id" ? "model" : "user",
           parts: [{ text: m.text }]
@@ -192,11 +206,14 @@ export const sendMessage = async (req, res) => {
 
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
-      await channel.sendMessage({
-        text: aiReply,
-        user_id: "ai-friend-id",
-        silent: true 
-      });
+      try {
+        await channel.sendMessage({
+          text: aiReply,
+          user_id: "ai-friend-id"
+        });
+      } catch (streamErr) {
+        console.error("Stream Send Failure (Best Friend):", streamErr.message);
+      }
 
       return res.status(200).json({ success: true, aiReply });
     }
@@ -215,6 +232,7 @@ export const sendMessage = async (req, res) => {
       const channel = streamClient.channel("messaging", channelId);
       const historyRes = await channel.query({ messages: { limit: 15 } });
       const history = (historyRes.messages || [])
+        .filter(m => m.text !== text)
         .map(m => ({
           role: m.user.id === "ai-coach-id" ? "model" : "user",
           parts: [{ text: m.text }]
@@ -224,11 +242,15 @@ export const sendMessage = async (req, res) => {
 
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
-      await channel.sendMessage({
-        text: aiReply,
-        user_id: "ai-coach-id",
-        silent: true 
-      });
+      try {
+        await channel.sendMessage({
+          text: aiReply,
+          user_id: "ai-coach-id"
+        });
+        console.log(`🩺 Response sent as Dr. Bond to channel: ${channelId}`);
+      } catch (streamErr) {
+        console.error("Stream Send Failure (Coach):", streamErr.message);
+      }
 
       return res.status(200).json({ success: true, aiReply });
     }

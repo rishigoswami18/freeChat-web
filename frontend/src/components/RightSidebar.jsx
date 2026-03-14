@@ -41,7 +41,7 @@ const RightSidebar = () => {
     if (!authUser) return null;
 
     return (
-        <aside className="w-[320px] hidden lg:block h-screen sticky top-0 pt-10 px-4 font-outfit text-white">
+        <aside className="w-[320px] hidden lg:block h-screen sticky top-0 pt-10 px-4 font-outfit text-base-content">
             {/* Current User Profile Switcher */}
             <div className="flex items-center justify-between mb-8 group">
                 <Link to="/profile" className="flex items-center gap-4">

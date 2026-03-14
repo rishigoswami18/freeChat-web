@@ -34,7 +34,7 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
   }
 
   return (
-    <div className="flex-shrink-0 z-50 bg-black backdrop-blur-md pb-safe">
+    <div className="flex-shrink-0 z-50 bg-base-100/95 backdrop-blur-md pb-safe">
       <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-4xl mx-auto w-full">
         {showShoutSlider && (
           <div className="flex items-center gap-4 bg-white/5 px-4 py-3 rounded-2xl shadow-xl mb-1 border border-white/10">
@@ -50,7 +50,7 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
         <div className="flex w-full items-end justify-center px-1">
           <div className="instagram-input-container flex w-full">
             
-            <button className="p-2.5 px-3 text-white/90 hover:text-white transition-colors shrink-0 outline-none mb-[2px]" title="Emoji">
+            <button className="p-2.5 px-3 text-base-content/90 hover:text-base-content transition-colors shrink-0 outline-none mb-[2px]" title="Emoji">
               <Smile className="w-[26px] h-[26px]" strokeWidth={1.5} />
             </button>
             
@@ -58,14 +58,14 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
                <MessageInput focus grow />
             </div>
 
-            <div className="custom-action-icons flex items-center pr-2 gap-1.5 shrink-0 text-white/90 mb-[2px] z-10 transition-all duration-200">
-               <div className="hover:text-white cursor-pointer transition-colors p-[6px] action-voice">
+            <div className="custom-action-icons flex items-center pr-2 gap-1.5 shrink-0 text-base-content/90 mb-[2px] z-10 transition-all duration-200">
+               <div className="hover:text-base-content cursor-pointer transition-colors p-[6px] action-voice">
                  <VoiceRecorder onSend={handleVoiceSend} />
                </div>
-               <button onClick={handleSnapClick} className="hover:text-white transition-colors p-[6px]" title="Image">
+               <button onClick={handleSnapClick} className="hover:text-base-content transition-colors p-[6px]" title="Image">
                  <ImageIcon className="w-[26px] h-[26px]" strokeWidth={1.5} />
                </button>
-               <button className="hover:text-white transition-colors p-[6px]" title="Sticker">
+               <button className="hover:text-base-content transition-colors p-[6px]" title="Sticker">
                  <Sticker className="w-[26px] h-[26px]" strokeWidth={1.5} />
                </button>
             </div>
@@ -191,7 +191,9 @@ const ChatPage = () => {
     initChannel();
   }, [chatClient, targetUserId, authUser]);
 
+  // useMemo for the request handler to stay stable unless target changes
   const doSendMessageRequest = useCallback(async (channelObj, message) => {
+    console.log(`💬 Processing message to: ${targetUserId}`);
     try {
       if (targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id") {
         setIsThinking(true);
@@ -261,11 +263,11 @@ const ChatPage = () => {
   const chatUI = useMemo(() => {
     if (!chatClient || !channel) return null;
     return (
-      <Chat client={chatClient} theme="messaging dark">
+      <Chat client={chatClient} theme="messaging">
         <Channel channel={channel} doSendMessageRequest={doSendMessageRequest} messageLimit={100}>
           <Window>
             <div className="flex flex-col h-full w-full relative z-10">
-              <div className="flex-shrink-0 z-50 bg-black backdrop-blur-md border-b border-white/5">
+              <div className="flex-shrink-0 z-50 bg-base-100/95 backdrop-blur-md border-b border-base-content/10">
                 <ChatHeader />
               </div>
 
@@ -283,9 +285,15 @@ const ChatPage = () => {
                     <div className="avatar size-7 sm:size-8">
                       <div className="bg-base-300 rounded-full flex items-center justify-center border border-primary/10">
                         <img 
-                          src={targetUserId === "ai-friend-id" ? (authUser?.aiFriendPic || "/ai-bestfriend.png") : (authUser?.aiPartnerPic || "/ai-girlfriend.png")} 
+                          src={
+                            targetUserId === "ai-coach-id" 
+                              ? "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png"
+                              : targetUserId === "ai-friend-id" 
+                                ? (authUser?.aiFriendPic || "/ai-bestfriend.png") 
+                                : (authUser?.aiPartnerPic || "/ai-girlfriend.png")
+                          } 
                           alt="AI" 
-                          className="rounded-full" 
+                          className="rounded-full w-full h-full object-cover" 
                         />
                       </div>
                     </div>
@@ -319,7 +327,7 @@ const ChatPage = () => {
 
   return (
     <div
-      className="absolute inset-0 flex bg-black text-white font-outfit overflow-hidden w-full lg:max-w-none sm:border-x border-white/10"
+      className="absolute inset-0 flex bg-base-100 text-base-content font-outfit overflow-hidden w-full lg:max-w-none sm:border-x border-base-content/10"
       style={{
         height: `${viewportHeight}px`,
         top: window.visualViewport?.offsetTop || 0,
@@ -332,9 +340,9 @@ const ChatPage = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-black">
-        {/* Optional subtle noise / gradient for a premium black look, mostly solid black */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-[#0a0a0a] pointer-events-none z-0" />
+      <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-base-100">
+        {/* Optional subtle noise / gradient that respects the theme */}
+        <div className="absolute inset-0 bg-gradient-to-b from-base-100 via-base-100 to-base-200/30 pointer-events-none z-0" />
         {chatUI}
         <Thread />
       </div>

@@ -5,6 +5,7 @@ import {
   sendMessage,
   testMLConnection,
   testStreamConnection,
+  testAIConnection,
   analyzeConflict,
 } from "../controllers/chat.controller.js";
 import cloudinary from "../lib/cloudinary.js";
@@ -49,6 +50,7 @@ router.post("/analyze-conflict", protectRoute, analyzeConflict);
 // DIAGNOSTIC routes (run these in browser to check connection status)
 router.get("/test-ml", testMLConnection);
 router.get("/test-stream", testStreamConnection);
+router.get("/test-ai", protectRoute, testAIConnection);
 router.get("/test-email", async (req, res) => {
   try {
     // Log env presence

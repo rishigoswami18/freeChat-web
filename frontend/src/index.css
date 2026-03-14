@@ -727,20 +727,45 @@ body.is-chat-active {
   border-top-right-radius: 4px !important;
 }
 
-.str-chat__message-simple--others .str-chat__message-simple-text-inner {
-  background: oklch(var(--b2) / 0.8) !important;
-  backdrop-filter: blur(12px) saturate(180%);
-  color: oklch(var(--bc)) !important;
-  border: 1px solid oklch(var(--bc) / 0.05) !important;
-  border-bottom-left-radius: 18px !important;
+/* ===== ULTRA-AGGRESSIVE MESSAGE BUBBLE CONTRAST FIX ===== */
+
+/* 1. Reset 'others' bubble to a clearly visible grayish-slate for ALL dark/green themes */
+.str-chat__message-simple--others .str-chat__message-simple-text-inner,
+.str-chat__chat [data-theme="forest"] .str-chat__message-simple--others .str-chat__message-simple-text-inner,
+.str-chat__chat [data-theme="bondbeyonddark"] .str-chat__message-simple--others .str-chat__message-simple-text-inner,
+[data-theme="forest"] .str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  background: #3f444d !important; /* Lighter slate gray - clearly visible on dark green */
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 }
 
-.str-chat__message-simple--me .str-chat__message-simple-text-inner {
-  background: linear-gradient(135deg, oklch(var(--p)) 0%, #3b82f6 100%) !important;
+/* 2. FORCE text color to WHITE for absolutely EVERYTHING inside Dr. Bond's bubbles */
+.str-chat__message-simple--others .str-chat__message-simple-text-inner *,
+.str-chat__message-simple--others .str-chat__message-simple-text-inner span,
+.str-chat__message-simple--others .str-chat__message-simple-text-inner p,
+.str-chat__message-simple--others .str-chat__message-simple-text-inner div,
+.str-chat__message-simple--others .str-chat__message-simple-text-inner a {
   color: #ffffff !important;
-  border: none !important;
-  border-bottom-right-radius: 18px !important;
-  box-shadow: 0 8px 25px -5px oklch(var(--p) / 0.3) !important;
+  opacity: 1 !important;
+  fill: #ffffff !important;
+}
+
+/* 3. Ensure 'me' bubbles keep their primary color but also have guaranteed white text */
+.str-chat__message-simple--me .str-chat__message-simple-text-inner,
+.str-chat__message-simple--me .str-chat__message-simple-text-inner * {
+  background: oklch(var(--p)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px oklch(var(--p) / 0.3) !important;
+}
+
+/* 4. Light theme overrides (so they don't stay white on white) */
+[data-theme="light"] .str-chat__message-simple--others .str-chat__message-simple-text-inner,
+[data-theme="bondbeyond"] .str-chat__message-simple--others .str-chat__message-simple-text-inner {
+  background: #e4e6eb !important;
+}
+[data-theme="light"] .str-chat__message-simple--others .str-chat__message-simple-text-inner *,
+[data-theme="bondbeyond"] .str-chat__message-simple--others .str-chat__message-simple-text-inner * {
+  color: #1c1e21 !important;
 }
 
 /* Whisper/Shout aggressive override */
