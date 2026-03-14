@@ -30,6 +30,7 @@ const postSchema = new mongoose.Schema(
     isAd: { type: Boolean, default: false },
     adLink: { type: String, default: "" },
     adCta: { type: String, default: "Learn More" },
+    communityId: { type: mongoose.Schema.Types.ObjectId, ref: "Community", default: null },
   },
   { timestamps: true }
 );

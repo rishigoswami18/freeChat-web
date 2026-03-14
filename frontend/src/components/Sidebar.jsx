@@ -43,6 +43,7 @@ const navItems = [
   { to: "/", icon: Home, labelKey: "Home" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
+  { to: "/communities", icon: Users, labelKey: "Communities" },
   { to: "/reels", icon: Film, labelKey: "Reels" },
   { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
   { to: "/notifications", icon: Heart, labelKey: "notifications" },

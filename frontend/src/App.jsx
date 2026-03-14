@@ -37,6 +37,8 @@ const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard.jsx"));
 const UserProfilePage = React.lazy(() => import("./pages/UserProfilePage.jsx"));
 const GemShopPage = React.lazy(() => import("./pages/GemShopPage.jsx"));
 const HomePage = React.lazy(() => import("./pages/HomePage.jsx"));
+const CommunityPage = React.lazy(() => import("./pages/CommunityPage.jsx"));
+const CommunityDetailsPage = React.lazy(() => import("./pages/CommunityDetailsPage.jsx"));
 
 import { Toaster } from "react-hot-toast";
 
@@ -362,6 +364,32 @@ const App = () => {
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={true}>
                           <CoupleProfilePage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/communities"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <CommunityPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/community/:id"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <CommunityDetailsPage />
                         </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

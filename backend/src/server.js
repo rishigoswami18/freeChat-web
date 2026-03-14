@@ -27,6 +27,7 @@ import bondRoutes from "./routes/bond.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import apkRoutes from "./routes/apk.route.js";
+import communityRoutes from "./routes/community.route.js";
 import { seedQuestions } from "./controllers/bond.controller.js";
 import { connectDB } from "./lib/db.js";
 import { startDelayedEmailWorker } from "./lib/delayed-email.worker.js";
@@ -93,6 +94,7 @@ app.use("/api/bond", bondRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/apk", apkRoutes);
+app.use("/api/communities", communityRoutes);
 
 
 if (process.env.NODE_ENV === "production") {

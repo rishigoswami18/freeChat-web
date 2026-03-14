@@ -541,3 +541,36 @@ export const getAppStats = async () => {
   const response = await axiosInstance.get("/apk/stats");
   return response.data;
 };
+
+// ----------------- COMMUNITIES -----------------
+
+export const getCommunities = async () => {
+  const response = await axiosInstance.get("/communities");
+  return response.data;
+};
+
+export const getCommunityDetails = async (id) => {
+  const response = await axiosInstance.get(`/communities/${id}`);
+  return response.data;
+};
+
+export const createCommunity = async (data) => {
+  const response = await axiosInstance.post("/communities", data);
+  return response.data;
+};
+
+export const toggleJoinCommunity = async (id) => {
+  const response = await axiosInstance.put(`/communities/${id}/join`);
+  return response.data;
+};
+
+export const getCommunityPosts = async (id) => {
+  const response = await axiosInstance.get(`/communities/${id}/posts`);
+  return response.data;
+};
+
+export const createCommunityPost = async (id, data) => {
+  const response = await axiosInstance.post(`/communities/${id}/posts`, data);
+  return response.data;
+};
+

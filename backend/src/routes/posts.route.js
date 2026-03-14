@@ -96,7 +96,7 @@ router.get("/videos", async (req, res) => {
     const limitNum = parseInt(limit, 10) || 8;
     const isPremium = hasPremiumAccess(req.user);
 
-    const matchQuery = { mediaType: "video", isAd: false };
+    const matchQuery = { mediaType: "video", isAd: false, communityId: null };
     if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
       matchQuery._id = { $lt: new mongoose.Types.ObjectId(lastId) };
     }
@@ -190,7 +190,7 @@ router.get("/videos", async (req, res) => {
         if (sampleCount > 0) {
           try {
             discoveryPosts = await Post.aggregate([
-              { $match: { mediaType: "video", isAd: false, _id: { $nin: excludeIds } } },
+              { $match: { mediaType: "video", isAd: false, communityId: null, _id: { $nin: excludeIds } } },
               { $sample: { size: Math.max(sampleCount, 2) } },
               {
                 $lookup: {
@@ -298,12 +298,17 @@ router.get("/", async (req, res) => {
       }
     }).filter(Boolean);
 
-    // Build Match Query
+    // Build Match Query (Only fetch global posts, not community posts)
     const matchQuery = {
-      $or: [
-        { userId: { $in: [myId, ...peerIds] } },
-        { "authorInfo.isPublic": true },
-      ],
+      $and: [
+        { communityId: null },
+        {
+          $or: [
+            { userId: { $in: [myId, ...peerIds] } },
+            { "authorInfo.isPublic": true },
+          ],
+        }
+      ]
     };
 
     // Cursor-based pagination: If lastId is provided, get posts before it
