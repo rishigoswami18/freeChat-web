@@ -2,6 +2,7 @@ import axios from "axios";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
 import { generateStreamToken, upsertStreamUser, streamClient } from "../lib/stream.js";
 import { getAIResponse } from "../lib/gemini.js";
+import { generateAIImage } from "../lib/imageGen.js";
 
 // Helper: resolve AI pic (relative paths → full URL)
 const resolveAiPic = (pic, fallback) => {
@@ -279,17 +280,37 @@ export const sendMessage = async (req, res) => {
       // Clean up excessive newlines for a better chat look
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
+      // Handle potential image generation command [PHOTO: prompt]
+      const photoMatch = aiReply.match(/\[PHOTO:\s*(.*?)\]/i);
+      let aiAttachments = [];
+      let finalAiText = aiReply;
+
+      if (photoMatch) {
+          const photoPrompt = photoMatch[1];
+          const generatedUrl = await generateAIImage(photoPrompt);
+          if (generatedUrl) {
+              aiAttachments.push({
+                  type: 'image',
+                  image_url: generatedUrl,
+                  fallback: 'AI Partner Photo'
+              });
+              // Remove the tag from the final text for a cleaner look
+              finalAiText = aiReply.replace(/\[PHOTO:.*?\]/gi, '').trim();
+          }
+      }
+
       // Send reply as AI via Stream
       try {
         await channel.sendMessage({
-          text: aiReply,
-          user_id: "ai-user-id"
+          text: finalAiText || "Here's a photo for you! ❤️",
+          user_id: "ai-user-id",
+          attachments: aiAttachments.length > 0 ? aiAttachments : undefined
         });
       } catch (streamErr) {
         console.error("Stream Send Failure (Girlfriend):", streamErr.message);
       }
 
-      return res.status(200).json({ success: true, aiReply });
+      return res.status(200).json({ success: true, aiReply: finalAiText });
     }
 
     // --- Virtual Best Friend AI Logic ---
@@ -312,7 +333,7 @@ export const sendMessage = async (req, res) => {
         .map(async (m, index, arr) => {
           const role = m.user.id === "ai-friend-id" ? "model" : "user";
           const parts = [{ text: m.text || (m.attachments?.length ? "Shared a file" : "") }];
-          
+
           const latestMediaMsg = arr.filter(msg => (msg.user.id !== "ai-friend-id") && (msg.attachments?.length || msg.isSnap || msg.isVoice)).slice(-1)[0];
           if (latestMediaMsg && m.id === latestMediaMsg.id && role === "user") {
             if (m.attachments) {
@@ -341,16 +362,30 @@ export const sendMessage = async (req, res) => {
 
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
+      const photoMatch = aiReply.match(/\[PHOTO:\s*(.*?)\]/i);
+      let aiAttachments = [];
+      let finalAiText = aiReply;
+
+      if (photoMatch) {
+          const photoPrompt = photoMatch[1];
+          const generatedUrl = await generateAIImage(photoPrompt);
+          if (generatedUrl) {
+              aiAttachments.push({ type: 'image', image_url: generatedUrl });
+              finalAiText = aiReply.replace(/\[PHOTO:.*?\]/gi, '').trim();
+          }
+      }
+
       try {
         await channel.sendMessage({
-          text: aiReply,
-          user_id: "ai-friend-id"
+          text: finalAiText || "Check this out! 👊",
+          user_id: "ai-friend-id",
+          attachments: aiAttachments.length > 0 ? aiAttachments : undefined
         });
       } catch (streamErr) {
         console.error("Stream Send Failure (Best Friend):", streamErr.message);
       }
 
-      return res.status(200).json({ success: true, aiReply });
+      return res.status(200).json({ success: true, aiReply: finalAiText });
     }
 
     // --- AI Mental Health & Relationship Coach Logic ---
@@ -371,7 +406,7 @@ export const sendMessage = async (req, res) => {
         .map(async (m, index, arr) => {
           const role = m.user.id === "ai-coach-id" ? "model" : "user";
           const parts = [{ text: m.text || "Shared media" }];
-          
+
           const latestMediaMsg = arr.filter(msg => (msg.user.id !== "ai-coach-id") && (msg.attachments?.length || msg.isSnap)).slice(-1)[0];
           if (latestMediaMsg && m.id === latestMediaMsg.id && role === "user") {
             if (m.attachments) {
@@ -395,17 +430,31 @@ export const sendMessage = async (req, res) => {
 
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
+      const photoMatch = aiReply.match(/\[PHOTO:\s*(.*?)\]/i);
+      let aiAttachments = [];
+      let finalAiText = aiReply;
+
+      if (photoMatch) {
+          const photoPrompt = photoMatch[1];
+          const generatedUrl = await generateAIImage(photoPrompt);
+          if (generatedUrl) {
+              aiAttachments.push({ type: 'image', image_url: generatedUrl });
+              finalAiText = aiReply.replace(/\[PHOTO:.*?\]/gi, '').trim();
+          }
+      }
+
       try {
         await channel.sendMessage({
-          text: aiReply,
-          user_id: "ai-coach-id"
+          text: finalAiText || "I hope this visual helps you. 🌿",
+          user_id: "ai-coach-id",
+          attachments: aiAttachments.length > 0 ? aiAttachments : undefined
         });
         console.log(`🩺 Response sent as Dr. Bond to channel: ${channelId}`);
       } catch (streamErr) {
         console.error("Stream Send Failure (Coach):", streamErr.message);
       }
 
-      return res.status(200).json({ success: true, aiReply });
+      return res.status(200).json({ success: true, aiReply: finalAiText });
     }
 
     // Standard emotion logic for human chats
