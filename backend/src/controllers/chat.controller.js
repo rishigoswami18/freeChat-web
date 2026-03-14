@@ -57,8 +57,23 @@ export async function getStreamToken(req, res) {
       return res.status(500).json({ message: "Stream token generation failed" });
     }
 
+    // Unconditionally add the AI Coach so everyone can talk to it
+    if (streamClient) {
+      try {
+        await upsertStreamUser({
+          id: "ai-coach-id",
+          name: "Dr. Bond (Relationship Coach)",
+          image: "https://freechatweb.in/ai-coach.png", 
+          role: "user"
+        });
+      } catch (coachErr) {
+        console.error("Failed to ensure AI coach in Stream:", coachErr);
+      }
+    }
+
     console.log(`✅ Stream token generated for ${userId}: ${token.substring(0, 10)}...`);
     res.status(200).json({ token, apiKey: process.env.STREAM_API_KEY });
+
   } catch (error) {
     console.error("❌ Error in getStreamToken controller:", error.stack || error.message);
     res.status(500).json({ message: `Internal Server Error: ${error.message}` });
@@ -180,6 +195,38 @@ export const sendMessage = async (req, res) => {
       await channel.sendMessage({
         text: aiReply,
         user_id: "ai-friend-id",
+        silent: true 
+      });
+
+      return res.status(200).json({ success: true, aiReply });
+    }
+
+    // --- AI Mental Health & Relationship Coach Logic ---
+    if (recipientId === "ai-coach-id" && streamClient) {
+      console.log(`🧠 AI Coach Request: ${req.user.fullName} -> Coach`);
+
+      await upsertStreamUser({
+        id: "ai-coach-id",
+        name: "Dr. Bond (Relationship Coach)",
+        image: "https://freechatweb.in/ai-coach.png",
+        role: "user"
+      });
+
+      const channel = streamClient.channel("messaging", channelId);
+      const historyRes = await channel.query({ messages: { limit: 15 } });
+      const history = (historyRes.messages || [])
+        .map(m => ({
+          role: m.user.id === "ai-coach-id" ? "model" : "user",
+          parts: [{ text: m.text }]
+        }));
+
+      let aiReply = await getAIResponse(text, history, "personal_coach", "Dr. Bond", req.user.fullName);
+
+      aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
+
+      await channel.sendMessage({
+        text: aiReply,
+        user_id: "ai-coach-id",
         silent: true 
       });
 

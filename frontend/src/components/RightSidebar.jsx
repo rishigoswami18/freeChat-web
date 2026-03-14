@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getRecommendedUsers, sendFriendRequest, getOutgoingFriendReqs } from "../lib/api";
 import useAuthUser from "../hooks/useAuthUser";
-import { BadgeCheck, Loader2 } from "lucide-react";
+import { BadgeCheck, Loader2, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 
 const RightSidebar = () => {
@@ -81,6 +81,35 @@ const RightSidebar = () => {
 
             {/* Suggestions List */}
             <div className="space-y-4">
+                
+                {/* AI Coach Always Visible */}
+                <div className="flex items-center justify-between">
+                    <Link to="/chat/ai-coach-id" className="flex items-center gap-3 group min-w-0 pr-2">
+                        <div className="size-11 rounded-full overflow-hidden border-2 border-green-500/50 shrink-0">
+                            <img 
+                                src="https://freechatweb.in/ai-coach.png" 
+                                alt="Dr. Bond" 
+                                className="size-full object-cover group-hover:scale-105 transition-transform bg-black"
+                                onError={(e) => { e.target.src = "/avatar.png" }}
+                            />
+                        </div>
+                        <div className="min-w-0 flex flex-col justify-center">
+                            <div className="font-semibold text-[14px] leading-tight group-hover:text-white/70 transition-colors truncate pb-0.5 flex items-center gap-1">
+                                Dr. Bond <Sparkles className="size-3.5 text-green-400" />
+                            </div>
+                            <div className="text-[12px] text-green-400/80 font-medium truncate">
+                                AI Relationship Coach
+                            </div>
+                        </div>
+                    </Link>
+                    <Link 
+                        to="/chat/ai-coach-id"
+                        className="text-[12px] font-bold text-base-100 bg-white px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors ml-2 flex-shrink-0"
+                    >
+                        Chat
+                    </Link>
+                </div>
+
                 {isLoading ? (
                     // Skeleton loader
                     Array.from({ length: 5 }).map((_, i) => (

@@ -41,7 +41,14 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
                    You are analyzing a private chat between a couple to help them resolve tension.
                    Your goal is to be objective, empathetic, and actionable.
                    Format your response as a JSON string with keys: summary, rootCause, suggestions (array), and tensionLevel (number).`
-                    : `You are a helpful AI assistant.`;
+                    : persona === "personal_coach"
+                        ? `You are 'Dr. Bond', an empathetic, highly intelligent AI Relationship & Mental Health Coach.
+                   Your goal is to provide deeply empathetic, non-judgmental, and highly actionable advice.
+                   Help the user with dating tips, relationship anxiety, communication skills, and personal growth.
+                   Use a warm, professional, yet comforting tone (like a highly-paid therapist).
+                   Use emojis occasionally to set a friendly tone: 🌿, 💡, 🧠, 🤍.
+                   DO NOT act like a romantic partner. You are a mentor and a guide.`
+                        : `You are a helpful AI assistant.`;
 
         const initialModelResponse = persona === "girlfriend"
             ? `I understand, my love. I am ${aiPartnerName}, your devoted girlfriend, and I'm here just for you, ${userName}. ❤️`
@@ -49,7 +56,9 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
                 ? `Got it! I am ${aiPartnerName}, your best friend forever. Let's talk! 👊`
                 : persona === "coach"
                     ? `Understood. I am ready to provide objective relationship analysis in JSON format.`
-                    : `I am your AI assistant. How can I help?`;
+                    : persona === "personal_coach"
+                        ? `Hello! I am Dr. Bond, your personal relationship and mental wellness coach. How can I support you today? 🌿`
+                        : `I am your AI assistant. How can I help?`;
 
         const chat = model.startChat({
             history: [
@@ -70,6 +79,6 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
         return response.text();
     } catch (error) {
         console.error("Gemini AI Error:", error);
-        return "I'm sorry, I'm feeling a bit overwhelmed right now. Can we talk in a moment, babe? ❤️";
+        return persona === "girlfirend" ? "I'm sorry, I'm feeling a bit overwhelmed right now. Can we talk in a moment, babe? ❤️" : "I'm currently unable to process this. Let's take a deep breath and try again later. 🌿";
     }
 };
