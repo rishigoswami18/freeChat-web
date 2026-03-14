@@ -7,22 +7,43 @@ import { getAIResponse } from "../lib/gemini.js";
 const resolveAiPic = (pic, fallback) => {
   if (!pic) return fallback;
   if (pic.startsWith("http")) return pic;
-  const base = process.env.CLIENT_URL || "https://freechatweb.in";
+  const base = process.env.SERVER_URL || "https://freechatweb.in";
   return `${base}${pic}`;
 };
 
 // Helper: convert media URL to Gemini format (Base64)
 async function urlToGeminiPart(url, mimeType) {
   try {
-    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    if (!url) return null;
+    
+    // Determine absolute URL
+    let targetUrl = url;
+    if (!url.startsWith("http")) {
+      const base = process.env.SERVER_URL || "https://freechatweb.in";
+      targetUrl = url.startsWith("/") ? `${base}${url}` : `${base}/${url}`;
+    }
+
+    console.log(`🔍 AI Fetching Media: ${targetUrl}`);
+    
+    const response = await axios.get(targetUrl, { 
+      responseType: 'arraybuffer',
+      timeout: 10000, // 10s
+      headers: { 'Accept': 'image/*,video/*,audio/*' }
+    });
+
+    const finalMimeType = mimeType || response.headers["content-type"] || "image/jpeg";
+    const base64Data = Buffer.from(response.data).toString("base64");
+    
+    console.log(`✅ Media Loaded: ${targetUrl} (${response.data.byteLength} bytes, ${finalMimeType})`);
+
     return {
       inlineData: {
-        data: Buffer.from(response.data).toString("base64"),
-        mimeType: mimeType || response.headers["content-type"] || "image/jpeg",
+        data: base64Data,
+        mimeType: finalMimeType
       }
     };
   } catch (error) {
-    console.error("Error fetching media for Gemini:", error.message);
+    console.error(`❌ AI Media Fetch Failed [${url}]:`, error.message);
     return null;
   }
 }
@@ -169,11 +190,14 @@ export const sendMessage = async (req, res) => {
     if (attachments && attachments.length > 0) {
       console.log(`📎 Processing ${attachments.length} attachments...`);
       for (const att of attachments) {
-        const url = att.image_url || att.thumb_url || att.asset_url;
+        const url = att.image_url || att.asset_url || att.thumb_url || att.file_url || att.url;
         if (url) {
-          const mimeType = att.type === "image" ? "image/jpeg" : (att.type === "video" ? "video/mp4" : "application/pdf");
+          const type = att.type || "image";
+          const mimeType = type === "image" ? "image/jpeg" : (type === "video" ? "video/mp4" : "application/pdf");
           const part = await urlToGeminiPart(url, mimeType);
           if (part) mediaParts.push(part);
+        } else {
+          console.warn("⚠️ Attachment without URL found:", att);
         }
       }
     }
