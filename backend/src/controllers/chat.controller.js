@@ -1,3 +1,4 @@
+import axios from "axios";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
 import { generateStreamToken, upsertStreamUser, streamClient } from "../lib/stream.js";
 import { getAIResponse } from "../lib/gemini.js";
@@ -9,6 +10,22 @@ const resolveAiPic = (pic, fallback) => {
   const base = process.env.CLIENT_URL || "https://freechatweb.in";
   return `${base}${pic}`;
 };
+
+// Helper: convert media URL to Gemini format (Base64)
+async function urlToGeminiPart(url, mimeType) {
+  try {
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    return {
+      inlineData: {
+        data: Buffer.from(response.data).toString("base64"),
+        mimeType: mimeType || response.headers["content-type"] || "image/jpeg",
+      }
+    };
+  } catch (error) {
+    console.error("Error fetching media for Gemini:", error.message);
+    return null;
+  }
+}
 
 export async function getStreamToken(req, res) {
   try {
@@ -133,10 +150,52 @@ export const testAIConnection = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, recipientId, channelId } = req.body;
-    if (!text || !text.trim()) {
-      return res.status(400).json({ message: "Text is required" });
+    const { text, recipientId, channelId, attachments, isVoice, voiceUrl, isSnap, mediaUrl, mediaType } = req.body;
+    
+    console.log(`📩 AI Send Request:`, { 
+      text, recipientId, channelId, 
+      hasAttachments: !!attachments?.length,
+      isVoice, voiceUrl: !!voiceUrl,
+      isSnap, mediaUrl: !!mediaUrl
+    });
+
+    if (!text && !attachments && !isVoice && !isSnap) {
+      return res.status(400).json({ message: "Content is required" });
     }
+
+    let mediaParts = [];
+
+    // Process attachments
+    if (attachments && attachments.length > 0) {
+      console.log(`📎 Processing ${attachments.length} attachments...`);
+      for (const att of attachments) {
+        const url = att.image_url || att.thumb_url || att.asset_url;
+        if (url) {
+          const mimeType = att.type === "image" ? "image/jpeg" : (att.type === "video" ? "video/mp4" : "application/pdf");
+          const part = await urlToGeminiPart(url, mimeType);
+          if (part) mediaParts.push(part);
+        }
+      }
+    }
+
+    // Process Voice Messages
+    if (isVoice && voiceUrl) {
+      console.log(`🎙️ Processing voice message...`);
+      const part = await urlToGeminiPart(voiceUrl, "audio/mp3");
+      if (part) mediaParts.push(part);
+    }
+
+    // Process Snaps
+    if (isSnap && mediaUrl) {
+      console.log(`📸 Processing snap...`);
+      const mimeType = mediaType === "video" ? "video/mp4" : "image/jpeg";
+      const part = await urlToGeminiPart(mediaUrl, mimeType);
+      if (part) mediaParts.push(part);
+    }
+
+    console.log(`🧬 Media parts prepared: ${mediaParts.length}`);
+
+    const promptText = text || (mediaParts.length > 0 ? "Analyze this media and respond." : "");
 
     // --- Virtual Girlfrind AI Logic ---
     if (recipientId === "ai-user-id" && streamClient) {
@@ -160,8 +219,8 @@ export const sendMessage = async (req, res) => {
           parts: [{ text: m.text }]
         }));
 
-      // Generate AI response with history
-      let aiReply = await getAIResponse(text, history, "girlfriend", req.user.aiPartnerName, req.user.fullName);
+      // Generate AI response with history and media
+      let aiReply = await getAIResponse(promptText, history, "girlfriend", req.user.aiPartnerName, req.user.fullName, mediaParts);
 
       // Clean up excessive newlines for a better chat look
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
@@ -202,7 +261,7 @@ export const sendMessage = async (req, res) => {
         }));
 
       // Generate AI response
-      let aiReply = await getAIResponse(text, history, "bestfriend", req.user.aiFriendName, req.user.fullName);
+      let aiReply = await getAIResponse(promptText, history, "bestfriend", req.user.aiFriendName, req.user.fullName, mediaParts);
 
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 
@@ -238,7 +297,7 @@ export const sendMessage = async (req, res) => {
           parts: [{ text: m.text }]
         }));
 
-      let aiReply = await getAIResponse(text, history, "personal_coach", "Dr. Bond", req.user.fullName);
+      let aiReply = await getAIResponse(promptText, history, "personal_coach", "Dr. Bond", req.user.fullName, mediaParts);
 
       aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
 

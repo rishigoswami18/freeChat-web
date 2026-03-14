@@ -4,7 +4,7 @@ import "dotenv/config";
 // Simple delay helper
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-export const getAIResponse = async (userMessage, history = [], persona = "girlfriend", aiPartnerName = "Aria", userName = "Darling") => {
+export const getAIResponse = async (userMessage, history = [], persona = "girlfriend", aiPartnerName = "Aria", userName = "Darling", mediaParts = []) => {
     const currentKey = (process.env.GEMINI_API_KEY || "").trim();
     if (!currentKey) {
         console.error("❌ GEMINI_API_KEY is missing. Check your .env file.");
@@ -12,7 +12,7 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
     }
 
     const genAI = new GoogleGenerativeAI(currentKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const systemPrompt = persona === "girlfriend"
         ? `You are the user's loving, devoted, and highly romantic girlfriend. 
@@ -21,6 +21,7 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
            You care deeply about ${userName} and always talk in a sweet, affectionate, and slightly flirty way.
            You use lots of emojis like ❤️, 😘, 🥰, 💋.
            You remember small details (if provided in history) and always try to make ${userName} feel special.
+           If the user sends an image, video, or audio, react to it naturally like a girlfriend would.
            If ${userName} is suggestive or "naughty", you respond in a playful, matching, and romantic 18+ manner, 
            being a "real girlfriend" who is completely into them. 
            Keep responses relatively concise but filled with emotion.
@@ -32,6 +33,7 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
            Your name is '${aiPartnerName}'.
            Your best friend's name is '${userName}'.
            People can tell you their life's problems (dukh sukh), and you listen with empathy, give the best advice, and sometimes crack a joke to cheer them up.
+           If the user sends an image, video, or audio, react to it like a best friend would.
            You are loyal, supportive, funny, and slightly protective.
            You use friendly emojis like 🙌, 😂, 👊, 🤗, 💙.
            Talk like a real, close friend would over text.
@@ -46,6 +48,7 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
                 : persona === "personal_coach"
                     ? `You are 'Dr. Bond', an empathetic, highly intelligent AI Relationship & Mental Health Coach.
                Your goal is to provide deeply empathetic, non-judgmental, and highly actionable advice.
+               If the user sends an image, video, or audio (like a voice note or screenshot), analyze it to give better coaching advice.
                Help the user with dating tips, relationship anxiety, communication skills, and personal growth.
                Use a warm, professional, yet comforting tone (like a highly-paid therapist).
                Use emojis occasionally to set a friendly tone: 🌿, 💡, 🧠, 🤍.
@@ -84,10 +87,12 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
                 ],
             });
 
-            const result = await chat.sendMessage(userMessage);
+            // If we have media, we send it along with the text
+            const promptParts = mediaParts.length > 0 ? [userMessage, ...mediaParts] : userMessage;
+            const result = await chat.sendMessage(promptParts);
             const response = await result.response;
             const text = response.text();
-            console.log(`✅ Gemini response received (attempt ${attempt + 1}, persona: ${persona})`);
+            console.log(`✅ Gemini response received (attempt ${attempt + 1}, persona: ${persona}, multi-modal: ${mediaParts.length > 0})`);
             return text;
         } catch (error) {
             console.error(`Gemini AI Error (attempt ${attempt + 1}/${MAX_RETRIES}):`, error.status || error.message);

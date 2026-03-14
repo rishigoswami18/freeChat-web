@@ -123,42 +123,6 @@ const ChatPage = () => {
 
   const handleSnapClick = useCallback(() => fileInputRef.current?.click(), []);
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file || !channel) return;
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("Snap must be under 20MB");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      try {
-        const type = file.type.startsWith("video") ? "video" : "image";
-        const res = await axiosInstance.post("/chat/upload-media", {
-          media: reader.result,
-          mediaType: type,
-        });
-        await channel.sendMessage({
-          text: "Sent a snap",
-          isSnap: true,
-          mediaUrl: res.data.url,
-          mediaType: type,
-          isViewed: false,
-        });
-
-        // Push notification
-        if (targetUserId && !targetUserId.startsWith("group_")) {
-          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(() => { });
-        }
-
-        toast.success("Snap sent! 📸");
-      } catch (error) {
-        toast.error("Failed to send snap");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
   useEffect(() => {
     const initChannel = async () => {
       if (!chatClient || !targetUserId || !authUser) {
@@ -192,19 +156,24 @@ const ChatPage = () => {
   }, [chatClient, targetUserId, authUser]);
 
   // useMemo for the request handler to stay stable unless target changes
-  const doSendMessageRequest = useCallback(async (channelObj, message) => {
-    console.log(`💬 Processing message to: ${targetUserId}`);
+  const doSendMessageRequest = useCallback(async (chanId, message) => {
+    console.log(`💬 Processing message to: ${targetUserId}`, message);
+    
+    // Use the channel object from our state
+    if (!channel) return;
+
     try {
       if (targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id") {
         setIsThinking(true);
-        // Step 1: Send user message to Stream first to guarantee correct order
-        const result = await channelObj.sendMessage({
+        
+        // Step 1: Send user message to Stream first
+        const result = await channel.sendMessage({
           ...message,
           fontSize: fontSize,
           extra_data: { ...message.extra_data, fontSize: fontSize }
         });
 
-        // Reset UI state immediately
+        // Reset UI state
         setFontSize(1);
         setShowShoutSlider(false);
 
@@ -212,7 +181,8 @@ const ChatPage = () => {
         await axiosInstance.post("/chat/send", {
           text: message.text,
           recipientId: targetUserId,
-          channelId: channelObj.id
+          channelId: channel.id,
+          attachments: message.attachments
         });
 
         setIsThinking(false);
@@ -223,7 +193,7 @@ const ChatPage = () => {
       const res = await axiosInstance.post("/chat/send", {
         text: message.text,
         recipientId: targetUserId,
-        channelId: channelObj.id
+        channelId: channel.id
       });
 
       const enrichedMessage = {
@@ -235,7 +205,7 @@ const ChatPage = () => {
 
       setFontSize(1);
       setShowShoutSlider(false);
-      const result = await channelObj.sendMessage(enrichedMessage);
+      const result = await channel.sendMessage(enrichedMessage);
 
       if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement" && !targetUserId.includes("ai-")) {
         notifyMessage(targetUserId, message.text).catch(() => { });
@@ -243,19 +213,39 @@ const ChatPage = () => {
 
       return result;
     } catch (error) {
+      console.error("Error sending message:", error);
       setIsThinking(false);
-      return await channelObj.sendMessage({ ...message, extra_data: { fontSize } });
+      return await channel.sendMessage({ ...message, extra_data: { fontSize } });
     }
-  }, [fontSize, targetUserId]);
+  }, [fontSize, targetUserId, channel, setIsThinking]);
 
-  const handleVoiceSend = useCallback((data) => {
-    if (channel) {
-      channel.sendMessage({ ...data, isVoice: true, text: "Voice Message" });
-      if (targetUserId && !targetUserId.startsWith("group_")) {
+  const handleVoiceSend = useCallback(async (data) => {
+    if (!channel) return;
+    
+    try {
+      const isAi = targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id";
+      if(isAi) setIsThinking(true);
+
+      const messageObj = { ...data, isVoice: true, text: "Voice Message" };
+      await channel.sendMessage(messageObj);
+
+      if (isAi) {
+        await axiosInstance.post("/chat/send", {
+          text: "Voice Message",
+          recipientId: targetUserId,
+          channelId: channel.id,
+          isVoice: true,
+          voiceUrl: data.url
+        });
+        setIsThinking(false);
+      } else if (targetUserId && !targetUserId.startsWith("group_")) {
         notifyMessage(targetUserId, "🎤 Sent a voice message").catch(() => { });
       }
+    } catch (error) {
+      console.error("Voice send error:", error);
+      setIsThinking(false);
     }
-  }, [channel, targetUserId]);
+  }, [channel, targetUserId, setIsThinking]);
 
   const MemoizedDateSeparator = useCallback(() => null, []);
 
@@ -321,7 +311,63 @@ const ChatPage = () => {
         </Channel>
       </Chat>
     );
-  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, MemoizedDateSeparator]);
+  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, MemoizedDateSeparator, isThinking, authUser]);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !channel) return;
+    
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Snap must be under 20MB");
+      return;
+    }
+
+    const isAi = targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id";
+    const reader = new FileReader();
+    
+    reader.onloadend = async () => {
+      try {
+        if(isAi) setIsThinking(true);
+        const type = file.type.startsWith("video") ? "video" : "image";
+        
+        const res = await axiosInstance.post("/chat/upload-media", {
+          media: reader.result,
+          mediaType: type,
+        });
+
+        const messageObj = {
+          text: "Sent a snap",
+          isSnap: true,
+          mediaUrl: res.data.url,
+          mediaType: type,
+          isViewed: false,
+        };
+
+        await channel.sendMessage(messageObj);
+
+        if (isAi) {
+          await axiosInstance.post("/chat/send", {
+            text: "Sent a snap",
+            recipientId: targetUserId,
+            channelId: channel.id,
+            isSnap: true,
+            mediaUrl: res.data.url,
+            mediaType: type
+          });
+          setIsThinking(false);
+        } else if (targetUserId && !targetUserId.startsWith("group_")) {
+          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(() => { });
+        }
+
+        toast.success("Snap sent! 📸");
+      } catch (error) {
+        console.error("Snap send error:", error);
+        setIsThinking(false);
+        toast.error("Failed to send snap");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
