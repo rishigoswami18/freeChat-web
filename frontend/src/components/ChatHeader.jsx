@@ -101,6 +101,16 @@ const ChatHeader = memo(() => {
                 };
             }
 
+            // AI Coach Fallback
+            if (otherMember?.user?.id === "ai-coach-id" || channel.id.toLowerCase().includes("ai-coach-id")) {
+                return {
+                    name: "Dr. Bond (Relationship Coach)",
+                    image: "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png",
+                    id: "ai-coach-id",
+                    user: { ...otherMember?.user, online: true, name: "Dr. Bond" },
+                };
+            }
+
             return {
                 name: otherMember?.user?.name || "Chat",
                 image: otherMember?.user?.image || "/avatar.png",

@@ -87,7 +87,7 @@ const RightSidebar = () => {
                     <Link to="/chat/ai-coach-id" className="flex items-center gap-3 group min-w-0 pr-2">
                         <div className="size-11 rounded-full overflow-hidden border-2 border-green-500/50 shrink-0">
                             <img 
-                                src="https://freechatweb.in/ai-coach.png" 
+                                src="https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png" 
                                 alt="Dr. Bond" 
                                 className="size-full object-cover group-hover:scale-105 transition-transform bg-black"
                                 onError={(e) => { e.target.src = "/avatar.png" }}

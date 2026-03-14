@@ -97,6 +97,9 @@ const InboxPage = ({ isSideNav = false }) => {
                         } else if (id === "ai-friend-id") {
                             name = authUser.aiFriendName || "Golu";
                             avatar = authUser.aiFriendPic || "/ai-bestfriend.png";
+                        } else if (id === "ai-coach-id") {
+                            name = "Dr. Bond (Relationship Coach)";
+                            avatar = "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png";
                         }
 
                         partner = {

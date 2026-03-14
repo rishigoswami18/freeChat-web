@@ -63,7 +63,7 @@ export async function getStreamToken(req, res) {
         await upsertStreamUser({
           id: "ai-coach-id",
           name: "Dr. Bond (Relationship Coach)",
-          image: "https://freechatweb.in/ai-coach.png", 
+          image: "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png", 
           role: "user"
         });
       } catch (coachErr) {
@@ -208,7 +208,7 @@ export const sendMessage = async (req, res) => {
       await upsertStreamUser({
         id: "ai-coach-id",
         name: "Dr. Bond (Relationship Coach)",
-        image: "https://freechatweb.in/ai-coach.png",
+        image: "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png",
         role: "user"
       });
 

@@ -498,7 +498,7 @@ const App = () => {
                     path="/admin"
                     element={
                       isAuthenticated && authUser?.role === "admin" ? (
-                        <Layout showSidebar={true}>
+                        <Layout showSidebar={true} showRightSidebar={false} isFluid={true}>
                           <AdminDashboard />
                         </Layout>
                       ) : (
