@@ -79,6 +79,8 @@ export const getAIResponse = async (userMessage, history = [], persona = "girlfr
         return response.text();
     } catch (error) {
         console.error("Gemini AI Error:", error);
-        return persona === "girlfirend" ? "I'm sorry, I'm feeling a bit overwhelmed right now. Can we talk in a moment, babe? ❤️" : "I'm currently unable to process this. Let's take a deep breath and try again later. 🌿";
+        return (persona === "girlfriend" || persona === "bestfriend") 
+            ? "I'm sorry, I'm feeling a bit overwhelmed right now. Can we talk in a moment? ❤️" 
+            : "Dr. Bond is currently away from his desk. Please take a deep breath and try again later. 🌿";
     }
 };

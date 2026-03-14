@@ -193,7 +193,7 @@ const ChatPage = () => {
 
   const doSendMessageRequest = useCallback(async (channelObj, message) => {
     try {
-      if (targetUserId === "ai-user-id" || targetUserId === "ai-friend-id") {
+      if (targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id") {
         setIsThinking(true);
         // Step 1: Send user message to Stream first to guarantee correct order
         const result = await channelObj.sendMessage({
@@ -235,7 +235,7 @@ const ChatPage = () => {
       setShowShoutSlider(false);
       const result = await channelObj.sendMessage(enrichedMessage);
 
-      if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement") {
+      if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement" && !targetUserId.includes("ai-")) {
         notifyMessage(targetUserId, message.text).catch(() => { });
       }
 

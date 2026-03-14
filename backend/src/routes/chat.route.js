@@ -90,6 +90,11 @@ router.post("/notify-message", protectRoute, async (req, res) => {
     const { recipientId, text } = req.body;
     if (!recipientId) return res.status(400).json({ message: "recipientId required" });
 
+    // Skip notifications for AI Bots
+    if (recipientId.toString().includes("ai-")) {
+      return res.json({ sent: false, reason: "ai_bot" });
+    }
+
     // Rate limit check
     const cooldownKey = `${req.user._id}_${recipientId}`;
     const lastSent = messageNotifCooldown.get(cooldownKey);
@@ -97,7 +102,7 @@ router.post("/notify-message", protectRoute, async (req, res) => {
       return res.json({ sent: false, reason: "cooldown" });
     }
 
-    const recipient = await User.findById(recipientId).select("email fullName");
+    const recipient = await User.findById(recipientId).select("email fullName").catch(() => null);
     if (!recipient) return res.json({ sent: false, reason: "no_user" });
 
     messageNotifCooldown.set(cooldownKey, Date.now());

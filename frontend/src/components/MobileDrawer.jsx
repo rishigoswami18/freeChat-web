@@ -88,7 +88,7 @@ const MobileDrawer = () => {
     { to: "/search", icon: Search, labelKey: "explore" },
     { to: "/notifications", icon: Bell, labelKey: "notifications" },
     { to: "/posts", icon: Pencil, labelKey: "post" },
-    { to: "/chat/ai-coach-id", icon: Sparkles, label: "AI Coach" },
+    { to: "/chat/ai-coach-id", icon: Sparkles, label: "DR. BOND (AI Coach)", isSacred: true },
     { to: "/couple", icon: Heart, label: "Soul Bond" },
     { to: "/games", icon: Gamepad2, labelKey: "games" },
     { to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
