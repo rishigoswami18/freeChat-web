@@ -57,6 +57,7 @@ import { useThemeStore } from "./store/useThemeStore.js";
 import StealthOverlay from "./components/StealthOverlay.jsx";
 import GoogleOneTap from "./components/GoogleOneTap.jsx";
 import GemDrop from "./components/GemDrop.jsx";
+import TutorialOverlay from "./components/TutorialOverlay.jsx";
 
 
 const App = () => {
@@ -538,6 +539,7 @@ const App = () => {
               </AnimatePresence>
             </Suspense>
 
+            {isAuthenticated && <TutorialOverlay />}
             <Toaster />
           </VideoProvider>
         </ChatProvider>

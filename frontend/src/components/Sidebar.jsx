@@ -164,7 +164,11 @@ const Sidebar = memo(() => {
   // === DATA MEMOIZATION ===
   // Prevents recreation of 14 complex Nav Objects containing Lucide SVG bindings on every scroll/keystroke.
   const dynamicNavItems = useMemo(() => {
-    const items = [...staticNavItems];
+    const items = staticNavItems.map(item => ({
+      ...item,
+      id: `tour-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, '-')}`
+    }));
+
     if (isCoupled) {
       const inboxIndex = items.findIndex(item => item.to === "/inbox");
       if (inboxIndex !== -1) {
@@ -172,6 +176,7 @@ const Sidebar = memo(() => {
           to: `/chat/${partnerId || 'ai-user-id'}`,
           icon: Sparkles,
           label: "Partner Chat",
+          id: "tour-ai-partner",
           isSacred: true
         });
       }
@@ -196,7 +201,7 @@ const Sidebar = memo(() => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-        {dynamicNavItems.map(({ to, icon: Icon, labelKey, isSacred, label: directLabel }) => {
+        {dynamicNavItems.map(({ to, icon: Icon, labelKey, isSacred, label: directLabel, id }) => {
           const isActive = currentPath === to;
           const displayLabel = isSacred || directLabel ? (directLabel) : t(labelKey) || labelKey;
 
@@ -204,6 +209,7 @@ const Sidebar = memo(() => {
             <Link
               key={to}
               to={to}
+              id={id}
               className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav ${
                 isActive ? "font-bold text-base-content bg-base-content/5" : "text-base-content hover:bg-base-content/5"
               }`}
@@ -231,6 +237,7 @@ const Sidebar = memo(() => {
         {/* Create Post Button */}
         <button
           onClick={handleCreatePost}
+          id="tour-create"
           className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content hover:bg-base-content/5 group/nav"
           title="Create"
         >
@@ -245,6 +252,7 @@ const Sidebar = memo(() => {
         {/* Profile Link */}
         <Link
           to="/profile"
+          id="tour-profile"
           className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav ${
             currentPath === "/profile" ? "font-bold text-base-content bg-base-content/5" : "text-base-content hover:bg-base-content/5"
           }`}
@@ -297,6 +305,20 @@ const Sidebar = memo(() => {
       
         {/* Memoized Daily Reward Integration */}
         {authUser && <DailyRewardButton authUser={authUser} onClaim={claimReward} />}
+
+        {/* Watch Tutorial */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("bondbeyond_start_tutorial"))}
+          className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content opacity-70 hover:opacity-100 hover:bg-base-content/5 group/nav"
+          title="Watch Tutorial"
+        >
+          <div className="relative shrink-0 flex items-center justify-center w-8">
+            <Sparkles className="size-[26px] stroke-2 text-primary group-hover/nav:scale-105 transition-transform" />
+          </div>
+          <span className="hidden xl:block text-[16px] tracking-tight truncate">
+            Help & Tutorial
+          </span>
+        </button>
 
         {/* Download App */}
         <a
