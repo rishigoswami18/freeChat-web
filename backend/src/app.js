@@ -24,6 +24,7 @@ import notificationRoutes from "./routes/notification.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import apkRoutes from "./routes/apk.route.js";
 import communityRoutes from "./routes/community.route.js";
+import radarRoutes from "./routes/radar.route.js";
 
 // Middleware
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -91,6 +92,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/apk", apkRoutes);
 app.use("/api/communities", communityRoutes);
+app.use("/api/radar", radarRoutes);
 
 /**
  * FRONTEND HOSTING (Production)

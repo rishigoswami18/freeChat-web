@@ -21,6 +21,7 @@ import ChatHeader from "../components/ChatHeader";
 import EmotionMessage from "../components/EmotionMessage";
 import VoiceRecorder from "../components/VoiceRecorder";
 import InboxPage from "./InboxPage";
+import EmpathyRadarView from "../components/EmpathyRadarView";
 
 // --- Utility Helpers ---
 const isAiUser = (id) => ["ai-user-id", "ai-friend-id", "ai-coach-id"].includes(id);
@@ -376,6 +377,15 @@ const ChatPage = () => {
               </div>
 
               <div className="flex-1 relative flex flex-col min-h-0">
+                {/* AI Empathy Radar — Floating Intelligence Layer */}
+                {!isGroupChat(targetUserId) && targetUserId !== "system_announcement" && (
+                  <div className="absolute top-2 left-0 right-0 z-30 px-4 pointer-events-none">
+                    <div className="max-w-lg mx-auto pointer-events-auto">
+                      <EmpathyRadarView channelId={channel.id} />
+                    </div>
+                  </div>
+                )}
+
                 <MessageList
                   Message={EmotionMessage}
                   DateSeparator={MemoizedDateSeparator}
