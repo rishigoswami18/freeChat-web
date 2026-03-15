@@ -3,7 +3,7 @@ import { useParams } from "react-router";
 import useAuthUser from "../hooks/useAuthUser";
 import { axiosInstance } from "../lib/axios";
 import { notifyMessage } from "../lib/api";
-import { Camera, Loader2, Smile, Image as ImageIcon, Sticker } from "lucide-react";
+import { Camera, Loader2, Image as ImageIcon, Type } from "lucide-react";
 
 import {
   Channel,
@@ -40,37 +40,52 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
 
   return (
     <div className="flex-shrink-0 z-50 bg-base-100 pb-safe">
-      <div className="flex flex-col gap-2 p-3 sm:p-4 max-w-4xl mx-auto w-full">
+      <div className="flex flex-col gap-2 p-2 sm:p-4 max-w-4xl mx-auto w-full">
         {showShoutSlider && (
-          <div className="flex items-center gap-4 bg-base-200/50 backdrop-blur-md px-4 py-3 rounded-2xl shadow-xl mb-1 border border-base-content/10">
+          <div className="flex items-center gap-4 bg-base-200/90 backdrop-blur-md px-4 py-3 rounded-2xl shadow-lg mb-1 border border-base-content/10 transition-all animate-in fade-in slide-in-from-bottom-2">
+            <Type className="size-4 opacity-50" />
             <input
               type="range" min="0.5" max="2.5" step="0.1" value={fontSize}
               onChange={(e) => setFontSize(parseFloat(e.target.value))}
-              className="w-full h-1 bg-base-content/20 rounded-lg appearance-none cursor-pointer accent-primary"
+              className="w-full h-1.5 bg-base-content/10 hover:bg-base-content/20 rounded-lg appearance-none cursor-pointer accent-info"
             />
-            <span className="font-bold text-[12px] opacity-60 text-base-content">{(fontSize * 100).toFixed(0)}%</span>
+            <Type className="size-6 opacity-80" />
+            <span className="font-bold text-[12px] opacity-60 text-base-content w-10 text-right">{(fontSize * 100).toFixed(0)}%</span>
           </div>
         )}
 
-        <div className="flex w-full items-center gap-2">
-          <div className="flex-1 flex items-center bg-base-200 rounded-[26px] min-h-[44px] px-2">
-            <button className="p-2 text-base-content/70 hover:text-base-content transition-colors shrink-0 outline-none" title="Emoji">
-              <Smile className="size-6" strokeWidth={1.5} />
-            </button>
+        <div className="flex w-full items-end gap-2 px-1 group/input">
+          {/* Instagram-style outside camera button */}
+          <button 
+            onClick={handleSnapClick} 
+            className="p-[10px] mb-0.5 bg-info text-info-content rounded-full hover:bg-info/90 transition-all active:scale-95 shrink-0 shadow-sm group-has-[textarea:not(:placeholder-shown)]/input:hidden" 
+            title="Camera"
+          >
+            <Camera className="size-[22px]" strokeWidth={2.5} />
+          </button>
+          
+          {/* Main Input Pill */}
+          <div className="flex-1 flex items-end bg-base-200 border border-base-content/5 rounded-3xl min-h-[44px] transition-all has-[:focus]:bg-base-100 has-[:focus]:border-base-content/20 shadow-sm px-1 py-1">
             
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pl-3 py-1 flex items-center w-full max-w-full">
                <MessageInput focus grow placeholder="Message..." />
             </div>
 
-            <div className="flex items-center gap-0.5 shrink-0 text-base-content/70">
-               <div className="hover:text-base-content cursor-pointer transition-colors p-2 action-voice">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-0.5 shrink-0 text-base-content/60 pb-0.5 pr-1 transition-all group-has-[textarea:not(:placeholder-shown)]/input:hidden">
+               <div className="hover:text-base-content cursor-pointer transition-colors p-[6px] action-voice rounded-full hover:bg-base-content/5">
                  <VoiceRecorder onSend={handleVoiceSend} />
                </div>
-               <button onClick={handleSnapClick} className="hover:text-base-content transition-colors p-2" title="Image">
-                 <ImageIcon className="size-6" strokeWidth={1.5} />
+               <button onClick={handleSnapClick} className="hover:text-base-content transition-colors p-[6px] rounded-full hover:bg-base-content/5 hidden sm:flex" title="Gallery">
+                 <ImageIcon className="size-5" strokeWidth={1.5} />
                </button>
-               <button className="hover:text-base-content transition-colors p-2" title="Sticker">
-                 <Sticker className="size-6" strokeWidth={1.5} />
+               {/* Replace Sticker with Shout/Whisper text scaler toggle */}
+               <button 
+                 onClick={() => setShowShoutSlider(!showShoutSlider)}
+                 className={`transition-colors p-[6px] rounded-full hover:bg-base-content/5 ${showShoutSlider ? 'text-info bg-info/10' : 'hover:text-base-content'}`} 
+                 title="Shout / Whisper"
+               >
+                 <Type className="size-5" strokeWidth={showShoutSlider ? 2.5 : 1.5} />
                </button>
             </div>
           </div>

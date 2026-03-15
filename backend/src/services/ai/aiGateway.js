@@ -15,7 +15,7 @@ export const AIGateway = {
     generate: async (options) => {
         const {
             provider = "gemini",
-            model = "gemini-1.5-flash",
+            model = "gemini-2.5-flash",
             messages = [],
             systemInstruction = "",
             safetySettings = [],

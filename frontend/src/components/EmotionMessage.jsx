@@ -43,11 +43,21 @@ const EmotionMessage = memo((props) => {
     return classes;
   }, [isAiMsg, extra.emotion]);
 
+  const fontSizeStyle = useMemo(() => {
+    const size = message?.fontSize || extra?.fontSize;
+    if (size && size !== 1) {
+       // Apply scalar variable down to stream chat
+       return { '--shout-factor': size };
+    }
+    return {};
+  }, [message?.fontSize, extra?.fontSize]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       className={`message-wrapper-bond ${isMyMsg ? "me" : "others"}`}
+      style={fontSizeStyle}
     >
       <MessageSimple
         {...props}
