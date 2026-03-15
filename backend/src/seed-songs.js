@@ -7,37 +7,34 @@ import Song from "./models/Song.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
-const songs = [
+const songData = [
     {
         title: "Summer Walk",
-        artist: "Artist Name",
+        artist: "BondBeyond Originals",
         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-        isTrending: true
+        coverUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300",
+        genre: "Pop",
+        isTrending: true,
+        duration: 180
     },
     {
         title: "Dreamy Vibes",
-        artist: "Audio Artist",
+        artist: "Chill Producer",
         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-        isTrending: true
+        coverUrl: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?w=300",
+        genre: "Lo-Fi",
+        isTrending: true,
+        duration: 156
     },
     {
         title: "Upbeat Energy",
-        artist: "Energy Studio",
+        artist: "Studio X",
         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-        isTrending: true
-    },
-    {
-        title: "Mellow Morning",
-        artist: "Chill Producer",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-        isTrending: true
-    },
-    {
-        title: "Night Drive",
-        artist: "Lo-Fi Beats",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
-        isTrending: true
-    },
+        coverUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300",
+        genre: "Dance",
+        isTrending: true,
+        duration: 210
+    }
 ];
 
 const seedSongs = async () => {
@@ -48,10 +45,17 @@ const seedSongs = async () => {
         await mongoose.connect(uri);
         console.log("✅ Connected to MongoDB");
 
-        await Song.deleteMany({});
+        // Safe Batch Upsert: Prevents duplicates and preserves existing usageCount/trends
+        const ops = songData.map(song => ({
+            updateOne: {
+                filter: { title: song.title, artist: song.artist },
+                update: { $set: song },
+                upsert: true
+            }
+        }));
 
-        await Song.insertMany(songs);
-        console.log("✅ Successfully seeded ACTUAL songs with audio");
+        const result = await Song.bulkWrite(ops);
+        console.log(`✅ Seed Complete. Upserted: ${result.upsertedCount}, Modified: ${result.modifiedCount}`);
 
         process.exit(0);
     } catch (err) {

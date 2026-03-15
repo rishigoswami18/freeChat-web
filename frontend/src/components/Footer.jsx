@@ -1,101 +1,68 @@
-import { Link } from "react-router-dom";
-import {
-    Heart,
-    Mail,
-    Shield,
-    Scale,
-    RefreshCcw,
-    Info,
-    Instagram,
-    Linkedin,
-    Twitter,
-    Facebook,
-    Globe
-} from "lucide-react";
-import Logo from "./Logo";
+import React, { memo, useMemo } from "react";
+import { FOOTER_SECTIONS } from "../config/footerLinks";
+import { SOCIAL_LINKS } from "../config/socialLinks";
+import FooterBrand from "./footer/FooterBrand";
+import FooterSection from "./footer/FooterSection";
+import FooterSocial from "./footer/FooterSocial";
+import FooterBottom from "./footer/FooterBottom";
 
+/**
+ * Footer Component — Production-grade Scalable UI System.
+ * Rebuilt as a configuration-driven responsive layout with accessibility guards.
+ * Optimized grid to prevent empty space on large screens.
+ */
 const Footer = () => {
-    const socialLinks = [
-        { icon: Instagram, href: "https://www.instagram.com/bondbeyond_webapp/?hl=en", label: "Instagram", color: "hover:text-pink-500" },
-        { icon: Twitter, href: "https://x.com/RishiGo13597016", label: "Twitter", color: "hover:text-sky-400" },
-        { icon: Facebook, href: "https://www.facebook.com/profile.php?id=100084458157489", label: "Facebook", color: "hover:text-blue-600" },
-        { icon: Linkedin, href: "https://www.linkedin.com/in/hrishikesh-giri/", label: "LinkedIn", color: "hover:text-blue-700" },
-        { icon: Globe, href: "https://hrishiportfoli.netlify.app/", label: "Portfolio", color: "hover:text-emerald-500" },
-    ];
+    // Memoize static configuration to prevent unnecessary prop re-evaluation
+    const sections = useMemo(() => FOOTER_SECTIONS, []);
+    const socials = useMemo(() => SOCIAL_LINKS, []);
 
     return (
-        <footer className="bg-base-200/80 border-t border-base-300/50 py-10 px-4 mt-auto font-outfit">
-            <div className="max-w-6xl mx-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 mb-10">
-                    {/* Brand */}
-                    <div className="space-y-4 col-span-1 md:col-span-1">
-                        <Logo className="size-8" fontSize="text-xl" />
-                        <p className="text-sm opacity-50 max-w-xs leading-relaxed">
-                            An immersive social platform for connecting with friends and partners. Unleash your creativity with Reels and Stories.
-                        </p>
+        <footer 
+            className="bg-base-200/80 border-t border-base-300/50 py-12 px-6 sm:px-12 mt-auto font-outfit relative z-10"
+            role="contentinfo"
+        >
+            <div className="w-full mx-auto">
+                {/* 
+                  Grid Strategy:
+                  - Mobile: 1 col
+                  - Tablet: 2 cols
+                  - Desktop: 6 cols (Brand=2, Sections=3, Social=1)
+                  This ensures a full row without empty "right space".
+                */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-y-12 gap-x-8 mb-12">
+                    
+                    {/* Brand Identity & Description (Takes 2 units) */}
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-2">
+                        <FooterBrand 
+                            tagline="Your Premium Social Space"
+                            description="An immersive social platform for connecting with friends and partners. Unleash your creativity with Reels, Stories, and Real-time connections."
+                        />
                     </div>
 
-                    {/* Support Links */}
-                    <div className="space-y-4">
-                        <h3 className="font-bold uppercase text-[10px] tracking-widest opacity-40">Support</h3>
-                        <div className="flex flex-col gap-2.5">
-                            <Link to="/about" className="text-sm hover:text-primary flex items-center gap-2 transition-colors link-hover-underline w-fit">
-                                <Info className="size-4 opacity-50" /> About Us
-                            </Link>
-                            <Link to="/contact" className="text-sm hover:text-primary flex items-center gap-2 transition-colors link-hover-underline w-fit">
-                                <Mail className="size-4 opacity-50" /> Contact Us
-                            </Link>
-                            <Link to="/refund-policy" className="text-sm hover:text-primary flex items-center gap-2 transition-colors link-hover-underline w-fit">
-                                <RefreshCcw className="size-4 opacity-50" /> Refund Policy
-                            </Link>
+                    {/* Dynamic Navigation Sections (3 separate columns) */}
+                    {sections.map((section, idx) => (
+                        <div key={idx} className="col-span-1">
+                            <FooterSection 
+                                title={section.title}
+                                links={section.links}
+                            />
                         </div>
-                    </div>
+                    ))}
 
-                    {/* Legal Links */}
-                    <div className="space-y-4">
-                        <h3 className="font-bold uppercase text-[10px] tracking-widest opacity-40">Legal</h3>
-                        <div className="flex flex-col gap-2.5">
-                            <Link to="/privacy-policy" className="text-sm hover:text-primary flex items-center gap-2 transition-colors link-hover-underline w-fit">
-                                <Shield className="size-4 opacity-50" /> Privacy Policy
-                            </Link>
-                            <Link to="/terms" className="text-sm hover:text-primary flex items-center gap-2 transition-colors link-hover-underline w-fit">
-                                <Scale className="size-4 opacity-50" /> Terms of Service
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Social Section */}
-                    <div className="space-y-4">
-                        <h3 className="font-bold uppercase text-[10px] tracking-widest opacity-40">Follow Us</h3>
-                        <div className="flex items-center gap-3">
-                            {socialLinks.map((social, idx) => (
-                                <a
-                                    key={idx}
-                                    href={social.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`size-9 rounded-xl bg-base-300/50 flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:bg-base-300 ${social.color}`}
-                                    aria-label={social.label}
-                                >
-                                    <social.icon className="size-4.5" />
-                                </a>
-                            ))}
-                        </div>
+                    {/* Community & Social Presence (Takes 1 unit) */}
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-1">
+                        <FooterSocial 
+                            title="Follow Us"
+                            links={socials}
+                        />
                     </div>
                 </div>
 
-                <div className="h-px bg-base-300/30 mb-6" />
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-xs opacity-40 font-medium">
-                        © {new Date().getFullYear()} BondBeyond. All rights reserved.
-                    </p>
-                    <div className="flex items-center gap-1 text-xs opacity-40">
-                        Made with <Heart className="size-3 text-red-500 fill-current mx-0.5" /> for connections.
-                    </div>
-                </div>
+                {/* Bottom Bar: Copyright & Signature */}
+                <FooterBottom brandName="BondBeyond" />
             </div>
         </footer>
     );
 };
 
-export default Footer;
+export default memo(Footer);

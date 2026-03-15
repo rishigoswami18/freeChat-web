@@ -1,25 +1,36 @@
 import { useCalls, CallingState } from "@stream-io/video-react-sdk";
 import { PhoneOff, PhoneIncoming, Video, Phone, Lock } from "lucide-react";
 import { useNavigate } from "react-router";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, memo, useMemo } from "react";
 import { outgoingCallIds } from "./VideoProvider";
 
-// WhatsApp ringtone
-const ringtone = new Audio("https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3");
-ringtone.loop = true;
+// === GLOBAL AUDIO OPTIMIZATION ===
+// Instantiate the audio object conditionally to prevent 
+// "Document not interacted with" Web Audio API block errors on load.
+let ringtoneInstance = null;
+const getRingtone = () => {
+    if (!ringtoneInstance) {
+        ringtoneInstance = new Audio("https://assets.mixkit.co/active_storage/sfx/1359/1359-preview.mp3");
+        ringtoneInstance.loop = true;
+    }
+    return ringtoneInstance;
+};
 
-const IncomingCallNotification = () => {
+// === PARENT NOTIFICATION MANAGER ===
+const IncomingCallNotification = memo(() => {
     const calls = useCalls();
     const navigate = useNavigate();
 
-    // Filter: only ringing calls that WE did NOT initiate & we're not already on that call page
-    const incomingCalls = calls.filter((call) => {
-        const callingState = call.state.callingState;
-        const isRinging = callingState === CallingState.RINGING;
-        const isOurCall = outgoingCallIds.has(call.id);
-        const isOnCallPage = window.location.pathname.includes(`/call/${call.id}`);
-        return isRinging && !isOurCall && !isOnCallPage;
-    });
+    // Purely derive the incoming calls payload shielding against rapid WebRTC connection ticks
+    const incomingCalls = useMemo(() => {
+        return calls.filter((call) => {
+            const callingState = call.state.callingState;
+            const isRinging = callingState === CallingState.RINGING;
+            const isOurCall = outgoingCallIds.has(call.id);
+            const isOnCallPage = window.location.pathname.includes(`/call/${call.id}`);
+            return isRinging && !isOurCall && !isOnCallPage;
+        });
+    }, [calls]);
 
     if (incomingCalls.length === 0) return null;
 
@@ -30,106 +41,129 @@ const IncomingCallNotification = () => {
             ))}
         </>
     );
-};
+});
+IncomingCallNotification.displayName = "IncomingCallNotification";
 
-const WhatsAppIncomingCall = ({ call, navigate }) => {
-    const [caller, setCaller] = useState(null);
+// === CHILD: FULLSCREEN CALLER SCREEN ===
+const WhatsAppIncomingCall = memo(({ call, navigate }) => {
     const [ringSeconds, setRingSeconds] = useState(0);
-    const intervalRef = useRef(null);
     const [isAccepting, setIsAccepting] = useState(false);
+    
+    // Stable Refs preventing closures from snapping
+    const intervalRef = useRef(null);
+    const vibrateIntervalRef = useRef(null);
 
+    // === CALLER DETECTION LOGIC ===
+    const caller = useMemo(() => {
+        const createdBy = call.state.createdBy;
+        if (createdBy) return createdBy;
+        
+        const members = call.state.members;
+        if (members) {
+            const callerMember = members.find(m => m.user?.id !== call.currentUserId);
+            if (callerMember) return callerMember.user;
+        }
+        return null;
+    }, [call.state.createdBy, call.state.members, call.currentUserId]);
+
+    const isAudioOnly = useMemo(() => call.state.custom?.audioOnly || call.data?.audioOnly, [call.state.custom, call.data]);
+
+    // === RINGTONE & TIMER LIFECYCLE ===
     useEffect(() => {
-        // 1. Play Web Ringtone
-        ringtone.play().catch(() => { });
+        // 1. Safe Ringtone Playback
+        const ringAudio = getRingtone();
+        const playPromise = ringAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.warn("Autoplay prevented by browser:", error);
+            });
+        }
 
-        // 2. Native Android Bridge: Long Vibration + Native Call UI
-        if (window.AndroidBridge) {
+        // 2. Safe Android Bridge Implementation
+        if (typeof window !== "undefined" && window.AndroidBridge) {
             try {
-                // High-priority native notification
-                window.AndroidBridge.showCallNotification(
-                    `📞 Incoming Call`,
-                    `${call.state.createdBy?.name || 'Someone'} is calling you...`
-                );
+                if (typeof window.AndroidBridge.showCallNotification === 'function') {
+                    window.AndroidBridge.showCallNotification(
+                        `📞 Incoming Call`,
+                        `${caller?.name || 'Someone'} is calling you...`
+                    );
+                }
 
-                // Start a repeating vibration pattern
-                const vibrateInterval = setInterval(() => {
-                    window.AndroidBridge.vibrate(500);
-                }, 1000);
-
-                return () => {
-                    clearInterval(vibrateInterval);
-                    ringtone.pause();
-                    ringtone.currentTime = 0;
-                };
+                if (typeof window.AndroidBridge.vibrate === 'function') {
+                    vibrateIntervalRef.current = setInterval(() => {
+                        window.AndroidBridge.vibrate(500);
+                    }, 1000);
+                }
             } catch (e) {
                 console.error("Android Bridge Error:", e);
             }
         }
 
-        // Get caller info
-        const createdBy = call.state.createdBy;
-        if (createdBy) {
-            setCaller(createdBy);
-        } else {
-            const members = call.state.members;
-            if (members) {
-                const callerMember = members.find(
-                    (m) => m.user?.id !== call.currentUserId
-                );
-                if (callerMember) setCaller(callerMember.user);
-            }
-        }
-
-        // Auto-reject after 40 seconds (like WhatsApp)
+        // 3. WhatsApp 40-Second Hard Timeout
         intervalRef.current = setInterval(() => {
             setRingSeconds(prev => {
-                if (prev >= 39) {
-                    handleReject();
+                if (prev >= 39) { // 40s timeout
+                    // Directly leave the call to ensure SDK disconnects correctly
+                    call.leave({ reject: true }).catch(() => {});
                     return prev;
                 }
                 return prev + 1;
             });
         }, 1000);
 
+        // 4. Guaranteed Hardware Teardown
         return () => {
-            ringtone.pause();
-            ringtone.currentTime = 0;
+            ringAudio.pause();
+            ringAudio.currentTime = 0;
             if (intervalRef.current) clearInterval(intervalRef.current);
+            if (vibrateIntervalRef.current) clearInterval(vibrateIntervalRef.current);
         };
-    }, [call]);
+    }, [call, caller]);
 
-    const isAudioOnly = call.state.custom?.audioOnly || call.data?.audioOnly;
-
+    // === ACTION HANDLERS ===
     const handleAccept = useCallback(async () => {
         if (isAccepting) return;
         setIsAccepting(true);
 
         try {
-            // Stop ringtone & bridge
-            ringtone.pause();
-            ringtone.currentTime = 0;
+            // Teardown Hardware instantly
+            const ringAudio = getRingtone();
+            ringAudio.pause();
+            ringAudio.currentTime = 0;
             if (intervalRef.current) clearInterval(intervalRef.current);
+            if (vibrateIntervalRef.current) clearInterval(vibrateIntervalRef.current);
 
-            // Close native notification if possible via bridge (not strictly necessary as we navigate)
-            if (window.AndroidBridge) {
-                window.AndroidBridge.vibrate(50); // Small haptic for click
+            // Small haptic confirmation
+            if (typeof window !== "undefined" && window.AndroidBridge) {
+                if (typeof window.AndroidBridge.vibrate === 'function') {
+                    window.AndroidBridge.vibrate(50);
+                }
             }
 
-            // Navigate to call page — CallPage will handle accept + join
+            // Route execution
             const typeParam = isAudioOnly ? "?type=audio" : "";
             navigate(`/call/${call.id}${typeParam}`);
         } catch (error) {
             console.error("Failed to accept call:", error);
             setIsAccepting(false);
         }
-    }, [call, navigate, isAudioOnly, isAccepting]);
+    }, [call.id, navigate, isAudioOnly, isAccepting]);
 
     const handleReject = useCallback(async () => {
         try {
-            ringtone.pause();
-            ringtone.currentTime = 0;
+            // Teardown Hardware instantly
+            const ringAudio = getRingtone();
+            ringAudio.pause();
+            ringAudio.currentTime = 0;
             if (intervalRef.current) clearInterval(intervalRef.current);
-            if (window.AndroidBridge) window.AndroidBridge.vibrate(50);
+            if (vibrateIntervalRef.current) clearInterval(vibrateIntervalRef.current);
+
+            if (typeof window !== "undefined" && window.AndroidBridge) {
+                if (typeof window.AndroidBridge.vibrate === 'function') {
+                    window.AndroidBridge.vibrate(50);
+                }
+            }
+
             await call.leave({ reject: true });
         } catch (error) {
             console.error("Failed to reject call:", error);
@@ -137,15 +171,15 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
     }, [call]);
 
     return (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-black">
+        <div className="fixed inset-0 z-[9999] overflow-hidden bg-black select-none pointer-events-auto">
             {/* Full-screen dark background with premium glow */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 pointer-events-none">
                 <div className="absolute -top-[20%] -left-[10%] size-[80%] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
                 <div className="absolute -bottom-[20%] -right-[10%] size-[80%] bg-pink-500/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
             </div>
 
             {/* Subtle pattern overlay */}
-            <div className="absolute inset-0 opacity-5"
+            <div className="absolute inset-0 opacity-5 pointer-events-none"
                 style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }}
             />
 
@@ -193,7 +227,7 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
                 </div>
 
                 {/* Center: Large avatar */}
-                <div className="relative">
+                <div className="relative pointer-events-none">
                     {/* Glow */}
                     <div className="absolute -inset-16 rounded-full bg-[#25D366]/10 blur-3xl animate-pulse" />
 
@@ -219,7 +253,7 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
                             <button
                                 onClick={handleReject}
                                 className="size-16 sm:size-[72px] rounded-full bg-[#ff3b30] flex items-center justify-center shadow-[0_8px_30px_rgba(255,59,48,0.35)] transition-all duration-200 active:scale-90 hover:bg-[#ff453a] hover:shadow-[0_8px_40px_rgba(255,59,48,0.5)]"
-                                aria-label="Decline"
+                                aria-label="Decline Call"
                             >
                                 <PhoneOff className="size-7 sm:size-8 text-white fill-current" />
                             </button>
@@ -233,7 +267,7 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
                                 disabled={isAccepting}
                                 className="size-16 sm:size-[72px] rounded-full bg-[#25D366] flex items-center justify-center shadow-[0_8px_35px_rgba(37,211,102,0.4)] transition-all duration-300 active:scale-90 hover:bg-[#22c55e] hover:shadow-[0_8px_45px_rgba(37,211,102,0.6)] disabled:opacity-50 animate-pulse outline outline-offset-4 outline-white/10"
                                 style={{ animationDuration: '2s' }}
-                                aria-label="Accept"
+                                aria-label="Accept Call"
                             >
                                 {isAccepting ? (
                                     <div className="size-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -249,6 +283,7 @@ const WhatsAppIncomingCall = ({ call, navigate }) => {
             </div>
         </div>
     );
-};
+});
+WhatsAppIncomingCall.displayName = "WhatsAppIncomingCall";
 
 export default IncomingCallNotification;

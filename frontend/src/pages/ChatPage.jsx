@@ -22,6 +22,11 @@ import EmotionMessage from "../components/EmotionMessage";
 import VoiceRecorder from "../components/VoiceRecorder";
 import InboxPage from "./InboxPage";
 
+// --- Utility Helpers ---
+const isAiUser = (id) => ["ai-user-id", "ai-friend-id", "ai-coach-id"].includes(id);
+const isGroupChat = (id) => id?.startsWith("group_");
+
+// --- Components ---
 const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlider, setShowShoutSlider, handleSnapClick, handleVoiceSend }) => {
   if (targetUserId === "system_announcement") {
     return (
@@ -34,42 +39,40 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
   }
 
   return (
-    <div className="flex-shrink-0 z-50 bg-base-100/95 backdrop-blur-md pb-safe">
-      <div className="flex flex-col gap-2 p-2 sm:p-3 max-w-4xl mx-auto w-full">
+    <div className="flex-shrink-0 z-50 bg-base-100 pb-safe">
+      <div className="flex flex-col gap-2 p-3 sm:p-4 max-w-4xl mx-auto w-full">
         {showShoutSlider && (
-          <div className="flex items-center gap-4 bg-white/5 px-4 py-3 rounded-2xl shadow-xl mb-1 border border-white/10">
+          <div className="flex items-center gap-4 bg-base-200/50 backdrop-blur-md px-4 py-3 rounded-2xl shadow-xl mb-1 border border-base-content/10">
             <input
               type="range" min="0.5" max="2.5" step="0.1" value={fontSize}
               onChange={(e) => setFontSize(parseFloat(e.target.value))}
-              className="w-full accent-blue-500 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+              className="w-full h-1 bg-base-content/20 rounded-lg appearance-none cursor-pointer accent-primary"
             />
-            <span className="font-medium text-white text-[13px]">{(fontSize * 100).toFixed(0)}%</span>
+            <span className="font-bold text-[12px] opacity-60 text-base-content">{(fontSize * 100).toFixed(0)}%</span>
           </div>
         )}
 
-        <div className="flex w-full items-end justify-center px-1">
-          <div className="instagram-input-container flex w-full">
-            
-            <button className="p-2.5 px-3 text-base-content/90 hover:text-base-content transition-colors shrink-0 outline-none mb-[2px]" title="Emoji">
-              <Smile className="w-[26px] h-[26px]" strokeWidth={1.5} />
+        <div className="flex w-full items-center gap-2">
+          <div className="flex-1 flex items-center bg-base-200 rounded-[26px] min-h-[44px] px-2">
+            <button className="p-2 text-base-content/70 hover:text-base-content transition-colors shrink-0 outline-none" title="Emoji">
+              <Smile className="size-6" strokeWidth={1.5} />
             </button>
             
-            <div className="flex-1 min-w-0 min-h-[44px]">
-               <MessageInput focus grow />
+            <div className="flex-1 min-w-0">
+               <MessageInput focus grow placeholder="Message..." />
             </div>
 
-            <div className="custom-action-icons flex items-center pr-2 gap-1.5 shrink-0 text-base-content/90 mb-[2px] z-10 transition-all duration-200">
-               <div className="hover:text-base-content cursor-pointer transition-colors p-[6px] action-voice">
+            <div className="flex items-center gap-0.5 shrink-0 text-base-content/70">
+               <div className="hover:text-base-content cursor-pointer transition-colors p-2 action-voice">
                  <VoiceRecorder onSend={handleVoiceSend} />
                </div>
-               <button onClick={handleSnapClick} className="hover:text-base-content transition-colors p-[6px]" title="Image">
-                 <ImageIcon className="w-[26px] h-[26px]" strokeWidth={1.5} />
+               <button onClick={handleSnapClick} className="hover:text-base-content transition-colors p-2" title="Image">
+                 <ImageIcon className="size-6" strokeWidth={1.5} />
                </button>
-               <button className="hover:text-base-content transition-colors p-[6px]" title="Sticker">
-                 <Sticker className="w-[26px] h-[26px]" strokeWidth={1.5} />
+               <button className="hover:text-base-content transition-colors p-2" title="Sticker">
+                 <Sticker className="size-6" strokeWidth={1.5} />
                </button>
             </div>
-
           </div>
         </div>
       </div>
@@ -79,18 +82,42 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
 
 ChatInputArea.displayName = "ChatInputArea";
 
+// Extracted AI Feedback UI to prevent inline JSX allocation
+const AiThinkingIndicator = memo(({ targetUserId, authUser }) => {
+  const avatarSrc = useMemo(() => {
+    if (targetUserId === "ai-coach-id") return "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png";
+    if (targetUserId === "ai-friend-id") return authUser?.aiFriendPic || "/ai-bestfriend.png";
+    return authUser?.aiPartnerPic || "/ai-girlfriend.png";
+  }, [targetUserId, authUser]);
+
+  return (
+    <div className="flex items-center gap-2 px-6 py-2 mb-4 stagger-item">
+      <div className="size-8 rounded-full overflow-hidden shrink-0">
+        <img src={avatarSrc} alt="AI" className="size-full object-cover" />
+      </div>
+      <div className="bg-base-200 px-4 py-3 rounded-[22px] rounded-tl-none flex items-center gap-1 border border-base-content/10">
+        <div className="size-1 bg-base-content/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
+        <div className="size-1 bg-base-content/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
+        <div className="size-1 bg-base-content/40 rounded-full animate-bounce" />
+      </div>
+    </div>
+  );
+});
+AiThinkingIndicator.displayName = "AiThinkingIndicator";
+
 const ChatPage = () => {
   const { id: targetUserId } = useParams();
   const chatClient = useChatClient();
+  const { authUser } = useAuthUser();
+  
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(!chatClient);
-  const { authUser } = useAuthUser();
-  const fileInputRef = useRef(null);
   const [fontSize, setFontSize] = useState(1);
   const [showShoutSlider, setShowShoutSlider] = useState(false);
-  const [isThinking, setIsThinking] = useState(false); // Added for AI delay
-  const scrollRef = useRef(null);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const [isThinking, setIsThinking] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight || 800);
+
+  const fileInputRef = useRef(null);
 
   // Optimized viewport handling for smooth mobile typing
   useEffect(() => {
@@ -98,20 +125,17 @@ const ChatPage = () => {
 
     let timeoutId;
     const handleViewportChange = () => {
-      // Debounce the height update slightly to stay responsive while keyboard is in motion
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setViewportHeight(window.visualViewport.height);
-        // Force scroll to bottom when keyboard opens
         if (window.visualViewport.height < window.innerHeight) {
           window.scrollTo(0, 0);
         }
-      }, 33); // At least 30fps
+      }, 33);
     };
 
     window.visualViewport.addEventListener("resize", handleViewportChange);
     window.visualViewport.addEventListener("scroll", handleViewportChange);
-
     handleViewportChange();
 
     return () => {
@@ -121,61 +145,64 @@ const ChatPage = () => {
     };
   }, []);
 
-  const handleSnapClick = useCallback(() => fileInputRef.current?.click(), []);
+  const handleSnapClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
+  // Channel Initialization with Mount Guard
   useEffect(() => {
+    let isMounted = true;
+
     const initChannel = async () => {
-      if (!chatClient || !targetUserId || !authUser) {
-        if (chatClient) setLoading(false);
+      if (!chatClient || !targetUserId || !authUser?._id) {
+        if (chatClient && isMounted) setLoading(false);
         return;
       }
+      
       setLoading(true);
       try {
-        const isGroup = targetUserId.startsWith("group_");
+        const isGroup = isGroupChat(targetUserId);
         const channelId = isGroup ? targetUserId : [authUser._id, targetUserId].sort().join("-");
         const currChannel = chatClient.channel("messaging", channelId,
           isGroup ? {} : { members: [authUser._id, targetUserId] }
         );
 
-        // Add timeout to watch to prevent infinite hang
         const watchPromise = currChannel.watch();
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Stream Timeout")), 10000)
         );
 
         await Promise.race([watchPromise, timeoutPromise]);
-        setChannel(currChannel);
+        
+        if (isMounted) setChannel(currChannel);
       } catch (error) {
         console.error("Chat Init Error:", error);
         toast.error(error.message === "Stream Timeout" ? "Chat connecting slow..." : "Could not load chat.");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     initChannel();
-  }, [chatClient, targetUserId, authUser]);
 
-  // useMemo for the request handler to stay stable unless target changes
+    return () => { isMounted = false; };
+  }, [chatClient, targetUserId, authUser?._id]);
+
+  // Message Sender (Memoized logic)
   const doSendMessageRequest = useCallback(async (chanId, message) => {
-    console.log(`💬 Processing message to: ${targetUserId}`, message);
-    
-    // Use the channel object from our state
     if (!channel) return;
-
+    const isAi = isAiUser(targetUserId);
+    
     try {
-      if (targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id") {
-        setIsThinking(true);
-        
-        // Step 1: Send user message to Stream first
-        // This ensures the message is saved and media is uploaded to CDN
-        const result = await channel.sendMessage({
-          ...message,
-          fontSize: fontSize,
-          extra_data: { ...message.extra_data, fontSize: fontSize }
-        });
+      const enrichedMessage = {
+        ...message,
+        fontSize: fontSize,
+        extra_data: { ...message.extra_data, fontSize: fontSize }
+      };
 
-        // Step 2: Trigger AI response generation on backend
-        // We use 'result' because it contains the final CDN URLs for attachments
+      if (isAi) {
+        setIsThinking(true);
+        const result = await channel.sendMessage(enrichedMessage);
+
         await axiosInstance.post("/chat/send", {
           messageId: result.message.id,
           text: result.message.text,
@@ -189,50 +216,45 @@ const ChatPage = () => {
           mediaType: result.message.mediaType
         });
 
-        // Reset UI state
         setFontSize(1);
         setShowShoutSlider(false);
-
         setIsThinking(false);
         return result;
       }
 
-      // Standard flow for Human/Group chats
+      // Standard Human Chat
       const res = await axiosInstance.post("/chat/send", {
         text: message.text,
         recipientId: targetUserId,
         channelId: channel.id
       });
 
-      const enrichedMessage = {
-        ...message,
-        emotion: res.data.emotion,
-        fontSize: fontSize,
-        extra_data: { ...message.extra_data, fontSize: fontSize }
-      };
-
+      enrichedMessage.emotion = res.data?.emotion || 'neutral';
       setFontSize(1);
       setShowShoutSlider(false);
+      
       const result = await channel.sendMessage(enrichedMessage);
 
-      if (targetUserId && !targetUserId.startsWith("group_") && targetUserId !== "system_announcement" && !targetUserId.includes("ai-")) {
-        notifyMessage(targetUserId, message.text).catch(() => { });
+      // Notification logic
+      if (!isGroupChat(targetUserId) && targetUserId !== "system_announcement") {
+        notifyMessage(targetUserId, message.text).catch(console.error);
       }
 
       return result;
     } catch (error) {
       console.error("Error sending message:", error);
       setIsThinking(false);
+      // Fallback local send if backend fails
       return await channel.sendMessage({ ...message, extra_data: { fontSize } });
     }
-  }, [fontSize, targetUserId, channel, setIsThinking]);
+  }, [channel, targetUserId, fontSize]);
 
   const handleVoiceSend = useCallback(async (data) => {
     if (!channel) return;
     
     try {
-      const isAi = targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id";
-      if(isAi) setIsThinking(true);
+      const isAi = isAiUser(targetUserId);
+      if (isAi) setIsThinking(true);
 
       const messageObj = { ...data, isVoice: true, text: "Voice Message" };
       await channel.sendMessage(messageObj);
@@ -246,16 +268,16 @@ const ChatPage = () => {
           voiceUrl: data.url
         });
         setIsThinking(false);
-      } else if (targetUserId && !targetUserId.startsWith("group_")) {
-        notifyMessage(targetUserId, "🎤 Sent a voice message").catch(() => { });
+      } else if (!isGroupChat(targetUserId)) {
+        notifyMessage(targetUserId, "🎤 Sent a voice message").catch(console.error);
       }
     } catch (error) {
       console.error("Voice send error:", error);
       setIsThinking(false);
     }
-  }, [channel, targetUserId, setIsThinking]);
+  }, [channel, targetUserId]);
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = useCallback(async (e) => {
     const file = e.target.files?.[0];
     if (!file || !channel) return;
     
@@ -264,7 +286,7 @@ const ChatPage = () => {
       return;
     }
 
-    const isAi = targetUserId === "ai-user-id" || targetUserId === "ai-friend-id" || targetUserId === "ai-coach-id";
+    const isAi = isAiUser(targetUserId);
     const reader = new FileReader();
     
     reader.onloadend = async () => {
@@ -272,6 +294,7 @@ const ChatPage = () => {
         if(isAi) setIsThinking(true);
         const type = file.type.startsWith("video") ? "video" : "image";
         
+        // Base64 upload to server (Memory handled per file context)
         const res = await axiosInstance.post("/chat/upload-media", {
           media: reader.result,
           mediaType: type,
@@ -297,8 +320,8 @@ const ChatPage = () => {
             mediaType: type
           });
           setIsThinking(false);
-        } else if (targetUserId && !targetUserId.startsWith("group_")) {
-          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(() => { });
+        } else if (!isGroupChat(targetUserId)) {
+          notifyMessage(targetUserId, `📸 Sent a ${type} snap`).catch(console.error);
         }
 
         toast.success("Snap sent! 📸");
@@ -307,13 +330,16 @@ const ChatPage = () => {
         setIsThinking(false);
         toast.error("Failed to send snap");
       }
+      
+      // Cleanup ref
+      if (fileInputRef.current) fileInputRef.current.value = "";
     };
     reader.readAsDataURL(file);
-  };
+  }, [channel, targetUserId]);
 
+  // Static components to avoid unnecessary re-renders in MessageList
   const MemoizedDateSeparator = useCallback(() => null, []);
 
-  // Performance Optimization: Memoize the chat wrapper and message list separately
   const chatUI = useMemo(() => {
     if (!chatClient || !channel) return null;
     return (
@@ -321,7 +347,7 @@ const ChatPage = () => {
         <Channel channel={channel} doSendMessageRequest={doSendMessageRequest} messageLimit={100}>
           <Window>
             <div className="flex flex-col h-full w-full relative z-10">
-              <div className="flex-shrink-0 z-50 bg-base-100/95 backdrop-blur-md border-b border-base-content/10">
+              <div className="flex-shrink-0 z-50 bg-base-100 border-b border-base-content/5">
                 <ChatHeader />
               </div>
 
@@ -334,30 +360,7 @@ const ChatPage = () => {
                   closeOnScroll
                 />
 
-                {isThinking && (
-                  <div className="flex items-center gap-2 px-4 py-2 mb-4 stagger-item">
-                    <div className="avatar size-7 sm:size-8">
-                      <div className="bg-base-300 rounded-full flex items-center justify-center border border-primary/10">
-                        <img 
-                          src={
-                            targetUserId === "ai-coach-id" 
-                              ? "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png"
-                              : targetUserId === "ai-friend-id" 
-                                ? (authUser?.aiFriendPic || "/ai-bestfriend.png") 
-                                : (authUser?.aiPartnerPic || "/ai-girlfriend.png")
-                          } 
-                          alt="AI" 
-                          className="rounded-full w-full h-full object-cover" 
-                        />
-                      </div>
-                    </div>
-                    <div className="bg-base-200/80 backdrop-blur-md px-4 py-3 rounded-[20px] rounded-tl-none flex items-center gap-1.5 shadow-sm border border-base-content/5">
-                      <div className="size-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                      <div className="size-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                      <div className="size-1.5 bg-primary/40 rounded-full animate-bounce" />
-                    </div>
-                  </div>
-                )}
+                {isThinking && <AiThinkingIndicator targetUserId={targetUserId} authUser={authUser} />}
               </div>
 
               <ChatInputArea
@@ -375,7 +378,8 @@ const ChatPage = () => {
         </Channel>
       </Chat>
     );
-  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, handleFileChange, MemoizedDateSeparator, isThinking, authUser]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatClient, channel, doSendMessageRequest, targetUserId, fontSize, showShoutSlider, handleSnapClick, handleVoiceSend, handleFileChange, MemoizedDateSeparator, isThinking, authUser?._id]);
 
   if (loading || !chatClient || !channel) return <ChatLoader />;
 
@@ -388,15 +392,11 @@ const ChatPage = () => {
         contain: 'layout size style'
       }}
     >
-      {/* Inbox Panel (Hidden on Mobile, Visible on Desktop) */}
-      <div className="hidden lg:block shrink-0 h-full border-r border-white/10 w-[350px]">
+      <div className="hidden lg:block shrink-0 h-full border-r border-base-content/10 w-[350px]">
          <InboxPage isSideNav={true} />
       </div>
 
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-base-100">
-        {/* Optional subtle noise / gradient that respects the theme */}
-        <div className="absolute inset-0 bg-gradient-to-b from-base-100 via-base-100 to-base-200/30 pointer-events-none z-0" />
         {chatUI}
         <Thread />
       </div>

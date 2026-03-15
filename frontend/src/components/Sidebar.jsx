@@ -1,45 +1,24 @@
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { memo, useState, useEffect, useMemo, useCallback } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { updateProfile, getCoupleStatus, claimDailyReward } from "../lib/api";
-import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
+import { APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import useNotificationCounts from "../hooks/useNotificationCounts";
-import { useState, useEffect } from "react";
 import useAuthUser from "../hooks/useAuthUser";
 import {
-  Home,
-  Users,
-  Bell,
-  HeartHandshake,
-  Crown,
-  Gamepad2,
-  User,
-  Search,
-  Film,
-  MessageSquare,
-  Smartphone,
-  ShieldAlert,
-  BadgeCheck,
-  Gem,
-  Heart,
-  Flame,
-  Sparkles,
-  Shield,
-  Zap,
-  PlusCircle,
-  Compass,
-  LayoutGrid,
-  Menu
+  Home, Users, HeartHandshake, Crown, Gamepad2, Search, Film, 
+  MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, 
+  Heart, Sparkles, PlusCircle, Compass, Menu
 } from "lucide-react";
 
 import CreateStoryModal from "./CreateStoryModal";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 import Logo from "./Logo";
 
-// Aligning to the Instagram-like navigation order and icon selection
-const navItems = [
+// === STATIC CONFIGURATION ===
+const staticNavItems = [
   { to: "/", icon: Home, labelKey: "Home" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
@@ -52,12 +31,66 @@ const navItems = [
   { to: "/gem-shop", icon: Crown, labelKey: "Premium" },
 ];
 
-const Sidebar = () => {
+// === PERFORMANCE OPTIMIZATION: Memoized Sub-Components ===
+// Extracted pure UI components to prevent the entire sidebar from rendering
+// when internal counters or dates tick.
+const NavBadge = memo(({ count, maxCount = 9 }) => {
+  if (!count || count <= 0) return null;
+  return (
+    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
+      {count > maxCount ? `${maxCount}+` : count}
+    </span>
+  );
+});
+NavBadge.displayName = "NavBadge";
+
+const DailyRewardButton = memo(({ authUser, onClaim }) => {
+  if (!authUser) return null;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const lastClaimDate = authUser.lastRewardClaimDate ? new Date(authUser.lastRewardClaimDate) : null;
+  const lastClaimStr = lastClaimDate ? lastClaimDate.toISOString().split('T')[0] : null;
+
+  if (lastClaimStr === todayStr) return null;
+
+  return (
+    <button
+      className="w-full flex items-center gap-4 p-3 rounded-lg transition-all duration-200 text-purple-500 hover:bg-purple-500/10 group/nav"
+      title="Claim Reward"
+      onClick={onClaim}
+    >
+      <div className="relative shrink-0 flex items-center justify-center w-8">
+        <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping opacity-50"></div>
+        <Gem className="size-[26px] stroke-2 group-hover/nav:scale-110 transition-transform" />
+      </div>
+      <span className="hidden xl:block text-[16px] font-semibold tracking-tight truncate">
+        Claim Gems
+      </span>
+    </button>
+  );
+});
+DailyRewardButton.displayName = "DailyRewardButton";
+
+
+// === MAIN COMPONENT ===
+const Sidebar = memo(() => {
   const { authUser } = useAuthUser();
-  // Dynamic Tab Title (Retention Hook)
+  const location = useLocation();
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  const { notificationCount, unreadMessages } = useNotificationCounts();
+  
+  const currentPath = location.pathname;
+  
+  // Modals state
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [viewingDP, setViewingDP] = useState(null);
+
+  // === RETENTION HOOK: Tab Title Optimization ===
   useEffect(() => {
+    if (!authUser?._id) return;
+
     const initialTitle = "BondBeyond | Connect & Play";
-    document.title = initialTitle; // Set initial title
+    document.title = initialTitle;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -75,21 +108,30 @@ const Sidebar = () => {
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [!!authUser]); // Dependency on authUser presence
+  // Bound to scalar ID rather than auth object to prevent infinite teardown loops
+  }, [authUser?._id]);
 
-  const location = useLocation();
-  const queryClient = useQueryClient();
-  const currentPath = location.pathname;
-  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
-  const [viewingDP, setViewingDP] = useState(null);
-  const { notificationCount, unreadMessages } = useNotificationCounts();
-  const { t } = useTranslation();
-  const [showConfetti, setShowConfetti] = useState(false); // State for confetti
-
-  const handleDownload = (e) => {
+  // === STABLE CALLBACKS ===
+  const handleDownload = useCallback((e) => {
     e.preventDefault();
     downloadFile(`${APK_DOWNLOAD_URL}/latest`, "BondBeyond_app.apk");
-  };
+  }, []);
+
+  const handleCreatePost = useCallback(() => {
+     window.scrollTo({ top: 0, behavior: 'smooth' });
+     toast("Create post is at the top of your feed!", { icon: "✨" });
+  }, []);
+
+  const claimReward = useCallback(async () => {
+    try {
+      const res = await claimDailyReward();
+      toast.success(res.message, { icon: '💎' });
+      // Single targeted invalidation avoids crashing the query stack
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Wait for tomorrow!");
+    }
+  }, [queryClient]);
 
   const { mutate: doUpdate } = useMutation({
     mutationFn: updateProfile,
@@ -103,32 +145,39 @@ const Sidebar = () => {
     }
   });
 
-  const navigate = useNavigate();
+  const handleDPUpdate = useCallback(async (base64) => {
+    await doUpdate({ profilePic: base64 });
+    setViewingDP(null);
+  }, [doUpdate]);
 
+  // Couple Relationship status stream
   const { data: coupleData } = useQuery({
     queryKey: ["coupleStatus"],
     queryFn: getCoupleStatus,
-    enabled: !!authUser,
+    enabled: !!authUser?._id,
     staleTime: 1000 * 60 * 10
   });
 
   const isCoupled = coupleData?.coupleStatus === "coupled";
   const partnerId = coupleData?.partner?._id;
-  const partnerName = coupleData?.partner?.fullName?.split(' ')[0] || "Partner";
 
-  const dynamicNavItems = [...navItems];
-  if (isCoupled) {
-    // Insert Sacred Chat after Inbox
-    const inboxIndex = dynamicNavItems.findIndex(item => item.to === "/inbox");
-    if (inboxIndex !== -1) {
-      dynamicNavItems.splice(inboxIndex + 1, 0, {
-        to: `/chat/${partnerId || 'ai-user-id'}`,
-        icon: Sparkles,
-        label: `Partner Chat`,
-        isSacred: true
-      });
+  // === DATA MEMOIZATION ===
+  // Prevents recreation of 14 complex Nav Objects containing Lucide SVG bindings on every scroll/keystroke.
+  const dynamicNavItems = useMemo(() => {
+    const items = [...staticNavItems];
+    if (isCoupled) {
+      const inboxIndex = items.findIndex(item => item.to === "/inbox");
+      if (inboxIndex !== -1) {
+        items.splice(inboxIndex + 1, 0, {
+          to: `/chat/${partnerId || 'ai-user-id'}`,
+          icon: Sparkles,
+          label: "Partner Chat",
+          isSacred: true
+        });
+      }
     }
-  }
+    return items;
+  }, [isCoupled, partnerId]);
 
   return (
     <aside className="w-[80px] xl:w-[244px] hidden md:flex flex-col h-screen fixed top-0 left-0 border-r border-base-content/10 bg-base-100 z-50 overflow-hidden transition-all duration-300">
@@ -147,40 +196,30 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-        {dynamicNavItems.map((item) => {
-          const { to, icon: Icon, labelKey, isSacred, label: directLabel } = item;
+        {dynamicNavItems.map(({ to, icon: Icon, labelKey, isSacred, label: directLabel }) => {
           const isActive = currentPath === to;
-          const displayLabel = isSacred || directLabel ? (directLabel || item.label) : t(labelKey) || labelKey;
+          const displayLabel = isSacred || directLabel ? (directLabel) : t(labelKey) || labelKey;
 
           return (
             <Link
               key={to}
               to={to}
-              className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav
-                ${isActive ? "font-bold text-base-content" : "text-base-content hover:bg-base-content/5"}
-              `}
+              className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav ${
+                isActive ? "font-bold text-base-content bg-base-content/5" : "text-base-content hover:bg-base-content/5"
+              }`}
               title={displayLabel}
             >
               <div className="relative shrink-0 flex items-center justify-center w-8">
                 <Icon
-                  className={`size-[26px] transition-transform duration-200 group-hover/nav:scale-105
-                    ${isActive && labelKey !== "Search" ? "stroke-[2.5px]" : "stroke-2 opacity-90"}
-                    ${isSacred ? "text-pink-500" : ""}
-                  `}
+                  className={`size-[26px] transition-transform duration-200 group-hover/nav:scale-105 ${
+                    isActive && labelKey !== "Search" ? "stroke-[2.5px]" : "stroke-2 opacity-90"
+                  } ${isSacred ? "text-pink-500" : ""}`}
+                  // Optimization: Directly binding fill to currentColor eliminates expensive CSS specificity overwrites
                   fill={isActive && labelKey !== "Search" && labelKey !== "Explore" ? "currentColor" : "none"}
                 />
                 
-                {/* Badges */}
-                {labelKey === "inbox" && unreadMessages > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
-                    {unreadMessages > 9 ? "9+" : unreadMessages}
-                  </span>
-                )}
-                {labelKey === "notifications" && notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
-                    {notificationCount > 9 ? "9+" : notificationCount}
-                  </span>
-                )}
+                {labelKey === "inbox" && <NavBadge count={unreadMessages} />}
+                {labelKey === "notifications" && <NavBadge count={notificationCount} />}
               </div>
               <span className={`hidden xl:block text-[16px] tracking-tight truncate ${isActive ? "" : "opacity-90"} ${isSacred ? "text-pink-500 font-semibold" : ""}`}>
                 {displayLabel}
@@ -189,13 +228,9 @@ const Sidebar = () => {
           );
         })}
 
-        {/* Create Post Button (Mocking Instagram Plus) */}
+        {/* Create Post Button */}
         <button
-          onClick={() => {
-             // Let's scroll to top since create post is at the top of feed, or ideally dispatch an event to focus the create post box
-             window.scrollTo({ top: 0, behavior: 'smooth' });
-             toast("Create post is at the top of your feed!", { icon: "✨" })
-          }}
+          onClick={handleCreatePost}
           className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content hover:bg-base-content/5 group/nav"
           title="Create"
         >
@@ -210,17 +245,23 @@ const Sidebar = () => {
         {/* Profile Link */}
         <Link
           to="/profile"
-          className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav
-            ${currentPath === "/profile" ? "font-bold text-base-content" : "text-base-content hover:bg-base-content/5"}
-          `}
+          className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav ${
+            currentPath === "/profile" ? "font-bold text-base-content bg-base-content/5" : "text-base-content hover:bg-base-content/5"
+          }`}
           title="Profile"
         >
           <div className="relative shrink-0 flex items-center justify-center w-8">
-             <img
-                src={authUser?.profilePic || "/avatar.png"}
-                alt="Profile"
-                className={`size-7 rounded-full object-cover transition-transform duration-200 group-hover/nav:scale-105 ${currentPath === "/profile" ? "ring-2 ring-base-content ring-offset-2 ring-offset-base-100" : ""}`}
-             />
+             <div className={`size-7 rounded-full overflow-hidden shrink-0 bg-base-300 transition-transform duration-200 group-hover/nav:scale-105 ${
+               currentPath === "/profile" ? "ring-2 ring-base-content ring-offset-2 ring-offset-base-100" : ""
+             }`}>
+                 <img
+                    src={authUser?.profilePic || "/avatar.png"}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                 />
+             </div>
              {(authUser?.isVerified || authUser?.role === "admin") && (
                 <div className="absolute -bottom-1 -right-1 size-3.5 bg-white rounded-full flex items-center justify-center p-[1px] shadow-sm ring-1 ring-base-content/5 overflow-hidden">
                    <BadgeCheck className="size-full text-white fill-[#1d9bf0]" strokeWidth={2} />
@@ -232,14 +273,13 @@ const Sidebar = () => {
           </span>
         </Link>
         
-
-        {/* Admin Link if role is admin */}
+        {/* Admin Link */}
         {authUser?.role === "admin" && (
           <Link
             to="/admin"
-            className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav mt-4 bg-primary/10
-              ${currentPath === "/admin" ? "font-bold text-primary" : "text-primary hover:bg-primary/20"}
-            `}
+            className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav mt-4 bg-primary/10 ${
+              currentPath === "/admin" ? "font-bold text-primary" : "text-primary hover:bg-primary/20"
+            }`}
             title="Admin"
           >
             <div className="relative shrink-0 flex items-center justify-center w-8">
@@ -255,39 +295,8 @@ const Sidebar = () => {
       {/* DAILY REWARDS & BOTTOM ACTIONS */}
       <div className="px-3 pb-6 pt-2 space-y-2 mt-auto">
       
-        {/* Sleek Daily Reward Notification (Only visible if expanded or we use a clean icon) */}
-        {authUser && (() => {
-          const todayStr = new Date().toISOString().split('T')[0];
-          const lastClaimDate = authUser.lastRewardClaimDate ? new Date(authUser.lastRewardClaimDate) : null;
-          const lastClaimStr = lastClaimDate ? lastClaimDate.toISOString().split('T')[0] : null;
-
-          if (lastClaimStr !== todayStr) {
-            return (
-              <button
-                className="w-full flex items-center gap-4 p-3 rounded-lg transition-all duration-200 text-purple-500 hover:bg-purple-500/10 group/nav"
-                title="Claim Reward"
-                onClick={async () => {
-                  try {
-                    const res = await claimDailyReward();
-                    toast.success(res.message, { icon: '💎' });
-                    queryClient.invalidateQueries({ queryKey: ["authUser"] });
-                  } catch (err) {
-                    toast.error(err.response?.data?.message || "Wait for tomorrow!");
-                  }
-                }}
-              >
-                <div className="relative shrink-0 flex items-center justify-center w-8">
-                  <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping opacity-50"></div>
-                  <Gem className="size-[26px] stroke-2 group-hover/nav:scale-110 transition-transform" />
-                </div>
-                <span className="hidden xl:block text-[16px] font-semibold tracking-tight truncate">
-                  Claim Gems
-                </span>
-              </button>
-            );
-          }
-          return null;
-        })()}
+        {/* Memoized Daily Reward Integration */}
+        {authUser && <DailyRewardButton authUser={authUser} onClaim={claimReward} />}
 
         {/* Download App */}
         <a
@@ -329,13 +338,12 @@ const Sidebar = () => {
           fullName={viewingDP.name}
           isVerified={authUser?.isVerified || authUser?.role === "admin"}
           onClose={() => setViewingDP(null)}
-          onUpdate={async (base64) => {
-            await doUpdate({ profilePic: base64 });
-            setViewingDP(null);
-          }}
+          onUpdate={handleDPUpdate}
         />
       )}
     </aside>
   );
-};
+});
+
+Sidebar.displayName = "Sidebar";
 export default Sidebar;

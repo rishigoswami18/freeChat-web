@@ -1,130 +1,49 @@
 /**
- * BondBeyond — All Rights Reserved © 2026
- * The Ultimate Relationship Platform
+ * BondBeyond — Backend API Gateway
+ * Optimized for Production Scale
  */
-import express from "express";
-import "dotenv/config";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-import helmet from "helmet";
-import compression from "compression";
-import { rateLimit } from "express-rate-limit";
-
-import authRoutes from "./routes/auth.route.js";
-import postsRoutes from "./routes/posts.route.js";
-import userRoutes from "./routes/user.route.js";
-import chatRoutes from "./routes/chat.route.js";
-import coupleRoutes from "./routes/couple.route.js";
-import membershipRoutes from "./routes/membership.route.js";
-import gameRoutes from "./routes/game.route.js";
-import storyRoutes from "./routes/story.route.js"; // Added import
-import translationRoutes from "./routes/translation.route.js";
-import supportRoutes from "./routes/support.route.js";
-import gemRoutes from "./routes/gem.route.js";
-import bondRoutes from "./routes/bond.route.js";
-import notificationRoutes from "./routes/notification.route.js";
-import adminRoutes from "./routes/admin.route.js";
-import apkRoutes from "./routes/apk.route.js";
-import communityRoutes from "./routes/community.route.js";
-import { seedQuestions } from "./controllers/bond.controller.js";
+import app from "./app.js";
+import validateEnv from "./config/env.js";
 import { connectDB } from "./lib/db.js";
-import { startDelayedEmailWorker } from "./lib/delayed-email.worker.js";
-import { startAINoteWorker } from "./lib/ai-note.worker.js";
+import { seedQuestions } from "./controllers/bond.controller.js";
+import { startWorkers } from "./workers/workerManager.js";
 
-const app = express();
+/**
+ * Server Bootstrap
+ */
+const bootstrap = async () => {
+    try {
+        // 1. Validate Environment
+        validateEnv();
 
-const PORT = process.env.PORT || 5001;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+        const PORT = process.env.PORT || 5001;
 
-// Security & Performance Middleware
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP for easier integration with CDNs/Stream
-}));
-app.use(compression()); // Compress all responses
+        // 2. Connect to Database
+        await connectDB();
+        console.log("✅ [Server] Database connection secured.");
 
-// Rate Limiting
-app.set('trust proxy', 1); // Trust Render proxy for correct IP detection
+        // 3. Initialize Domain Seeders
+        await seedQuestions();
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 2000, // Increased limit for broader API usage
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: "Too many requests, please try again later."
+        // 4. Start Background Job Infrastructure
+        startWorkers();
+
+        // 5. Start Listening
+        app.listen(PORT, () => {
+            console.log(`🚀 [Server] BondBeyond API Gateway running on port ${PORT}`);
+            console.log(`📡 [Mode] ${process.env.NODE_ENV || 'development'}`);
+        });
+
+    } catch (error) {
+        console.error("❌ [Server] Fatal error during bootstrap:", error.message);
+        process.exit(1);
+    }
+};
+
+// Global termination handling
+process.on("unhandledRejection", (err) => {
+    console.error("⛔ [Server] Unhandled Rejection:", err.message);
+    // In production, we might want to shut down gracefully
 });
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Relaxed limit (was 20 per hour, now 100 per 15 min)
-  message: "Too many login/auth attempts, please try again in a few minutes."
-});
-
-app.use("/api/", limiter);
-app.use("/api/auth/login", authLimiter);
-app.use("/api/auth/signup", authLimiter);
-
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "https://www.freechatweb.in", "https://freechatweb.in"],
-    credentials: true,
-  })
-);
-
-app.use(express.json({ limit: "200mb" }));
-app.use(cookieParser());
-
-// Serve locally stored APK files publicly (no auth needed for downloads)
-app.use("/uploads", express.static(path.join(__dirname, "../../uploads")));
-
-app.use("/api/auth", authRoutes)
-app.use("/api/users", userRoutes)
-app.use("/api/chat", chatRoutes)
-app.use("/api/posts", postsRoutes);
-app.use("/api/stories", storyRoutes); // Added usage
-app.use("/api/couple", coupleRoutes);
-app.use("/api/membership", membershipRoutes);
-app.use("/api/games", gameRoutes);
-app.use("/api/translate", translationRoutes);
-app.use("/api/support", supportRoutes);
-app.use("/api/gems", gemRoutes);
-app.use("/api/bond", bondRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/apk", apkRoutes);
-app.use("/api/communities", communityRoutes);
-
-
-if (process.env.NODE_ENV === "production") {
-  // Cache hashed assets for 1 year (Vite adds content hashes)
-  app.use("/assets", express.static(path.join(__dirname, "../../frontend/dist/assets"), {
-    maxAge: "1y",
-    immutable: true,
-  }));
-
-  // Serve other static files with a short cache
-  app.use(express.static(path.join(__dirname, "../../frontend/dist"), {
-    maxAge: "1h",
-    setHeaders: (res, filePath) => {
-      // Never cache index.html so updates are always picked up
-      if (filePath.endsWith(".html")) {
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      }
-    },
-  }));
-
-  app.get("*", (req, res) => {
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-    res.sendFile(path.join(__dirname, "../../frontend", "dist", "index.html"));
-  });
-}
-
-app.listen(PORT, async () => {
-  console.log(`Server is running on port ${PORT}`);
-  await connectDB();
-  await seedQuestions();
-  startDelayedEmailWorker();
-  startAINoteWorker();
-});
+bootstrap();

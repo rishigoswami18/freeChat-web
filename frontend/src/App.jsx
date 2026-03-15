@@ -55,8 +55,12 @@ import GemDrop from "./components/GemDrop.jsx";
 
 const App = () => {
   const { isLoading, authUser } = useAuthUser();
-  const { theme } = useThemeStore();
+  const { theme, initTheme } = useThemeStore();
   const location = useLocation();
+
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
 
   const isAuthenticated = Boolean(authUser);
   const isOnboarded = authUser?.isOnboarded;

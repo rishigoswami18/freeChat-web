@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import { generateUniqueUsername } from "../utils/usernameUtils.js";
 import { OAuth2Client } from "google-auth-library";
 import OTP from "../models/OTP.js";
-import { sendOTPEmail, sendResetPasswordEmail, sendWelcomeEmail } from "../lib/email.service.js";
+import { sendOTPEmail, sendResetPasswordEmail } from "../lib/email.service.js";
+import { bus, EVENTS } from "../lib/eventBus.js";
 
 const throwawayDomains = [
   "yopmail.com", "mailinator.com", "guerrillamail.com", "temp-mail.org",
@@ -56,20 +57,8 @@ export async function googleLogin(req, res) {
         lastLoginDate: new Date(),
       });
 
-      // Sync with Stream
-      try {
-        await upsertStreamUser({
-          id: user._id.toString(),
-          name: user.fullName,
-          image: user.profilePic || "",
-          role: user.role, // Sync role
-        });
-      } catch (error) {
-        console.log("Error syncing Stream user (Google):", error);
-      }
-
-      // Send welcome email asynchronously
-      sendWelcomeEmail(user.email, user.fullName);
+      // Emit Event: All side effects (Stream Sync, Welcome Email) handled by Subscribers
+      bus.emit(EVENTS.USER.REGISTERED, { user });
     } else {
       // Link googleId if not already linked
       if (!user.googleId) {
@@ -170,19 +159,8 @@ export async function googleLoginWithAccessToken(req, res) {
         lastLoginDate: new Date(),
       });
 
-      try {
-        await upsertStreamUser({
-          id: user._id.toString(),
-          name: user.fullName,
-          image: user.profilePic || "",
-          role: user.role, // Sync role
-        });
-      } catch (streamErr) {
-        console.error("Stream Sync Error:", streamErr.message);
-      }
-
-      // Send welcome email asynchronously
-      sendWelcomeEmail(user.email, user.fullName);
+      // Emit Event for all secondary tasks
+      bus.emit(EVENTS.USER.REGISTERED, { user });
     } else {
       console.log("Logging in existing user:", email);
       if (!user.googleId) user.googleId = googleId;
@@ -251,20 +229,8 @@ export async function syncFirebaseUser(req, res) {
         profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff`,
       });
 
-      // Keep Stream integration working
-      try {
-        await upsertStreamUser({
-          id: user._id.toString(),
-          name: user.fullName,
-          image: user.profilePic || "",
-          role: user.role, // Sync role
-        });
-      } catch (error) {
-        console.log("Error syncing Stream user:", error);
-      }
-
-      // Send welcome email asynchronously
-      sendWelcomeEmail(user.email, user.fullName);
+      // Emit Event for all secondary tasks
+      bus.emit(EVENTS.USER.REGISTERED, { user });
     }
 
     // Generate JWT so the Android app can make authorized MERN calls
@@ -358,19 +324,8 @@ export async function signup(req, res) {
       lastLoginDate: new Date(),
     });
 
-    try {
-      await upsertStreamUser({
-        id: newUser._id.toString(),
-        name: newUser.fullName,
-        image: newUser.profilePic || "",
-        role: newUser.role, // Sync role
-      });
-    } catch (error) {
-      console.log("Error creating Stream user:", error);
-    }
-
-    // Send welcome email asynchronously
-    sendWelcomeEmail(newUser.email, newUser.fullName);
+    // Emit Event for all secondary tasks
+    bus.emit(EVENTS.USER.REGISTERED, { user: newUser });
 
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",

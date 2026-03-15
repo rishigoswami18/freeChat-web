@@ -147,6 +147,7 @@ body.is-chat-active {
   box-shadow: inset 0 2px 4px 0 oklch(0 0 0 / 0.02);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .input-premium:focus,
 .input-premium:focus-visible {
   background-color: oklch(var(--b1));
@@ -154,6 +155,7 @@ body.is-chat-active {
   box-shadow: 0 0 0 3px oklch(var(--p) / 0.15), inset 0 2px 4px 0 oklch(0 0 0 / 0.01) !important;
   outline: none;
 }
+
 .input-premium::placeholder {
   color: oklch(var(--bc) / 0.4);
 }
@@ -637,11 +639,16 @@ body.is-chat-active {
 /* 1. Reset root containers to be exactly the viewport height */
 .str-chat-channel,
 .str-chat-channel>div,
-.str-chat__container {
+.str-chat__container,
+.str-chat__main-panel,
+.str-chat__message-team,
+.str-chat__channel {
   height: 100% !important;
   display: flex !important;
   flex-direction: column !important;
   overflow: hidden !important;
+  background: oklch(var(--b1)) !important;
+  /* Theme-aware Background */
 }
 
 /* 2. Fix the Window/Main Panel layout */
@@ -689,120 +696,124 @@ body.is-chat-active {
   z-index: 100;
 }
 
-
-
-/* ===== Message Bubble Styling (WhatsApp/Telegram Inspired) ===== */
-.str-chat__message-simple {
-  margin-bottom: 2px !important;
+/* 6.95. Clean Instagram-Style Message Bubble Logic */
+.str-chat__list {
+  background: oklch(var(--b1)) !important;
+  padding-top: 20px !important;
 }
 
+/* Force Stream row to be completely transparent */
+.str-chat__message-simple,
+.str-chat__message-simple__inner-wrapper,
+.str-chat__message-inner,
+.str-chat__message-simple-data {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+/* The actual bubble component */
+/* ===== 🚀 FINAL PRODUCTION-SAFE MESSAGE STYLING ===== */
+
+/* ===== 🚀 BONDBEYOND GLOBAL CHAT SYSTEM (v2.0) ===== */
+
+/* 1. Canvas & Structural Reset */
+.str-chat-channel,
+.str-chat__container,
+.str-chat__main-panel,
+.str-chat__window,
+.str-chat__list {
+  background: oklch(var(--b1)) !important;
+}
+
+/* Neutralize every SDK container layer to prevent double bubbles */
+.str-chat__message-simple,
+.str-chat__message-simple__inner-wrapper,
+.str-chat__message-inner,
+.str-chat__message-simple-data,
+.str-chat__message-simple-text-inner-wrapper,
+.str-chat__li,
+.str-chat__message,
+.str-chat__message-bubble {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+/* 2. Global Bubble Core */
 .str-chat__message-simple-text-inner {
-  border-radius: 18px !important;
-  padding: 10px 14px 8px 14px !important;
-  position: relative !important;
-  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1) !important;
-  transition: opacity 0.2s ease;
-  max-width: 82% !important;
-  width: fit-content !important;
-  min-width: 60px !important;
-  border-bottom: 1.5px solid rgba(0, 0, 0, 0.04) !important;
-  white-space: pre-wrap !important;
+  padding: 11px 16px !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  max-width: 85% !important;
   word-break: break-word !important;
+  white-space: pre-wrap !important;
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.2s ease !important;
+  border-radius: 20px !important;
+  margin-top: 2px !important;
 }
 
-@media (min-width: 640px) {
-  .str-chat__message-simple-text-inner {
-    max-width: 70% !important;
-    padding: 12px 18px 10px 18px !important;
-    border-radius: 22px !important;
-  }
-}
-
-/* Specific radius for first/last in group (defined in React but supported here) */
-.bubble-top-left {
-  border-top-left-radius: 4px !important;
-}
-
-.bubble-top-right {
-  border-top-right-radius: 4px !important;
-}
-
-/* ===== DYNAMIC MESSAGE BUBBLE CONTRAST (Theme Tokens Only) ===== */
-
-/* 1. OTHERS: Uses Base-3 (slightly darker/lighter than b1) and Base-Content (text color) */
+/* 3. INCOMING MESSAGES (Others / AI / Friends) - Left Side */
+.others .str-chat__message-simple-text-inner,
 .str-chat__message-simple--others .str-chat__message-simple-text-inner {
-  background: oklch(var(--b2)) !important; 
+  background: oklch(var(--b2)) !important;
   color: oklch(var(--bc)) !important;
+  margin-right: auto !important;
+  border-radius: 20px 20px 20px 4px !important;
   border: 1px solid oklch(var(--bc) / 0.1) !important;
-  border-bottom-left-radius: 18px !important;
 }
 
-/* Force all children (p, span, etc.) to use the theme's base-content color */
-.str-chat__message-simple--others .str-chat__message-simple-text-inner * {
+/* 🤖 AI SPECIAL STYLE (Insight Border) */
+.ai-message-bubble .str-chat__message-simple-text-inner {
+  border: 1.5px solid oklch(var(--p) / 0.4) !important;
+  box-shadow: 0 4px 20px -5px oklch(var(--p) / 0.15) !important;
+}
+
+/* 🚨 RECURSIVE READABILITY GUARD 🚨 */
+/* This forces all incoming/AI text to be perfectly visible in Dark Mode */
+.others .str-chat__message-simple-text-inner,
+.others .str-chat__message-simple-text-inner *,
+.str-chat__message-simple--others .str-chat__message-simple-text-inner,
+.str-chat__message-simple--others .str-chat__message-simple-text-inner *,
+.str-chat__message-text,
+.str-chat__message-text-inner * {
   color: oklch(var(--bc)) !important;
+  fill: oklch(var(--bc)) !important;
   opacity: 1 !important;
 }
 
-/* 2. ME: Uses Primary and Primary-Content (guaranteed contrast) */
+/* 4. OUTGOING MESSAGES (User) - Right Side */
+.me .str-chat__message-simple-text-inner,
 .str-chat__message-simple--me .str-chat__message-simple-text-inner {
   background: oklch(var(--p)) !important;
   color: oklch(var(--pc)) !important;
+  margin-left: auto !important;
+  border-radius: 20px 20px 4px 20px !important;
   border: none !important;
-  border-bottom-right-radius: 18px !important;
-  box-shadow: 0 4px 12px oklch(var(--p) / 0.15) !important;
 }
 
-/* Force all children in 'me' bubbles to use primary-content color */
+/* Force high-contrast for outgoing text */
+.me .str-chat__message-simple-text-inner,
+.me .str-chat__message-simple-text-inner *,
+.str-chat__message-simple--me .str-chat__message-simple-text-inner,
 .str-chat__message-simple--me .str-chat__message-simple-text-inner * {
   color: oklch(var(--pc)) !important;
+  fill: oklch(var(--pc)) !important;
 }
 
-/* Whisper/Shout aggressive override */
-.message-scale-container .str-chat__message-simple-text-inner * {
-  font-size: inherit !important;
-  line-height: inherit !important;
-}
-
-/* Bubble Tail (WhatsApp style) - Only on first message of a group */
-.bubble-tail-others::before {
-  content: '';
-  position: absolute;
-  left: -6px;
-  top: 0;
-  width: 10px;
-  height: 10px;
-  background: oklch(var(--b2) / 0.8);
-  clip-path: polygon(100% 0, 0 0, 100% 100%);
-  z-index: 10;
-}
-
-.bubble-tail-me::after {
-  content: '';
-  position: absolute;
-  right: -6px;
-  top: 0;
-  width: 10px;
-  height: 10px;
-  background: oklch(var(--p));
-  clip-path: polygon(0 0, 100% 0, 0 100%);
-  z-index: 10;
-}
-
-/* ===== Quoted Message (Reply) Styling ===== */
-.str-chat__quoted-message-preview,
-.str-chat__message-replied {
-  background: rgba(0, 0, 0, 0.05) !important;
-  border-left: 3px solid oklch(var(--p)) !important;
-  padding: 6px 10px !important;
-  margin-bottom: 6px !important;
-  border-radius: 6px !important;
-  font-size: 12px !important;
-}
-
-.str-chat__message-simple--me .str-chat__quoted-message-preview {
-  background: rgba(255, 255, 255, 0.15) !important;
-  border-left-color: rgba(255, 255, 255, 0.5) !important;
-  color: white !important;
+/* 5. Mobile Refinement */
+@media (max-width: 639px) {
+  .str-chat__message-simple-text-inner {
+    padding: 9px 15px !important;
+    font-size: 14.5px !important;
+    max-width: 92% !important;
+  }
 }
 
 /* ===== Professional Premium Chat Background & Wallpaper ===== */
@@ -819,11 +830,6 @@ body.is-chat-active {
 }
 
 /* Collapse excessive spacing from AI responses */
-.str-chat__message-simple-text-inner br {
-  display: block;
-  content: "";
-  margin-top: 4px;
-}
 
 
 /* For dark mode we might need to invert it */
@@ -860,14 +866,6 @@ body.is-chat-active {
   -webkit-backdrop-filter: none !important;
 }
 
-/* Custom Message Bubble Shapes (Tails handled by pseudo-elements) */
-.str-chat__message-simple--others .str-chat__message-simple-message {
-  margin-left: 0 !important;
-}
-
-.str-chat__message-simple--me .str-chat__message-simple-message {
-  margin-right: 0 !important;
-}
 
 /* ===== Hide default channel header (we use custom) ===== */
 .str-chat__header-livestream,
@@ -1695,98 +1693,9 @@ a[href*="getstream.com"] {
 
   .floating-controls {
     bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    /* ===== ✨ THEME-AWARE INSTAGRAM STYLE CLONE ✨ ===== */
+
   }
 }
 
-/* ===== Instagram Style Chat Input ===== */
-.instagram-input-container {
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 9999px;
-  background-color: transparent;
-  align-items: flex-end;
-  transition: border-color 0.2s;
-  padding: 2px;
-}
 
-.instagram-input-container:focus-within {
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.instagram-input-container .str-chat__message-input {
-  border: none !important;
-  background: transparent !important;
-  padding: 0 !important;
-  width: 100%;
-}
-
-.instagram-input-container .str-chat__input-flat-wrapper {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: flex-end !important;
-}
-
-.instagram-input-container .str-chat__fileupload-wrapper,
-.instagram-input-container .str-chat__emojipicker-icon {
-  display: none !important;
-}
-
-.instagram-input-container .str-chat__input-flat {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.instagram-input-container textarea {
-  color: white !important;
-  font-size: 15px !important;
-  padding: 12px 6px 12px 0px !important;
-  min-height: 44px !important;
-  max-height: 120px !important;
-  line-height: 20px !important;
-}
-
-.instagram-input-container textarea::placeholder {
-  color: rgba(255, 255, 255, 0.5) !important;
-  font-size: 15px !important;
-}
-
-/* Make Stream Chat Send Button Text-based 'Send' */
-.instagram-input-container .str-chat__send-button {
-  background: transparent !important;
-  padding: 0 16px 10px 8px !important;
-  margin: 0 !important;
-}
-
-.instagram-input-container .str-chat__send-button svg {
-  display: none !important;
-}
-
-.instagram-input-container .str-chat__send-button::after {
-  content: "Send";
-  color: #0095f6;
-  font-weight: 600;
-  font-size: 15px;
-}
-
-/* Hide Send Button when disabled */
-.instagram-input-container .str-chat__send-button:disabled,
-.instagram-input-container .str-chat__send-button[disabled] {
-  display: none !important;
-}
-
-/* Hide custom actions when send button is NOT disabled (meaning user is typing) */
-.instagram-input-container:has(.str-chat__send-button:not([disabled])) .custom-action-icons {
-  display: none !important;
-}
-.instagram-input-container:has(.str-chat__send-button:not(:disabled)) .custom-action-icons {
-  display: none !important;
-}
-
-/* Hide if Stream chat react uses this class for text presence */
-.instagram-input-container:has(.str-chat__message-input-flat--has-text) .custom-action-icons {
-  display: none !important;
-}

@@ -1,15 +1,16 @@
-import { X, Clock, Download, Camera } from "lucide-react";
+import { useState } from "react";
+import { X, Download, Image as ImageIcon, Video } from "lucide-react";
 import toast from "react-hot-toast";
 
-const SnapViewer = ({ message, onClose }) => {
-    const user = message?.user || {};
-    const extraData = message?.extra_data || {};
+const SnapViewer = ({ snap, isMyMessage }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    // Resolve media data
+    const mediaUrl = snap?.mediaUrl || snap?.attachments?.[0]?.image_url || snap?.attachments?.[0]?.asset_url;
+    const mediaType = snap?.mediaType || (snap?.attachments?.[0]?.type === "video" ? "video" : "image");
 
-    // Resolve media data from all possible sources
-    const mediaUrl = message?.mediaUrl || extraData?.mediaUrl || message?.attachments?.[0]?.image_url || message?.attachments?.[0]?.asset_url;
-    const mediaType = message?.mediaType || extraData?.mediaType || (message?.attachments?.[0]?.type === "video" ? "video" : "image");
-
-    const handleDownload = async () => {
+    const handleDownload = async (e) => {
+        e.stopPropagation();
         if (!mediaUrl) return;
         try {
             const response = await fetch(mediaUrl);
@@ -21,78 +22,85 @@ const SnapViewer = ({ message, onClose }) => {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            toast.success("Media saved!");
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+            toast.success("Saved! 🚀");
         } catch (error) {
             console.error("Download failed:", error);
             window.open(mediaUrl, '_blank');
         }
     };
 
+    if (!mediaUrl) {
+        return (
+            <div className={`flex flex-col items-center justify-center p-4 rounded-3xl ${isMyMessage ? 'bg-[#3797F0]' : 'bg-[#262626]'} text-white/50 w-[200px] h-[150px]`}>
+               <ImageIcon className="size-8 opacity-20 mb-2" />
+               <span className="text-xs font-semibold">Media unavailable</span>
+            </div>
+        );
+    }
+
+    // Inline Chat Thumbnail View
+    const renderThumbnail = () => (
+        <div 
+            onClick={() => setIsOpen(true)}
+            className={`relative group cursor-pointer overflow-hidden rounded-2xl w-[220px] h-[300px] shadow-sm transition-transform active:scale-[0.98] ${isMyMessage ? 'border-2 border-[#3797F0]' : 'border-2 border-[#262626]'}`}
+        >
+            {mediaType === 'video' ? (
+                <div className="absolute inset-0 bg-[#1A1A1A] flex items-center justify-center">
+                    <Video className="size-12 text-white/40" />
+                </div>
+            ) : (
+                <img src={mediaUrl} alt="Snap" className="size-full object-cover" loading="lazy" />
+            )}
+            
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                 <div className="opacity-0 group-hover:opacity-100 bg-black/60 backdrop-blur-md rounded-full px-4 py-2 text-white font-semibold text-xs transition-opacity shadow-lg">
+                     Click to View
+                 </div>
+            </div>
+        </div>
+    );
+
+    // Fullscreen Expanded View
+    if (!isOpen) return renderThumbnail();
+
     return (
         <div className="fixed inset-0 z-[200] bg-black/95 flex flex-col items-center justify-center backdrop-blur-md">
-            {/* Header */}
+            {/* Header Controls */}
             <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-50 bg-gradient-to-b from-black/80 to-transparent">
-                <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-full border border-white/20 overflow-hidden bg-white/10 shrink-0">
-                        <img src={user.image || user.profilePic || "/avatar.png"} alt="" className="size-full object-cover" />
-                    </div>
-                    <div className="min-w-0">
-                        <p className="text-white font-bold text-sm tracking-tight truncate">{user.name || user.fullName || "User"}</p>
-                        <p className="text-white/60 text-[10px] flex items-center gap-1">
-                            <Clock className="size-2.5" />
-                            Disappearing message
-                        </p>
-                    </div>
-                </div>
-
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={handleDownload}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"
-                        title="Download"
-                    >
+                    <button onClick={handleDownload} className="p-3 hover:bg-white/10 rounded-full transition-colors active:scale-90" title="Download">
                         <Download className="size-6 text-white" />
                     </button>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors active:scale-90"
-                    >
-                        <X className="size-7 text-white" />
-                    </button>
                 </div>
+                <button onClick={() => setIsOpen(false)} className="p-3 hover:bg-white/10 rounded-full bg-black/50 transition-colors active:scale-90">
+                    <X className="size-7 text-white" />
+                </button>
             </div>
 
             {/* Media Content */}
-            <div className="relative w-full h-full flex items-center justify-center p-4">
-                {!mediaUrl ? (
-                    <div className="flex flex-col items-center gap-4 text-white/40">
-                        <div className="size-20 rounded-full bg-white/5 flex items-center justify-center">
-                            <Camera className="size-10 opacity-20" />
-                        </div>
-                        <p className="text-sm font-medium">Media could not be loaded</p>
-                    </div>
-                ) : mediaType === "video" ? (
+            <div className="relative w-full h-full flex flex-col items-center justify-center p-4" onClick={() => setIsOpen(false)}>
+                {mediaType === "video" ? (
                     <video
                         src={mediaUrl}
-                        className="max-h-full max-w-full rounded-lg object-contain"
+                        className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl"
                         autoPlay
                         controls
-                        onEnded={onClose}
+                        onClick={(e) => e.stopPropagation()}
                     />
                 ) : (
                     <img
                         src={mediaUrl}
-                        className="max-h-full max-w-full rounded-lg object-contain select-none shadow-2xl"
-                        alt="Snap"
+                        className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-2xl select-none"
+                        alt="Snap Fullscreen"
+                        onClick={(e) => e.stopPropagation()}
                         onContextMenu={(e) => e.preventDefault()}
                     />
                 )}
             </div>
-
-            {/* Tap to exit hint */}
-            <div className="absolute bottom-10 text-white/40 text-[10px] font-bold uppercase tracking-widest animate-pulse">
-                Click (X) to close
+            
+            <div className="absolute bottom-10 text-white/50 text-[10px] font-bold uppercase tracking-widest">
+                Click background to close
             </div>
         </div>
     );

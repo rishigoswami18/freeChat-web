@@ -22,6 +22,7 @@ const postSchema = new mongoose.Schema(
     caption: { type: String, default: "" },
     mediaUrl: { type: String, default: "" },
     mediaType: { type: String, enum: ["image", "video", ""], default: "" },
+    songId: { type: mongoose.Schema.Types.ObjectId, ref: "Song", default: null, index: true },
     songName: { type: String, default: "Original Audio" },
     audioUrl: { type: String, default: "" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

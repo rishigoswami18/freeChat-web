@@ -2,7 +2,7 @@ import axios from "axios";
 import { hasPremiumAccess } from "../utils/freeTrial.js";
 import { generateStreamToken, upsertStreamUser, streamClient } from "../lib/stream.js";
 import { getAIResponse } from "../lib/gemini.js";
-import { generateAIImage } from "../lib/imageGen.js";
+
 
 // Helper: resolve AI pic (relative paths → full URL)
 const resolveAiPic = (pic, fallback) => {
@@ -12,31 +12,6 @@ const resolveAiPic = (pic, fallback) => {
   return `${base}${pic}`;
 };
 
-// Helper: Handle AI response for photo generation tags
-const handleAIPhotoResponse = async (aiReply) => {
-    aiReply = (aiReply || "").trim().replace(/\n{2,}/g, '\n');
-    const photoMatch = aiReply.match(/\[PHOTO:\s*([\s\S]*?)\]/i);
-    let attachments = [];
-    let text = aiReply;
-
-    if (photoMatch) {
-        const photoPrompt = photoMatch[1].trim();
-        console.log(`📸 AI Photo Trigger: "${photoPrompt.substring(0, 50)}..."`);
-        const generatedUrl = await generateAIImage(photoPrompt);
-        
-        // Always remove the tag so the user doesn't see the technical prompt
-        text = aiReply.replace(/\[PHOTO:[\s\S]*?\]/gi, '').trim();
-
-        if (generatedUrl) {
-            attachments.push({
-                type: 'image',
-                image_url: generatedUrl,
-                fallback: 'AI Generation'
-            });
-        }
-    }
-    return { text, attachments };
-};
 
 // Helper: convert media URL to Gemini format (Base64)
 async function urlToGeminiPart(url, mimeType) {
@@ -303,21 +278,17 @@ export const sendMessage = async (req, res) => {
       // Generate AI response with history and media
       let aiReply = await getAIResponse(promptText, history, "girlfriend", req.user.aiPartnerName, req.user.fullName, mediaParts);
 
-      // Process AI response for tags and generate attachments
-      const { text: finalAiText, attachments: aiAttachments } = await handleAIPhotoResponse(aiReply);
-
       // Send reply as AI via Stream
       try {
         await channel.sendMessage({
-          text: finalAiText || "Here's the photo you asked for! ❤️",
-          user_id: "ai-user-id",
-          attachments: aiAttachments.length > 0 ? aiAttachments : undefined
+          text: aiReply || "Hi baby! ❤️",
+          user_id: "ai-user-id"
         });
       } catch (streamErr) {
         console.error("Stream Send Failure (Girlfriend):", streamErr.message);
       }
 
-      return res.status(200).json({ success: true, aiReply: finalAiText });
+      return res.status(200).json({ success: true, aiReply });
     }
 
     // --- Virtual Best Friend AI Logic ---
@@ -367,19 +338,16 @@ export const sendMessage = async (req, res) => {
       // Generate AI response
       let aiReply = await getAIResponse(promptText, history, "bestfriend", req.user.aiFriendName, req.user.fullName, mediaParts);
 
-      const { text: finalAiText, attachments: aiAttachments } = await handleAIPhotoResponse(aiReply);
-
       try {
         await channel.sendMessage({
-          text: finalAiText || "Check this out! 👊",
-          user_id: "ai-friend-id",
-          attachments: aiAttachments.length > 0 ? aiAttachments : undefined
+          text: aiReply || "Hey! 👊",
+          user_id: "ai-friend-id"
         });
       } catch (streamErr) {
         console.error("Stream Send Failure (Best Friend):", streamErr.message);
       }
 
-      return res.status(200).json({ success: true, aiReply: finalAiText });
+      return res.status(200).json({ success: true, aiReply });
     }
 
     // --- AI Mental Health & Relationship Coach Logic ---
@@ -422,20 +390,17 @@ export const sendMessage = async (req, res) => {
 
       let aiReply = await getAIResponse(promptText, history, "personal_coach", "Dr. Bond", req.user.fullName, mediaParts);
 
-      const { text: finalAiText, attachments: aiAttachments } = await handleAIPhotoResponse(aiReply);
-
       try {
         await channel.sendMessage({
-          text: finalAiText || "I hope this visual helps you. 🌿",
-          user_id: "ai-coach-id",
-          attachments: aiAttachments.length > 0 ? aiAttachments : undefined
+          text: aiReply || "I'm here for you. 🌿",
+          user_id: "ai-coach-id"
         });
         console.log(`🩺 Response sent as Dr. Bond to channel: ${channelId}`);
       } catch (streamErr) {
         console.error("Stream Send Failure (Coach):", streamErr.message);
       }
 
-      return res.status(200).json({ success: true, aiReply: finalAiText });
+      return res.status(200).json({ success: true, aiReply });
     }
 
     // Standard emotion logic for human chats

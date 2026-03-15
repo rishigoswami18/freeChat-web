@@ -1,129 +1,62 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getRecommendedUsers, sendFriendRequest } from "../lib/api";
-import { Search, UserPlus, Check, X, Loader2, Star, BadgeCheck } from "lucide-react";
-import toast from "react-hot-toast";
+import { useState, useCallback, useMemo } from "react";
+import { useSearchUsers, useFriendRequest } from "../hooks/useSearchUsers";
 import { ChatSkeleton } from "../components/Skeletons";
+import { useDebounce } from "../hooks/useDebounce"; // We'll create a safer hook for this
+
+import SearchInput from "../components/search/SearchInput";
+import UserSearchResult from "../components/search/UserSearchResult";
+import EmptySearchState from "../components/search/EmptySearchState";
 
 const SearchPage = () => {
+    // 1. UI Controlled State
     const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
-    const queryClient = useQueryClient();
+    
+    // 2. Extracted React standard debounce hook bounds
+    const debouncedSearch = useDebounce(searchTerm, 300);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    // 3. Isolated Network Hooks
+    const { data: users = [], isLoading } = useSearchUsers(debouncedSearch);
+    const { mutate: addFriend, variables: pendingUserId, isPending } = useFriendRequest();
 
-    const { data: users = [], isLoading } = useQuery({
-        queryKey: ["searchUsers", debouncedSearch],
-        queryFn: () => getRecommendedUsers(debouncedSearch),
-        enabled: true,
-    });
+    // 4. Stable Handlers 
+    const handleAddFriend = useCallback((userId) => {
+        addFriend(userId);
+    }, [addFriend]);
 
-    const { mutate: addFriend, variables: pendingUserId } = useMutation({
-        mutationFn: sendFriendRequest,
-        onSuccess: () => {
-            toast.success("Friend request sent! ✨");
-            queryClient.invalidateQueries({ queryKey: ["searchUsers"] });
-        },
-        onError: (err) => {
-            toast.error(err.response?.data?.message || "Something went wrong");
-        },
-    });
+    // 5. Derived Computations
+    const showEmptyState = !isLoading && users.length === 0;
 
     return (
-        <div className="px-0 py-4 sm:p-6 lg:p-8 sm:max-w-2xl mx-auto space-y-6">
-            <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors" />
-                <input
-                    type="text"
-                    placeholder="Search by name or @username..."
-                    className="input input-bordered w-full pl-12 h-14 bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all rounded-2xl text-lg shadow-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {searchTerm && (
-                    <button
-                        onClick={() => setSearchTerm("")}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 btn btn-ghost btn-circle btn-xs"
-                    >
-                        <X className="size-4" />
-                    </button>
-                )}
-            </div>
+        <div 
+            className="px-4 py-6 sm:p-6 lg:p-8 sm:max-w-2xl mx-auto space-y-6"
+            // Accessibility labels for screenreaders entering the view
+            role="region" 
+            aria-label="User Search Page"
+        >
+            <SearchInput 
+                searchTerm={searchTerm} 
+                setSearchTerm={setSearchTerm} 
+            />
 
-            <div className="space-y-4">
+            <div 
+                className="space-y-4"
+                role="list"
+                aria-live="polite"
+            >
                 {isLoading ? (
+                    // Display loading skeleton array to prevent page jerk
                     <ChatSkeleton />
-                ) : users.length > 0 ? (
-                    users.map((user) => (
-                        <div
-                            key={user._id}
-                            className={`group p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border shadow-sm stagger-item ${user.isTandemMatch
-                                ? "bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 hover:border-primary/40 shadow-md ring-1 ring-primary/5"
-                                : "bg-base-200/50 hover:bg-base-200 border-transparent hover:border-primary/10"
-                                }`}
-                        >
-                            <div className="avatar">
-                                <div className={`size-14 rounded-full ring-2 transition-all ${user.isTandemMatch ? "ring-primary/40 scale-105" : "ring-transparent group-hover:ring-primary/20"
-                                    }`}>
-                                    <img src={user.profilePic || "/avatar.png"} alt={user.fullName} />
-                                </div>
-                            </div>
-                            <Link to={`/user/${user._id}`} className="flex-1 min-w-0 group-hover:text-primary transition-colors">
-                                <div className="flex items-center gap-2">
-                                    <h3 className="font-bold text-base tracking-tight">{user.fullName}</h3>
-                                    {(user.role === "admin" || user.isVerified) && (
-                                        <div className="flex items-center justify-center shrink-0" title="Verified Professional">
-                                            <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
-                                        </div>
-                                    )}
-                                    {user.isTandemMatch && (
-                                        <span className="badge badge-primary badge-sm gap-1 py-2.5 font-bold animate-pulse">
-                                            <Star className="size-3 fill-current" />
-                                            Tandem Match
-                                        </span>
-                                    )}
-                                </div>
-                                {user.username && (
-                                    <p className="text-xs font-mono font-semibold opacity-70">@{user.username}</p>
-                                )}
-                                <p className="text-xs text-base-content/50 font-medium truncate">
-                                    {user.nativeLanguage} • Learning {user.learningLanguage}
-                                </p>
-                            </Link>
-                            <button
-                                onClick={() => addFriend(user._id)}
-                                disabled={pendingUserId === user._id}
-                                className={`btn btn-sm rounded-xl px-4 transition-all duration-300 ${pendingUserId === user._id ? "btn-disabled" : "btn-primary hover:scale-105"
-                                    }`}
-                            >
-                                {pendingUserId === user._id ? (
-                                    <Loader2 className="size-4 animate-spin" />
-                                ) : (
-                                    <>
-                                        <UserPlus className="size-4 mr-1.5" />
-                                        <span>Add</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    ))
+                ) : showEmptyState ? (
+                    <EmptySearchState isSearching={!!debouncedSearch} />
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
-                        <div className="empty-state-icon">
-                            <Search className="size-8 text-primary/50" />
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-lg font-bold text-base-content/60">No users found</p>
-                            <p className="text-sm text-base-content/40">Try searching for a name or username!</p>
-                            <p className="text-xs text-base-content/30 mt-2 italic">Note: Only new people show up here. Check your <Link to="/friends" className="link link-primary">Friends</Link> page for existing connections.</p>
-                        </div>
-                    </div>
+                    users.map((user) => (
+                        <UserSearchResult 
+                            key={user._id} 
+                            user={user} 
+                            onAddFriend={handleAddFriend} 
+                            isPending={isPending && pendingUserId === user._id} 
+                        />
+                    ))
                 )}
             </div>
         </div>

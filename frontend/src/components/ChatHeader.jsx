@@ -1,6 +1,6 @@
 import { memo, useState, useMemo } from "react";
 import { useChannelStateContext } from "stream-chat-react";
-import { Video, Phone, ArrowLeft, Wind, BadgeCheck, Heart, Sparkles } from "lucide-react";
+import { Video, Phone, ArrowLeft, Wind, BadgeCheck, Heart, Sparkles, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useVideoClient, outgoingCallIds } from "./VideoProvider";
 import { notifyCall, getCoupleStatus } from "../lib/api";
@@ -239,80 +239,64 @@ const ChatHeader = memo(() => {
     };
 
     return (
-        <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-base-content/10 bg-base-100/95 backdrop-blur-md relative z-[100] w-full flex-shrink-0 select-none transition-all font-outfit text-base-content">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-base-content/5 bg-base-100 relative z-[100] w-full flex-shrink-0 select-none transition-all font-outfit text-base-content">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
                 <button
                     onClick={() => navigate("/inbox")}
-                    className="flex-shrink-0 p-1.5 hover:bg-base-content/10 rounded-full transition-colors group"
-                    aria-label="Go back to inbox"
+                    className="flex-shrink-0 p-1 hover:bg-base-content/10 rounded-full transition-colors"
                 >
-                    <ArrowLeft className="size-5 sm:size-6 text-base-content group-active:scale-90 transition-transform" strokeWidth={2} />
+                    <ArrowLeft className="size-6 text-base-content" strokeWidth={2} />
                 </button>
 
-                <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name, isVerified: user?.isVerified || user?.role === "admin" })}>
-                    <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-base-content/10 bg-black shrink-0">
+                <div className="flex-shrink-0 cursor-pointer" onClick={() => setViewingDP({ url: displayData.image, name: displayData.name, isVerified: user?.isVerified })}>
+                    <div className="size-10 rounded-full overflow-hidden border border-base-content/10">
                         <img src={displayData.image} alt={displayData.name} className="object-cover w-full h-full" />
                     </div>
-                    {isOnline && !isGroup && (
-                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-black bg-green-500 shadow-sm" />
-                    )}
                 </div>
 
                 <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/user/${user?.id}`)}>
-                    <h3 className="font-semibold text-[15px] sm:text-[16px] leading-tight truncate text-base-content flex items-center gap-1.5">
-                        {displayData.name}
+                    <div className="flex items-center gap-1">
+                        <h3 className="font-bold text-[14px] leading-tight truncate">
+                            {displayData.name}
+                        </h3>
                         {(user?.role === "admin" || user?.isVerified) && (
-                            <div className="flex items-center justify-center shrink-0" title="Verified Professional">
-                               <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
-                            </div>
+                            <BadgeCheck className="size-3.5 text-blue-500 fill-current" />
                         )}
-                        {isPartner && <Heart className="size-3.5 text-pink-500 fill-pink-500 ml-0.5" />}
-                    </h3>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <p className={`text-[12px] sm:text-[13px] font-normal truncate ${isOnline && !isGroup ? "text-base-content/80" : "text-base-content/50"}`}>
-                            {isGroup
-                                ? `${Object.keys(channel.state.members).length} members`
-                                : isOnline
-                                    ? "Active now"
-                                    : formatLastSeen(user?.last_active)}
-                        </p>
-                        {isPartner && (
-                            <span className="text-[10px] font-medium bg-pink-500/10 text-pink-400 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                Linked
-                            </span>
-                        )}
+                        {!isGroup && <span className="opacity-40 text-[14px]">♠</span>}
                     </div>
+                    {!isGroup && (
+                        <p className="text-[12px] font-medium opacity-50 truncate leading-none mt-0.5">
+                            {displayData.id === 'ai-coach-id' ? 'Relationship Coach' : 
+                             displayData.id === 'ai-user-id' ? 'AI Partner' : 
+                             displayData.id === 'ai-friend-id' ? 'AI Bestie' : 
+                             (isOnline ? "Active now" : (user?.last_active ? formatLastSeen(user.last_active) : "Offline"))}
+                        </p>
+                    )}
                 </div>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2">
-                {!isGroup && user?.id !== "system_announcement" && user?.id !== "ai-user-id" && user?.id !== "ai-friend-id" && (
+            <div className="flex items-center gap-1.5 shrink-0">
+                {!isGroup && (
                     <>
-                        {isPartner && (
-                            <button
-                                onClick={handleAnalyze}
-                                className="p-2 hover:bg-base-content/10 rounded-full transition-colors"
-                                title="AI Relationship Coach"
-                            >
-                                <Sparkles className="size-5 sm:size-[22px] text-base-content/90" strokeWidth={1.5} />
-                            </button>
-                        )}
-                        <button
-                            onClick={handleAudioCall}
-                            className="p-2 hover:bg-base-content/10 rounded-full transition-colors"
-                            aria-label="Voice call"
-                        >
-                            <Phone className="size-5 sm:size-[22px] text-base-content/90" strokeWidth={1.5} />
+                        {/* AI Relationship Coach Tools */}
+                        <button onClick={handleCoolDown} className="p-2 hover:bg-base-content/10 rounded-full transition-all active:scale-90" title="Cool Down">
+                            <Wind className="size-6 text-base-content" strokeWidth={1.5} />
                         </button>
-                        <button
-                            onClick={handleCall}
-                            className="p-2 hover:bg-base-content/10 rounded-full transition-colors"
-                            aria-label="Video call"
-                        >
-                            <Video className="size-5 sm:size-[22px] text-base-content/90" strokeWidth={1.5} />
+                        <button onClick={handleAnalyze} className="p-2 hover:bg-base-content/10 rounded-full transition-all active:scale-90" title="Analyze Conflict">
+                            <Sparkles className="size-6 text-base-content" strokeWidth={1.5} />
+                        </button>
+                        
+                        <button onClick={handleAudioCall} className="p-2 hover:bg-base-content/10 rounded-full transition-all active:scale-90" title="Voice Call">
+                            <Phone className="size-6 text-base-content" strokeWidth={1.5} />
+                        </button>
+                        <button onClick={handleCall} className="p-2 hover:bg-base-content/10 rounded-full transition-all active:scale-90" title="Video Call">
+                            <Video className="size-7 text-base-content" strokeWidth={1.5} />
                         </button>
                     </>
                 )}
+                <button className="p-2 hover:bg-base-content/10 rounded-full transition-all active:scale-90" title="Info">
+                    <Info className="size-6 text-base-content" strokeWidth={1.5} />
+                </button>
             </div>
 
             {viewingDP && (

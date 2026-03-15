@@ -38,10 +38,10 @@ router.put("/profile", updateProfile);
 router.put("/buy-verification", buyVerification);
 router.put("/fcm-token", async (req, res) => {
   try {
-    const { token } = req.body;
+    const { token, platform } = req.body;
     if (!token) return res.status(400).json({ message: "Token is required" });
-    const { saveFcmToken } = await import("../lib/push.service.js");
-    await saveFcmToken(req.user._id, token);
+    const { TokenService } = await import("../services/notifications/tokenService.js");
+    await TokenService.saveToken(req.user._id, token, platform || "web");
     res.json({ message: "Token saved successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

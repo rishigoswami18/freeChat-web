@@ -1,42 +1,111 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Gem, Flame, Sparkles, TrendingUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { claimDailyReward } from "../lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import useAuthUser from "../hooks/useAuthUser";
 
-const GemDrop = () => {
+// === ANIMATION CONFIGURATION ===
+// Extracted out of render to prevent re-calculating random arrays continuously
+const generateConfettiPaths = () => {
+    return Array.from({ length: 15 }).map(() => ({
+        scale: [0, 1, 0.5],
+        x: (Math.random() - 0.5) * 400,
+        y: (Math.random() - 0.5) * 600,
+        size: Math.floor(Math.random() * 4) + 4
+    }));
+};
+
+// === SUBCOMPONENT: Confetti Blast ===
+// Shielded component that doesn't re-render unless explicitly triggered
+const ConfettiBlast = memo(({ show, paths }) => {
+    if (!show) return null;
+    
+    return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {paths.map((config, i) => (
+                <motion.div
+                    key={`gem-${i}`}
+                    initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                    animate={{
+                        scale: config.scale,
+                        x: config.x,
+                        y: config.y,
+                        opacity: [1, 1, 0]
+                    }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                >
+                    <Gem className={`size-${config.size} text-amber-400 fill-amber-300 shadow-lg`} />
+                </motion.div>
+            ))}
+        </div>
+    );
+});
+ConfettiBlast.displayName = "ConfettiBlast";
+
+// === MAIN UI COMPONENT ===
+const GemDrop = memo(() => {
     const { authUser } = useAuthUser();
     const queryClient = useQueryClient();
     const [isVisible, setIsVisible] = useState(false);
     const [isClaiming, setIsClaiming] = useState(false);
     const [showBlast, setShowBlast] = useState(false);
 
-    useEffect(() => {
-        if (authUser) {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const lastClaimDate = authUser.lastRewardClaimDate ? new Date(authUser.lastRewardClaimDate) : null;
-            const lastClaimStr = lastClaimDate ? lastClaimDate.toISOString().split('T')[0] : null;
+    // === REWARD ELIGIBILITY LOGIC ===
+    // Memoized date comparison prevents object recreation on every scroll tick
+    const isEligibleToday = useMemo(() => {
+        if (!authUser) return false;
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        let lastClaimStr = null;
+        
+        if (authUser.lastRewardClaimDate) {
+            lastClaimStr = new Date(authUser.lastRewardClaimDate).toISOString().split('T')[0];
+        }
+        
+        return lastClaimStr !== todayStr;
+    }, [authUser?.lastRewardClaimDate, authUser?._id]);
 
-            if (lastClaimStr !== todayStr) {
-                // Only show if not on a "distraction-free" page like chat or reels
-                const path = window.location.pathname;
-                if (!path.includes("/chat") && !path.includes("/call") && !path.includes("/reels")) {
-                    // Delay briefly for impact
-                    const timer = setTimeout(() => setIsVisible(true), 1500);
-                    return () => clearTimeout(timer);
-                }
+    useEffect(() => {
+        let timer;
+        
+        if (isEligibleToday) {
+            // Only show if not on a "distraction-free" page like chat or reels
+            const path = window.location.pathname;
+            if (!path.includes("/chat") && !path.includes("/call") && !path.includes("/reels")) {
+                // Delay briefly for organic impact, store strict reference for cleanup
+                timer = setTimeout(() => setIsVisible(true), 1500);
             }
         }
-    }, [authUser]);
 
-    const handleClaim = async () => {
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [isEligibleToday]);
+
+    // Generate static confetti map exactly once
+    const confettiPaths = useMemo(() => generateConfettiPaths(), []);
+
+    // === COMPONENT DERIVATIONS ===
+    const { streak = 0 } = authUser || {};
+    const nextMilestone = useMemo(() => Math.ceil((streak + 1) / 7) * 7, [streak]);
+    const progress = useMemo(() => (streak % 7) / 7 * 100, [streak]);
+
+    // === HANDLERS ===
+    const handleClose = useCallback(() => setIsVisible(false), []);
+
+    const handleClaim = useCallback(async () => {
         if (isClaiming) return;
         setIsClaiming(true);
 
         try {
-            if (window.AndroidBridge) window.AndroidBridge.vibrate(100);
+            // Android bridge safety wrapper
+            if (typeof window !== "undefined" && window.AndroidBridge) {
+               try { window.AndroidBridge.vibrate(100); } catch (e) { /* ignore */ }
+            }
+            
             const res = await claimDailyReward();
             setShowBlast(true);
 
@@ -45,9 +114,10 @@ const GemDrop = () => {
                 style: { borderRadius: '20px', background: '#1c1c1c', color: '#fff' }
             });
 
-            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            // Targeted invalidation prevents mass UI unmounting
+            queryClient.invalidateQueries({ queryKey: ["authUser"], exact: true });
 
-            // Keep visible for blast animation
+            // Keep visible for blast animation to finish
             setTimeout(() => {
                 setIsVisible(false);
                 setIsClaiming(false);
@@ -59,12 +129,10 @@ const GemDrop = () => {
             setIsVisible(false);
             setIsClaiming(false);
         }
-    };
+    }, [isClaiming, queryClient]);
 
+    // Safe early exit (after hooks rule applied)
     if (!authUser) return null;
-
-    const nextMilestone = Math.ceil((authUser.streak + 1) / 7) * 7;
-    const progress = (authUser.streak % 7) / 7 * 100;
 
     return (
         <AnimatePresence>
@@ -75,27 +143,8 @@ const GemDrop = () => {
                     exit={{ opacity: 0 }}
                     className="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md lg:hidden"
                 >
-                    {/* Confetti Blast Layer */}
-                    {showBlast && (
-                        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                            {[...Array(15)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
-                                    animate={{
-                                        scale: [0, 1, 0.5],
-                                        x: (Math.random() - 0.5) * 400,
-                                        y: (Math.random() - 0.5) * 600,
-                                        opacity: [1, 1, 0]
-                                    }}
-                                    transition={{ duration: 1.2, ease: "easeOut" }}
-                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                                >
-                                    <Gem className={`size-${Math.floor(Math.random() * 4) + 4} text-amber-400 fill-amber-300 shadow-lg`} />
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
+                    {/* Abstracted Confetti Blast Layer */}
+                    <ConfettiBlast show={showBlast} paths={confettiPaths} />
 
                     <motion.div
                         initial={{ scale: 0.5, y: 100, rotate: -10 }}
@@ -128,7 +177,7 @@ const GemDrop = () => {
                                     <motion.div
                                         animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
                                         transition={{ duration: 2, repeat: Infinity }}
-                                        className="absolute -top-2 -right-2"
+                                        className="absolute -top-2 -right-2 pointer-events-none"
                                     >
                                         <Sparkles className="size-8 text-yellow-200 fill-yellow-100" />
                                     </motion.div>
@@ -141,14 +190,14 @@ const GemDrop = () => {
                                         <div className="h-px w-8 bg-white/20" />
                                         <div className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full">
                                             <Flame className="size-3 text-white fill-white" />
-                                            <span className="text-[10px] font-black text-white">{authUser.streak}d</span>
+                                            <span className="text-[10px] font-black text-white">{streak}d</span>
                                         </div>
                                     </div>
                                     <h2 className="text-3xl font-black italic text-white tracking-tighter uppercase leading-none">
                                         Gem Rain Incoming!
                                     </h2>
                                     <p className="text-sm text-white/80 font-medium px-4">
-                                        Claim your daily dose of gems and keep your {authUser.streak} day streak alive.
+                                        Claim your daily dose of gems and keep your {streak} day streak alive.
                                     </p>
                                 </div>
 
@@ -156,7 +205,7 @@ const GemDrop = () => {
                                 <div className="w-full space-y-2 px-2">
                                     <div className="flex justify-between items-end mb-1">
                                         <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Streak Progress</span>
-                                        <span className="text-xs font-black text-white tracking-widest">Day {authUser.streak}/{nextMilestone}</span>
+                                        <span className="text-xs font-black text-white tracking-widest">Day {streak}/{nextMilestone}</span>
                                     </div>
                                     <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden border border-white/10 p-0.5">
                                         <motion.div
@@ -191,13 +240,13 @@ const GemDrop = () => {
                                     {/* Glossy Sweep */}
                                     <motion.div
                                         animate={{ x: ["-100%", "200%"] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                        className="absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent -skew-x-12"
+                                        transition={{ duration: 2, repeat: Infinity, ease: "linear", delay: 1 }}
+                                        className="absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent -skew-x-12 pointer-events-none"
                                     />
                                 </motion.button>
 
                                 <button
-                                    onClick={() => setIsVisible(false)}
+                                    onClick={handleClose}
                                     className="text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white/60 transition-colors"
                                 >
                                     Maybe Later
@@ -209,6 +258,7 @@ const GemDrop = () => {
             )}
         </AnimatePresence>
     );
-};
+});
+GemDrop.displayName = "GemDrop";
 
 export default GemDrop;
