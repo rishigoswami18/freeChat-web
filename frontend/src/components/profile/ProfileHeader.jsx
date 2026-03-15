@@ -1,12 +1,12 @@
 import { memo } from "react";
-import { Camera, Globe, MapPin, BadgeCheck } from "lucide-react";
+import { Camera, Globe, MapPin, BadgeCheck, LogOut } from "lucide-react";
 
 /**
  * ProfileHeader
  * Memoized to prevent re-renders when a user switches tabs (Grid/Feed)
  * or when they click on unrelated buttons.
  */
-const ProfileHeader = memo(({ authUser, postsCount, onEditClick, onShareClick, onFriendsClick }) => {
+const ProfileHeader = memo(({ authUser, postsCount, onEditClick, onShareClick, onFriendsClick, onLogout, isLoggingOut }) => {
     return (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10 mb-10 pb-6 border-b border-base-300">
             <div
@@ -94,6 +94,19 @@ const ProfileHeader = memo(({ authUser, postsCount, onEditClick, onShareClick, o
                         className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case"
                     >
                         Share Profile
+                    </button>
+                    {/* Logout Button (Primarily for Mobile Accessibility) */}
+                    <button
+                        onClick={onLogout}
+                        disabled={isLoggingOut}
+                        className="btn btn-error btn-outline btn-sm sm:hidden flex-1 rounded-lg font-bold px-8 normal-case gap-2"
+                    >
+                        {isLoggingOut ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <LogOut className="size-4" />
+                        )}
+                        Logout
                     </button>
                 </div>
             </div>

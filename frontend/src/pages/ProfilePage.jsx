@@ -26,7 +26,7 @@ const ProfilePage = () => {
     const { authUser, isLoading: authLoading } = useAuthUser();
     const queryClient = useQueryClient();
     const isPremium = isPremiumUser(authUser);
-    const { logoutMutation } = useLogout();
+    const { logoutMutation, isPending: isLoggingOut } = useLogout();
     const { isStealthMode, setStealthMode, panicShortcut, setPanicShortcut } = useStealthStore();
 
     // === LOCAL RENDER STATES ===
@@ -163,6 +163,8 @@ const ProfilePage = () => {
                 onEditClick={() => setIsEditing(true)} 
                 onShareClick={handleShareProfile} 
                 onFriendsClick={() => setShowFriends(true)} 
+                onLogout={logoutMutation}
+                isLoggingOut={isLoggingOut}
             />
 
             {/* View Mode Toggle Controls */}
