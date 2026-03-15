@@ -74,9 +74,15 @@ const PostHeader = memo(({ post, authUser, onViewingDP, onDeletePost, isDeleting
         
         <div className="flex flex-col">
           <div className="flex items-center gap-1">
-            <Link to={`/user/${post.userId}`} className="font-bold text-[14px] text-base-content hover:text-base-content/70 truncate max-w-[150px]">
-              {post.fullName || "user"}
-            </Link>
+            {post.isDiscovery ? (
+              <span className="font-bold text-[14px] text-base-content truncate max-w-[150px]">
+                {post.fullName || "Global Creator"}
+              </span>
+            ) : (
+              <Link to={`/user/${post.userId}`} className="font-bold text-[14px] text-base-content hover:text-base-content/70 truncate max-w-[150px]">
+                {post.fullName || "user"}
+              </Link>
+            )}
             {(post.role === "admin" || post.isVerified) && (
               <div className="flex items-center justify-center shrink-0" title="Verified Professional">
                  <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
@@ -85,7 +91,13 @@ const PostHeader = memo(({ post, authUser, onViewingDP, onDeletePost, isDeleting
             <span className="mx-1 text-base-content/40 text-[10px]">•</span>
             <span className="text-base-content/40 text-[13px]">{timeAgoShort(post.createdAt)}</span>
           </div>
-          {post.isSuggested && (
+          {post.isDiscovery && (
+             <div className="text-[10px] font-bold text-primary/60 uppercase tracking-widest flex items-center gap-1">
+               <span className="size-1 bg-primary/60 rounded-full animate-pulse" />
+               Global Content
+             </div>
+          )}
+          {post.isSuggested && !post.isDiscovery && (
              <div className="text-[12px] text-base-content/60 leading-tight">
                Suggested for you
              </div>
@@ -216,9 +228,15 @@ const PostCaption = memo(({ post }) => {
     return (
         <div className="px-0 text-[14px] leading-[18px] mb-2">
             <div className="flex items-center gap-1 inline-flex">
-              <Link to={`/user/${post.userId}`} className="font-semibold hover:opacity-50 tracking-tight">
-                {post.fullName || "user"}
-              </Link>
+              {post.isDiscovery ? (
+                <span className="font-semibold tracking-tight">
+                  {post.fullName || "user"}
+                </span>
+              ) : (
+                <Link to={`/user/${post.userId}`} className="font-semibold hover:opacity-50 tracking-tight">
+                  {post.fullName || "user"}
+                </Link>
+              )}
               {(post.isVerified || post.role === "admin") && (
                   <div className="flex items-center justify-center shrink-0" title="Verified Professional">
                      <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />

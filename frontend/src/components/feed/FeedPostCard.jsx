@@ -67,15 +67,27 @@ const PostHeader = memo(({ post, authUser, onViewingDP, onDeletePost, isDeleting
         
         <div className="flex flex-col">
           <div className="flex items-center gap-1">
-            <Link to={`/user/${post.userId}`} className="font-bold text-[14px] text-base-content hover:opacity-70 truncate max-w-[150px]">
-              {post.fullName || "user"}
-            </Link>
+            {post.isDiscovery ? (
+               <span className="font-bold text-[14px] text-base-content truncate max-w-[150px]">
+                 {post.fullName || "Global Creator"}
+               </span>
+            ) : (
+               <Link to={`/user/${post.userId}`} className="font-bold text-[14px] text-base-content hover:opacity-70 truncate max-w-[150px]">
+                 {post.fullName || "user"}
+               </Link>
+            )}
             {(post.role === "admin" || post.isVerified) && (
               <BadgeCheck className="size-4 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
             )}
             <span className="mx-1 text-base-content/40 text-[10px]">•</span>
             <span className="text-base-content/40 text-[13px]">{timeAgoShort(post.createdAt)}</span>
           </div>
+          {post.isDiscovery && (
+            <div className="text-[10px] font-bold text-primary/60 uppercase tracking-widest flex items-center gap-1">
+               <span className="size-1 bg-primary/60 rounded-full animate-pulse" />
+               Global Content
+            </div>
+          )}
         </div>
       </div>
 
@@ -278,7 +290,11 @@ const PostCard = memo(({ post, setLikedByPostId, setViewingDP }) => {
 
       {(post.content || post.caption) && (
         <div className="text-[14px] leading-[18px] mb-2">
-          <Link to={`/user/${post.userId}`} className="font-semibold mr-2">{post.fullName}</Link>
+          {post.isDiscovery ? (
+            <span className="font-semibold mr-2">{post.fullName}</span>
+          ) : (
+            <Link to={`/user/${post.userId}`} className="font-semibold mr-2">{post.fullName}</Link>
+          )}
           <span className="whitespace-pre-wrap">{post.content}</span>
         </div>
       )}
