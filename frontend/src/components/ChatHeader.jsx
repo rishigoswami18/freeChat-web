@@ -251,16 +251,15 @@ const ChatHeader = memo(() => {
 
                 <div className="min-w-0 flex-1 flex flex-col justify-center cursor-pointer" onClick={() => navigate(isGroup ? "#" : `/user/${user?.id}`)}>
                     <div className="flex items-center gap-1">
-                        <h3 className="font-bold text-[14px] leading-tight truncate">
+                        <h3 className="font-bold text-[15px] leading-tight truncate">
                             {displayData.name}
                         </h3>
                         {(user?.role === "admin" || user?.isVerified) && (
-                            <BadgeCheck className="size-3.5 text-blue-500 fill-current" />
+                            <BadgeCheck className="size-4 text-blue-500 fill-current" />
                         )}
-                        {!isGroup && <span className="opacity-40 text-[14px]">♠</span>}
                     </div>
                     {!isGroup && (
-                        <p className="text-[12px] font-medium opacity-50 truncate leading-none mt-0.5">
+                        <p className="text-[11px] font-medium opacity-50 truncate leading-none mt-0.5">
                             {displayData.id === 'ai-coach-id' ? 'Relationship Coach' : 
                              displayData.id === 'ai-user-id' ? 'AI Partner' : 
                              displayData.id === 'ai-friend-id' ? 'AI Bestie' : 

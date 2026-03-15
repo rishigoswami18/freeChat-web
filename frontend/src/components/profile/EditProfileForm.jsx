@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from "react";
-import { Camera, MapPin, Globe, User, Languages, Calendar, Save, Loader2, Shield } from "lucide-react";
+import { Camera, MapPin, Globe, User, Languages, Calendar, Save, Loader2, Shield, Sparkles } from "lucide-react";
 
 /**
  * EditProfileForm
@@ -15,6 +15,8 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
         learningLanguage: "",
         dateOfBirth: "",
         isPublic: true,
+        aiPartnerName: "",
+        aiFriendName: "",
     });
 
     useEffect(() => {
@@ -27,6 +29,8 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
                 learningLanguage: authUser.learningLanguage || "",
                 dateOfBirth: authUser.dateOfBirth ? authUser.dateOfBirth.split("T")[0] : "",
                 isPublic: authUser.isPublic !== undefined ? authUser.isPublic : true,
+                aiPartnerName: authUser.aiPartnerName || "",
+                aiFriendName: authUser.aiFriendName || "",
             });
         }
     }, [authUser]);
@@ -205,6 +209,44 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
                     />
                 </div>
             </div>
+
+            {/* AI Customization Section */}
+            <div className="bg-base-200/50 p-6 rounded-2xl border border-base-content/5 space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 flex items-center gap-2">
+                    <Sparkles className="size-4" /> AI Customization
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="form-control">
+                        <label className="label pt-0">
+                            <span className="label-text font-semibold text-xs">GF / Partner Name</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="aiPartnerName"
+                            value={formData.aiPartnerName}
+                            onChange={handleInputChange}
+                            placeholder="Aria"
+                            className="input input-sm input-bordered focus:input-primary transition-all rounded-lg"
+                        />
+                    </div>
+                    
+                    <div className="form-control">
+                        <label className="label pt-0">
+                            <span className="label-text font-semibold text-xs">Bestie Name</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="aiFriendName"
+                            value={formData.aiFriendName}
+                            onChange={handleInputChange}
+                            placeholder="Golu"
+                            className="input input-sm input-bordered focus:input-primary transition-all rounded-lg"
+                        />
+                    </div>
+                </div>
+            </div>
+
 
             <div className="bg-base-200 p-4 rounded-xl flex items-center justify-between border border-primary/5">
                 <div className="flex flex-col gap-0.5">

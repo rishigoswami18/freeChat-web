@@ -791,11 +791,13 @@ body.is-chat-active {
 /* 4. OUTGOING MESSAGES (User) - Right Side */
 .me .str-chat__message-simple-text-inner,
 .str-chat__message-simple--me .str-chat__message-simple-text-inner {
-  background: oklch(var(--p)) !important;
-  color: oklch(var(--pc)) !important;
+  background: linear-gradient(135deg, #0099ff 0%, #a033ff 100%) !important;
+  color: #ffffff !important;
   margin-left: auto !important;
-  border-radius: 20px 20px 4px 20px !important;
+  border-radius: 22px 22px 4px 22px !important;
   border: none !important;
+  box-shadow: 0 4px 12px -4px rgba(0, 153, 255, 0.4) !important;
+  letter-spacing: -0.01em;
 }
 
 /* Force high-contrast for outgoing text */

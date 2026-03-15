@@ -67,8 +67,17 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
           {/* Main Input Pill */}
           <div className="flex-1 flex items-end bg-base-200 border border-base-content/5 rounded-3xl min-h-[44px] transition-all has-[:focus]:bg-base-100 has-[:focus]:border-base-content/20 shadow-sm px-1 py-1">
             
-            <div className="flex-1 min-w-0 pl-3 py-1 flex items-center w-full max-w-full">
-               <MessageInput focus grow placeholder="Message..." />
+            <div className="flex-1 min-w-0 pl-3 py-1 flex items-center w-full max-w-full overflow-hidden">
+               <MessageInput 
+                 focus 
+                 grow 
+                 placeholder="Message..." 
+                 additionalTextareaProps={{
+                   placeholder: "Message...",
+                   className: "w-full focus:outline-none !bg-transparent text-[15px] border-none",
+                   rows: 1
+                 }}
+               />
             </div>
 
             {/* Action Buttons */}
