@@ -44,6 +44,7 @@ const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
 const AIGirlfriendSEOPage = React.lazy(() => import("./pages/AIGirlfriendSEOPage.jsx"));
 const FutureSocialSEOPage = React.lazy(() => import("./pages/FutureSocialSEOPage.jsx"));
 const BlogPage = React.lazy(() => import("./pages/BlogPage.jsx"));
+const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage.jsx"));
 
 import { Toaster } from "react-hot-toast";
 
@@ -517,6 +518,7 @@ const App = () => {
                   <Route path="/next-gen-social-platform" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
                   
                   <Route path="/blog" element={<Layout showSidebar={false}><BlogPage /></Layout>} />
+                  <Route path="/blog/:slug" element={<Layout showSidebar={false}><BlogPostPage /></Layout>} />
 
                   <Route
                     path="/admin"
