@@ -54,7 +54,7 @@ const TermsPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">6. Limitation of Liability</h2>
                     <p className="leading-relaxed">
-                        In no event shall freeChat, nor its directors, employees, or partners, be liable for any indirect, incidental, special, consequential
+                        In no event shall BondBeyond, nor its directors, employees, or partners, be liable for any indirect, incidental, special, consequential
                         or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.
                     </p>
                 </section>

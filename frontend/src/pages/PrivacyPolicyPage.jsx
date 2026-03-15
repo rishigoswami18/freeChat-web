@@ -17,7 +17,7 @@ const PrivacyPolicyPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">2. Information We Collect</h2>
                     <div className="space-y-4">
-                        <p>We collect personal information that you voluntarily provide to us when registering at freeChat, expressing an interest in obtaining information about us or our products and services, when participating in activities on our site, or otherwise contacting us.</p>
+                        <p>We collect personal information that you voluntarily provide to us when registering at BondBeyond, expressing an interest in obtaining information about us or our products and services, when participating in activities on our site, or otherwise contacting us.</p>
                         <ul className="list-disc pl-5 space-y-2 opacity-80">
                             <li><strong>Personal Information:</strong> Name, Email Address, Gender, Date of Birth.</li>
                             <li><strong>Content Provided:</strong> Chat messages, posts, reels, and stories.</li>
@@ -43,7 +43,7 @@ const PrivacyPolicyPage = () => {
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">4. Cookies and Web Beacons</h2>
                     <p className="leading-relaxed">
-                        Like any other website, freeChat uses 'cookies'. These cookies are used to store information including visitors' preferences,
+                        Like any other website, BondBeyond uses 'cookies'. These cookies are used to store information including visitors' preferences,
                         and the pages on the website that the visitor accessed or visited. The information is used to optimize the users' experience
                         by customizing our web page content based on visitors' browser type and/or other information.
                     </p>

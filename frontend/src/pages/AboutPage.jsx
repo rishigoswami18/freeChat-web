@@ -125,7 +125,7 @@ const AboutPage = () => {
                                     <h3 className="text-xl font-bold mb-2 uppercase tracking-wider text-base-content/80">The Hidden Chat App</h3>
                                     <p className="opacity-70 leading-relaxed">
                                         We understand that privacy is complex. Our <strong>Stealth Mode</strong>
-                                        makes freeChat the perfect app for users who need a private space
+                                        makes BondBeyond the perfect app for users who need a private space
                                         safe from prying eyes.
                                     </p>
                                 </div>
@@ -138,7 +138,7 @@ const AboutPage = () => {
                                 <div>
                                     <h3 className="text-xl font-bold mb-2 uppercase tracking-wider text-base-content/80">Community Focused</h3>
                                     <p className="opacity-70 leading-relaxed">
-                                        With Reels, Posts, and Story features, freeChat is more than a messenger;
+                                        With Reels, Posts, and Story features, BondBeyond is more than a messenger;
                                         it's a vibrant community where you can express yourself freely and
                                         connect with like-minded individuals worldwide.
                                     </p>
@@ -174,7 +174,7 @@ const AboutPage = () => {
                                 <h3 className="text-xl font-bold opacity-60 mb-6 uppercase tracking-widest text-sm">Founder & Owner, BondBeyond</h3>
 
                                 <p className="text-lg opacity-80 leading-relaxed mb-8 italic">
-                                    "I built freeChat and BondBeyond because I believe that in an era of digital noise,
+                                    "I built BondBeyond because I believe that in an era of digital noise,
                                     everyone deserves a private, secure, and beautiful space to nurture their most
                                     important relationships. Our mission is to strengthen bonds, one conversation at a time."
                                 </p>
@@ -198,7 +198,7 @@ const AboutPage = () => {
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold mb-8 italic uppercase tracking-widest opacity-40">Connecting the world</h2>
                     <p className="text-xl opacity-80 mb-12 max-w-xl mx-auto leading-relaxed">
-                        Join the thousands of users already building stronger relationships on freeChat.
+                        Join the thousands of users already building stronger relationships on BondBeyond.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <Link to="/signup" className="btn btn-primary btn-lg rounded-2xl px-8 italic font-black uppercase">
