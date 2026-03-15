@@ -439,7 +439,16 @@ export const analyzeConflict = async (req, res) => {
 
     // Clean potential markdown code blocks from AI response
     const cleanedJson = analysisJson.replace(/```json|```/g, "").trim();
-    const result = JSON.parse(cleanedJson);
+    let result;
+    try {
+      result = JSON.parse(cleanedJson);
+    } catch (parseErr) {
+      console.error("AI Analysis JSON Parse Error:", parseErr, "Content:", analysisJson);
+      return res.status(500).json({ 
+        message: "AI Coach provided an unreadable analysis.",
+        raw: analysisJson 
+      });
+    }
 
     // Save to DB (Optional: keep a history of coaching)
     const ConflictAnalysis = (await import("../models/ConflictAnalysis.js")).default;
