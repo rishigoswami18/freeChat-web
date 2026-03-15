@@ -71,6 +71,7 @@ export const FeedService = {
                     profilePic: { $ifNull: ["$author.profilePic", "$profilePic"] },
                     isVerified: { $ifNull: ["$author.isVerified", "$isVerified"] },
                     role: { $ifNull: ["$author.role", "$role"] },
+                    userId: 1,
                     content: 1,
                     mediaUrl: 1,
                     mediaType: 1,
