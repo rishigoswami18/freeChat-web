@@ -8,7 +8,7 @@ import { memo } from "react";
  * Implements a glassmorphic dashboard for real-time emotional intelligence.
  */
 const EmpathyRadarView = memo(({ channelId }) => {
-  const { data: radar, isLoading, error } = useQuery({
+  const { data: radar, isLoading, error, refetch } = useQuery({
     queryKey: ["empathyRadar", channelId],
     queryFn: async () => {
       const res = await axiosInstance.get(`/radar/${channelId}`);
@@ -20,14 +20,35 @@ const EmpathyRadarView = memo(({ channelId }) => {
 
   if (isLoading && !radar) {
     return (
-      <div className="flex flex-col gap-2 p-4 bg-base-200/50 rounded-3xl animate-pulse">
-        <div className="h-4 bg-base-content/10 w-1/3 rounded-lg" />
-        <div className="h-2 bg-base-content/10 w-full rounded-lg" />
+      <div className="p-4 bg-base-100/40 backdrop-blur-2xl border border-base-content/5 rounded-3xl mb-4 transition-all">
+        <div className="flex items-center gap-2 mb-2">
+          <Activity className="size-3 text-primary animate-pulse" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Radar Initializing...</span>
+        </div>
+        <div className="w-full bg-base-content/5 h-1.5 rounded-full overflow-hidden">
+          <div className="h-full bg-primary/20 w-1/2 animate-shimmer" />
+        </div>
       </div>
     );
   }
 
-  if (error || !radar) return null;
+  // If there's an error or no radar data, show a subtle "Recalibrating" state instead of null
+  if (error || !radar) {
+    return (
+      <div className="p-3 bg-base-100/20 backdrop-blur-md border border-base-content/5 rounded-2xl mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+           <Activity className="size-3 opacity-20" />
+           <span className="text-[10px] font-bold uppercase tracking-widest opacity-30">Radar Recalibrating...</span>
+        </div>
+        <button 
+          onClick={() => refetch()} 
+          className="text-[10px] font-bold text-primary hover:underline"
+        >
+          Check Pulse
+        </button>
+      </div>
+    );
+  }
 
   const vibe = radar.currentVibe;
   const latestInsight = radar.insights?.[radar.insights.length - 1];
