@@ -60,79 +60,107 @@ const CallPage = () => {
   const isAudioCall = queryParams.get("type") === "audio";
 
   useEffect(() => {
-    if (!videoClient || !callId) return;
-
     let isMounted = true;
-    let currentCall = null;
     let wakeLock = null;
+    let timeoutId = null;
 
     const initCall = async () => {
-      // Prevent duplicate asynchronous initializations
+      if (!videoClient || !callId) {
+        console.log("⏳ [CallPage] Waiting for video engine context...");
+        return;
+      }
+
       if (joiningRef.current) return;
       joiningRef.current = true;
 
+      console.log("🔌 [CallPage] Initializing WebRTC session:", callId);
+      setIsConnecting(true);
+
+      // Security timeout: If call doesn't connect in 15s, bail out
+      timeoutId = setTimeout(() => {
+          if (isMounted && !call) {
+              console.warn("⏱️ [CallPage] Connection timed out.");
+              toast.error("Connection timed out. Please try again.");
+              navigate("/");
+          }
+      }, 15000);
+
       try {
         const callInstance = videoClient.call("default", callId);
-        currentCall = callInstance;
+        
+        console.log("📡 [CallPage] Syncing call state...");
+        await callInstance.getOrCreate().catch(err => {
+            console.warn("Retrying call sync...", err.message);
+            return callInstance.getOrCreate(); // One retry
+        });
 
-        // Fetch call state from server safely
-        await callInstance.getOrCreate();
         const state = callInstance.state.callingState;
+        console.log("📊 [CallPage] Calling State:", state);
 
-        // INCOMING CALL: Accept first to securely transition WebRTC boundaries
         if (state === CallingState.RINGING) {
-          if (window.AndroidBridge && typeof window.AndroidBridge.vibrate === 'function') {
-          window.AndroidBridge.vibrate(50);
-        }
-          await callInstance.accept();
-        } else if (state !== CallingState.JOINED) {
-          // OUTGOING CALL: Only play ringback if no remote participants exist
-          if (callInstance.state.remoteParticipants.length === 0) {
-            safePlayAudio(ringbackTone);
-          }
+           console.log("🔔 [CallPage] Accepting incoming call...");
+           if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(50);
+           await callInstance.accept();
+        } else {
+           console.log("📤 [CallPage] Joining outgoing call...");
+           if (callInstance.state.remoteParticipants.length === 0) {
+              safePlayAudio(ringbackTone);
+           }
         }
 
-        // Join WebRTC network
-        await callInstance.join({ create: !state });
+        await callInstance.join({ create: true });
 
         if (isAudioCall) {
-          await callInstance.camera.disable();
+          await callInstance.camera.disable().catch(() => {});
         }
 
         if (isMounted) {
           setCall(callInstance);
           setIsConnecting(false);
+          clearTimeout(timeoutId);
+          console.log("✅ [CallPage] Call linked successfully.");
         }
       } catch (error) {
-        console.error("Error joining call:", error);
-        safeStopAudio(ringbackTone);
+        console.error("❌ [CallPage] Fatal Join Error:", error);
         if (isMounted) {
-          toast.error("Call unavailable.");
+          toast.error("Call unavailable or expired.");
           setIsConnecting(false);
           navigate("/");
         }
       } finally {
         if (isMounted) joiningRef.current = false;
+        clearTimeout(timeoutId);
       }
     };
 
     initCall();
 
-    // Power Management: Keep screen actively on during video calls
     if ("wakeLock" in navigator && !isAudioCall) {
       navigator.wakeLock.request("screen").then(wl => wakeLock = wl).catch(() => {});
     }
 
-    // Call Component Unmount Cleanup
     return () => {
       isMounted = false;
+      clearTimeout(timeoutId);
       safeStopAudio(ringbackTone);
-      if (currentCall) currentCall.leave().catch(console.error);
       if (wakeLock) wakeLock.release().catch(() => {});
+      // Note: we don't call leave() here as it might be handled by the End Call button 
+      // or we want the user to be able to stay in the call if they just navigate briefly.
+      // But usually, CallPage unmount = call end in this UX.
+      // However, Stream Video hooks handle some of this.
     };
-  }, [videoClient, callId, isAudioCall, navigate]);
+  }, [videoClient, callId, navigate, isAudioCall]);
 
-  if (isConnecting || !call) return <PageLoader />;
+  if (isConnecting || !call) {
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-black">
+            <PageLoader />
+            <div className="text-white/50 text-[10px] mt-4 font-mono animate-pulse">
+                Establishing Secure Tunnel...
+            </div>
+        </div>
+    );
+  }
 
   return (
     <StreamCall call={call}>

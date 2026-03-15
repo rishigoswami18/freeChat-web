@@ -72,7 +72,7 @@ const PostHeader = memo(({ post, authUser, onViewingDP, onDeletePost, isDeleting
                  {post.fullName || "Global Creator"}
                </span>
             ) : (
-               <Link to={`/user/${post.userId}`} className="font-bold text-[14px] text-base-content hover:opacity-70 truncate max-w-[150px]">
+               <Link to={`/user/${post.userId || post._id}`} className="font-bold text-[14px] text-base-content hover:opacity-70 truncate max-w-[150px]">
                  {post.fullName || "user"}
                </Link>
             )}
@@ -293,7 +293,7 @@ const PostCard = memo(({ post, setLikedByPostId, setViewingDP }) => {
           {post.isDiscovery ? (
             <span className="font-semibold mr-2">{post.fullName}</span>
           ) : (
-            <Link to={`/user/${post.userId}`} className="font-semibold mr-2">{post.fullName}</Link>
+            <Link to={`/user/${post.userId || post._id}`} className="font-semibold mr-2">{post.fullName}</Link>
           )}
           <span className="whitespace-pre-wrap">{post.content}</span>
         </div>

@@ -135,26 +135,38 @@ const ChatHeader = memo(() => {
         return coupleData.partner?._id === displayData.id;
     }, [coupleData, displayData.id]);
 
-    const handleCall = async () => {
-        if (!videoClient || isGroup || !user) {
-            toast.error(
-                isGroup
-                    ? "Calls are not supported in groups yet."
-                    : "Call service not ready."
-            );
+    const initiateStreamCall = async (isAudio = false) => {
+        if (!videoClient) {
+            toast.error("Call service is not ready. Please wait a moment.");
+            return;
+        }
+
+        if (isGroup) {
+            toast.error("Group calls are not supported yet.");
+            return;
+        }
+
+        if (!user || !user.id) {
+            toast.error("Unable to identify call recipient.");
+            return;
+        }
+
+        // Check if recipient is an AI bot
+        if (["ai-user-id", "ai-friend-id", "ai-coach-id", "ai-bot"].includes(user.id)) {
+            toast.error(`${user.name} is currently offline for calls.`);
             return;
         }
 
         try {
-            const myId = String(authUser._id);
+            const myId = String(authUser?._id);
             const theirId = String(user.id);
-            const timestamp = Date.now().toString(36);
+            const timestamp = Date.now();
             const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
 
-            console.log("📞 Initiating call:", { callId, myId, theirId });
-            outgoingCallIds.add(callId);
-
             const call = videoClient.call("default", callId);
+            
+            console.log("📞 [ChatHeader] Initiating call:", { callId, myId, theirId });
+
             await call.getOrCreate({
                 ring: true,
                 data: {
@@ -162,53 +174,36 @@ const ChatHeader = memo(() => {
                         { user_id: myId },
                         { user_id: theirId },
                     ],
+                    custom: {
+                        audioOnly: isAudio,
+                        callerName: authUser.fullName,
+                        callerImage: authUser.profilePic
+                    }
                 },
             });
-            navigate(`/call/${callId}`, { state: { callee: { name: user.name, image: user.image } } });
 
-            // Send push notification to recipient (fire-and-forget)
-            notifyCall(theirId, callId, "video").catch(() => { });
-        } catch (error) {
-            console.error("Call Error:", error);
-            toast.error("Could not start call.");
-        }
-    };
-
-    const handleAudioCall = async () => {
-        if (!videoClient || isGroup || !user) {
-            toast.error(
-                isGroup
-                    ? "Calls are not supported in groups yet."
-                    : "Call service not ready."
-            );
-            return;
-        }
-        try {
-            const myId = String(authUser._id);
-            const theirId = String(user.id);
-            const timestamp = Date.now().toString(36);
-            const callId = `${[myId, theirId].sort().join("-")}-${timestamp}`;
+            // Mark this call as outgoing so we don't notify ourselves
             outgoingCallIds.add(callId);
-            const call = videoClient.call("default", callId);
-            await call.getOrCreate({
-                ring: true,
-                data: {
-                    members: [
-                        { user_id: myId },
-                        { user_id: theirId },
-                    ],
-                    audioOnly: true,
-                },
-            });
-            navigate(`/call/${callId}?type=audio`, { state: { callee: { name: user.name, image: user.image } } });
 
-            // Send push notification to recipient (fire-and-forget)
-            notifyCall(theirId, callId, "audio").catch(() => { });
+            // Notify recipient (Push Notification / API signal)
+            notifyCall(theirId, callId, isAudio ? "audio" : "video").catch(err => {
+                console.error("Failed to send call notification:", err);
+            });
+
+            // Navigate to the call page
+            const typeParam = isAudio ? "?type=audio" : "";
+            navigate(`/call/${callId}${typeParam}`, { 
+                state: { callee: { name: user.name, image: user.image } } 
+            });
+
         } catch (error) {
-            console.error("Audio Call Error:", error);
-            toast.error("Could not start audio call.");
+            console.error("❌ [ChatHeader] Call failed to spawn:", error);
+            toast.error("Could not start call. Please check your network.");
         }
     };
+
+    const handleCall = () => initiateStreamCall(false);
+    const handleAudioCall = () => initiateStreamCall(true);
 
     const handleCoolDown = async () => {
         try {

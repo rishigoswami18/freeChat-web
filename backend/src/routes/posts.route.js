@@ -159,6 +159,14 @@ router.get("/", async (req, res) => {
       lastId
     });
 
+    // Ensure userId is present for every post (redundant check but safe for the UI)
+    if (result.posts) {
+        result.posts = result.posts.map(p => ({
+            ...p,
+            userId: p.userId || p._id // Fallback to _id if userId is missing for some reason
+        }));
+    }
+
     res.json(result);
   } catch (err) {
     console.error("🌊 Feed: Route Error:", err.message);
@@ -295,6 +303,7 @@ router.get("/user/:userId", async (req, res) => {
       },
       {
         $addFields: {
+          userId: "$userId", // Explicitly preserve userId
           role: { $ifNull: ["$role", "$authorInfo.role"] },
           isVerified: { $ifNull: ["$isVerified", "$authorInfo.isVerified"] },
           fullName: { $ifNull: ["$authorInfo.fullName", "$fullName"] },
@@ -303,7 +312,23 @@ router.get("/user/:userId", async (req, res) => {
       },
       { $sort: { _id: -1 } },
       { $limit: limitNum + 1 },
-      { $project: { authorInfo: 0 } }
+      { 
+        $project: { 
+          authorInfo: 0,
+          // Ensure all required fields are passed
+          userId: 1,
+          content: 1,
+          mediaUrl: 1,
+          mediaType: 1,
+          likes: 1,
+          comments: 1,
+          createdAt: 1,
+          role: 1,
+          isVerified: 1,
+          fullName: 1,
+          profilePic: 1
+        } 
+      }
     ]);
 
     const hasMore = posts.length > limitNum;

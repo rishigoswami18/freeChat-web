@@ -20,30 +20,27 @@ export const useVideoClient = () => useContext(VideoClientContext);
  */
 const VideoProvider = ({ children }) => {
     const [videoClient, setVideoClient] = useState(null);
+    const [isInitializing, setIsInitializing] = useState(false);
     const { authUser } = useAuthUser();
     
-    // Connection lock preventing race conditions in React 18+
     const initialInstanceRef = useRef(null);
     const userId = authUser?._id ? String(authUser._id) : null;
 
     // --- FETCH CREDENTIALS ---
-    // Using TanStack Query ensures the token is cached and retried with exponential backoff on network failures.
     const { data: streamData, error: fetchError } = useQuery({
         queryKey: ["streamToken", userId],
         queryFn: getStreamToken,
         enabled: !!userId,
-        staleTime: 5 * 60 * 1000, // 5 min cache
+        staleTime: 5 * 60 * 1000, 
         retry: 3,
     });
 
-    // Stable token provider function for the SDK
     const tokenProvider = useCallback(async () => {
         try {
             const data = await getStreamToken();
-            console.log("🎥 Video Token Provider: Refreshed credentials");
             return data.token;
         } catch (error) {
-            console.error("❌ Video Token Provider: Refresh error:", error);
+            console.error("❌ [VideoProvider] Token refresh failed:", error);
             throw error;
         }
     }, []);
@@ -51,47 +48,53 @@ const VideoProvider = ({ children }) => {
     // --- CORE CLIENT LIFECYCLE ---
     useEffect(() => {
         if (!userId || !streamData?.token || !streamData?.apiKey) {
+            if (userId && !videoClient) console.log("⏳ [VideoProvider] Waiting for credentials...");
             return;
         }
 
-        let isMounted = true;
-        const apiKey = streamData.apiKey;
+        if (initialInstanceRef.current && initialInstanceRef.current.user?.id === userId) {
+            return; // Already initialized for this user
+        }
 
+        let isMounted = true;
+        
         const initClient = async () => {
+            if (isInitializing) return;
+            setIsInitializing(true);
+
             try {
-                // If identity changed, wipe previous socket
-                if (initialInstanceRef.current && initialInstanceRef.current.user?.id !== userId) {
-                    console.log("🔄 Video Identity: Cleaning up stale socket...");
-                    await initialInstanceRef.current.disconnectUser();
+                // Cleanup previous identity if any
+                if (initialInstanceRef.current) {
+                    console.log("🔄 [VideoProvider] Swapping user identity...");
+                    await initialInstanceRef.current.disconnectUser().catch(() => {});
                     initialInstanceRef.current = null;
-                    if (isMounted) setVideoClient(null);
                 }
 
-                // Skip if already connected to this user
-                if (initialInstanceRef.current) return;
-
-                console.log("🔌 Video Identity: Initializing for user", userId);
+                console.log("🔌 [VideoProvider] Initializing SDK for:", userId);
                 
                 const client = new StreamVideoClient({
-                    apiKey,
+                    apiKey: streamData.apiKey,
                     user: {
                         id: userId,
                         name: authUser.fullName,
                         image: authUser.profilePic,
                     },
                     tokenProvider,
+                    options: { logLevel: 'warn' }
                 });
 
                 initialInstanceRef.current = client;
 
                 if (isMounted) {
                     setVideoClient(client);
-                    console.log("✅ Video Identity: Service ready");
+                    console.log("✅ [VideoProvider] Service Ready");
                 } else {
-                    await client.disconnectUser();
+                    await client.disconnectUser().catch(() => {});
                 }
             } catch (err) {
-                console.error("❌ Video Identity: Initialization failed:", err);
+                console.error("❌ [VideoProvider] Init Failed:", err);
+            } finally {
+                if (isMounted) setIsInitializing(false);
             }
         };
 
@@ -99,10 +102,8 @@ const VideoProvider = ({ children }) => {
 
         return () => {
             isMounted = false;
-            // Note: We avoid disconnect on every mount/unmount cycle to maintain background incoming call listeners.
-            // Disposal is handled during identity swaps or app shutdowns.
         };
-    }, [userId, streamData, authUser, tokenProvider]);
+    }, [userId, streamData, authUser, tokenProvider, videoClient, isInitializing]);
 
     // Cleanup on complete auth loss
     useEffect(() => {
@@ -111,11 +112,10 @@ const VideoProvider = ({ children }) => {
             initialInstanceRef.current = null;
             setVideoClient(null);
             client.disconnectUser().catch(() => {});
+            console.log("👋 [VideoProvider] User logged out, disconnected.");
         }
     }, [userId]);
 
-    // Provide context even if value is null to ensure hooks don't fail, 
-    // but downstream components should still check for presence.
     return (
         <VideoClientContext.Provider value={videoClient}>
             {videoClient ? (
