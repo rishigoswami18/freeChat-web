@@ -44,6 +44,17 @@ const FooterSection = memo(({ handleDownload }) => {
                     </div>
 
                     <div>
+                        <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-50">Explore</h4>
+                        <ul className="space-y-3 text-sm opacity-70">
+                            <li><Link to="/best-ai-girlfriend-app" className="hover:text-primary transition-colors link-hover-underline">AI Girlfriend App</Link></li>
+                            <li><Link to="/virtual-girlfriend-ai" className="hover:text-primary transition-colors link-hover-underline">Virtual Partner AI</Link></li>
+                            <li><Link to="/future-of-social-media" className="hover:text-primary transition-colors link-hover-underline">Future of Social</Link></li>
+                            <li><Link to="/blog" className="hover:text-primary transition-colors link-hover-underline">BondBeyond Blog</Link></li>
+                            <li><Link to="/founder" className="hover:text-primary transition-colors link-hover-underline text-primary/80 font-bold">About the Creator</Link></li>
+                        </ul>
+                    </div>
+
+                    <div>
                         <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-50">Legal</h4>
                         <ul className="space-y-3 text-sm opacity-70">
                             <li><Link to="/privacy-policy" className="hover:text-primary transition-colors link-hover-underline">Privacy Policy</Link></li>

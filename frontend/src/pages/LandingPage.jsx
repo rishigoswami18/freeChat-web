@@ -61,11 +61,11 @@ const LandingPage = () => {
     return (
         <div className="min-h-screen bg-base-100" data-theme="bondbeyond">
             {/* SEO & Meta Tags for Global Reach */}
-            <title>BondBeyond | Free Chat App, Video Calls & AI Companions</title>
-            <meta name="description" content="Join BondBeyond, the all-in-one free chat platform. Enjoy high-quality video calls, share reels, play games, and connect with your personalized AI best friend. Bonding redefined." />
-            <meta name="keywords" content="free chat, video call app, AI girlfriend, AI best friend, social media app, ludo online, bondbeyond" />
-            <meta property="og:title" content="BondBeyond | Join the Best Free Social Platform" />
-            <meta property="og:description" content="High-quality video calls, secure messaging, games, and AI companions—always free." />
+            <title>BondBeyond | #1 Indian Social Media App & Free Video Calls</title>
+            <meta name="description" content="Join BondBeyond, the premier Made in India social media platform. Experience high-quality video calls, viral reels, and safe chatting—completely free. Proudly Indian." />
+            <meta name="keywords" content="Indian social media app, best Indian chat app, Made in India messaging app, free video calls India, AI girlfriend India, BondBeyond" />
+            <meta property="og:title" content="BondBeyond | India's Top Social & Chat App" />
+            <meta property="og:description" content="Secure messaging, HD video calls, and viral reels—all in one Made in India app. Join the revolution." />
             <meta property="og:type" content="website" />
             <meta name="twitter:card" content="summary_large_image" />
 
@@ -75,12 +75,17 @@ const LandingPage = () => {
                     "@context": "https://schema.org",
                     "@type": "SoftwareApplication",
                     "name": "BondBeyond",
-                    "operatingSystem": "Android",
-                    "applicationCategory": "ChatApplication",
+                    "operatingSystem": "Android, iOS, Web",
+                    "applicationCategory": "SocialNetworkingApplication",
+                    "contentRating": "Everyone",
+                    "author": {
+                         "@type": "Organization",
+                         "name": "BondBeyond India"
+                    },
                     "offers": {
                         "@type": "Offer",
                         "price": "0",
-                        "priceCurrency": "USD"
+                        "priceCurrency": "INR"
                     }
                 })}
             </script>

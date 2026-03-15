@@ -36,9 +36,14 @@ const AboutPage = React.lazy(() => import("./pages/AboutPage.jsx"));
 const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard.jsx"));
 const UserProfilePage = React.lazy(() => import("./pages/UserProfilePage.jsx"));
 const GemShopPage = React.lazy(() => import("./pages/GemShopPage.jsx"));
-const HomePage = React.lazy(() => import("./pages/HomePage.jsx"));
 const CommunityPage = React.lazy(() => import("./pages/CommunityPage.jsx"));
 const CommunityDetailsPage = React.lazy(() => import("./pages/CommunityDetailsPage.jsx"));
+
+// SEO Domination Pages
+const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
+const AIGirlfriendSEOPage = React.lazy(() => import("./pages/AIGirlfriendSEOPage.jsx"));
+const FutureSocialSEOPage = React.lazy(() => import("./pages/FutureSocialSEOPage.jsx"));
+const BlogPage = React.lazy(() => import("./pages/BlogPage.jsx"));
 
 import { Toaster } from "react-hot-toast";
 
@@ -497,6 +502,21 @@ const App = () => {
                   <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
                   <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
                   <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
+
+                  {/* SEO SEO DOMINATION ROUTES */}
+                  <Route path="/founder" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
+                  <Route path="/creator" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
+                  <Route path="/about-hriskesh-giri" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
+                  <Route path="/hriskesh-giri-ai-developer" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
+                  
+                  <Route path="/best-ai-girlfriend-app" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  <Route path="/virtual-girlfriend-ai" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  <Route path="/ai-relationship-chat" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  
+                  <Route path="/future-of-social-media" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
+                  <Route path="/next-gen-social-platform" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
+                  
+                  <Route path="/blog" element={<Layout showSidebar={false}><BlogPage /></Layout>} />
 
                   <Route
                     path="/admin"

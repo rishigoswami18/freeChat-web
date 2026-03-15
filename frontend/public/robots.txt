@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin/
+Disallow: /settings/
 
 Sitemap: https://www.freechatweb.in/sitemap.xml
