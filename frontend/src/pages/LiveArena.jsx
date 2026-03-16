@@ -36,16 +36,24 @@ const LiveArena = () => {
     useEffect(() => {
         if (!liveMatch && upcomingMatches?.length > 0) {
             const timer = setInterval(() => {
-                const nextMatch = upcomingMatches[0];
-                const diff = new Date(nextMatch.startTime) - new Date();
+                const start = new Date(nextMatch.startTime);
+                const now = new Date();
+                const diff = start - now;
+                
                 if (diff <= 0) {
-                    setTimeLeft("Starting Soon!");
+                    setTimeLeft("LIVE");
                     return;
                 }
-                const h = Math.floor(diff / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                setTimeLeft(`${h}h ${m}m ${s}s`);
+
+                const hoursToMatch = diff / 3600000;
+                if (hoursToMatch > 24) {
+                    setTimeLeft(start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }));
+                } else {
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    setTimeLeft(`${h}h ${m}m ${s}s`);
+                }
             }, 1000);
             return () => clearInterval(timer);
         }

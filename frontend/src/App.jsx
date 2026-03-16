@@ -586,11 +586,11 @@ const App = () => {
                       }
                     />
                     <Route
-                      path="/desi-arena"
+                      path="/ipl-dashboard"
                       element={
                         isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true} showRightSidebar={false}>
-                            <DesiArena />
+                          <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
+                            <IplDashboard />
                           </Layout>
                         ) : (
                           <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

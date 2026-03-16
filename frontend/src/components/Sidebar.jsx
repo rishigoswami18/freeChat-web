@@ -23,7 +23,7 @@ import { logout } from "../lib/api";
 // === STATIC CONFIGURATION ===
 const staticNavItems = [
   { to: "/", icon: Home, labelKey: "Home" },
-  { to: "/live-arena", icon: Zap, label: "IPL Live", isSacred: true },
+  { to: "/ipl-dashboard", icon: Zap, label: "IPL Exclusive", isSacred: true },
   { to: "/feed", icon: Newspaper, labelKey: "feed" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },

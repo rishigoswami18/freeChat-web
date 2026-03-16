@@ -1,7 +1,4 @@
-/**
- * BondBeyond — Backend API Gateway
- * Optimized for Production Scale
- */
+/** BondBeyond — Backend API Gateway | Sync: 2026-03-17 02:55 */
 import http from "http";
 import app from "./app.js";
 import validateEnv from "./config/env.js";

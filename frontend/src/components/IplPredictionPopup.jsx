@@ -116,19 +116,24 @@ const IplPredictionPopup = ({ userId }) => {
                             </div>
                             <div>
                                 <h3 className="text-xl font-black italic tracking-tighter text-white uppercase flex items-center gap-2">
-                                    Instant Strike <span className="bg-red-500 text-[10px] px-2 py-0.5 rounded-md animate-bounce">LIVE</span>
+                                    {liveMatch?.status === "live" ? "Instant Strike" : "Victory Pulse"} 
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-md ${liveMatch?.status === "live" ? "bg-red-500 animate-bounce" : "bg-indigo-500"}`}>
+                                        {liveMatch?.status === "live" ? "LIVE" : "FEATURED"}
+                                    </span>
                                 </h3>
-                                <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Next Ball Outcome?</p>
+                                <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest">
+                                    {liveMatch?.status === "live" ? "Next Ball Outcome?" : "Who wins the match?"}
+                                </p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-3 mb-6">
-                            {[0, 1, 4, 6, "Out", "Wde"].map((choice) => (
+                        <div className={`grid ${liveMatch?.status === "live" ? "grid-cols-3" : "grid-cols-2"} gap-3 mb-6`}>
+                            {(liveMatch?.predictionOptions || [0, 1, 4, 6, "Out", "Wde"]).map((choice) => (
                                 <button
                                     key={choice}
                                     onClick={() => !isLockActive && setPredictionValue(choice)}
                                     disabled={isLockActive}
-                                    className={`py-3 rounded-2xl font-black italic transition-all active:scale-95 ${
+                                    className={`py-3 rounded-2xl font-black italic transition-all active:scale-95 text-xs lg:text-sm ${
                                         predictionValue === choice 
                                         ? "bg-primary text-white shadow-glow ring-2 ring-white/20" 
                                         : "bg-white/5 text-white/60 hover:bg-white/10"

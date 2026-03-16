@@ -15,6 +15,9 @@ import GlobalErrorBoundary from "../components/GlobalErrorBoundary";
 import { HeroSkeleton, PulseSkeleton, MatchListSkeleton } from "../components/Skeletons";
 import { EmptyArenaState } from "../components/EmptyStates";
 import UpcomingMatchesWidget from "../components/UpcomingMatchesWidget";
+import LiveTicker from "../components/LiveTicker";
+import LiveArenaGrid from "../components/LiveArenaGrid";
+import IPLPlayersList from "../components/IPLPlayersList";
 
 // Lazy Load heavy components
 const FanPulse = React.lazy(() => import("../components/FanPulse.jsx"));
@@ -54,7 +57,7 @@ const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
             const updateTimer = () => {
                 const nextMatch = upcomingMatches[0];
                 const now = DateTime.now();
-                const start = DateTime.fromISO(nextMatch.startTime || "");
+                const start = DateTime.fromISO(nextMatch.startTime);
 
                 if (!start.isValid) {
                     setDisplayTime("Schedule TBA");
@@ -65,12 +68,10 @@ const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
                 const hoursToMatch = diff.as("hours");
 
                 if (hoursToMatch <= 0) {
-                    setDisplayTime("Starting Soon!");
+                    setDisplayTime("Match Starting...");
                 } else if (hoursToMatch > 24) {
-                    // Match is more than 24 hours away - Show Date
-                    setDisplayTime(start.toFormat("d MMMM, hh:mm a"));
+                    setDisplayTime(start.toFormat("d LLL, hh:mm a"));
                 } else {
-                    // Match is less than 24 hours away - Show Countdown
                     const countdown = start.diff(now, ["hours", "minutes", "seconds"]).toObject();
                     const h = Math.floor(countdown.hours || 0);
                     const m = Math.floor(countdown.minutes || 0);
@@ -120,11 +121,10 @@ const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
                         <div className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 ${
                             isLive ? "bg-red-600 animate-pulse" : "bg-indigo-600"
                         }`}>
-                            <div className={`size-2 rounded-full bg-white ${isLive ? "animate-ping" : ""}`} /> 
-                            {isLive ? "LIVE ARENA" : (hoursToStart < 1 ? "STARTING SOON" : "UPCOMING GLORY")}
+                            <div className={`size-2 rounded-full bg-white ${isLive ? "animate-ping" : ""}`} />                            {isLive ? "LIVE ARENA" : "FEATURED ARENA"}
                         </div>
                         <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.4em] ml-1">
-                            {currentMatch.matchName || "IPL SEZ 2026"}
+                            {matchData.seriesName || "Global Cricket Hub"}
                         </p>
                     </div>
                     
@@ -138,33 +138,47 @@ const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
                         </div>
                     </div>
                 </div>
+                
+                {/* Team Logos Overlay */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+                    <div className="flex items-center gap-12">
+                        <img src={currentMatch.team1?.logo} className="size-48 object-contain" />
+                        <div className="text-4xl font-black italic">VS</div>
+                        <img src={currentMatch.team2?.logo} className="size-48 object-contain" />
+                    </div>
+                </div>
 
                 <div className="flex items-end justify-between">
                     <div className="space-y-2">
                         {isLive ? (
                             <>
-                                <motion.h3 
-                                    key={matchData.score}
-                                    initial={{ y: 20, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    className="text-6xl md:text-8xl font-black italic tracking-tighter"
-                                >
-                                    {matchData.score || "0/0"}
-                                </motion.h3>
-                                <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
-                                    {matchData.overs || "0.0"} Overs • {matchData.battingTeam || "TBA"} Batting
-                                </p>
+                                <div className="flex flex-col gap-0">
+                                    <motion.h3 
+                                        key={matchData.score}
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        className="text-6xl md:text-8xl font-black italic tracking-tighter"
+                                    >
+                                        {matchData.score || "0/0"}
+                                    </motion.h3>
+                                    <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
+                                        {matchData.overs || "0.0"} Overs • {matchData.battingTeam || "TBA"} Batting
+                                    </p>
+                                </div>
+                                <div className="mt-4">
+                                    <button className="px-8 h-12 bg-white text-black rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:scale-105 transition-all">
+                                        Predict Now <Zap className="size-3 fill-black" />
+                                    </button>
+                                </div>
                             </>
                         ) : (
                             <>
-                                <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-1">
-                                    {(hoursToStart > 0 && hoursToStart < 24) ? "Kicking off in" : "Arena Launch"}
-                                </p>
-                                <h3 className={`font-black italic tracking-tighter tabular-nums ${displayTime.includes(':') ? "text-5xl md:text-7xl" : "text-4xl md:text-6xl"}`}>
-                                    {displayTime || "--h --m --s"}
+                                <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] block mb-2">Arena Launch</span>
+                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2">
+                                    {displayTime || "28 March, 07:30 PM"}
                                 </h3>
-                                <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
-                                    {currentMatch.venue || "Stadium TBA"}
+                                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                                    {currentMatch.venue || "M. Chinnaswamy Stadium, Bengaluru"}
                                 </p>
                             </>
                         )}
@@ -390,8 +404,8 @@ const Home = () => {
 
     const tabs = [
         { id: "arena", icon: trophyIcon, label: "Arena" },
+        { id: "market", icon: dollarIcon, label: "Market" },
         { id: "focus", icon: zapIcon, label: "Focus" },
-        { id: "creator", icon: dollarIcon, label: "Creator" },
         { id: "account", icon: userIcon, label: "Account" },
     ];
 
@@ -411,9 +425,10 @@ const Home = () => {
                 <div className="absolute -bottom-[10%] left-[20%] size-[55%] bg-emerald-600/5 blur-[150px] rounded-full" />
             </div>
 
-            <div className="relative z-10 flex-1 flex flex-col pt-8 pb-32">
+            <div className="relative z-10 flex-1 flex flex-col pt-0 pb-32">
+                <LiveTicker />
                 {/* Fixed Top Header */}
-                <header className="px-8 mb-10 flex justify-between items-center">
+                <header className="px-8 mt-8 mb-10 flex justify-between items-center">
                     <div>
                         <h1 className="text-4xl font-black italic tracking-tighter">BOND BEYOND</h1>
                         <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] leading-none mt-1">Unified OS Dashboard</p>
@@ -451,6 +466,8 @@ const Home = () => {
                                     <>
                                         <HeroArenaWidget matchData={displayMatch} upcomingMatches={upcomingMatches} />
                                         
+                                        <LiveArenaGrid />
+                                        
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             {isLive && (
                                                 <div className="md:col-span-1">
@@ -468,9 +485,30 @@ const Home = () => {
                                                 <Trophy className="size-10 text-amber-500 mb-4" />
                                                 <h4 className="text-xl font-black italic mb-2">Mega Arena Clash</h4>
                                                 <p className="text-xs font-bold text-white/40 mb-6 leading-relaxed">Join 100K+ fans and predict outcomes in real-time. Highest accuracy wins 10x Gems.</p>
-                                                <button className="h-14 bg-white text-black rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all">
-                                                    Join Now <ChevronRight className="size-4" />
+                                                <button 
+                                                    onClick={() => navigate('/ipl-dashboard')}
+                                                    className="h-14 bg-white text-black rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                                                >
+                                                    Open IPL Hub <ChevronRight className="size-4" />
                                                 </button>
+                                            </div>
+
+                                            <div className="md:col-span-2 bg-white/5 border border-white/5 rounded-[40px] p-8 flex flex-col md:flex-row items-center gap-8 group cursor-pointer hover:border-orange-500/30 transition-all" onClick={() => navigate('/ipl-dashboard')}>
+                                                <div className="size-24 rounded-[32px] bg-orange-600/10 flex items-center justify-center text-orange-500 shadow-inner group-hover:scale-110 transition-transform">
+                                                   <Award className="size-12" />
+                                                </div>
+                                                <div className="flex-1 space-y-2">
+                                                   <h4 className="text-2xl font-black italic tracking-tight">WHO WILL WIN ORANGE CAP?</h4>
+                                                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Stake your Bond Coins now • Massive Jackpot Awaits</p>
+                                                   <div className="flex gap-2 pt-2">
+                                                      <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-white/60">Virat Kohli</span>
+                                                      <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-white/60">Ruturaj Gaikwad</span>
+                                                      <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-white/60">+8 Others</span>
+                                                   </div>
+                                                </div>
+                                                <div className="size-14 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                                                   <Zap className="size-6" />
+                                                </div>
                                             </div>
 
                                             {upcomingMatches?.length > 0 && (
@@ -509,27 +547,15 @@ const Home = () => {
                             </motion.div>
                         )}
 
-                        {activeTab === "creator" && (
+                        {activeTab === "market" && (
                             <motion.div 
-                                key="creator"
+                                key="market"
                                 initial={{ x: 20, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 exit={{ x: -20, opacity: 0 }}
-                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                className="w-full"
                             >
-                                <div className="md:col-span-1">
-                                    <CreatorWidget />
-                                </div>
-                                <div className="md:col-span-1 bg-emerald-500/5 border border-emerald-500/10 rounded-[40px] p-10 flex flex-col justify-between">
-                                    <div>
-                                        <h3 className="text-3xl font-black italic italic text-emerald-500">Creator Hub</h3>
-                                        <p className="mt-4 text-sm font-bold text-white/50 leading-relaxed">Monetize your cricket knowledge. Create polls, share insights, and get supported by your tribe.</p>
-                                    </div>
-                                    <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
-                                        <p className="text-[10px] font-black text-emerald-500 uppercase mb-2">New Milestone</p>
-                                        <p className="font-bold flex items-center gap-2">Reach 100K Fans to unlock <span className="px-2 py-0.5 bg-emerald-500 text-black text-[9px] rounded-full">GOLD</span> status.</p>
-                                    </div>
-                                </div>
+                                <IPLPlayersList />
                             </motion.div>
                         )}
 

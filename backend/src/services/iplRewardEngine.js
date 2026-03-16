@@ -20,7 +20,12 @@ const calculateRiskMultiplier = (timeGap) => {
 class IplRewardEngine {
     constructor() {
         this.io = null;
-        this.memoryCache = new Map(); // Billionaire-scale In-memory fallback
+        this.memoryCache = new Map();
+        this.activeUsers = new Set(); 
+    }
+
+    getActiveUserCount() {
+        return this.activeUsers.size;
     }
 
     // ... (init and scoreBlast logic remain the same)
@@ -43,6 +48,9 @@ class IplRewardEngine {
         });
 
         this.io.on("connection", (socket) => {
+            this.activeUsers.add(socket.id);
+            console.log(`🔌 [Socket] User Linked. Active: ${this.getActiveUserCount()}`);
+
             socket.on("join_match", async (matchId) => {
                 socket.join(`match_${matchId}`);
                 
@@ -84,6 +92,10 @@ class IplRewardEngine {
                 } catch (error) {
                     socket.emit("vote_error", { message: "Voting failed" });
                 }
+            });
+            socket.on("disconnect", () => {
+                this.activeUsers.delete(socket.id);
+                console.log(`🔌 [Socket] User Unlinked. Active: ${this.getActiveUserCount()}`);
             });
         });
     }

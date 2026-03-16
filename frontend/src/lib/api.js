@@ -616,3 +616,7 @@ export const getUpcomingMatches = async () => {
     return response.data;
 };
 
+export const getIplSquads = async () => {
+    const response = await axiosInstance.get("/ipl/squads");
+    return response.data;
+};

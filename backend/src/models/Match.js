@@ -19,7 +19,18 @@ const MatchSchema = new mongoose.Schema({
         name: String,
         logo: String
     },
+    seriesId: { type: mongoose.Schema.Types.ObjectId, ref: "Series" },
+    externalSeriesId: { type: String },
+    tier: { 
+        type: String, 
+        enum: ["gold", "silver", "bronze"], 
+        default: "bronze" 
+    },
+    entryFee: { type: Number, default: 10 },
+    prizePool: { type: Number, default: 0 },
+    participantsCount: { type: Number, default: 0 },
     currentScore: { type: String, default: "0/0 (0.0)" },
+    importantStatus: { type: String },
     isBallInQueue: { type: Boolean, default: false }
 }, { timestamps: true });
 

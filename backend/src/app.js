@@ -1,4 +1,4 @@
-import express from "express";
+import express from "express"; // Restarting...
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
@@ -28,6 +28,8 @@ import radarRoutes from "./routes/radar.route.js";
 import focusRoutes from "./routes/focus.route.js";
 import creatorRoutes from "./routes/creator.route.js";
 import iplRoutes from "./routes/ipl.route.js";
+import matchRoutes from "./routes/matchRoutes.js";
+import testRoutes from "./routes/test.routes.js";
 import walletRoutes from "./routes/wallet.route.js";
 
 // Middleware
@@ -117,6 +119,8 @@ app.use("/api/radar", radarRoutes);
 app.use("/api/focus", focusRoutes);
 app.use("/api/creator", creatorRoutes);
 app.use("/api/ipl", iplRoutes);
+app.use("/api/match", matchRoutes);
+app.use("/api/test", testRoutes);
 app.use("/api/wallet", walletRoutes);
 
 /**
