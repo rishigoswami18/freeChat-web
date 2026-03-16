@@ -15,7 +15,7 @@ export const AIGateway = {
     generate: async (options) => {
         const {
             provider = "gemini",
-            model = "gemini-2.5-flash",
+            model = "gemini-1.5-flash",
             messages = [],
             systemInstruction = "",
             safetySettings = [],
@@ -85,18 +85,35 @@ export const AIGateway = {
             safetySettings
         });
 
-        // Split history and latest prompt
         const history = messages.slice(0, -1);
         const latest = messages[messages.length - 1];
 
+        // Diagnostic Logging to catch role alternation errors
+        console.log(`[AIGateway] Request Model: ${model} | History: ${history.length} msgs | Roles: ${messages.map(m => m.role).join(" -> ")}`);
+
         const chat = modelInstance.startChat({ history });
-        
-        // We use the sendMessage API which doesn't directly support AbortSignal in the current SDK version
-        // but we can wrap it if needed or use fetch to proxy. 
-        // For simplicity with the official SDK, we rely on the timeout logic above.
         const result = await chat.sendMessage(latest.parts);
         const response = await result.response;
-        return response.text().trim();
+
+        // Check for safety blocks manually to provide better errors
+        if (response.promptFeedback?.blockReason) {
+            throw new Error(`BLOCKED_BY_SAFETY: ${response.promptFeedback.blockReason}`);
+        }
+
+        const candidate = response.candidates?.[0];
+        if (candidate?.finishReason === "SAFETY" || candidate?.finishReason === "RECITATION") {
+            throw new Error(`BLOCKED_BY_SAFETY_CANDIDATE: ${candidate.finishReason}`);
+        }
+
+        try {
+            return response.text().trim();
+        } catch (e) {
+            // This happens if safety triggers late or other SDK internal issues
+            if (e.message?.includes("SAFETY")) {
+                throw new Error("BLOCKED_BY_SAFETY: Late detection");
+            }
+            throw e;
+        }
     },
 
     /**

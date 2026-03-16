@@ -2,11 +2,15 @@
  * BondBeyond — Backend API Gateway
  * Optimized for Production Scale
  */
+import http from "http";
 import app from "./app.js";
 import validateEnv from "./config/env.js";
 import { connectDB } from "./lib/db.js";
 import { seedQuestions } from "./controllers/bond.controller.js";
 import { startWorkers } from "./workers/workerManager.js";
+import iplRewardEngine from "./services/iplRewardEngine.js";
+import liveScoreService from "./services/LiveScoreService.js";
+import matchAutomationSystem from "./services/MatchAutomationSystem.js";
 
 /**
  * Server Bootstrap
@@ -28,10 +32,18 @@ const bootstrap = async () => {
         // 4. Start Background Job Infrastructure
         startWorkers();
 
-        // 5. Start Listening
-        app.listen(PORT, () => {
+        // 5. Create HTTP Server for Socket.io
+        const server = http.createServer(app);
+
+        // 6. Initialize Real-time Engines
+        iplRewardEngine.init(server);
+        liveScoreService.start();
+        matchAutomationSystem.init();
+
+        // 7. Start Listening
+        server.listen(PORT, () => {
             console.log(`🚀 [Server] BondBeyond API Gateway running on port ${PORT}`);
-            console.log(`📡 [Mode] ${process.env.NODE_ENV || 'development'}`);
+            console.log(`📡 [Real-time] IPL Reward Engine Primed.`);
         });
 
     } catch (error) {

@@ -573,4 +573,46 @@ export const createCommunityPost = async (id, data) => {
   const response = await axiosInstance.post(`/communities/${id}/posts`, data);
   return response.data;
 };
+// ----------------- BONDBEYOND ADMIN -----------------
+
+export const getAdminMatches = async () => {
+    const response = await axiosInstance.get("/admin/matches");
+    return response.data;
+};
+
+export const createMatch = async (matchData) => {
+    const response = await axiosInstance.post("/admin/matches", matchData);
+    return response.data;
+};
+
+export const updateMatchStatusAdmin = async (matchId, statusData) => {
+    const response = await axiosInstance.patch(`/admin/matches/${matchId}`, statusData);
+    return response.data;
+};
+
+export const resolveMatchBall = async (resolutionData) => {
+    const response = await axiosInstance.post("/admin/resolve-ball", resolutionData);
+    return response.data;
+};
+
+export const getWithdrawalRequests = async () => {
+    const response = await axiosInstance.get("/admin/withdrawals");
+    return response.data;
+};
+
+export const processWithdrawal = async (processData) => {
+    const response = await axiosInstance.post("/admin/withdrawals/process", processData);
+    return response.data;
+};
+
+export const getFinancialStats = async () => {
+    const response = await axiosInstance.get("/admin/bond-stats");
+    return response.data;
+};
+
+// ----------------- IPL ARENA -----------------
+export const getUpcomingMatches = async () => {
+    const response = await axiosInstance.get("/ipl/upcoming");
+    return response.data;
+};
 

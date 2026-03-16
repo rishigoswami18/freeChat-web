@@ -9,10 +9,9 @@ import { createRoot } from "react-dom/client";
 import 'stream-chat-react/dist/css/v2/index.css';
 import "./index.css";
 import "./i18n";
-import App from "./App.jsx";
-
 import { BrowserRouter } from "react-router-dom";
-
+import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { MatchProvider } from "./context/MatchContext.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
@@ -46,6 +45,8 @@ window.addEventListener('unhandledrejection', (event) => {
 
 console.log("🚀 Initializing BondBeyond App...");
 
+import App from "./App.jsx";
+
 try {
   const root = createRoot(document.getElementById("root"));
   console.log("✅ React root created");
@@ -54,7 +55,11 @@ try {
     <StrictMode>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-          <App />
+          <ThemeProvider>
+            <MatchProvider>
+              <App />
+            </MatchProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </BrowserRouter>
     </StrictMode>

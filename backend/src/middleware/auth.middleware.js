@@ -30,6 +30,22 @@ export const protectRoute = async (req, res, next) => {
   }
 };
 
+/**
+ * Verify User Middleware
+ * Blocks access to 'Live Predictions' if the user is not verified.
+ * Ensures the platform maintains a 'High-Trust' environment.
+ */
+export const isVerified = (req, res, next) => {
+    if (req.user && req.user.isVerified) {
+        next();
+    } else {
+        res.status(403).json({ 
+            message: "Action Required! You must be a 'Verified Fan' to access Live Predictions. 🥉🛡️",
+            action: "/kyc"
+        });
+    }
+};
+
 export const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();

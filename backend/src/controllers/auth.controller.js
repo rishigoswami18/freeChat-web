@@ -17,45 +17,52 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // --- Google OAuth Sign-In (ID Token method) ---
 export async function googleLogin(req, res) {
-  const { credential } = req.body;
+    const { credential, referralCode: usedReferralCode } = req.body;
 
-  try {
-    if (!credential) {
-      return res.status(400).json({ message: "Google credential is required" });
-    }
+    try {
+      if (!credential) {
+        return res.status(400).json({ message: "Google credential is required" });
+      }
 
-    // Verify the Google ID token
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
-
-    if (!email) {
-      return res.status(400).json({ message: "Google account has no email" });
-    }
-
-    // Check if user already exists (by googleId or email)
-    let user = await User.findOne({
-      $or: [{ googleId }, { email }],
-    });
-
-    if (!user) {
-      // Create a new user
-      const username = await generateUniqueUsername(name);
-
-      user = await User.create({
-        email,
-        fullName: name,
-        username,
-        googleId,
-        profilePic: picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`,
-        dateOfBirth: new Date("2000-01-01"),
-        streak: 1,
-        lastLoginDate: new Date(),
+      // Verify the Google ID token
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
+
+      const payload = ticket.getPayload();
+      const { sub: googleId, email, name, picture } = payload;
+
+      if (!email) {
+        return res.status(400).json({ message: "Google account has no email" });
+      }
+
+      // Check if user already exists (by googleId or email)
+      let user = await User.findOne({
+        $or: [{ googleId }, { email }],
+      });
+
+      if (!user) {
+        // Create a new user
+        const username = await generateUniqueUsername(name);
+
+        let referringUserId = null;
+        if (usedReferralCode) {
+          const referrer = await User.findOne({ referralCode: usedReferralCode.toUpperCase() });
+          if (referrer) referringUserId = referrer._id;
+        }
+
+        user = await User.create({
+          email,
+          fullName: name,
+          username,
+          googleId,
+          profilePic: picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`,
+          dateOfBirth: new Date("2000-01-01"),
+          streak: 1,
+          lastLoginDate: new Date(),
+          referredBy: referringUserId
+        });
 
       // Emit Event: All side effects (Stream Sync, Welcome Email) handled by Subscribers
       bus.emit(EVENTS.USER.REGISTERED, { user });
@@ -203,7 +210,7 @@ export async function googleLoginWithAccessToken(req, res) {
 
 // --- NEW: Bridge for Android App ---
 export async function syncFirebaseUser(req, res) {
-  const { email, fullName, firebaseId, password } = req.body;
+  const { email, fullName, firebaseId, password, referralCode: usedReferralCode } = req.body;
 
   try {
     if (!email || !fullName || !firebaseId || !password) {
@@ -218,6 +225,12 @@ export async function syncFirebaseUser(req, res) {
     if (!user) {
       const username = await generateUniqueUsername(fullName);
 
+      let referringUserId = null;
+      if (usedReferralCode) {
+        const referrer = await User.findOne({ referralCode: usedReferralCode.toUpperCase() });
+        if (referrer) referringUserId = referrer._id;
+      }
+
       // Create MERN user linked to Firebase
       user = await User.create({
         email,
@@ -227,6 +240,7 @@ export async function syncFirebaseUser(req, res) {
         password,
         dateOfBirth: req.body.dateOfBirth || new Date("2000-01-01"),
         profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff`,
+        referredBy: referringUserId
       });
 
       // Emit Event for all secondary tasks
@@ -298,20 +312,24 @@ export async function signup(req, res) {
     }
 
     // OTP Verification (optional — allows signup even when email service is down)
-    const { otp: userOtp } = req.body;
+    const { otp: userOtp, referralCode: usedReferralCode } = req.body;
     if (userOtp) {
       const validOtp = await OTP.findOne({ email, otp: userOtp });
       if (!validOtp) {
-        // Log the failure but don't strictly block if needed (Optional: return 400 for strictness)
         console.warn(`Signup: Invalid OTP attempt for ${email}`);
         return res.status(400).json({ message: "Invalid or expired verification code" });
       }
       await OTP.deleteOne({ _id: validOtp._id });
-    } else {
-      console.log(`Signup: Proceeding without OTP for ${email}`);
+    }
+
+    let referringUserId = null;
+    if (usedReferralCode) {
+      const referrer = await User.findOne({ referralCode: usedReferralCode.toUpperCase() });
+      if (referrer) referringUserId = referrer._id;
     }
 
     const username = await generateUniqueUsername(fullName);
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
     const newUser = await User.create({
       email,
@@ -322,7 +340,21 @@ export async function signup(req, res) {
       profilePic: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff`,
       streak: 1,
       lastLoginDate: new Date(),
+      referredBy: referringUserId,
+      registrationIP: ip
     });
+
+    if (newUser) {
+      const { default: UserWallet } = await import("../models/UserWallet.js");
+      const wallet = await UserWallet.create({
+        userId: newUser._id,
+        bonusBalance: 100,
+        totalBalance: 100
+      });
+
+      newUser.wallet = wallet._id;
+      await newUser.save();
+    }
 
     // Emit Event for all secondary tasks
     bus.emit(EVENTS.USER.REGISTERED, { user: newUser });
@@ -409,26 +441,44 @@ export function logout(req, res) {
 export async function onboard(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName, bio, nativeLanguage, learningLanguage, location } = req.body;
+    const { 
+      fullName, 
+      favTeam, 
+      gender, 
+      state, 
+      city,
+      bio, 
+      nativeLanguage, 
+      learningLanguage, 
+      location 
+    } = req.body;
 
-    if (!fullName || !bio || !nativeLanguage || !learningLanguage || !location) {
-      return res.status(400).json({ message: "All fields are required" });
+    // Minimum requirement for Fan-Identity Onboarding
+    if (!fullName || !favTeam || !gender || !state || !city) {
+      return res.status(400).json({ message: "Essential Fan-Identity details are required" });
     }
 
+    // Credits 500 Bond Coins for completing onboarding
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { ...req.body, isOnboarded: true },
+      { 
+        ...req.body, 
+        isOnboarded: true,
+        bondCoins: 500, // Reward
+        rank: 'Rookie'
+      },
       { new: true }
     );
 
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
 
+    // Sync with Stream (Chat Identity)
     try {
       await upsertStreamUser({
         id: updatedUser._id.toString(),
         name: updatedUser.fullName,
         image: updatedUser.profilePic || "",
-        role: updatedUser.role, // Sync role
+        role: updatedUser.role,
       });
     } catch (streamError) {
       console.log("Error updating Stream user during onboarding:", streamError.message);

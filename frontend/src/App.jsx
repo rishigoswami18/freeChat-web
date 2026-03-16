@@ -30,6 +30,8 @@ const ContactPage = React.lazy(() => import("./pages/ContactPage.jsx"));
 const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage.jsx"));
 const TermsPage = React.lazy(() => import("./pages/TermsPage.jsx"));
 const RefundPolicyPage = React.lazy(() => import("./pages/RefundPolicyPage.jsx"));
+const PrizeVaultPage = React.lazy(() => import("./pages/PrizeVaultPage.jsx"));
+const RedeemCashPage = React.lazy(() => import("./pages/RedeemCashPage.jsx"));
 const ForgotPasswordPage = React.lazy(() => import("./pages/ForgotPasswordPage.jsx"));
 const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage.jsx"));
 const AboutPage = React.lazy(() => import("./pages/AboutPage.jsx"));
@@ -38,6 +40,16 @@ const UserProfilePage = React.lazy(() => import("./pages/UserProfilePage.jsx"));
 const GemShopPage = React.lazy(() => import("./pages/GemShopPage.jsx"));
 const CommunityPage = React.lazy(() => import("./pages/CommunityPage.jsx"));
 const CommunityDetailsPage = React.lazy(() => import("./pages/CommunityDetailsPage.jsx"));
+const CreatorCenterPage = React.lazy(() => import("./pages/CreatorCenterPage.jsx"));
+const IplDashboard = React.lazy(() => import("./pages/IplDashboard.jsx"));
+const Home = React.lazy(() => import("./pages/Home.jsx"));
+const EarningsWallet = React.lazy(() => import("./pages/EarningsWallet.jsx"));
+const IplHomeDashboard = React.lazy(() => import("./pages/IplHomeDashboard.jsx"));
+const CareerAssistant = React.lazy(() => import("./pages/CareerAssistant.jsx"));
+const KYCVerification = React.lazy(() => import("./pages/KYCVerification.jsx"));
+const AntigravityEnginePage = React.lazy(() => import("./pages/AntigravityEnginePage.jsx"));
+const LiveArena = React.lazy(() => import("./pages/LiveArena.jsx"));
+const DesiArena = React.lazy(() => import("./pages/DesiArena.jsx"));
 
 // SEO Domination Pages
 const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
@@ -217,12 +229,24 @@ const App = () => {
                     element={
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={true} isFluid={true}>
-                          <PostsPage />
+                          <Home />
                         </Layout>
                       ) : isAuthenticated ? (
                         <Navigate to="/onboarding" />
                       ) : (
                         <LandingPage />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/feed"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <PostsPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
                       )
                     }
                   />
@@ -369,18 +393,7 @@ const App = () => {
                     }
                   />
 
-                  <Route
-                    path="/couple"
-                    element={
-                      isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true}>
-                          <CoupleProfilePage />
-                        </Layout>
-                      ) : (
-                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                      )
-                    }
-                  />
+                  {/* Couple feature disabled for now */}
 
                   <Route
                     path="/communities"
@@ -474,6 +487,19 @@ const App = () => {
                   />
 
                   <Route
+                    path="/wallet"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true} hideSidebarOnMobile={true}>
+                          <EarningsWallet />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
                     path="/game/:sessionId"
                     element={
                       isAuthenticated && isOnboarded ? (
@@ -504,6 +530,8 @@ const App = () => {
                   <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
                   <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
                   <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
+                  <Route path="/prize-vault" element={<Layout showSidebar={true} isFluid={true}><PrizeVaultPage /></Layout>} />
+                  <Route path="/redeem-cash" element={<Layout showSidebar={true} isFluid={true}><RedeemCashPage /></Layout>} />
 
                   {/* SEO SEO DOMINATION ROUTES */}
                   <Route path="/founder" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
@@ -511,9 +539,7 @@ const App = () => {
                   <Route path="/about-hriskesh-giri" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
                   <Route path="/hriskesh-giri-ai-developer" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
                   
-                  <Route path="/best-ai-girlfriend-app" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
-                  <Route path="/virtual-girlfriend-ai" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
-                  <Route path="/ai-relationship-chat" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  {/* Relationship SEO disabled for now */}
                   
                   <Route path="/future-of-social-media" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
                   <Route path="/next-gen-social-platform" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
@@ -521,8 +547,98 @@ const App = () => {
                   <Route path="/blog" element={<Layout showSidebar={false}><BlogPage /></Layout>} />
                   <Route path="/blog/:slug" element={<Layout showSidebar={false}><BlogPostPage /></Layout>} />
 
-                  <Route
-                    path="/admin"
+                    <Route
+                      path="/creator-center"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true}>
+                            <CreatorCenterPage />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+
+                    <Route
+                      path="/ipl-arena"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true}>
+                            <IplDashboard />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+
+                    <Route
+                      path="/live-arena"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true} showRightSidebar={false}>
+                            <LiveArena />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+                    <Route
+                      path="/desi-arena"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true} showRightSidebar={false}>
+                            <DesiArena />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+
+                    <Route
+                      path="/career-assistant"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true}>
+                            <CareerAssistant />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+
+                    <Route
+                      path="/kyc"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true}>
+                            <KYCVerification />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+
+                    <Route
+                      path="/antigravity-engine"
+                      element={
+                        isAuthenticated && isOnboarded ? (
+                          <Layout showSidebar={true} isFluid={true}>
+                            <AntigravityEnginePage />
+                          </Layout>
+                        ) : (
+                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                        )
+                      }
+                    />
+
+                    <Route
+                      path="/admin"
                     element={
                       isAuthenticated && authUser?.role === "admin" ? (
                         <Layout showSidebar={true} showRightSidebar={false} isFluid={true}>

@@ -53,6 +53,17 @@ router.put("/change-password", changePassword);
 router.delete("/delete-account", deleteAccount);
 router.post("/claim-daily-reward", claimDailyReward);
 
+// Prize Vault & Rewards
+router.get("/prizes", async (req, res) => {
+  try {
+    const { default: PrizeVault } = await import("../models/PrizeVault.js");
+    const prizes = await PrizeVault.find({ userId: req.user._id }).sort({ awardedAt: -1 });
+    res.json(prizes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Migration route (Temporary)
 router.post("/migrate-usernames", migrateUsernames);
 

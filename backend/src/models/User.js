@@ -200,6 +200,42 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  // Fan Identity Onboarding fields
+  favTeam: { 
+    type: String, 
+    enum: ['CSK', 'RCB', 'MI', 'GT', 'LSG', 'RR', 'DC', 'PBKS', 'KKR', 'SRH', 'NONE'],
+    default: 'NONE'
+  },
+  gender: { 
+    type: String, 
+    enum: ['Male', 'Female', 'Other', 'NONE'],
+    default: 'NONE'
+  },
+  state: { type: String, default: "" },
+  city: { type: String, default: "" },
+  bondCoins: { 
+    type: Number, 
+    default: 500 // Onboarding starting reward
+  },
+  rank: { 
+    type: String, 
+    enum: ['Rookie', 'All-Star', 'Legend'],
+    default: 'Rookie' 
+  },
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  referralCode: {
+    type: String,
+    unique: true
+  },
+  registrationIP: { type: String, index: true },
+  isBanned: { type: Boolean, default: false },
+  wallet: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'UserWallet'
+  }
 }
   , {
     timestamps: true,
@@ -212,6 +248,10 @@ userSchema.virtual("friendCount").get(function () {
 });
 
 userSchema.pre("save", async function (next) {
+  if (!this.referralCode) {
+    this.referralCode = `BOND-${this._id.toString().slice(-6).toUpperCase()}`;
+  }
+
   if (!this.isModified("password")) return next();
 
   try {

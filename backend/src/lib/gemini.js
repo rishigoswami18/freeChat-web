@@ -36,6 +36,8 @@ export const getAIResponse = async (prompt, history = [], persona = "girlfriend"
         
         const fallbackMessages = {
             girlfriend: "I'm having a little trouble thinking clearly right now... ❤️ Give me a moment?",
+            personal_coach: "The AI Gateway is experiencing high latency. Dr. Bond is temporarily unavailable. 🌿",
+            coach: "Dr. Bond's analytical engine is currently under maintenance. Please try again soon. 🌿",
             doctor: "The AI Gateway is experiencing high latency. Dr. Bond is temporarily unavailable. 🌿",
             default: "I'm a bit overwhelmed at the moment. Let's talk in a minute! ✨"
         };

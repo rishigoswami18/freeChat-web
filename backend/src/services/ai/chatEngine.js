@@ -15,7 +15,7 @@ const SAFETY_SETTINGS = [
     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
-const MODELS = ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.0-flash"];
+const MODELS = ["models/gemini-1.5-flash", "models/gemini-1.5-pro", "models/gemini-2.0-flash-exp"]; // Prepending 'models/' for absolute SDK compatibility
 
 export const ChatEngine = {
     /**
@@ -33,8 +33,8 @@ export const ChatEngine = {
         if (!apiKey) throw new Error("GEMINI_API_KEY_MISSING");
 
         // 1. Prepare and Scrub History
-        const formattedHistory = ChatEngine._alignHistory(history);
-        const cleanedHistory = SafetyHandler.scrubHistory(formattedHistory).slice(-12);
+        const scrubbedHistory = SafetyHandler.scrubHistory(history);
+        const alignedHistory = ChatEngine._alignHistory(scrubbedHistory).slice(-12);
 
         // 2. Try models in order (Fallback Logic handled by Engine, delivery by Gateway)
         for (const modelName of MODELS) {
@@ -47,7 +47,7 @@ export const ChatEngine = {
                     messages: [
                         { role: "user", parts: [{ text: "Wake up" }] },
                         { role: "model", parts: [{ text: PersonaManager.getInitialMessage(persona, userName) }] },
-                        ...cleanedHistory,
+                        ...alignedHistory,
                         { 
                             role: "user", 
                             parts: [

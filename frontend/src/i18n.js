@@ -46,6 +46,14 @@ const resources = {
             post: "Post",
             share_thoughts: "Share your thoughts, a photo, or a video...",
             your_story: "Your story",
+            ipl_arena: "IPL Arena",
+            desi_arena: "Desi Arena",
+            boundary_4: "BOUNDARY!",
+            boundary_6: "SIXER!",
+            wicket: "WICKET!",
+            score_update: "Score is now",
+            next_ball: "Next ball is coming...",
+            invite_village: "Invite Your Village & Earn Desi Coins",
         }
     },
     hi: {
@@ -76,6 +84,7 @@ const resources = {
             everything_free: "आपकी हर ज़रूरत, बिल्कुल मुफ़्त",
             packed_features: "उन सुविधाओं से भरपूर जिनके लिए अन्य ऐप्स शुल्क लेते हैं। यहाँ, सब कुछ मुफ़्त है - हमेशा के लिए।",
             get_started: "बॉन्डबियॉन्ड आज़माने के लिए तैयार हैं?",
+            get_started: "तैयार हैं बॉन्डबियॉन्ड के लिए?",
             create_account: "अपना मुफ़्त खाता बनाएँ",
             free_forever: "100% मुफ़्त — कोई छिपा हुआ शुल्क नहीं",
             feed: "फ़ीड",
@@ -91,6 +100,44 @@ const resources = {
             post: "पोस्ट",
             share_thoughts: "अपने विचार, फ़ोटो या वीडियो साझा करें...",
             your_story: "आपकी कहानी",
+            ipl_arena: "IPL अरीना",
+            desi_arena: "देसी अरीना",
+            boundary_4: "चौका!",
+            boundary_6: "छक्का!",
+            wicket: "आउट!",
+            score_update: "स्कोर अब है",
+            next_ball: "अगली गेंद आ रही है...",
+            invite_village: "अपने गाँव को बुलाएं और देसी कॉइन्स कमाएं",
+        }
+    },
+    pa: {
+        translation: {
+            welcome: "ਜੀ ਆਇਆਂ ਨੂੰ",
+            login: "ਲੌਗਿਨ",
+            logout: "ਲੌਗਆਉਟ",
+            ipl_arena: "IPL ਅਖਾੜਾ",
+            desi_arena: "ਦੇਸੀ ਅਖਾੜਾ",
+            boundary_4: "ਚੌਕਾ! ਚਕਾ ਦੇ ਫੱਟੇ!",
+            boundary_6: "ਛੱਕਾ! ਬੱਲੇ ਬੱਲੇ!",
+            wicket: "ਵਿਕਟ! ਗਈ!",
+            score_update: "ਸਕੋਰ ਹੋ ਗਿਆ ਹੈ",
+            next_ball: "ਅਗਲੀ ਗੇਂਦ ਆ ਰਹੀ ਹੈ...",
+            invite_village: "ਪਿੰਡ ਦਿਆਂ ਮਿੱਤਰਾਂ ਨੂੰ ਬੁਲਾਓ ਤੇ ਦੇਸੀ ਸਿੱਕੇ ਕਮਾਓ",
+        }
+    },
+    bho: {
+        translation: {
+            welcome: "रउआ के स्वागत बा",
+            login: "लॉगिन",
+            logout: "लॉगआउट",
+            ipl_arena: "IPL अखाड़ा",
+            desi_arena: "देसी अखाड़ा",
+            boundary_4: "चौका! गर्दा उड़ा देहला!",
+            boundary_6: "छक्का! जियह हो बिहार के लाला!",
+            wicket: "आउट! गइल!",
+            score_update: "स्कोर भइल बा",
+            next_ball: "अगली गेंद आ रहल बा...",
+            invite_village: "गाँव के दोस्तन के बोलाईं और देसी सिक्का कमाईं",
         }
     },
     es: {

@@ -196,7 +196,7 @@ const GameDashboard = () => {
             <div className="max-w-6xl mx-auto relative z-10">
                 <header className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
                     <div className="space-y-4">
-                        <Link to="/couple" className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest text-white/60">
+                        <Link to="/profile" className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest text-white/60">
                             <ArrowLeft className="size-4" />
                             Back to Profile
                         </Link>
@@ -205,7 +205,7 @@ const GameDashboard = () => {
                                 <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent italic">BOND</span> ARENA
                             </h1>
                             <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px] mt-2 italic flex items-center gap-2">
-                                <Flame className="size-3 text-orange-400" /> Challenge your partner in strategic matches
+                                <Flame className="size-3 text-orange-400" /> Challenge your friends in strategic matches
                             </p>
                         </div>
                     </div>
@@ -221,7 +221,7 @@ const GameDashboard = () => {
                         <div className="p-8 bg-gradient-to-br from-primary/20 to-pink-500/20 rounded-[40px] border border-white/10 text-center space-y-4 relative overflow-hidden group">
                             <Heart className="absolute -bottom-6 -right-6 size-32 text-white/5 group-hover:scale-125 transition-transform duration-1000" />
                             <div className="text-4xl font-black italic tracking-tighter">LVL 42</div>
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Your Couple Synergy</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Your Gaming Sync</p>
                             <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mt-6">
                                 <div className="h-full bg-primary w-[70%] shadow-[0_0_15px_rgba(139,92,246,0.6)]" />
                             </div>

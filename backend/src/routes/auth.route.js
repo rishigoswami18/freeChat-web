@@ -1,11 +1,12 @@
 import express from "express";
 import { login, logout, onboard, signup, googleLogin, googleLoginWithAccessToken, requestOTP, forgotPassword, resetPassword } from "../controllers/auth.controller.js"
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { fraudDetection } from "../controllers/wallet.controller.js";
 
 const router = express.Router();
 
 router.post("/request-otp", requestOTP);
-router.post("/signup", signup);
+router.post("/signup", fraudDetection, signup);
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/google", googleLogin);

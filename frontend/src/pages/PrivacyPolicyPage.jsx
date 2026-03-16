@@ -1,70 +1,80 @@
+import React from "react";
+import { ShieldCheck, Eye, Lock, FileText } from "lucide-react";
+
 const PrivacyPolicyPage = () => {
     return (
-        <div className="min-h-screen bg-base-100 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto prose prose-sm sm:prose-base dark:prose-invert">
-                <h1 className="text-4xl font-black mb-10 tracking-tight italic uppercase text-primary">Privacy Policy</h1>
-                <p className="opacity-70 text-sm mb-12 font-bold tracking-widest uppercase">Last Updated: March 03, 2026</p>
+        <div className="min-h-screen bg-[#050508] text-white py-20 px-6 sm:px-12 font-outfit">
+            <div className="max-w-4xl mx-auto">
+                <div className="mb-16">
+                    <h1 className="text-5xl font-black italic tracking-tighter mb-4">Privacy Policy</h1>
+                    <p className="text-amber-500 font-bold uppercase tracking-[0.3em] text-xs">Data Protection Shield | Effective: March 16, 2026</p>
+                </div>
 
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">1. Introduction</h2>
-                    <p className="leading-relaxed">
-                        Welcome to <strong>BondBeyond</strong> (freechatweb.in). We are committed to protecting your personal information and your right to privacy.
-                        If you have any questions or concerns about our policy, or our practices with regards to your personal information, please contact us at
-                        <span className="text-primary italic px-1 underline underline-offset-4 decoration-primary/40 font-medium">freechatweb00@gmail.com</span>.
-                    </p>
-                </section>
+                <div className="space-y-12">
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-10 opacity-5">
+                            <ShieldCheck className="size-48" />
+                        </div>
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                <ShieldCheck className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">1. Our Commitment</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed relative z-10">
+                            At <strong>BondBeyond</strong>, we recognize that privacy is a cornerstone of trust. We collect minimal user data—such as your Favorite Team and Location—solely to personalize the <strong>'Antigravity'</strong> visualizations and ensure you get relevant regional updates. 
+                        </p>
+                    </section>
 
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">2. Information We Collect</h2>
-                    <div className="space-y-4">
-                        <p>We collect personal information that you voluntarily provide to us when registering at BondBeyond, expressing an interest in obtaining information about us or our products and services, when participating in activities on our site, or otherwise contacting us.</p>
-                        <ul className="list-disc pl-5 space-y-2 opacity-80">
-                            <li><strong>Personal Information:</strong> Name, Email Address, Gender, Date of Birth.</li>
-                            <li><strong>Content Provided:</strong> Chat messages, posts, reels, and stories.</li>
-                            <li><strong>Credentials:</strong> Passwords and similar security info.</li>
-                            <li><strong>Payment Data:</strong> Payment details via our secure third-party payment gateways (not stored on our servers).</li>
-                        </ul>
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                                <Eye className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">2. Data Non-Disclosure</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed">
+                            We have a strict non-disclosure policy. We **do not sell, rent, or trade** user data to third parties or advertising conglomerates. Your fan journey and analytical history remain strictly between you and the BondBeyond platform.
+                        </p>
+                    </section>
+
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                                <Lock className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">3. Transactional Security</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed mb-6">
+                            All financial transactions for 'Bond Coins' are processed through industry-standard, **PCI-DSS compliant gateways (Razorpay)**. 
+                        </p>
+                        <div className="p-6 bg-white/[0.03] rounded-3xl border border-white/10">
+                            <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Encryption Standards</p>
+                            <p className="text-sm text-white/70 leading-relaxed">
+                                We utilize 256-bit SSL encryption to protect your identity and payment information. BondBeyond never stores sensitive card details on its servers.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-500">
+                                <FileText className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">4. Your Rights</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed">
+                            You have the right to request access to your data or its deletion at any time. Simply contact our support team to clear your vault and personal profile from our analytical engine.
+                        </p>
+                    </section>
+                </div>
+
+                <div className="mt-20 p-10 bg-white/5 border border-white/10 rounded-[40px] flex flex-col items-center">
+                    <p className="text-white/30 text-center mb-6">For detailed data inquiries, reach out to our DPO at:</p>
+                    <div className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-black italic text-indigo-400">
+                        privacy@freechatweb.in
                     </div>
-                </section>
-
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">3. Google AdSense & Third-Party Advertising</h2>
-                    <div className="space-y-4">
-                        <p>We use third-party advertising companies to serve ads when you visit our website. These companies may use information about your visits to this and other websites in order to provide advertisements about goods and services of interest to you.</p>
-                        <p><strong>Google AdSense & DoubleClick Cookie:</strong></p>
-                        <ul className="list-disc pl-5 space-y-2 opacity-80">
-                            <li>Google, as a third-party vendor, uses cookies to serve ads on our site.</li>
-                            <li>Google's use of the DART cookie enables it to serve ads to our users based on their visit to our site and other sites on the Internet.</li>
-                            <li>Users may opt out of the use of the DART cookie by visiting the Google Ad and Content Network privacy policy.</li>
-                        </ul>
-                    </div>
-                </section>
-
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">4. Cookies and Web Beacons</h2>
-                    <p className="leading-relaxed">
-                        Like any other website, BondBeyond uses 'cookies'. These cookies are used to store information including visitors' preferences,
-                        and the pages on the website that the visitor accessed or visited. The information is used to optimize the users' experience
-                        by customizing our web page content based on visitors' browser type and/or other information.
-                    </p>
-                </section>
-
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">5. Data Retention & Privacy Rights</h2>
-                    <div className="space-y-4">
-                        <p>We keep your information for as long as necessary to fulfill the purposes outlined in this privacy policy unless otherwise required by law.</p>
-                        <p><strong>GDPR/CCPA Compliance:</strong> If you are a resident of the European Economic Area (EEA) or California, you have certain data protection rights, including the right to access, rectify, or erase your data. Please contact us to exercise these rights.</p>
-                    </div>
-                </section>
-
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">6. Contact Information</h2>
-                    <p className="bg-base-200 p-6 rounded-2xl border border-base-300">
-                        If you have questions about this policy, you may email us at:
-                        <br />
-                        <span className="font-bold text-lg text-primary">freechatweb00@gmail.com</span>
-                    </p>
-                </section>
+                </div>
             </div>
         </div>
     );

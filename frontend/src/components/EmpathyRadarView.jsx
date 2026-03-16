@@ -14,19 +14,20 @@ const EmpathyRadarView = memo(({ channelId }) => {
       const res = await axiosInstance.get(`/radar/${channelId}`);
       return res.data;
     },
-    refetchInterval: 10000, // Sync every 10 seconds for "Live" monitoring
-    staleTime: 5000,
+    refetchInterval: 5000, // Faster polling during initialization
+    staleTime: 3000,
   });
 
-  if (isLoading && !radar) {
+  // Show initializing if loading or if we have a "202 Accepted" status (no currentVibe yet)
+  if ((isLoading && !radar) || (radar && !radar.currentVibe)) {
     return (
       <div className="p-4 bg-base-100/40 backdrop-blur-2xl border border-base-content/5 rounded-3xl mb-4 transition-all">
         <div className="flex items-center gap-2 mb-2">
           <Activity className="size-3 text-primary animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Radar Initializing...</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Radar Scanning Vibes...</span>
         </div>
         <div className="w-full bg-base-content/5 h-1.5 rounded-full overflow-hidden">
-          <div className="h-full bg-primary/20 w-1/2 animate-shimmer" />
+          <div className="h-full bg-primary/40 w-full animate-shimmer" />
         </div>
       </div>
     );

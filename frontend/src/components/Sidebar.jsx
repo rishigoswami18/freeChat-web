@@ -1,5 +1,6 @@
 import { memo, useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { updateProfile, getCoupleStatus, claimDailyReward } from "../lib/api";
 import { APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
@@ -10,16 +11,20 @@ import useAuthUser from "../hooks/useAuthUser";
 import {
   Home, Users, HeartHandshake, Crown, Gamepad2, Search, Film, 
   MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, 
-  Heart, Sparkles, PlusCircle, Compass, Menu
+  Heart, Sparkles, PlusCircle, Compass, Menu, Zap, DollarSign, Globe, Newspaper, Gift
 } from "lucide-react";
 
 import CreateStoryModal from "./CreateStoryModal";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
+import FocusModeView from "./FocusModeView";
 import Logo from "./Logo";
+import { logout } from "../lib/api";
 
 // === STATIC CONFIGURATION ===
 const staticNavItems = [
   { to: "/", icon: Home, labelKey: "Home" },
+  { to: "/live-arena", icon: Zap, label: "IPL Live", isSacred: true },
+  { to: "/feed", icon: Newspaper, labelKey: "feed" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
   { to: "/communities", icon: Users, labelKey: "Communities" },
@@ -27,8 +32,8 @@ const staticNavItems = [
   { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
   { to: "/notifications", icon: Heart, labelKey: "notifications" },
   { to: "/games", icon: Gamepad2, labelKey: "Games" },
-  { to: "/couple", icon: HeartHandshake, label: "Soul Bond" },
   { to: "/gem-shop", icon: Crown, labelKey: "Premium" },
+  { to: "/prize-vault", icon: Gift, label: "Prize Vault" },
 ];
 
 // === PERFORMANCE OPTIMIZATION: Memoized Sub-Components ===
@@ -83,6 +88,7 @@ const Sidebar = memo(() => {
   
   // Modals state
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
 
   // === RETENTION HOOK: Tab Title Optimization ===
@@ -97,7 +103,6 @@ const Sidebar = memo(() => {
         const hooks = [
           "Don't break your streak! 🔥",
           "New Reels for you! 🍿",
-          "Your partner is waiting... ❤️",
           "Claim your daily gems! 💎"
         ];
         document.title = hooks[Math.floor(Math.random() * hooks.length)];
@@ -145,6 +150,16 @@ const Sidebar = memo(() => {
     }
   });
 
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout();
+      queryClient.setQueryData(["authUser"], null);
+      window.location.href = "/login";
+    } catch (err) {
+      toast.error("Logout failed. Try clearing cache.");
+    }
+  }, [queryClient]);
+
   const handleDPUpdate = useCallback(async (base64) => {
     await doUpdate({ profilePic: base64 });
     setViewingDP(null);
@@ -169,18 +184,7 @@ const Sidebar = memo(() => {
       id: `tour-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, '-')}`
     }));
 
-    if (isCoupled) {
-      const inboxIndex = items.findIndex(item => item.to === "/inbox");
-      if (inboxIndex !== -1) {
-        items.splice(inboxIndex + 1, 0, {
-          to: `/chat/${partnerId || 'ai-user-id'}`,
-          icon: Sparkles,
-          label: "Partner Chat",
-          id: "tour-ai-partner",
-          isSacred: true
-        });
-      }
-    }
+    // Couple feature disabled for now
     return items;
   }, [isCoupled, partnerId]);
 
@@ -335,24 +339,107 @@ const Sidebar = memo(() => {
           </span>
         </a>
 
-        {/* Menu (More) */}
-        <button
-          className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content hover:bg-base-content/5 group/nav"
-          title="More"
-        >
-          <div className="relative shrink-0 flex items-center justify-center w-8">
-            <Menu className="size-[26px] stroke-2 opacity-90 transition-transform duration-200 group-hover/nav:scale-105" />
-          </div>
-          <span className="hidden xl:block text-[16px] tracking-tight truncate opacity-90">
-            More
-          </span>
-        </button>
+        {/* Menu (More) — Optimized with Premium Dropdown */}
+        <div className="dropdown dropdown-top dropdown-end w-full">
+          <label 
+            tabIndex={0} 
+            className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content hover:bg-base-content/5 group/nav cursor-pointer"
+          >
+            <div className="relative shrink-0 flex items-center justify-center w-8">
+              <Menu className="size-[26px] stroke-2 opacity-90 transition-transform duration-200 group-hover/nav:scale-105" />
+            </div>
+            <span className="hidden xl:block text-[16px] tracking-tight truncate opacity-90 font-medium">
+              More
+            </span>
+          </label>
+          <ul tabIndex={0} className="dropdown-content z-[60] menu p-2 shadow-2xl bg-base-100 border border-base-content/10 rounded-2xl w-64 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <li className="menu-title px-4 py-2 opacity-40 text-[10px] uppercase font-black tracking-widest">Bond OS Menu</li>
+            
+            <li>
+              <Link to="/creator-center" className="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-500/10 text-emerald-500 font-bold">
+                <DollarSign className="size-5 fill-emerald-500/20" />
+                Creator Monetization
+              </Link>
+            </li>
+            
+            <li>
+              <Link to="/ipl-arena" className="flex items-center gap-3 p-3 rounded-xl hover:bg-orange-500/10 text-orange-500 font-bold">
+                <Zap className="size-5 fill-orange-500/20" />
+                IPL Live Arena
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/antigravity-engine" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 text-blue-500 font-bold">
+                <Globe className="size-5 fill-blue-500/20" />
+                Antigravity Engine
+              </Link>
+            </li>
+
+            <li>
+              <button 
+                onClick={() => setIsFocusModalOpen(true)}
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/10 text-primary font-bold"
+              >
+                <Zap className="size-5 fill-primary/20" />
+                AI Career Focus Mode
+              </button>
+            </li>
+
+            <li>
+              <Link to="/settings" className="flex items-center gap-3 p-3 rounded-xl">
+                 <BadgeCheck className="size-5 text-info" />
+                 Verification & Settings
+              </Link>
+            </li>
+
+            <div className="divider my-0 opacity-5"></div>
+
+            <li>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-3 p-3 rounded-xl text-error hover:bg-error/10"
+              >
+                Logout Account
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <CreateStoryModal
         isOpen={isStoryModalOpen}
         onClose={() => setIsStoryModalOpen(false)}
       />
+
+      {/* AI Career Focus Mode Modal */}
+      <AnimatePresence>
+        {isFocusModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFocusModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-xl z-10"
+            >
+               <button 
+                 onClick={() => setIsFocusModalOpen(false)}
+                 className="absolute -top-12 right-0 text-white opacity-50 hover:opacity-100 font-bold bg-white/10 px-4 py-2 rounded-full"
+               >
+                 Close Esc
+               </button>
+               <FocusModeView />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {viewingDP && (
         <ProfilePhotoViewer

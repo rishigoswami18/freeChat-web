@@ -115,8 +115,8 @@ const LandingPage = () => {
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t('what_is')}</h2>
                     <p className="text-lg opacity-70 leading-relaxed mt-6">
                         BondBeyond is a free social platform built for real human connection.
-                        Whether you're chatting with friends, playing couple games,
-                        sharing stories, or learning a new language — BondBeyond makes
+                        Whether you're chatting with friends, building your community,
+                        sharing stories, or boosting your career with AI — BondBeyond makes
                         every interaction meaningful.
                     </p>
                 </section>

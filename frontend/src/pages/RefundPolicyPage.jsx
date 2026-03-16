@@ -1,50 +1,60 @@
+import React from "react";
+import { RefreshCcw, ShieldCheck, HelpCircle } from "lucide-react";
+
 const RefundPolicyPage = () => {
     return (
-        <div className="min-h-screen bg-base-100 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto prose prose-sm sm:prose-base dark:prose-invert">
-                <h1 className="text-4xl font-black mb-10 tracking-tight italic uppercase text-primary">Refund & Cancellation Policy</h1>
-                <p className="opacity-70 text-sm mb-12 font-bold tracking-widest uppercase">Last Updated: March 12, 2026</p>
+        <div className="min-h-screen bg-[#050508] text-white py-20 px-6 sm:px-12 font-outfit">
+            <div className="max-w-4xl mx-auto">
+                <div className="mb-16">
+                    <h1 className="text-5xl font-black italic tracking-tighter mb-4">Refund Policy</h1>
+                    <p className="text-amber-500 font-bold uppercase tracking-[0.3em] text-xs">Customer Assurance | Effective: March 16, 2026</p>
+                </div>
 
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">1. Subscription Cancellation</h2>
-                    <p className="leading-relaxed">
-                        Users can cancel their <strong>BondBeyond Premium</strong> subscription at any time through their user dashboard or membership settings. 
-                        Upon cancellation, your premium features will remain active until the end of the current billing cycle. No further charges will be applied.
-                    </p>
-                </section>
+                <div className="space-y-12">
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+                                <RefreshCcw className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">1. Virtual Assets (Bond Coins)</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed">
+                            Since BondBeyond provides immediate access to digital tools, analytics, and social recognition upon the purchase of 'Bond Coins', all virtual currency transactions are **non-refundable**. Once a pack is credited to your vault, it is considered consumed.
+                        </p>
+                    </section>
 
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">2. Refund Eligibility</h2>
-                    <div className="space-y-4">
-                        <p>We want you to be satisfied with BondBeyond. We offer a <strong>15-day money-back guarantee</strong> for new premium subscriptions if you find the service does not meet your expectations. To be eligible for a refund:</p>
-                        <ul className="list-disc pl-5 space-y-2 opacity-80">
-                            <li>The refund request must be made within 15 days of the initial purchase date.</li>
-                            <li>The user must not have violated our Terms of Service.</li>
-                            <li>Refunds are not applicable to the 'Gem' purchases once they have been partially or fully consumed within the app.</li>
-                            <li>Refunds are not applicable to renewals or subsequent months of service.</li>
-                        </ul>
-                    </div>
-                </section>
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                                <ShieldCheck className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">2. Exceptional Circumstances</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed mb-6">
+                            We value our fans. In the rare event of a technical failure where your account is charged but coins are not credited (and verification fails), our team will manually credit the coins or initiate a reversal within **5-7 business days**.
+                        </p>
+                        <div className="p-4 bg-white/[0.03] rounded-2xl border border-white/5 text-xs text-white/40 italic">
+                            Note: Transaction IDs from Razorpay are required for all investigation requests.
+                        </div>
+                    </section>
 
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">3. Processing Refunds</h2>
-                    <p className="leading-relaxed">
-                        Once your refund request is submitted and reviewed, we will notify you of the approval or rejection. 
-                        If approved, your refund will be initiated back to your original payment method (Credit Card, UPI, or Wallet). 
-                        The credited amount should reflect in your account within <strong>5-10 business days</strong>, depending on your bank's processing time.
-                    </p>
-                </section>
+                    <section className="bg-white/5 border border-white/10 rounded-[40px] p-8 md:p-12">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="size-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                                <HelpCircle className="size-6" />
+                            </div>
+                            <h2 className="text-2xl font-black italic">3. Support Assistance</h2>
+                        </div>
+                        <p className="text-white/70 leading-relaxed">
+                            If you face any issues with your 'Elite Match Pass' or 'Vault Recharge', please reach out immediately. We are committed to resolving all valid payment discrepancies to maintain the integrity of the Antigravity ecosystem.
+                        </p>
+                    </section>
+                </div>
 
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold mb-6 text-base-content/90 border-b border-primary/20 pb-2">4. Contact Support</h2>
-                    <p className="bg-base-200 p-6 rounded-2xl border border-base-300">
-                        For any refund, cancellation, or billing queries, please reach out to our dedicated support team:
-                        <br /><br />
-                        <span className="font-bold text-lg text-primary">freechatweb00@gmail.com</span>
-                        <br />
-                        <span className="text-sm opacity-60 italic">Expected response time: Within 24-48 hours.</span>
-                    </p>
-                </section>
+                <div className="mt-20 p-10 bg-white/5 border border-white/10 rounded-[40px] text-center">
+                    <p className="text-white/40 mb-4">Payment disputes? Email our support hub:</p>
+                    <a href="mailto:support@freechatweb.in" className="text-xl font-bold text-white hover:text-amber-500 transition-colors">support@freechatweb.in</a>
+                </div>
             </div>
         </div>
     );

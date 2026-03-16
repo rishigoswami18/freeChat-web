@@ -183,7 +183,7 @@ const RightSidebar = memo(() => {
                                 Dr. Bond <Sparkles className="size-3.5 text-green-400" />
                             </div>
                             <div className="text-[12px] text-green-500 font-medium truncate">
-                                AI Relationship Coach
+                                AI Personal Coach
                             </div>
                         </div>
                     </Link>

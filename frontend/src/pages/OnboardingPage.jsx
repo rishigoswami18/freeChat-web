@@ -1,228 +1,286 @@
-import { useState } from "react";
-import useAuthUser from "../hooks/useAuthUser";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { completeOnboarding } from "../lib/api";
-import { Loader2, MapPin, HeartHandshake, Shuffle, Camera } from "lucide-react";
-import { LANGUAGES } from "../constants";
+import useAuthUser from "../hooks/useAuthUser";
+import { Trophy, User, MapPin, ChevronRight, CheckCircle, Zap } from "lucide-react";
 import Logo from "../components/Logo";
+
+const IPL_TEAMS = [
+  { id: "CSK", name: "Chennai Super Kings", color: "#FDB913", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/CHH/Logos/LogoLight/CSK.png" },
+  { id: "RCB", name: "Royal Challengers Bengaluru", color: "#D11D26", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/RCB/Logos/LogoLight/RCB.png" },
+  { id: "MI", name: "Mumbai Indians", color: "#004BA0", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/MI/Logos/LogoLight/MI.png" },
+  { id: "GT", name: "Gujarat Titans", color: "#1B2133", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/GT/Logos/LogoLight/GT.png" },
+  { id: "LSG", name: "Lucknow Super Giants", color: "#0057E2", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/LSG/Logos/LogoLight/LSG.png" },
+  { id: "RR", name: "Rajasthan Royals", color: "#EA1A85", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/RR/Logos/LogoLight/RR.png" },
+  { id: "DC", name: "Delhi Capitals", color: "#0078BC", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/DC/Logos/LogoLight/DC.png" },
+  { id: "PBKS", name: "Punjab Kings", color: "#D31D24", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/PBKS/Logos/LogoLight/PBKS.png" },
+  { id: "KKR", name: "Kolkata Knight Riders", color: "#3A225D", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/KKR/Logos/LogoLight/KKR.png" },
+  { id: "SRH", name: "Sunrisers Hyderabad", color: "#FF822A", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/SRH/Logos/LogoLight/SRH.png" },
+];
+
+const STATE_CITY_DATA = {
+  "Punjab": ["Jalandhar", "Ludhiana", "Amritsar", "Patiala", "Mohali"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem", "Trichy"],
+  "Karnataka": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi"],
+  "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Meerut"],
+  "West Bengal": ["Kolkata", "Asansol", "Siliguri", "Durgapur", "Howrah"],
+};
 
 const OnboardingPage = () => {
   const { authUser } = useAuthUser();
   const queryClient = useQueryClient();
-
-  const [formState, setFormState] = useState({
-    fullName: authUser?.fullName || "",
-    bio: authUser?.bio || "",
-    nativeLanguage: authUser?.nativeLanguage || "",
-    learningLanguage: authUser?.learningLanguage || "",
-    location: authUser?.location || "",
-    profilePic: authUser?.profilePic || "",
-    dateOfBirth: (authUser?.dateOfBirth && !isNaN(new Date(authUser.dateOfBirth).getTime()))
-      ? new Date(authUser.dateOfBirth).toISOString().split("T")[0]
-      : "",
+  const [step, setStep] = useState(1);
+  
+  const [formState, setFormState] = useState(() => {
+    const saved = localStorage.getItem("bondbeyond_onboarding_draft");
+    const defaultData = {
+      fullName: authUser?.fullName || "",
+      favTeam: "NONE",
+      gender: "NONE",
+      state: "",
+      city: "",
+      bio: "I'm a die-hard IPL fan!",
+      nativeLanguage: "hindi",
+      learningLanguage: "english",
+      location: "",
+    };
+    return saved ? JSON.parse(saved) : defaultData;
   });
+
+  // Persist draft to local storage
+  useMemo(() => {
+    localStorage.setItem("bondbeyond_onboarding_draft", JSON.stringify(formState));
+  }, [formState]);
 
   const { mutate: onboardingMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
     onSuccess: () => {
-      toast.success("Profile onboarded successfully");
+      localStorage.removeItem("bondbeyond_onboarding_draft");
+      toast.success("Welcome to the Arena! 🏟️ +500 Coins added!");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
-
     onError: (error) => {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     },
   });
 
+  const updateTheme = (color) => {
+    document.documentElement.style.setProperty("--primary-color", color);
+  };
+
+  const handleTeamSelect = (teamId, color) => {
+    setFormState({ ...formState, favTeam: teamId });
+    updateTheme(color);
+    setTimeout(() => setStep(2), 600);
+  };
+
+  const nextStep = () => setStep(step + 1);
+  const prevStep = () => setStep(step - 1);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    if (!formState.city || !formState.gender) return toast.error("Please fill all details!");
     onboardingMutation(formState);
   };
 
-  // const handleRandomAvatar = () => {
-  //   const idx = Math.floor(Math.random() * 100) + 1; // 1-100 included
-  //   const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
-
-  //   setFormState({ ...formState, profilePic: randomAvatar });
-  //   toast.success("Random profile picture generated!");
-  // };
-
-  const handleRandomAvatar = () => {
-    const randomSeed = Math.random().toString(36).substring(2, 10); // random 8-char string
-    const randomAvatar = `https://api.dicebear.com/7.x/adventurer/svg?seed=${randomSeed}`;
-
-    setFormState({ ...formState, profilePic: randomAvatar });
-    toast.success("Random profile picture generated!");
-  };
-
+  const progress = (step / 2) * 100;
 
   return (
-    <div className="min-h-screen bg-base-100 flex items-center justify-center p-4">
-      <div className="card bg-base-200 w-full max-w-3xl shadow-xl">
-        <div className="card-body p-6 sm:p-8">
-          <div className="flex justify-center mb-6">
-            <Logo className="size-12" showText={false} />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-1">Complete Your Profile</h1>
-          <div className="text-[9px] font-black uppercase tracking-[0.4em] opacity-30 text-center mb-6">
-            Premium Relationship Experience
-          </div>
+    <div className="min-h-screen bg-[#0a0c14] text-white flex flex-col font-outfit overflow-hidden relative">
+      <div className="absolute inset-0 bg-primary/5 blur-[120px] pointer-events-none" />
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* PROFILE PIC CONTAINER */}
-            <div className="flex flex-col items-center justify-center space-y-4">
-              {/* IMAGE PREVIEW */}
-              <div className="size-32 rounded-full bg-base-300 overflow-hidden">
-                {formState.profilePic ? (
-                  <img
-                    src={formState.profilePic}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <Camera className="size-12 text-base-content opacity-40" />
-                  </div>
-                )}
-              </div>
+      {/* Cricket Pitch Progress Bar */}
+      <div className="w-full h-3 bg-[#13331d] relative overflow-hidden">
+        {/* Pitch markings */}
+        <div className="absolute inset-0 flex justify-between px-12 pointer-events-none opacity-40">
+          <div className="h-full w-1 bg-white" />
+          <div className="h-full w-1 bg-white" />
+          <div className="absolute left-1/2 -translate-x-1/2 h-full w-1 bg-white" />
+        </div>
+        
+        {/* Grass texture effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-green-900/20 via-transparent to-green-900/20" />
 
-              {/* Generate Random Avatar BTN */}
-              <div className="flex items-center gap-2">
-                <button type="button" onClick={handleRandomAvatar} className="btn btn-accent">
-                  <Shuffle className="size-4 mr-2" />
-                  Generate Random Avatar
-                </button>
-              </div>
-            </div>
+        <motion.div 
+          className="h-full bg-primary relative shadow-[0_0_30px_rgba(34,197,94,0.3)]" 
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+        >
+          <motion.div 
+            className="absolute -right-6 -top-5 text-3xl filter drop-shadow-lg"
+            animate={{ 
+              x: [0, 4, 0],
+              y: [0, -2, 0]
+            }}
+            transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut" }}
+          >
+            🏏
+          </motion.div>
+        </motion.div>
+      </div>
 
-            {/* FULL NAME */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Full Name</span>
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formState.fullName}
-                onChange={(e) => setFormState({ ...formState, fullName: e.target.value })}
-                className="input input-bordered w-full"
-                placeholder="Your full name"
-              />
-            </div>
-
-            {/* BIO */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Bio</span>
-              </label>
-              <textarea
-                name="bio"
-                value={formState.bio}
-                onChange={(e) => setFormState({ ...formState, bio: e.target.value })}
-                className="textarea textarea-bordered h-24"
-                placeholder="Tell others about yourself and your language learning goals"
-              />
-            </div>
-
-            {/* LANGUAGES */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* NATIVE LANGUAGE */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Native Language</span>
-                </label>
-                <select
-                  name="nativeLanguage"
-                  value={formState.nativeLanguage}
-                  onChange={(e) => setFormState({ ...formState, nativeLanguage: e.target.value })}
-                  className="select select-bordered w-full"
-                >
-                  <option value="">Select your native language</option>
-                  {LANGUAGES.map((lang) => (
-                    <option key={`native-${lang}`} value={lang.toLowerCase()}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* LEARNING LANGUAGE */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Learning Language</span>
-                </label>
-                <select
-                  name="learningLanguage"
-                  value={formState.learningLanguage}
-                  onChange={(e) => setFormState({ ...formState, learningLanguage: e.target.value })}
-                  className="select select-bordered w-full"
-                >
-                  <option value="">Select language you're learning</option>
-                  {LANGUAGES.map((lang) => (
-                    <option key={`learning-${lang}`} value={lang.toLowerCase()}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* LOCATION */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Location</span>
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute top-1/2 transform -translate-y-1/2 left-3 size-5 text-base-content opacity-70" />
-                  <input
-                    type="text"
-                    name="location"
-                    value={formState.location}
-                    onChange={(e) => setFormState({ ...formState, location: e.target.value })}
-                    className="input input-bordered w-full pl-10"
-                    placeholder="City, Country"
-                  />
+      <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 relative z-10">
+        <div className="max-w-4xl w-full">
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ x: 300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -300, opacity: 0 }}
+                className="space-y-8"
+              >
+                <div className="text-center space-y-2">
+                  <h1 className="text-5xl font-black italic tracking-tighter">PICK YOUR WARRIORS ⚔️</h1>
+                  <p className="text-white/40 uppercase tracking-widest text-sm font-bold">Select your favorite IPL team</p>
                 </div>
-              </div>
 
-              {/* DATE OF BIRTH */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Date of Birth</span>
-                </label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formState.dateOfBirth}
-                  onChange={(e) => setFormState({ ...formState, dateOfBirth: e.target.value })}
-                  className="input input-bordered w-full"
-                  required
-                />
-              </div>
-            </div>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {IPL_TEAMS.map((team) => (
+                    <motion.button
+                      key={team.id}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleTeamSelect(team.id, team.color)}
+                      className={`relative aspect-square rounded-[32px] p-6 flex flex-col items-center justify-center gap-4 transition-all border ${
+                        formState.favTeam === team.id 
+                        ? "bg-primary border-white" 
+                        : "bg-white/5 border-white/10 hover:border-white/30 backdrop-blur-xl"
+                      }`}
+                    >
+                      <img src={team.logo} alt={team.id} className="w-full h-full object-contain" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-center">{team.id}</span>
+                      {formState.favTeam === team.id && (
+                        <CheckCircle className="absolute top-4 right-4 size-5 text-white" />
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-            {/* SUBMIT BUTTON */}
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ x: 300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -300, opacity: 0 }}
+                className="space-y-10 bg-white/5 border border-white/10 backdrop-blur-3xl p-10 lg:p-16 rounded-[48px]"
+              >
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-black italic tracking-tighter uppercase">Soldier Intel 📋</h2>
+                  <p className="text-white/40 uppercase tracking-widest text-xs font-bold font-outfit">Define your identity in the Arena</p>
+                </div>
 
-            <button className="btn btn-primary w-full rounded-2xl h-14" disabled={isPending} type="submit">
-              {!isPending ? (
-                <>
-                  <HeartHandshake className="size-5 mr-2" />
-                  Start Our Journey Together
-                </>
-              ) : (
-                <>
-                  <Loader2 className="animate-spin size-5 mr-2" />
-                  Preparing Your Bond...
-                </>
-              )}
-            </button>
-          </form>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* GENDER SELECT */}
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Gender Identity</label>
+                      <div className="flex gap-2">
+                        {['Male', 'Female', 'Other'].map((g) => (
+                          <motion.button
+                            type="button"
+                            key={g}
+                            whileTap={{ scale: 0.9 }}
+                            animate={{ 
+                              scale: formState.gender === g ? 1.05 : 1,
+                              borderColor: formState.gender === g ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.1)"
+                            }}
+                            onClick={() => setFormState({ ...formState, gender: g })}
+                            className={`flex-1 py-4 rounded-2xl text-xs font-black uppercase transition-all border ${
+                              formState.gender === g 
+                              ? "bg-primary text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]" 
+                              : "bg-white/5 text-white/40"
+                            }`}
+                          >
+                            {g}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* FULL NAME */}
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Warrior Display Name</label>
+                      <input 
+                        type="text" 
+                        value={formState.fullName}
+                        onChange={(e) => setFormState({ ...formState, fullName: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 focus:border-primary transition-all font-bold outline-none"
+                        placeholder="e.g. Rahul Sharma"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* STATE SELECT */}
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Home State</label>
+                      <select 
+                        value={formState.state}
+                        onChange={(e) => setFormState({ ...formState, state: e.target.value, city: "" })}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 focus:border-primary transition-all font-bold outline-none appearance-none"
+                      >
+                        <option value="" className="bg-black">Select State</option>
+                        {Object.keys(STATE_CITY_DATA).map(s => (
+                          <option key={s} value={s} className="bg-black">{s}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* CITY SELECT */}
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-white/40">Battleground City</label>
+                      <select 
+                        disabled={!formState.state}
+                        value={formState.city}
+                        onChange={(e) => setFormState({ ...formState, city: e.target.value, location: `${formState.city}, ${formState.state}` })}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-6 focus:border-primary transition-all font-bold outline-none appearance-none disabled:opacity-20"
+                      >
+                        <option value="" className="bg-black">Select City</option>
+                        {formState.state && STATE_CITY_DATA[formState.state].map(c => (
+                          <option key={c} value={c} className="bg-black">{c}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button 
+                      type="button"
+                      onClick={prevStep}
+                      className="px-8 bg-white/5 hover:bg-white/10 rounded-2xl font-black uppercase text-xs"
+                    >
+                      Back
+                    </button>
+                    <button 
+                      type="submit"
+                      disabled={isPending}
+                      className="flex-1 h-16 bg-primary text-white rounded-2xl font-black uppercase italic tracking-tighter flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-2xl"
+                    >
+                      {isPending ? "Syncing..." : <>Enter the Arena <Zap className="size-5 fill-white" /></>}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </main>
+
+      {/* Rewards Badge */}
+      <div className="p-10 flex justify-center">
+        <div className="flex items-center gap-3 bg-white/10 px-6 py-3 rounded-full border border-white/10">
+          <Zap className="size-4 text-amber-400 fill-amber-400" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Complete to Earn 500 Bond Coins</span>
         </div>
       </div>
     </div>
   );
 };
+
 export default OnboardingPage;

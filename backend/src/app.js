@@ -25,6 +25,10 @@ import adminRoutes from "./routes/admin.route.js";
 import apkRoutes from "./routes/apk.route.js";
 import communityRoutes from "./routes/community.route.js";
 import radarRoutes from "./routes/radar.route.js";
+import focusRoutes from "./routes/focus.route.js";
+import creatorRoutes from "./routes/creator.route.js";
+import iplRoutes from "./routes/ipl.route.js";
+import walletRoutes from "./routes/wallet.route.js";
 
 // Middleware
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -42,6 +46,21 @@ app.use(helmet({
 }));
 app.use(compression());
 app.set("trust proxy", 1);
+
+/**
+ * Nginx-Style Performance Headers (Specifically for Render/Edge)
+ * Ensures aggressive caching for media & animations.
+ */
+app.use((req, res, next) => {
+    // 1y Cache for Immutable Assets (Images, Icons, Animations)
+    if (req.url.match(/\.(jpg|jpeg|png|gif|svg|webp|mp4|webm|woff2)$/)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    }
+    // High-performance Proxy Headers
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    next();
+});
 
 // Global Rate Limiter
 const globalLimiter = rateLimit({
@@ -76,6 +95,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../../uploads")));
 /**
  * API ROUTES
  */
+app.get("/api/ping", (req, res) => res.json({ pong: true, time: new Date().toISOString() }));
+app.get("/api/health", (req, res) => res.status(200).send("OK")); // Render Keep-Alive
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
@@ -93,6 +114,10 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/apk", apkRoutes);
 app.use("/api/communities", communityRoutes);
 app.use("/api/radar", radarRoutes);
+app.use("/api/focus", focusRoutes);
+app.use("/api/creator", creatorRoutes);
+app.use("/api/ipl", iplRoutes);
+app.use("/api/wallet", walletRoutes);
 
 /**
  * FRONTEND HOSTING (Production)

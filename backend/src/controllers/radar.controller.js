@@ -12,15 +12,23 @@ export const getRadarPulse = async (req, res) => {
     // First attempt to get existing data (fast)
     let radar = await EmpathyRadar.findOne({ channelId });
 
-    // If data is old (> 10 mins) or doesn't exist, trigger a refresh in background or synchronously if needed
-    // For "Billion-Dollar" feel, we trigger a refresh if it's been more than 5 minutes
     const staleTime = 1000 * 60 * 5; 
-    if (!radar || (Date.now() - new Date(radar.lastPulse).getTime() > staleTime)) {
-      radar = await RadarEngine.performPulseCheck(channelId, userId);
+    const isStale = !radar || (Date.now() - new Date(radar.lastPulse).getTime() > staleTime);
+
+    if (isStale) {
+      console.log(`[Radar] Data is stale or missing for ${channelId}. Triggering background pulse...`);
+      // Fire-and-forget: Start the AI pulse check in the background
+      RadarEngine.performPulseCheck(channelId, userId).then(updated => {
+        console.log(`[Radar] Background pulse complete for ${channelId}`);
+      }).catch(err => {
+        console.error(`[Radar] Background pulse failed:`, err.message);
+      });
     }
 
     if (!radar) {
-      return res.status(404).json({ message: "Radar pulse not available yet." });
+      // If we have NO data yet, we can't show anything meaningful.
+      // But we don't want to hang the request.
+      return res.status(202).json({ message: "Initializing pulse..." });
     }
 
     res.status(200).json(radar);

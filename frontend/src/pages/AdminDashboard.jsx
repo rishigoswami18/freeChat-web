@@ -27,7 +27,8 @@ import {
     ArrowDownToLine,
     Plus,
     CheckCircle,
-    BadgeCheck
+    BadgeCheck,
+    Calendar
 } from "lucide-react";
 import {
     getAdminStats,
@@ -49,7 +50,14 @@ import {
     getAllReleases,
     createRelease,
     updateRelease,
-    deleteRelease
+    deleteRelease,
+    getAdminMatches,
+    createMatch,
+    updateMatchStatusAdmin,
+    resolveMatchBall,
+    getWithdrawalRequests,
+    processWithdrawal,
+    getFinancialStats
 } from "../lib/api";
 import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -101,6 +109,13 @@ const AdminDashboard = () => {
         isUpdateRequired: false,
         apkFile: null // base64
     });
+
+    // BondBeyond Specific State
+    const [matches, setMatches] = useState([]);
+    const [withdrawals, setWithdrawals] = useState([]);
+    const [bondStats, setBondStats] = useState(null);
+    const [newMatch, setNewMatch] = useState({ matchName: "", team1: { name: "" }, team2: { name: "" }, startTime: "" });
+    const [resolution, setResolution] = useState({ matchId: "", ballId: "", correctOutcome: "" });
 
     useEffect(() => {
         fetchStats();
@@ -233,7 +248,71 @@ const AdminDashboard = () => {
         if (activeTab === "invite") fetchFirebaseUsers();
         if (activeTab === "support") fetchSupportMessages();
         if (activeTab === "apk") fetchReleases();
+        if (activeTab === "bondMatches") fetchMatches();
+        if (activeTab === "bondWithdrawals") fetchWithdrawals();
+        if (activeTab === "bondStats") fetchBondStats();
     }, [activeTab]);
+
+    const fetchMatches = async () => {
+        try {
+            const data = await getAdminMatches();
+            setMatches(data || []);
+        } catch (err) { toast.error("Failed to load matches"); }
+    };
+
+    const fetchWithdrawals = async () => {
+        try {
+            const data = await getWithdrawalRequests();
+            setWithdrawals(data || []);
+        } catch (err) { toast.error("Failed to load withdrawals"); }
+    };
+
+    const fetchBondStats = async () => {
+        try {
+            const data = await getFinancialStats();
+            setBondStats(data);
+        } catch (err) { toast.error("Failed to load Bond stats"); }
+    };
+
+    const handleCreateMatch = async () => {
+        if (!newMatch.matchName || !newMatch.startTime) {
+            return toast.error("Match Name and Start Time required ⏳");
+        }
+        try {
+            await createMatch(newMatch);
+            toast.success("Match Scheduled! 🏏");
+            setNewMatch({ matchName: "", team1: { name: "" }, team2: { name: "" }, startTime: "" });
+            fetchMatches();
+        } catch (err) { 
+            console.error("Match creation error:", err);
+            toast.error(err.response?.data?.message || "Match creation failed"); 
+        }
+    };
+
+    const handleTogglePrediction = async (id, current) => {
+        try {
+            await updateMatchStatusAdmin(id, { isPredictionsEnabled: !current });
+            toast.success(`Predictions ${!current ? 'Enabled' : 'Disabled'}! 🔒`);
+            fetchMatches();
+        } catch (err) { toast.error("Update failed"); }
+    };
+
+    const handleResolveBall = async () => {
+        if (!resolution.matchId || !resolution.correctOutcome) return toast.error("Match & Outcome required");
+        try {
+            await resolveMatchBall(resolution);
+            toast.success("Coins Distributed! 🪙💎");
+            setResolution({ ...resolution, ballId: "", correctOutcome: "" });
+        } catch (err) { toast.error("Resolution failed"); }
+    };
+
+    const handleProcessWithdrawal = async (id, status) => {
+        try {
+            await processWithdrawal({ requestId: id, status });
+            toast.success(`Payout ${status}! 🏦`);
+            fetchWithdrawals();
+        } catch (err) { toast.error("Processing failed"); }
+    };
 
     const fetchReleases = async () => {
         setIsApkLoading(true);
@@ -468,6 +547,9 @@ const AdminDashboard = () => {
                     { id: "posts", label: "Posts", icon: FileText },
                     { id: "support", label: "Support", icon: LifeBuoy },
                     { id: "broadcast", label: "Mass Broadcast", icon: Megaphone },
+                    { id: "bondMatches", label: "Bond Control", icon: ShieldCheck },
+                    { id: "bondWithdrawals", label: "Payouts", icon: ArrowDownToLine },
+                    { id: "bondStats", label: "Revenue & Pulse", icon: Sparkles },
                     { id: "invite", label: "Invite System", icon: UserPlus },
                     { id: "apk", label: "APK Manager", icon: Smartphone },
                 ].map((tab) => (
@@ -1086,6 +1168,259 @@ const AdminDashboard = () => {
                             )}
                         </motion.div>
                     )}
+                    {activeTab === "bondMatches" && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            className="space-y-8"
+                        >
+                            {/* Create Match Section */}
+                            <div className="card bg-base-200 p-8 rounded-[2.5rem] border border-base-content/5 shadow-inner">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-4">
+                                        <div className="size-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center border-2 border-primary/5">
+                                            <Calendar className="size-7" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black uppercase italic tracking-tighter">Schedule New Arena</h3>
+                                            <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Initialize a match for live predictions</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-base-100 rounded-xl border border-base-content/5">
+                                        <div className="size-2 rounded-full bg-success animate-pulse"></div>
+                                        <span className="text-[10px] font-black uppercase tracking-tight opacity-60">System Ready</span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Event Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. CSK vs MI"
+                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
+                                            value={newMatch.matchName}
+                                            onChange={(e) => setNewMatch({ ...newMatch, matchName: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Home Team</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Team 1 Name"
+                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
+                                            value={newMatch.team1.name}
+                                            onChange={(e) => setNewMatch({ ...newMatch, team1: { ...newMatch.team1, name: e.target.value } })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Away Team</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Team 2 Name"
+                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
+                                            value={newMatch.team2.name}
+                                            onChange={(e) => setNewMatch({ ...newMatch, team2: { ...newMatch.team2, name: e.target.value } })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Kickoff Time</label>
+                                        <input
+                                            type="datetime-local"
+                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
+                                            value={newMatch.startTime}
+                                            onChange={(e) => setNewMatch({ ...newMatch, startTime: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 flex justify-end">
+                                    <button 
+                                        onClick={handleCreateMatch}
+                                        disabled={!newMatch.matchName || !newMatch.startTime}
+                                        className="btn btn-primary btn-lg rounded-2xl gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all px-12 group"
+                                    >
+                                        <span className="font-black italic uppercase tracking-tighter text-lg">Initialize Arena</span>
+                                        <ShieldCheck className="size-6 group-hover:rotate-12 transition-transform" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Ongoing Matches */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {matches.map(m => (
+                                    <div key={m._id} className="card bg-base-100 border-2 border-base-content/5 p-6 rounded-[2rem] hover:border-primary/20 transition-all">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h4 className="font-black text-lg italic uppercase">{m.matchName}</h4>
+                                                <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{new Date(m.startTime).toLocaleString()}</p>
+                                            </div>
+                                            <div className={`badge ${m.status === 'live' ? 'badge-error' : 'badge-ghost'} font-black uppercase text-[10px]`}>{m.status}</div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between p-4 bg-base-200 rounded-2xl mb-4">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="font-black text-sm">{m.team1?.name || "TBA"}</span>
+                                            </div>
+                                            <span className="font-black italic opacity-20 text-xl">VS</span>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="font-black text-sm">{m.team2?.name || "TBA"}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleTogglePrediction(m._id, m.isPredictionsEnabled)}
+                                                className={`btn btn-sm flex-1 rounded-xl font-black uppercase text-[10px] ${m.isPredictionsEnabled ? 'btn-success text-white' : 'btn-outline border-base-content/10'}`}
+                                            >
+                                                {m.isPredictionsEnabled ? 'Predictions Live 🟢' : 'Enable Predictions 🔒'}
+                                            </button>
+                                            <button
+                                                onClick={() => setResolution({ ...resolution, matchId: m._id })}
+                                                className="btn btn-sm btn-primary rounded-xl font-black uppercase text-[10px]"
+                                            >
+                                                Resolve Ball
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Resolution Engine Console */}
+                            {resolution.matchId && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="card bg-primary/5 border-2 border-primary/20 p-8 rounded-[3rem] shadow-2xl shadow-primary/10"
+                                >
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="size-12 bg-primary text-primary-content rounded-2xl flex items-center justify-center font-black">AI</div>
+                                        <div>
+                                            <h3 className="font-black text-xl italic uppercase tracking-tighter">Reward Distribution Engine</h3>
+                                            <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Manual Decision Override</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                        <select
+                                            className="select select-bordered rounded-2xl bg-base-100"
+                                            value={resolution.correctOutcome}
+                                            onChange={(e) => setResolution({ ...resolution, correctOutcome: e.target.value })}
+                                        >
+                                            <option value="">Select Outcome</option>
+                                            <option value="DOT">Dot Ball</option>
+                                            <option value="1">1 Run</option>
+                                            <option value="2">2 Runs</option>
+                                            <option value="3">3 Runs</option>
+                                            <option value="4">FOUR! 🎬</option>
+                                            <option value="6">SIX! 🚀</option>
+                                            <option value="WICKET">WICKET! ☝️</option>
+                                        </select>
+                                        <input
+                                            type="text"
+                                            placeholder="Ball ID (e.g. 15.4)"
+                                            className="input input-bordered rounded-2xl bg-base-100 font-bold"
+                                            value={resolution.ballId}
+                                            onChange={(e) => setResolution({ ...resolution, ballId: e.target.value })}
+                                        />
+                                        <button onClick={handleResolveBall} className="btn btn-primary rounded-2xl font-black uppercase col-span-2">Distribute Payouts</button>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === "bondWithdrawals" && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="space-y-6"
+                        >
+                            <div className="overflow-x-auto rounded-[2rem] bg-base-200 p-4 border border-base-content/5">
+                                <table className="table">
+                                    <thead className="text-[10px] uppercase font-black tracking-widest opacity-40">
+                                        <tr>
+                                            <th>User / Intel</th>
+                                            <th>Amount (BC)</th>
+                                            <th>UPI Address</th>
+                                            <th>Status</th>
+                                            <th className="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {withdrawals.map(w => (
+                                            <tr key={w._id} className="hover:bg-base-300/50 transition-colors border-b border-base-content/5">
+                                                <td>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-sm">{w.userId?.fullName}</span>
+                                                        <span className="text-[10px] opacity-40">{w.ipAddress}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-black text-primary">{w.amount} BC</span>
+                                                        <span className="text-[10px] font-bold text-success">₹{w.amount / 10}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="font-mono text-xs font-bold">{w.upiId}</td>
+                                                <td>
+                                                    <span className={`badge badge-xs font-black uppercase text-[8px] p-2 ${w.status === 'completed' ? 'badge-success text-white' : w.status === 'pending' ? 'badge-warning' : 'badge-error text-white'}`}>
+                                                        {w.status}
+                                                    </span>
+                                                </td>
+                                                <td className="text-right space-x-2">
+                                                    {w.status === "pending" && (
+                                                        <>
+                                                            <button onClick={() => handleProcessWithdrawal(w._id, "approved")} className="btn btn-success btn-xs rounded-lg text-white font-black uppercase">Verify</button>
+                                                            <button onClick={() => handleProcessWithdrawal(w._id, "rejected")} className="btn btn-error btn-xs rounded-lg text-white font-black uppercase">Flag</button>
+                                                        </>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === "bondStats" && bondStats && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                        >
+                            <div className="card bg-base-100 p-8 rounded-[3rem] border border-base-content/5 shadow-xl relative overflow-hidden group">
+                                <div className="size-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-6">
+                                    <Users className="size-8" />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Arena Active Pulse</p>
+                                <h4 className="text-5xl font-black tracking-tighter">{bondStats.activeUsers}</h4>
+                                <p className="text-[10px] font-bold text-success uppercase mt-2">Live WebSockets 📡</p>
+                            </div>
+
+                            <div className="card bg-base-100 p-8 rounded-[3rem] border border-base-content/5 shadow-xl relative overflow-hidden group">
+                                <div className="size-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-6">
+                                    <ShieldCheck className="size-8" />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Total Economy Circulating</p>
+                                <h4 className="text-5xl font-black tracking-tighter">{bondStats.totalWinnings}</h4>
+                                <p className="text-[10px] font-bold text-primary uppercase mt-2">Bond Coins (Winnings) 🪙</p>
+                            </div>
+
+                            <div className="card bg-base-100 p-8 rounded-[3rem] border border-base-content/5 shadow-xl relative overflow-hidden group">
+                                <div className="size-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mb-6">
+                                    <Sparkles className="size-8" />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Platform Revenue</p>
+                                <h4 className="text-5xl font-black tracking-tighter">₹{bondStats.revenue}</h4>
+                                <p className="text-[10px] font-bold text-warning uppercase mt-2">Match Pass Sales 🎫</p>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {activeTab === "apk" && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.98 }}

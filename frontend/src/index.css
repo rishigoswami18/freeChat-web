@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary-color: #6366f1; /* BondBeyond Default Indigo */
+}
+
 /* ===== Global Typography & Defaults ===== */
 html {
   min-height: 100%;

@@ -34,8 +34,8 @@ const Footer = () => {
                     {/* Brand Identity & Description (Takes 2 units) */}
                     <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                         <FooterBrand 
-                            tagline="Your Premium Social Space"
-                            description="An immersive social platform for connecting with friends and partners. Unleash your creativity with Reels, Stories, and Real-time connections."
+                            tagline="India's Largest Fan Engagement Ecosystem"
+                            description="BondBeyond is a cutting-edge Sports-Tech platform redefining the fan experience through the Antigravity Engine. We transform passive viewing into an active, data-driven analytical journey."
                         />
                     </div>
 

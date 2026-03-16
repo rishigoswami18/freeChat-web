@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  Home, Users, Bell, Menu, X, LogOut, Pencil, Heart, Crown, Gamepad2, User, Search, Film, Flame, MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, Sparkles,
+  Home, Users, Bell, Menu, X, LogOut, Pencil, Heart, Crown, Gamepad2, User, Search, Film, Flame, MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, Sparkles, Newspaper,
 } from "lucide-react";
 
 import useAuthUser from "../hooks/useAuthUser";
@@ -129,7 +129,8 @@ const MobileDrawer = memo(() => {
   // on every scroll/touch event drains battery. Locked down inside useMemo.
   const dynamicNavItems = useMemo(() => {
     const baseItems = [
-      { to: "/", icon: Home, labelKey: "feed" },
+      { to: "/", icon: Home, labelKey: "Home" },
+      { to: "/feed", icon: Newspaper, labelKey: "feed" },
       { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
       { to: "/friends", icon: Users, label: "Community" },
       { to: "/reels", icon: Film, labelKey: "reels" },
@@ -137,24 +138,13 @@ const MobileDrawer = memo(() => {
       { to: "/notifications", icon: Bell, labelKey: "notifications" },
       { to: "/posts", icon: Pencil, labelKey: "post" },
       { to: "/chat/ai-coach-id", icon: Sparkles, label: "DR. BOND (AI Coach)", isSacred: true },
-      { to: "/couple", icon: Heart, label: "Soul Bond" },
       { to: "/games", icon: Gamepad2, labelKey: "games" },
-      { to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
+      {to: "/gem-shop", icon: Gem, labelKey: "gem_shop" },
       { to: "/membership", icon: Crown, labelKey: "premium" },
       { to: "/profile", icon: User, labelKey: "profile" },
     ];
 
-    if (isCoupled) {
-      const inboxIndex = baseItems.findIndex(item => item.to === "/inbox");
-      if (inboxIndex !== -1) {
-        baseItems.splice(inboxIndex + 1, 0, {
-          to: `/chat/${partnerId || 'ai-user-id'}`,
-          icon: Sparkles,
-          label: `Chat with ${partnerName}`,
-          isSacred: true
-        });
-      }
-    }
+    // Relationship features disabled
     return baseItems;
   }, [isCoupled, partnerId, partnerName]);
 

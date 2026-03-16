@@ -1,55 +1,4 @@
 import User from "../models/User.js";
-
-// Send a gift to a creator
-export const sendGift = async (req, res) => {
-    try {
-        const { creatorId, giftAmount, giftName } = req.body;
-        const senderId = req.user._id;
-
-        if (senderId.toString() === creatorId) {
-            return res.status(400).json({ message: "You cannot give a gift to yourself" });
-        }
-
-        const sender = await User.findById(senderId);
-        const creator = await User.findById(creatorId);
-
-        if (!sender || !creator) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (sender.gems < giftAmount) {
-            return res.status(400).json({ message: "Not enough gems. Please recharge." });
-        }
-
-        // Transaction
-        sender.gems -= giftAmount;
-        // Creator gets 70% of the value as earnings (the fund cut is 30%)
-        creator.earnings += (giftAmount * 0.7);
-
-        await sender.save();
-        await creator.save();
-
-        res.status(200).json({
-            success: true,
-            message: `Sent ${giftName} to ${creator.fullName}`,
-            remainingGems: sender.gems
-        });
-    } catch (error) {
-        console.error("Error in sendGift controller:", error);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-};
-
-// Get current earnings and gem balance
-export const getWalletBalance = async (req, res) => {
-    try {
-        const user = await User.findById(req.user._id).select("gems earnings");
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
-    }
-};
-
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
@@ -59,22 +8,25 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Create Razorpay order for gems
+/**
+ * createGemOrder - Initiates a transaction for Bond Coins
+ */
 export const createGemOrder = async (req, res) => {
     try {
-        const { amount, packId } = req.body; // price in INR
+        const { amount, packId } = req.body; 
 
         if (!amount || amount < 0) {
-            return res.status(400).json({ message: "Invalid amount" });
+            return res.status(400).json({ message: "Bhai, valid amount to daal!" });
         }
 
         const options = {
-            amount: amount * 100, // convert to paise
+            amount: amount * 100, // Razorpay takes paise
             currency: "INR",
-            receipt: `gem_rcpt_${req.user._id.toString().slice(-10)}_${Date.now()}`,
+            receipt: `bond_vlt_${req.user._id.toString().slice(-6)}_${Date.now()}`,
             notes: {
                 userId: req.user._id.toString(),
-                packId: packId?.toString() || "custom",
+                packId: packId || "custom_pack",
+                purpose: "Skill Analysis & Community Access"
             },
         };
 
@@ -85,19 +37,21 @@ export const createGemOrder = async (req, res) => {
             order,
         });
     } catch (error) {
-        console.error("Error creating gem order:", error);
-        res.status(500).json({ message: "Failed to initiate payment" });
+        console.error("Order Creation Error:", error);
+        res.status(500).json({ message: "Server down, try again later!" });
     }
 };
 
-// Verify payment and credit gems
+/**
+ * verifyGemPayment - Verifies signature and credits Bond Coins + Referral Bonus
+ */
 export const verifyGemPayment = async (req, res) => {
     try {
         const {
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature,
-            gemAmount
+            gemAmount // These are actually Bond Coins
         } = req.body;
 
         const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -107,54 +61,100 @@ export const verifyGemPayment = async (req, res) => {
             .digest("hex");
 
         if (expectedSignature !== razorpay_signature) {
-            return res.status(400).json({ message: "Payment verification failed" });
+            return res.status(400).json({ message: "Fraud detected or invalid signature!" });
         }
 
+        // 1. Credit the User
         const user = await User.findById(req.user._id);
-        user.gems += gemAmount;
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.bondCoins = (user.bondCoins || 0) + gemAmount;
         await user.save();
+
+        // 2. Referral Logic (Billionaire Edge)
+        // If this user was referred by someone, give the referrer 20% bonus
+        if (user.referredBy) {
+            const referrer = await User.findById(user.referredBy);
+            if (referrer) {
+                const bonus = Math.floor(gemAmount * 0.20);
+                referrer.bondCoins = (referrer.bondCoins || 0) + bonus;
+                await referrer.save();
+                console.log(`✅ Referral Bonus: ${bonus} coins credited to ${referrer.fullName}`);
+            }
+        }
 
         res.status(200).json({
             success: true,
-            message: `Successfully credited ${gemAmount} gems! 💎`,
-            gems: user.gems
+            message: `Swagat hai Arena mein! ${gemAmount} Coins credited.`,
+            coins: user.bondCoins
         });
     } catch (error) {
-        console.error("Error verifying gem payment:", error);
-        res.status(500).json({ message: "Verification failed" });
+        console.error("Payment Verification Error:", error);
+        res.status(500).json({ message: "Internal verification error" });
     }
 };
 
-// Boost profile for 24 hours (costs 99 gems)
+/**
+ * sendGift - Send a gift to a creator (uses Bond Coins)
+ */
+export const sendGift = async (req, res) => {
+    try {
+        const { creatorId, giftAmount, giftName } = req.body;
+        const senderId = req.user._id;
+
+        if (senderId.toString() === creatorId) {
+            return res.status(400).json({ message: "Apne aap ko gift nahi de sakte bhai!" });
+        }
+
+        const sender = await User.findById(senderId);
+        const creator = await User.findById(creatorId);
+
+        if (!sender || !creator) return res.status(404).json({ message: "User gayab hai!" });
+
+        if (sender.bondCoins < giftAmount) {
+            return res.status(400).json({ message: "Coins khatam! Recharge kar lo fast." });
+        }
+
+        sender.bondCoins -= giftAmount;
+        creator.earnings = (creator.earnings || 0) + (giftAmount * 0.7); // 70-30 split
+
+        await sender.save();
+        await creator.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Sent ${giftName} to ${creator.fullName}`,
+            remainingCoins: sender.bondCoins
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Gift failed!" });
+    }
+};
+
+export const getWalletBalance = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select("bondCoins earnings gems");
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching balance" });
+    }
+};
+
 export const boostProfile = async (req, res) => {
     try {
-        const userId = req.user._id;
-        const user = await User.findById(userId);
+        const user = await User.findById(req.user._id);
+        const BOOST_COST = 500; // Increased for premium feel
 
-        const BOOST_COST = 99;
-        const BOOST_HOURS = 24;
-
-        if (user.gems < BOOST_COST) {
-            return res.status(400).json({ message: `Not enough gems. You need ${BOOST_COST}💎 to boost.` });
+        if (user.bondCoins < BOOST_COST) {
+            return res.status(400).json({ message: "Coins kam hain boost ke liye!" });
         }
 
-        user.gems -= BOOST_COST;
-
-        const now = new Date();
-        const existingBoost = user.boostUntil && user.boostUntil > now ? user.boostUntil : now;
-        user.boostUntil = new Date(existingBoost.getTime() + BOOST_HOURS * 60 * 60 * 1000);
-
+        user.bondCoins -= BOOST_COST;
+        user.boostUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await user.save();
 
-        res.status(200).json({
-            success: true,
-            message: "Profile boosted! 🚀 You are now being featured.",
-            gems: user.gems,
-            boostUntil: user.boostUntil
-        });
+        res.status(200).json({ success: true, message: "Profile Boosted! 🚀", coins: user.bondCoins });
     } catch (error) {
-        console.error("Error boosting profile:", error);
-        res.status(500).json({ message: "Failed to boost profile" });
+        res.status(500).json({ message: "Boost failed!" });
     }
 };
-

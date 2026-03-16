@@ -47,7 +47,7 @@ export const features = [
         icon: Shield,
         title: "Stealth Mode",
         description:
-            "Activate Stealth Mode to instantly hide your screen — the ultimate privacy companion for your relationship.",
+            "Activate Stealth Mode to instantly hide your screen — the ultimate privacy companion for your workspace.",
         gradient: "from-yellow-500/20 to-amber-500/20",
         iconColor: "text-yellow-400",
     },
@@ -63,17 +63,9 @@ export const features = [
         icon: Gamepad2,
         title: "Fun Games",
         description:
-            "Play compatibility quizzes and interactive games with friends. Make connections fun!",
+            "Play interactive games with friends. Make connections fun and competitive!",
         gradient: "from-orange-500/20 to-red-500/20",
         iconColor: "text-orange-400",
-    },
-    {
-        icon: Heart,
-        title: "Couple Profiles & Notes",
-        description:
-            "Create shared couple profiles, play relationship games, and celebrate your connection together.",
-        gradient: "from-red-500/20 to-pink-500/20",
-        iconColor: "text-red-400",
     },
     {
         icon: Sparkles,
