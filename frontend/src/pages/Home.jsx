@@ -142,9 +142,13 @@ const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
                 {/* Team Logos Overlay */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
                     <div className="flex items-center gap-12">
-                        <img src={currentMatch.team1?.logo} className="size-48 object-contain" />
-                        <div className="text-4xl font-black italic">VS</div>
-                        <img src={currentMatch.team2?.logo} className="size-48 object-contain" />
+                        {currentMatch?.team1 && (
+                            <img src={currentMatch.team1.logo} alt={currentMatch.team1.name} className="size-48 object-contain" />
+                        )}
+                        <div className="text-4xl font-black italic text-white/20">VS</div>
+                        {currentMatch?.team2 && (
+                            <img src={currentMatch.team2.logo} alt={currentMatch.team2.name} className="size-48 object-contain" />
+                        )}
                     </div>
                 </div>
 
@@ -356,7 +360,7 @@ const AccountWidget = ({ user }) => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-2xl font-black italic truncate max-w-[150px]">{user?.fullName.split(' ')[0]}</h4>
+                    <h4 className="text-2xl font-black italic truncate max-w-[150px]">{user?.fullName?.split(' ')[0] || 'User'}</h4>
                     {!user?.isVerified && (
                         <span className="px-2 py-0.5 bg-amber-500 text-black text-[8px] font-black rounded-full uppercase tracking-widest animate-pulse">
                             Quick Verify

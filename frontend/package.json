@@ -14,7 +14,6 @@
     "@tanstack/react-query": "^5.81.2",
     "axios": "^1.10.0",
     "canvas-confetti": "^1.9.4",
-    "chat_application": "file:..",
     "firebase": "^12.10.0",
     "framer-motion": "^12.34.3",
     "i18next": "^25.8.14",
