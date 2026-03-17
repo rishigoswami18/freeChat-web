@@ -5,7 +5,7 @@
   "description": "# freeChat",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build --prefix frontend",
+    "build": "npm install && npm run build --prefix frontend",
     "start": "node backend/src/server.js"
   },
   "dependencies": {
