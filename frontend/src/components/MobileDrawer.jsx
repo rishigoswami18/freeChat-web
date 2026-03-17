@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
-  Home, Users, Bell, Menu, X, LogOut, Pencil, Heart, Crown, Gamepad2, User, Search, Film, Flame, MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, Sparkles, Newspaper,
+  Home, Users, Bell, Menu, X, LogOut, Pencil, Heart, Crown, Gamepad2, User, Search, Film, Flame, MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, Sparkles, Newspaper, Zap,
 } from "lucide-react";
 
 import useAuthUser from "../hooks/useAuthUser";
@@ -130,6 +130,7 @@ const MobileDrawer = memo(() => {
   const dynamicNavItems = useMemo(() => {
     const baseItems = [
       { to: "/", icon: Home, labelKey: "Home" },
+      { to: "/ipl-dashboard", icon: Zap, label: "IPL Exclusive", isSacred: true },
       { to: "/feed", icon: Newspaper, labelKey: "feed" },
       { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
       { to: "/friends", icon: Users, label: "Community" },
