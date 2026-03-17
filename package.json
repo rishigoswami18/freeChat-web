@@ -2,14 +2,14 @@
   "name": "chat_application",
   "version": "1.0.0",
   "type": "module",
-  "description": "#\u0000 \u0000f\u0000r\u0000e\u0000e\u0000C\u0000h\u0000a\u0000t\u0000\r\u0000 \u0000",
+  "description": "# freeChat",
   "main": "index.js",
   "workspaces": [
     "backend",
     "frontend"
   ],
   "scripts": {
-    "build": "npm install && npm run build -w frontend",
+    "build": "npm run build -w frontend",
     "start": "npm start -w backend"
   },
   "devDependencies": {
