@@ -49,8 +49,8 @@ const IplPredictionPopup = ({ userId }) => {
             setIsProcessing(false);
             setIsVisible(false);
             if (data.status === "WIN") {
-                toast.success(data.message, { 
-                    duration: 5000, 
+                toast.success(data.message, {
+                    duration: 5000,
                     icon: "🔥",
                     style: { background: "#10b981", color: "#fff", fontWeight: "bold" }
                 });
@@ -77,7 +77,7 @@ const IplPredictionPopup = ({ userId }) => {
 
     const handlePredict = useCallback(() => {
         if (!predictionValue) return toast.error("Quick! Pick an outcome!");
-        
+
         setIsProcessing(true);
         // Simulate Haptic Vibration (Web View)
         if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
@@ -102,8 +102,8 @@ const IplPredictionPopup = ({ userId }) => {
                     <div className="bg-gradient-to-br from-[#1a1c2c] to-[#4a192c] border-2 border-primary/50 rounded-[32px] p-6 shadow-2xl overflow-hidden relative group">
                         {/* Ambient Glow */}
                         <div className="absolute -top-10 -right-10 size-40 bg-primary/20 blur-3xl rounded-full" />
-                        
-                        <button 
+
+                        <button
                             onClick={() => setIsVisible(false)}
                             className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors text-white/40"
                         >
@@ -116,7 +116,7 @@ const IplPredictionPopup = ({ userId }) => {
                             </div>
                             <div>
                                 <h3 className="text-xl font-black italic tracking-tighter text-white uppercase flex items-center gap-2">
-                                    {liveMatch?.status === "live" ? "Instant Strike" : "Victory Pulse"} 
+                                    {liveMatch?.status === "live" ? "Instant Strike" : "Victory Pulse"}
                                     <span className={`text-[10px] px-2 py-0.5 rounded-md ${liveMatch?.status === "live" ? "bg-red-500 animate-bounce" : "bg-indigo-500"}`}>
                                         {liveMatch?.status === "live" ? "LIVE" : "FEATURED"}
                                     </span>
@@ -133,11 +133,10 @@ const IplPredictionPopup = ({ userId }) => {
                                     key={choice}
                                     onClick={() => !isLockActive && setPredictionValue(choice)}
                                     disabled={isLockActive}
-                                    className={`py-3 rounded-2xl font-black italic transition-all active:scale-95 text-xs lg:text-sm ${
-                                        predictionValue === choice 
-                                        ? "bg-primary text-white shadow-glow ring-2 ring-white/20" 
-                                        : "bg-white/5 text-white/60 hover:bg-white/10"
-                                    } ${isLockActive ? "opacity-30 cursor-not-allowed" : ""}`}
+                                    className={`py-3 rounded-2xl font-black italic transition-all active:scale-95 text-xs lg:text-sm ${predictionValue === choice
+                                            ? "bg-primary text-white shadow-glow ring-2 ring-white/20"
+                                            : "bg-white/5 text-white/60 hover:bg-white/10"
+                                        } ${isLockActive ? "opacity-30 cursor-not-allowed" : ""}`}
                                 >
                                     {choice}
                                 </button>
@@ -150,11 +149,11 @@ const IplPredictionPopup = ({ userId }) => {
                                 <span className="text-sm font-bold text-white">{wagerAmount} BC</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <button 
+                                <button
                                     onClick={() => setWagerAmount(Math.max(10, wagerAmount - 10))}
                                     className="px-3 py-1 bg-white/5 rounded-lg text-white font-black"
                                 >-</button>
-                                <button 
+                                <button
                                     onClick={() => setWagerAmount(wagerAmount + 10)}
                                     className="px-3 py-1 bg-white/5 rounded-lg text-white font-black"
                                 >+</button>

@@ -103,7 +103,7 @@ const App = () => {
   useEffect(() => {
     const hash = window.location.hash;
     const search = window.location.search;
-    
+
     // Check both hash (implicit flow) and search (auth code flow fallbacks)
     if (hash && (hash.includes("access_token") || hash.includes("id_token") || hash.includes("credential") || hash.includes("code"))) {
       const params = new URLSearchParams(hash.substring(1));
@@ -118,19 +118,19 @@ const App = () => {
         // 1. Try messaging the opener
         if (window.opener) {
           window.opener.postMessage(
-            { 
-              type: "GOOGLE_OAUTH_TOKEN", 
-              token: token, 
-              credential: credential 
-            }, 
+            {
+              type: "GOOGLE_OAUTH_TOKEN",
+              token: token,
+              credential: credential
+            },
             "*" // Safer wildcard to ensure delivery across subdomains
           );
         }
-        
+
         // 2. Fallback for polling (Sync via localStorage)
         if (token) localStorage.setItem("google_auth_token", token);
         if (credential) localStorage.setItem("google_auth_credential", credential);
-        
+
         // 3. Auto-close if we are in a popup
         if (window.opener || window.name === "google-auth") {
           setTimeout(() => window.close(), 400);
@@ -538,107 +538,107 @@ const App = () => {
                   <Route path="/creator" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
                   <Route path="/about-hriskesh-giri" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
                   <Route path="/hriskesh-giri-ai-developer" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
-                  
+
                   {/* Relationship SEO disabled for now */}
-                  
+
                   <Route path="/future-of-social-media" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
                   <Route path="/next-gen-social-platform" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
-                  
+
                   <Route path="/blog" element={<Layout showSidebar={false}><BlogPage /></Layout>} />
                   <Route path="/blog/:slug" element={<Layout showSidebar={false}><BlogPostPage /></Layout>} />
 
-                    <Route
-                      path="/creator-center"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true}>
-                            <CreatorCenterPage />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
+                  <Route
+                    path="/creator-center"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <CreatorCenterPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                    <Route
-                      path="/ipl-arena"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true}>
-                            <IplDashboard />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
+                  <Route
+                    path="/ipl-arena"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <IplDashboard />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                    <Route
-                      path="/live-arena"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true} showRightSidebar={false}>
-                            <LiveArena />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
-                    <Route
-                      path="/ipl-dashboard"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
-                            <IplDashboard />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
+                  <Route
+                    path="/live-arena"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true} showRightSidebar={false}>
+                          <LiveArena />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/ipl-dashboard"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
+                          <IplDashboard />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                    <Route
-                      path="/career-assistant"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true}>
-                            <CareerAssistant />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
+                  <Route
+                    path="/career-assistant"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <CareerAssistant />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                    <Route
-                      path="/kyc"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true}>
-                            <KYCVerification />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
+                  <Route
+                    path="/kyc"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <KYCVerification />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                    <Route
-                      path="/antigravity-engine"
-                      element={
-                        isAuthenticated && isOnboarded ? (
-                          <Layout showSidebar={true} isFluid={true}>
-                            <AntigravityEnginePage />
-                          </Layout>
-                        ) : (
-                          <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                        )
-                      }
-                    />
+                  <Route
+                    path="/antigravity-engine"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <AntigravityEnginePage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
 
-                    <Route
-                      path="/admin"
+                  <Route
+                    path="/admin"
                     element={
                       isAuthenticated && authUser?.role === "admin" ? (
                         <Layout showSidebar={true} showRightSidebar={false} isFluid={true}>
