@@ -26,7 +26,7 @@ const FanPulse = React.lazy(() => import("../components/FanPulse.jsx"));
  * Hero Arena Widget — The 'Antigravity' Heart of BondBeyond.
  * Automatically toggles between Live Arena and Upcoming Countdown.
  */
-const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
+const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
     const [displayTime, setDisplayTime] = useState("");
     const [isBoundary, setIsBoundary] = useState(false);
 
@@ -171,6 +171,16 @@ const HeroArenaWidget = ({ matchData, upcomingMatches }) => {
                                         Predict Now <Zap className="size-3 fill-black" />
                                     </button>
                                 </div>
+                            </>
+                        ) : !isMatchToday ? (
+                            <>
+                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em] block mb-2">Rest Day</span>
+                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2">
+                                    NO MATCH TODAY
+                                </h3>
+                                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                                    Next Arena: {displayTime || "Schedule TBA"}
+                                </p>
                             </>
                         ) : (
                             <>
@@ -402,6 +412,13 @@ const Home = () => {
     const isLive = liveMatch?.status === "live";
     const hasAnyMatch = Boolean(liveMatch || upcomingMatches?.length > 0);
 
+    const isMatchToday = useMemo(() => {
+        if (isLive) return true;
+        if (!upcomingMatches?.[0]) return false;
+        const matchDate = DateTime.fromISO(upcomingMatches[0].startTime).startOf('day');
+        return matchDate.equals(DateTime.now().startOf('day'));
+    }, [isLive, upcomingMatches]);
+
     const tabs = [
         { id: "arena", icon: trophyIcon, label: "Arena" },
         { id: "market", icon: dollarIcon, label: "Market" },
@@ -464,7 +481,11 @@ const Home = () => {
                                         <EmptyArenaState />
                                     ) : (
                                         <>
-                                            <HeroArenaWidget matchData={displayMatch} upcomingMatches={upcomingMatches} />
+                                            <HeroArenaWidget 
+                                                matchData={displayMatch} 
+                                                upcomingMatches={upcomingMatches} 
+                                                isMatchToday={isMatchToday}
+                                            />
 
                                             <LiveArenaGrid />
 
