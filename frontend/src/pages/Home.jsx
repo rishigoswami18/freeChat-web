@@ -151,7 +151,17 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
 
                 <div className="flex items-end justify-between">
                     <div className="space-y-2">
-                        {isLive ? (
+                        {!isMatchToday ? (
+                            <>
+                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em] block mb-2">Rest Day</span>
+                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2">
+                                    NO MATCH TODAY
+                                </h3>
+                                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                                    Next Arena: {displayTime || "Schedule TBA"}
+                                </p>
+                            </>
+                        ) : isLive ? (
                             <>
                                 <div className="flex flex-col gap-0">
                                     <motion.h3
@@ -171,16 +181,6 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                                         Predict Now <Zap className="size-3 fill-black" />
                                     </button>
                                 </div>
-                            </>
-                        ) : !isMatchToday ? (
-                            <>
-                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em] block mb-2">Rest Day</span>
-                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2">
-                                    NO MATCH TODAY
-                                </h3>
-                                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
-                                    Next Arena: {displayTime || "Schedule TBA"}
-                                </p>
                             </>
                         ) : (
                             <>
@@ -413,11 +413,14 @@ const Home = () => {
     const hasAnyMatch = Boolean(liveMatch || upcomingMatches?.length > 0);
 
     const isMatchToday = useMemo(() => {
-        if (isLive) return true;
-        if (!upcomingMatches?.[0]) return false;
-        const matchDate = DateTime.fromISO(upcomingMatches[0].startTime).startOf('day');
-        return matchDate.equals(DateTime.now().startOf('day'));
-    }, [isLive, upcomingMatches]);
+        const today = DateTime.now().startOf('day');
+        // Check if any active/upcoming match started TODAY
+        const checkMatch = (match) => {
+            if (!match?.startTime) return false;
+            return DateTime.fromISO(match.startTime).startOf('day').equals(today);
+        };
+        return checkMatch(liveMatch) || checkMatch(upcomingMatches?.[0]);
+    }, [liveMatch, upcomingMatches]);
 
     const tabs = [
         { id: "arena", icon: trophyIcon, label: "Arena" },
