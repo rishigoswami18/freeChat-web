@@ -1,14 +1,14 @@
 services:
-  # Main Full-Stack Application (Front-end + Back-end)
   - type: web
-    name: freechat-app
+    name: freechat-web-1
     env: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: "npm install && npm run build --prefix frontend"
+    startCommand: "node backend/src/server.js"
     envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
       - key: PORT
         value: 5001
       - key: NODE_ENV
         value: production
-      # Note: HF_TOKEN and other secrets should be added via Render Dashboard UI

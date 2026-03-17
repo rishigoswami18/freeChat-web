@@ -4,15 +4,40 @@
   "type": "module",
   "description": "# freeChat",
   "main": "index.js",
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
-    "build": "npm run build -w frontend",
-    "start": "npm start -w backend"
+    "build": "npm run build --prefix frontend",
+    "start": "node backend/src/server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.7.9",
+    "bcryptjs": "^3.0.2",
+    "cheerio": "^1.2.0",
+    "cloudinary": "^2.9.0",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "cron": "^4.4.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "express-rate-limit": "^8.2.1",
+    "firebase-admin": "^13.7.0",
+    "google-auth-library": "^10.6.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.7.2",
+    "moment-timezone": "^0.6.0",
+    "mongoose": "8.10.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.1",
+    "razorpay": "^2.9.6",
+    "resend": "^6.9.3",
+    "socket.io": "^4.8.3",
+    "stream-chat": "^8.60.0"
   },
   "devDependencies": {
+    "nodemon": "^3.1.9",
     "vite": "^6.3.5"
   },
   "repository": {
@@ -21,12 +46,5 @@
   },
   "engines": {
     "node": "22.x"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rishigoswami18/freeChat/issues"
-  },
-  "homepage": "https://github.com/rishigoswami18/freeChat#readme"
+  }
 }
