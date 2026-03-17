@@ -370,3 +370,56 @@ export const getIplSchedule = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const syncExternalData = async (req, res) => {
+  try {
+    const { secret_key, matchId, externalId, matchName, matchData } = req.body;
+
+    // Security check
+    if (!secret_key || secret_key !== process.env.SYNC_EXTERNAL_SECRET) {
+      return res.status(401).json({ message: "Unauthorized automation request" });
+    }
+
+    if (!matchData) {
+      return res.status(400).json({ message: "No match data provided" });
+    }
+
+    // Find the match
+    let query = {};
+    if (matchId) query._id = matchId;
+    else if (externalId) query.externalId = externalId;
+    else if (matchName) query.matchName = new RegExp(matchName, "i");
+    else {
+      return res.status(400).json({ message: "Provide matchId, externalId, or matchName" });
+    }
+
+    const match = await Match.findOne(query);
+    if (!match) {
+      return res.status(404).json({ message: "Match not found for sync" });
+    }
+
+    // Update match data
+    if (matchData.score) match.currentScore = matchData.score;
+    if (matchData.status) match.status = matchData.status;
+    if (matchData.importantStatus) match.importantStatus = matchData.importantStatus;
+    
+    // Auto-enable predictions if match goes live
+    if (matchData.status === "live") {
+      match.isPredictionsEnabled = true;
+    }
+
+    await match.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Match ${match.matchName} synced via automation! 🚀`,
+      updated: {
+        score: match.currentScore,
+        status: match.status
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
