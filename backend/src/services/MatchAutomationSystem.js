@@ -24,8 +24,15 @@ const RAPIDAPI_HOST = "cricket-live-data.p.rapidapi.com";
 class MatchAutomationSystem {
     constructor() {
         this.activeMonitors = new Map();
+        
+        // Use keys from Provider Manager to ensure rotation/fallback consistency
+        const keys = [
+            process.env.RAPIDAPI_KEY,
+            process.env.RAPIDAPI_KEY_SECONDARY
+        ].filter(k => k && k !== "undefined");
+        
         this.headers = {
-            'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+            'x-rapidapi-key': keys[0] || "",
             'x-rapidapi-host': RAPIDAPI_HOST
         };
     }

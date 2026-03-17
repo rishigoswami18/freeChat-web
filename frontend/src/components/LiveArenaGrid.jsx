@@ -14,7 +14,7 @@ const LiveArenaGrid = () => {
     refetchInterval: 10000
   });
 
-  const liveMatches = tickerData?.filter(m => m.isLive) || [];
+  const liveMatches = Array.isArray(tickerData) ? tickerData.filter(m => m.isLive) : [];
 
   if (isLoading || liveMatches.length === 0) return null;
 
