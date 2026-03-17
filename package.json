@@ -9,8 +9,11 @@
     "frontend"
   ],
   "scripts": {
-    "build": "npm run build -w frontend",
+    "build": "npm install && npm run build -w frontend",
     "start": "npm start -w backend"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
   },
   "repository": {
     "type": "git",
