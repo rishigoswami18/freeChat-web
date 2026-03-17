@@ -43,7 +43,7 @@ const IplDashboard = () => {
             <nav className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-6">
-                        <button 
+                        <button
                             onClick={() => navigate('/')}
                             className="size-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all shadow-inner group"
                         >
@@ -63,11 +63,10 @@ const IplDashboard = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
-                                    activeTab === tab.id 
-                                    ? 'bg-white text-black shadow-2xl scale-105' 
-                                    : 'text-white/40 hover:text-white hover:bg-white/5'
-                                }`}
+                                className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
+                                        ? 'bg-white text-black shadow-2xl scale-105'
+                                        : 'text-white/40 hover:text-white hover:bg-white/5'
+                                    }`}
                             >
                                 <tab.icon className="size-3.5" />
                                 {tab.label}
@@ -77,16 +76,16 @@ const IplDashboard = () => {
 
                     <div className="flex items-center gap-4">
                         <div className="hidden md:flex items-center gap-2 p-2 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl px-4">
-                            <img 
-                                src={authUser?.profilePic || 'https://via.placeholder.com/150'} 
-                                className="size-6 rounded-full border border-white/20" 
+                            <img
+                                src={authUser?.profilePic || 'https://via.placeholder.com/150'}
+                                className="size-6 rounded-full border border-white/20"
                                 alt="User"
                             />
                             <span className="text-[10px] font-black tracking-widest text-indigo-400 uppercase">
                                 {authUser?.fullName?.split(' ')[0]}
                             </span>
                         </div>
-                        <button 
+                        <button
                             className="lg:hidden p-2 text-white/60"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
@@ -99,7 +98,7 @@ const IplDashboard = () => {
             {/* Mobile Menu */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -113,9 +112,8 @@ const IplDashboard = () => {
                                         setActiveTab(tab.id);
                                         setIsMobileMenuOpen(false);
                                     }}
-                                    className={`w-full flex items-center gap-4 p-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all ${
-                                        activeTab === tab.id ? 'bg-white text-black' : 'text-white/40 hover:bg-white/5'
-                                    }`}
+                                    className={`w-full flex items-center gap-4 p-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-black' : 'text-white/40 hover:bg-white/5'
+                                        }`}
                                 >
                                     <tab.icon className="size-5" />
                                     {tab.label}
@@ -143,7 +141,7 @@ const IplDashboard = () => {
 
             {/* Global Sticky Footer for Live Status */}
             <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] md:w-auto">
-                <motion.div 
+                <motion.div
                     initial={{ y: 100 }}
                     animate={{ y: 0 }}
                     className="bg-white/10 backdrop-blur-3xl border border-white/20 p-4 px-8 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-8 justify-between"

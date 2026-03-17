@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import { getUpcomingMatches } from "../lib/api";
 import { axiosInstance } from "../lib/axios";
@@ -13,6 +13,7 @@ export const MatchProvider = ({ children }) => {
         teamB: 50,
         trendingEmotion: "Neural"
     });
+    const socketRef = useRef(null);
 
     const { data: upcomingMatches, isLoading: isUpcomingLoading } = useQuery({
         queryKey: ["upcomingMatches"],
@@ -43,7 +44,7 @@ export const MatchProvider = ({ children }) => {
             transports: ["websocket"],
             reconnectionAttempts: 5
         });
-        thisSocket = socket;
+        socketRef.current = socket;
 
         socket.on("connect", () => {
             socket.emit("join_match", "ipl_arena_global");
@@ -57,28 +58,33 @@ export const MatchProvider = ({ children }) => {
             setMatchStats(stats);
         });
 
-        return () => socket.disconnect();
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+        };
     }, []);
 
     // Dynamic Join Effect
     useEffect(() => {
         const id = activeMatch?._id || activeMatch?.matchId;
-        if (thisSocket && id) {
+        if (socketRef.current && id) {
             console.log(`🔌 [Socket] Joining Room: match_${id}`);
-            thisSocket.emit("join_match", id);
+            socketRef.current.emit("join_match", id);
         }
     }, [activeMatch?._id, activeMatch?.matchId]);
 
     const submitVote = (userId, matchId, team) => {
-        if (thisSocket) {
-            thisSocket.emit("submit_vote", { userId, matchId, team });
+        if (socketRef.current) {
+            socketRef.current.emit("submit_vote", { userId, matchId, team });
         }
     };
 
     return (
-        <MatchContext.Provider value={{ 
-            liveMatch, 
-            upcomingMatches, 
+        <MatchContext.Provider value={{
+            liveMatch,
+            upcomingMatches,
             isUpcomingLoading,
             activeMatch,
             isLive,
@@ -89,8 +95,6 @@ export const MatchProvider = ({ children }) => {
         </MatchContext.Provider>
     );
 };
-
-let thisSocket;
 
 export const useMatch = () => {
     const context = useContext(MatchContext);

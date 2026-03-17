@@ -26,11 +26,11 @@ const LiveArena = () => {
     const [timeLeft, setTimeLeft] = useState("");
 
     const [reactions, setReactions] = useState([]);
-    const [showBlast, setShowBlast] = useState(null); 
+    const [showBlast, setShowBlast] = useState(null);
     const [isLocked, setIsLocked] = useState(false);
 
     // Sync matchState with liveMatch from context
-    const currentMatch = liveMatch || matchState; 
+    const currentMatch = liveMatch || matchState;
 
     // Countdown Logic for Next Match
     useEffect(() => {
@@ -39,7 +39,7 @@ const LiveArena = () => {
                 const start = new Date(nextMatch.startTime);
                 const now = new Date();
                 const diff = start - now;
-                
+
                 if (diff <= 0) {
                     setTimeLeft("LIVE");
                     return;
@@ -76,11 +76,11 @@ const LiveArena = () => {
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 blur-[150px] rounded-full" />
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-pink-600/10 blur-[150px] rounded-full" />
                 <div className="max-w-4xl w-full relative z-10 text-center space-y-12">
-                     <motion.div
+                    <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="space-y-6"
-                     >
+                    >
                         <div className="inline-flex items-center gap-2 px-6 py-2 bg-indigo-600/20 border border-indigo-500/30 rounded-full">
                             <Clock className="size-4 text-indigo-400" />
                             <span className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400">Next Arena Kicking Off</span>
@@ -94,20 +94,20 @@ const LiveArena = () => {
                                 <p className="text-sm font-bold text-white/40 uppercase tracking-widest">{nextMatch.venue || "M. Chinnaswamy Stadium, Bengaluru"}</p>
                             </div>
                         )}
-                     </motion.div>
+                    </motion.div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                         <div className="p-8 bg-white/5 border border-white/5 rounded-[40px] text-left group hover:bg-white/10 transition-all cursor-pointer" onClick={() => navigate("/")}>
-                             <Trophy className="size-8 text-amber-500 mb-4" />
-                             <h4 className="font-black italic text-xl mb-2">Back to Dashboard</h4>
-                             <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed">Check full season schedule or your wallet.</p>
+                            <Trophy className="size-8 text-amber-500 mb-4" />
+                            <h4 className="font-black italic text-xl mb-2">Back to Dashboard</h4>
+                            <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed">Check full season schedule or your wallet.</p>
                         </div>
                         <div className="p-8 bg-white/5 border border-white/5 rounded-[40px] text-left group hover:bg-white/10 transition-all">
-                             <Zap className="size-8 text-indigo-500 mb-4" />
-                             <h4 className="font-black italic text-xl mb-2">Instant Alerts</h4>
-                             <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed">Notifications will ping when toss happens.</p>
+                            <Zap className="size-8 text-indigo-500 mb-4" />
+                            <h4 className="font-black italic text-xl mb-2">Instant Alerts</h4>
+                            <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed">Notifications will ping when toss happens.</p>
                         </div>
-                     </div>
+                    </div>
                 </div>
             </div>
         );
@@ -139,10 +139,10 @@ const LiveArena = () => {
             </AnimatePresence>
 
             <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
+
                 {/* LEFT: Live Match Center (Glassmorphism) */}
                 <div className="lg:col-span-8 space-y-8">
-                    <motion.header 
+                    <motion.header
                         initial={{ y: -20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         className="bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[40px] p-8 flex flex-col md:flex-row justify-between items-center gap-8"
@@ -165,7 +165,7 @@ const LiveArena = () => {
                         </div>
 
                         <div className="flex flex-col items-end gap-3">
-                            <div 
+                            <div
                                 onClick={() => navigate("/wallet")}
                                 className="px-4 py-2 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-2 cursor-pointer hover:bg-white/10 transition-all group"
                             >
@@ -195,7 +195,7 @@ const LiveArena = () => {
                             <h3 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-6 flex items-center gap-2">
                                 <BarChart2 className="size-4" /> Batting Pipeline
                             </h3>
-                             <div className="space-y-4">
+                            <div className="space-y-4">
                                 {currentMatch?.batters ? currentMatch.batters.map((b, i) => (
                                     <div key={i} className="flex justify-between items-center p-4 bg-white/[0.03] rounded-2xl border border-white/5">
                                         <div>
@@ -219,7 +219,7 @@ const LiveArena = () => {
                             <h3 className="text-xs font-black uppercase tracking-[0.4em] text-white/30 mb-6 flex items-center gap-2">
                                 <Zap className="size-4 text-amber-400" /> Bowling Heat
                             </h3>
-                             <div className="p-4 bg-indigo-600/10 rounded-2xl border border-indigo-500/20">
+                            <div className="p-4 bg-indigo-600/10 rounded-2xl border border-indigo-500/20">
                                 <div className="flex justify-between items-center mb-2">
                                     <p className="font-bold text-sm italic">{currentMatch?.bowler?.name || "TBA"}</p>
                                     <p className="font-black text-indigo-400">{currentMatch?.bowler?.figures || "0-0-0-0"}</p>
@@ -228,15 +228,14 @@ const LiveArena = () => {
                                     <div className="h-full bg-indigo-500 w-[60%]" />
                                 </div>
                             </div>
-                             <div className="mt-6">
+                            <div className="mt-6">
                                 <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] mb-3">Last 12 Balls</p>
                                 <div className="flex flex-wrap gap-2">
                                     {(currentMatch?.last12Balls || ["0", "1", "4", "0", "1", "W"]).map((b, i) => (
-                                        <div key={i} className={`size-7 rounded-lg flex items-center justify-center text-[10px] font-black ${
-                                            b === '6' ? 'bg-amber-500 text-black' : 
-                                            b === '4' ? 'bg-indigo-500 text-white' :
-                                            b === 'W' ? 'bg-red-500 text-white' : 'bg-white/5 text-white/40'
-                                        }`}>
+                                        <div key={i} className={`size-7 rounded-lg flex items-center justify-center text-[10px] font-black ${b === '6' ? 'bg-amber-500 text-black' :
+                                                b === '4' ? 'bg-indigo-500 text-white' :
+                                                    b === 'W' ? 'bg-red-500 text-white' : 'bg-white/5 text-white/40'
+                                            }`}>
                                             {b}
                                         </div>
                                     ))}
@@ -270,7 +269,7 @@ const LiveArena = () => {
                         <h3 className="font-black italic tracking-tighter uppercase flex items-center gap-3 text-lg">
                             <Users className="size-5 text-indigo-400" /> Commentary
                         </h3>
-                        <button 
+                        <button
                             onClick={() => navigate("/wallet")}
                             className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full flex items-center gap-2 hover:bg-amber-500/20 transition-all group"
                         >
@@ -307,7 +306,7 @@ const LiveArena = () => {
                     <div className="p-6 bg-white/[0.02] space-y-4">
                         <div className="flex justify-between bg-black/40 p-2 rounded-2xl border border-white/5">
                             {["🔥", "🎯", "⚡", "🧤", "🧊"].map(e => (
-                                <button 
+                                <button
                                     key={e}
                                     onClick={() => sendReaction(e)}
                                     className="p-2 hover:bg-white/10 rounded-xl transition-all hover:scale-125 hover:-translate-y-1 active:scale-95 text-xl"
@@ -317,8 +316,8 @@ const LiveArena = () => {
                             ))}
                         </div>
                         <div className="flex gap-3">
-                            <input 
-                                type="text" 
+                            <input
+                                type="text"
                                 placeholder="Roast the bowler..."
                                 className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                             />
@@ -330,7 +329,8 @@ const LiveArena = () => {
                 </div>
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 .shadow-glow { filter: drop-shadow(0 0 10px currentColor); }
             `}} />
         </div>
@@ -345,9 +345,9 @@ const FlyingEmoji = ({ emojiId }) => {
     return (
         <motion.div
             initial={{ y: "100%", x: `${randomX}%`, opacity: 0, scale: 0.5, rotate: 0 }}
-            animate={{ 
-                y: "-110%", 
-                opacity: [0, 1, 1, 0], 
+            animate={{
+                y: "-110%",
+                opacity: [0, 1, 1, 0],
                 scale: [0.5, 2, 2.5, 2],
                 rotate: randomRotate
             }}

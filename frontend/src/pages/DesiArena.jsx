@@ -12,7 +12,7 @@ let socket;
 const DesiArena = () => {
     const { t, i18n } = useTranslation();
     const { authUser } = useAuthUser();
-    
+
     const [matchState, setMatchState] = useState({
         matchId: "ipl-2024-match-1",
         battingTeam: "CSK",
@@ -109,17 +109,16 @@ const DesiArena = () => {
                             <button
                                 key={lang.code}
                                 onClick={() => changeLanguage(lang.code)}
-                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                                    i18n.language === lang.code 
-                                    ? "bg-[#000080] text-white shadow-lg" 
-                                    : "bg-white/5 text-white/40 hover:bg-white/10"
-                                }`}
+                                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${i18n.language === lang.code
+                                        ? "bg-[#000080] text-white shadow-lg"
+                                        : "bg-white/5 text-white/40 hover:bg-white/10"
+                                    }`}
                             >
                                 {lang.label}
                             </button>
                         ))}
                     </div>
-                    <button 
+                    <button
                         onClick={() => setIsVoiceEnabled(!isVoiceEnabled)}
                         className={`p-4 rounded-full transition-all ${isVoiceEnabled ? "bg-[#138808] text-white" : "bg-white/5 text-white/40"}`}
                     >
@@ -128,7 +127,7 @@ const DesiArena = () => {
                 </header>
 
                 {/* Score Card: Desi Glassmorphism */}
-                <motion.section 
+                <motion.section
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     className="bg-gradient-to-br from-white/10 to-transparent border border-white/10 rounded-[48px] p-10 shadow-2xl relative overflow-hidden group"
@@ -136,7 +135,7 @@ const DesiArena = () => {
                     <div className="absolute top-0 right-0 p-10 opacity-5">
                         <Trophy className="size-64" />
                     </div>
-                    
+
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
                         <div className="text-center md:text-left space-y-2">
                             <span className="px-5 py-1.5 bg-[#FF9933] text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em]">

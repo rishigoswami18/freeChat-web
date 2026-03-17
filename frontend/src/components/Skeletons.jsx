@@ -100,3 +100,17 @@ export const StorySkeleton = () => (
         ))}
     </div>
 );
+
+export const GameSkeleton = () => (
+  <div className="min-h-screen bg-[#060606] p-10 space-y-12 animate-pulse">
+    <div className="space-y-4">
+      <div className="w-32 h-8 bg-white/5 rounded-2xl" />
+      <div className="w-64 h-12 bg-white/10 rounded-3xl" />
+      <div className="w-48 h-4 bg-white/5 rounded-full" />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="h-64 bg-white/5 rounded-[40px]" />
+      <div className="h-64 bg-white/5 rounded-[40px]" />
+    </div>
+  </div>
+);

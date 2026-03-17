@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    Trophy, Zap, Users, TrendingUp, ChevronRight, 
+import {
+    Trophy, Zap, Users, TrendingUp, ChevronRight,
     Award, Star, LayoutGrid, ListOrdered, Shield
 } from "lucide-react";
 import { axiosInstance } from "../lib/axios";
@@ -33,9 +33,8 @@ const MatchList = ({ matches }) => (
         {matches.map((match) => (
             <div key={match.id} className="bg-white/5 border border-white/5 rounded-[40px] p-8 hover:border-white/20 transition-all group">
                 <div className="flex justify-between items-center mb-6">
-                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                        match.status === "live" ? "bg-red-500 text-white animate-pulse" : "bg-white/10 text-white/40"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${match.status === "live" ? "bg-red-500 text-white animate-pulse" : "bg-white/10 text-white/40"
+                        }`}>
                         {match.status}
                     </span>
                 </div>
@@ -66,7 +65,7 @@ const PointsTable = ({ data = [] }) => (
                 {data.map((item, idx) => (
                     <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                         <td className="px-8 py-6 flex items-center gap-4">
-                            <span className="text-white/20 text-xs">0{idx+1}</span>
+                            <span className="text-white/20 text-xs">0{idx + 1}</span>
                             <span className="font-black italic">{item.team}</span>
                         </td>
                         <td className="px-8 py-6">{item.played}</td>
@@ -125,8 +124,8 @@ const Squads = ({ squads = {} }) => (
                 <div className="space-y-3">
                     {players.map(p => (
                         <div key={p} className="text-sm font-bold text-white/60 hover:text-white transition-colors flex items-center gap-2">
-                             <div className="size-1.5 rounded-full bg-orange-500" />
-                             {p}
+                            <div className="size-1.5 rounded-full bg-orange-500" />
+                            {p}
                         </div>
                     ))}
                 </div>
@@ -167,11 +166,10 @@ const IplHomeDashboard = () => {
     }, []);
 
     const TabButton = ({ id, icon: Icon, label }) => (
-        <button 
+        <button
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl transition-all font-black text-xs uppercase tracking-widest ${
-                activeTab === id ? "bg-white text-black shadow-lg" : "bg-white/5 text-white/40 hover:bg-white/10"
-            }`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl transition-all font-black text-xs uppercase tracking-widest ${activeTab === id ? "bg-white text-black shadow-lg" : "bg-white/5 text-white/40 hover:bg-white/10"
+                }`}
         >
             <Icon className="size-4" />
             {label}
@@ -181,7 +179,7 @@ const IplHomeDashboard = () => {
     return (
         <div className="min-h-screen bg-[#050505] font-outfit text-white relative flex flex-col">
             <div className="absolute inset-0 bg-gradient-to-tr from-orange-600/10 via-transparent to-indigo-600/10 pointer-events-none" />
-            
+
             <Header authUser={authUser} />
 
             <div className="relative z-10 px-8 py-8 max-w-7xl mx-auto w-full flex flex-col gap-8">
