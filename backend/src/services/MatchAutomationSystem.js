@@ -95,6 +95,11 @@ class MatchAutomationSystem {
 
                 const seriesDoc = await Series.findOne({ externalId: m.series?.id?.toString() });
 
+                // Safety: Don't let a scheduled sync overwrite a LIVE status back to scheduled
+                const existingMatch = await Match.findOne({ externalId: m.id.toString() });
+                const newStatus = m.status?.toLowerCase() || "scheduled";
+                const finalStatus = (existingMatch?.status === "live" && newStatus === "scheduled") ? "live" : newStatus;
+
                 await Match.findOneAndUpdate(
                     { externalId: m.id.toString() },
                     {
@@ -103,7 +108,7 @@ class MatchAutomationSystem {
                         externalSeriesId: m.series?.id?.toString(),
                         matchName: `${m.home.code} vs ${m.away.code}`,
                         startTime: startUtc.toJSDate(),
-                        status: m.status?.toLowerCase() || "scheduled",
+                        status: finalStatus,
                         venue: m.venue,
                         team1: { name: m.home.name, logo: "" },
                         team2: { name: m.away.name, logo: "" },
@@ -251,7 +256,7 @@ class MatchAutomationSystem {
             try {
                 // Fetch fresh doc to avoid stale data and check if still live
                 const freshMatch = await Match.findById(match._id);
-                if (!freshMatch || freshMatch.status !== "live") {
+                if (!freshMatch || (freshMatch.status !== "live" && freshMatch.status !== "scheduled")) {
                     this.stopMatchMonitor(match._id.toString());
                     return;
                 }

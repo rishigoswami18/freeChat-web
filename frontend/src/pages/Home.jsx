@@ -150,8 +150,8 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                 </div>
 
                 <div className="flex items-end justify-between">
-                    <div className="space-y-2">
-                        {!isMatchToday ? (
+                    <div className="space-y-4">
+                        {(!isMatchToday && !isLive) ? (
                             <>
                                 <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em] block mb-2">Rest Day</span>
                                 <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2">
@@ -185,12 +185,19 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                         ) : (
                             <>
                                 <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] block mb-2">Arena Launch</span>
-                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2">
-                                    {displayTime || "28 March, 07:30 PM"}
+                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2 uppercase">
+                                    {currentMatch.matchName || "UPCOMING MATCH"}
                                 </h3>
-                                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
-                                    {currentMatch.venue || "M. Chinnaswamy Stadium, Bengaluru"}
-                                </p>
+                                <div className="flex flex-col gap-1 text-xs font-bold text-white/40 uppercase tracking-[0.2em] mt-4">
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="size-3 text-amber-500" />
+                                        <span className="text-white">{displayTime || "Loading..." }</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <LayoutGrid className="size-3" />
+                                        {currentMatch.venue || "Global Arena"}
+                                    </div>
+                                </div>
                             </>
                         )}
                     </div>
@@ -413,14 +420,14 @@ const Home = () => {
     const hasAnyMatch = Boolean(liveMatch || upcomingMatches?.length > 0);
 
     const isMatchToday = useMemo(() => {
-        const today = DateTime.now().startOf('day');
-        // Check if any active/upcoming match started TODAY
+        if (isLive) return true; // Force true if we have a live match
+        const localToday = DateTime.now().toISODate();
         const checkMatch = (match) => {
             if (!match?.startTime) return false;
-            return DateTime.fromISO(match.startTime).startOf('day').equals(today);
+            return DateTime.fromISO(match.startTime).toISODate() === localToday;
         };
-        return checkMatch(liveMatch) || checkMatch(upcomingMatches?.[0]);
-    }, [liveMatch, upcomingMatches]);
+        return checkMatch(upcomingMatches?.[0]);
+    }, [isLive, upcomingMatches]);
 
     const tabs = [
         { id: "arena", icon: trophyIcon, label: "Arena" },

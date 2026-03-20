@@ -221,7 +221,17 @@ export const getIplDetails = async (req, res) => {
 
 export const getUpcomingMatches = async (req, res) => {
   try {
-    const matches = await Match.find({ status: "scheduled" })
+    const now = new Date();
+    // Safety Cleanup: Any scheduled match from >12h ago is likely stale
+    await Match.updateMany(
+        { status: "scheduled", startTime: { $lt: new Date(now.getTime() - 12 * 60 * 60000) } },
+        { $set: { status: "completed" } }
+    );
+
+    const matches = await Match.find({ 
+        status: "scheduled",
+        startTime: { $gte: now } 
+    })
       .populate("seriesId")
       .sort({ startTime: 1 })
       .limit(20);
