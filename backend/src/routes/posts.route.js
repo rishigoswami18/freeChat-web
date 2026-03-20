@@ -283,7 +283,10 @@ router.get("/user/:userId", async (req, res) => {
     const { limit = 10, lastId } = req.query;
     const limitNum = parseInt(limit, 10) || 10;
 
-    const matchQuery = { userId: new mongoose.Types.ObjectId(req.params.userId) };
+    const userId = req.params.userId;
+    console.log("🔍 [Profile] Fetching posts for user:", userId);
+
+    const matchQuery = { userId: mongoose.Types.ObjectId.isValid(userId) ? new mongoose.Types.ObjectId(userId) : userId };
     if (lastId && mongoose.Types.ObjectId.isValid(lastId)) {
       matchQuery._id = { $lt: new mongoose.Types.ObjectId(lastId) };
     }
@@ -314,8 +317,6 @@ router.get("/user/:userId", async (req, res) => {
       { $limit: limitNum + 1 },
       { 
         $project: { 
-          authorInfo: 0,
-          // Ensure all required fields are passed
           userId: 1,
           content: 1,
           mediaUrl: 1,
@@ -337,8 +338,16 @@ router.get("/user/:userId", async (req, res) => {
 
     res.json({ posts: paginatedPosts, nextCursor, hasMore });
   } catch (err) {
-    console.error("Error fetching user posts:", err.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("❌ Post Fetch Error:", err.message);
+    try {
+      const fallbackLimit = parseInt(req.query.limit, 10) || 10;
+      const posts = await Post.find({ userId: req.params.userId })
+        .sort({ _id: -1 })
+        .limit(fallbackLimit);
+      res.json({ posts, nextCursor: null, hasMore: false });
+    } catch (fallbackErr) {
+      res.status(500).json({ message: "DB Error: " + fallbackErr.message });
+    }
   }
 });
 

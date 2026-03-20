@@ -15,7 +15,7 @@ const SAFETY_SETTINGS = [
     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
-const MODELS = ["models/gemini-1.5-flash", "models/gemini-1.5-pro", "models/gemini-2.0-flash-exp"]; // Prepending 'models/' for absolute SDK compatibility
+const MODELS = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]; 
 
 export const ChatEngine = {
     /**

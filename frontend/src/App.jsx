@@ -50,6 +50,7 @@ const KYCVerification = React.lazy(() => import("./pages/KYCVerification.jsx"));
 const AntigravityEnginePage = React.lazy(() => import("./pages/AntigravityEnginePage.jsx"));
 const LiveArena = React.lazy(() => import("./pages/LiveArena.jsx"));
 const DesiArena = React.lazy(() => import("./pages/DesiArena.jsx"));
+const AIFaceCallPage = React.lazy(() => import("./pages/AIFaceCallPage.jsx"));
 
 // SEO Domination Pages
 const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
@@ -344,6 +345,19 @@ const App = () => {
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
                           <CallPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/ai-face-call/:id"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={false} showFooter={false} showNavbar={false} isFluid={true}>
+                          <AIFaceCallPage />
                         </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

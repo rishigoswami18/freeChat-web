@@ -136,6 +136,18 @@ const ChatHeader = memo(() => {
     }, [coupleData, displayData.id]);
 
     const initiateStreamCall = async (isAudio = false) => {
+        if (!user || !user.id) {
+            toast.error("Unable to identify call recipient.");
+            return;
+        }
+
+        // 🧠 AI bots → redirect to AI Face Call page (DO NOT wait for videoClient)
+        if (["ai-user-id", "ai-friend-id", "ai-coach-id", "ai-bot"].includes(user.id)) {
+            const aiId = user.id === "ai-bot" ? "ai-user-id" : user.id;
+            navigate(`/ai-face-call/${aiId}`);
+            return;
+        }
+
         if (!videoClient) {
             toast.error("Call service is not ready. Please wait a moment.");
             return;
@@ -143,17 +155,6 @@ const ChatHeader = memo(() => {
 
         if (isGroup) {
             toast.error("Group calls are not supported yet.");
-            return;
-        }
-
-        if (!user || !user.id) {
-            toast.error("Unable to identify call recipient.");
-            return;
-        }
-
-        // Check if recipient is an AI bot
-        if (["ai-user-id", "ai-friend-id", "ai-coach-id", "ai-bot"].includes(user.id)) {
-            toast.error(`${user.name} is currently offline for calls.`);
             return;
         }
 
@@ -288,9 +289,6 @@ const ChatHeader = memo(() => {
                         </button>
                     </>
                 )}
-                <button className="p-2 hover:bg-base-content/10 rounded-full transition-all active:scale-90" title="Info">
-                    <Info className="size-6 text-base-content" strokeWidth={1.5} />
-                </button>
             </div>
 
             {viewingDP && (

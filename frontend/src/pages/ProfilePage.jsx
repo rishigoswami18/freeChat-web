@@ -53,6 +53,8 @@ const ProfilePage = () => {
     
     // Direct array pass safely bypassing undefined states
     const userPosts = serverPosts?.posts || [];
+    console.log("📂 [Profile] Loaded posts count:", userPosts.length);
+    if (isErrorPosts) console.error("❌ [Profile] Fetch error:", isErrorPosts);
 
     // === MUTATION PIPELINES ===
     const { mutate: updateProfileMutation, isPending: isUpdating } = useMutation({

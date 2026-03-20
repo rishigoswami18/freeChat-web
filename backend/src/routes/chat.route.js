@@ -14,6 +14,9 @@ import DelayedEmail from "../models/DelayedEmail.js";
 import { sendNotificationEmail } from "../lib/email.service.js";
 import { sendPushNotification } from "../lib/push.service.js";
 import { streamClient } from "../lib/stream.js";
+import { getAIResponse } from "../lib/gemini.js";
+import { MatchIntelligence } from "../services/ai/matchIntelligence.js";
+import RealtimeAvatar from "../services/ai/realtimeAvatar.js";
 
 const router = express.Router();
 
@@ -46,6 +49,149 @@ router.post("/send", protectRoute, sendMessage);
 
 // AI Relationship Coach → analyzes conflict in a channel
 router.post("/analyze-conflict", protectRoute, analyzeConflict);
+
+// ═══════════════════════════════════════════════════
+//  AI FACE CALL — Voice-to-Voice with AI personas
+// ═══════════════════════════════════════════════════
+router.post("/ai-face-call", protectRoute, async (req, res) => {
+  try {
+    const { text, aiType, history = [], matchContext, userEmotion } = req.body;
+    
+    if (!text?.trim() && !userEmotion) { // Allow empty text if we're just reacting to a face change
+      return res.status(400).json({ message: "Text or Emotion is required" });
+    }
+
+    console.log(`📞 [AI Face Call] ${req.user.fullName} → ${aiType}: "${text.substring(0, 50)}..."`);
+
+    // Map aiType to persona
+    const personaMap = {
+      "ai-user-id": "face_call",
+      "ai-friend-id": "face_call",
+      "ai-coach-id": "personal_coach",
+      "ai-match-analyst": "match_analyst"
+    };
+
+    const persona = personaMap[aiType] || "face_call";
+    
+    // Get AI name based on type
+    let aiName = "AI";
+    if (aiType === "ai-user-id") aiName = req.user.aiPartnerName || "Aria";
+    else if (aiType === "ai-friend-id") aiName = req.user.aiFriendName || "Golu";
+    else if (aiType === "ai-coach-id") aiName = "Dr. Bond";
+    else if (aiType === "ai-match-analyst") aiName = "Commander";
+
+    // Build prompt with match context and EMOTIONAL awareness
+    let prompt = text || "[User is looking at you]";
+    if (userEmotion) {
+      prompt = `[USER EMOTION: ${userEmotion}]\n\n${prompt}`;
+    }
+    if (matchContext && persona === "match_analyst") {
+      prompt = `[LIVE MATCH: ${matchContext}]\n\n${prompt}`;
+    }
+
+    const reply = await getAIResponse(
+      prompt,
+      history,
+      persona,
+      aiName,
+      req.user.fullName
+    );
+
+    console.log(`📞 [AI Face Call] ${aiName} replied: "${(reply || "").substring(0, 50)}..."`);
+
+    res.status(200).json({ reply });
+  } catch (error) {
+    console.error("❌ [AI Face Call] Error:", error.message);
+    res.status(500).json({ 
+      reply: "Connection thodi weak hai... ek second ruko! 📡",
+      error: error.message 
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  EXPERT EYE — Screenshot/Image Analysis
+// ═══════════════════════════════════════════════════
+router.post("/analyze-screenshot", protectRoute, async (req, res) => {
+  try {
+    const { image, mimeType, context } = req.body;
+
+    if (!image) {
+      return res.status(400).json({ message: "Image data is required" });
+    }
+
+    console.log(`👁️ [Expert Eye] ${req.user.fullName} sent screenshot for analysis`);
+
+    // Extract base64 data (handle data URIs)
+    const base64Data = image.includes(",") ? image.split(",")[1] : image;
+    const resolvedMime = mimeType || (image.startsWith("data:") ? image.split(";")[0].split(":")[1] : "image/jpeg");
+
+    const analysis = await MatchIntelligence.analyzeScreenshot({
+      imageBase64: base64Data,
+      mimeType: resolvedMime,
+      userName: req.user.fullName,
+      context
+    });
+
+    res.status(200).json({ analysis });
+  } catch (error) {
+    console.error("❌ [Expert Eye] Analysis Error:", error.message);
+    res.status(500).json({ message: "Analysis failed. Try again." });
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  MATCH RECAP — Post-match War Room Summary
+// ═══════════════════════════════════════════════════
+router.post("/match-recap", protectRoute, async (req, res) => {
+  try {
+    const { matchName, predictions, chatHighlights, finalScore } = req.body;
+
+    if (!matchName) {
+      return res.status(400).json({ message: "Match name is required" });
+    }
+
+    console.log(`📊 [Match Recap] Generating for ${req.user.fullName}: ${matchName}`);
+
+    const recap = await MatchIntelligence.generateMatchRecap({
+      matchName,
+      userPredictions: predictions || [],
+      chatHighlights: chatHighlights || [],
+      finalScore: finalScore || "Not available",
+      userName: req.user.fullName
+    });
+
+    res.status(200).json({ recap });
+  } catch (error) {
+    console.error("❌ [Match Recap] Error:", error.message);
+    res.status(500).json({ message: "Recap generation failed" });
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  GLOBAL STADIUM — AI-Powered Translation
+// ═══════════════════════════════════════════════════
+router.post("/ai-translate", protectRoute, async (req, res) => {
+  try {
+    const { text, targetLang } = req.body;
+
+    if (!text || !targetLang) {
+      return res.status(400).json({ message: "Text and target language required" });
+    }
+
+    console.log(`🌍 [Global Stadium] Translating to ${targetLang}: "${text.substring(0, 40)}..."`);
+
+    const translated = await MatchIntelligence.translateMessage({
+      text,
+      targetLang
+    });
+
+    res.status(200).json({ translatedText: translated });
+  } catch (error) {
+    console.error("❌ [Translation] Error:", error.message);
+    res.status(500).json({ message: "Translation failed" });
+  }
+});
 
 // DIAGNOSTIC routes (run these in browser to check connection status)
 router.get("/test-ml", testMLConnection);
@@ -218,6 +364,38 @@ router.post("/notify-call", protectRoute, async (req, res) => {
     console.error("[Call Push] Error:", err.message);
     res.status(500).json({ message: "Failed to send call notification" });
   }
+});
+
+// ═══ REALTIME AI AVATAR & VISUAL MEMORY ═══
+router.post("/avatar-session", protectRoute, async (req, res) => {
+  try {
+    const session = await RealtimeAvatar.createHeyGenSession();
+    res.json(session);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post("/avatar-start", protectRoute, async (req, res) => {
+  const { sessionId, sdp } = req.body;
+  try {
+    const data = await RealtimeAvatar.startStreaming(sessionId, sdp);
+    res.json(data);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post("/avatar-task", protectRoute, async (req, res) => {
+  const { sessionId, text } = req.body;
+  try {
+    const data = await RealtimeAvatar.speak(sessionId, text);
+    res.json(data);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post("/sense-emotion", protectRoute, async (req, res) => {
+  const { image } = req.body;
+  try {
+    const analysis = await RealtimeAvatar.senseEmotion(image);
+    res.json(analysis);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 export default router;
