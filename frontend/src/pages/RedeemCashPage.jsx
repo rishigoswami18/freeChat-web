@@ -33,7 +33,7 @@ const RedeemCashPage = () => {
     const confirmWithdrawal = async () => {
         setIsProcessing(true);
         try {
-            const res = await axiosInstance.post("/api/wallet/withdraw", {
+            const res = await axiosInstance.post("/wallet/withdraw", {
                 amount: parseInt(amount),
                 upiId
             });

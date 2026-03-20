@@ -11,7 +11,7 @@ const PrizeVaultPage = () => {
     const { data: prizes, isLoading } = useQuery({
         queryKey: ["prizeVault"],
         queryFn: async () => {
-            const res = await axiosInstance.get("/api/users/prizes");
+            const res = await axiosInstance.get("/users/prizes");
             return res.data;
         }
     });
@@ -55,7 +55,7 @@ const PrizeVaultPage = () => {
                             <div key={i} className="h-48 bg-white/5 rounded-[40px] animate-pulse" />
                         ))}
                     </div>
-                ) : prizes?.length === 0 ? (
+                ) : !Array.isArray(prizes) || prizes.length === 0 ? (
                     <div className="text-center py-32 bg-white/5 rounded-[50px] border border-dashed border-white/10">
                         <Ticket className="size-20 text-white/10 mx-auto mb-6" />
                         <h3 className="text-2xl font-bold opacity-30 italic">No Prizes Captured Yet.</h3>
@@ -63,7 +63,7 @@ const PrizeVaultPage = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {prizes?.map((prize) => (
+                        {Array.isArray(prizes) && prizes.map((prize) => (
                             <motion.div 
                                 key={prize._id}
                                 layoutId={prize._id}
