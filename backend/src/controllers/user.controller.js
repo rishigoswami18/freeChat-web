@@ -43,12 +43,12 @@ export async function getRecommendedUsers(req, res) {
       });
     }
 
-    let recommendedUsers = await User.find(query).limit(20); // Limit to top 20 to avoid over-fetching
+    let recommendedUsers = await User.find(query).limit(20).lean(); // Limit to top 20 to avoid over-fetching + lean for speed
     console.log(`Found ${recommendedUsers.length} users for query: "${q || 'none'}"`);
 
     // Calculate match scores
     recommendedUsers = recommendedUsers.map(user => {
-      const userObj = user.toObject();
+      const userObj = user; // Already a lean plain object
       let matchScore = 10; // Give a base score so everyone shows up
       let isTandemMatch = false;
 

@@ -5,7 +5,7 @@ import { sendPushNotification } from "../lib/push.service.js";
 
 const moodLabels = {
     happy: "😊 Happy", neutral: "😐 Neutral", sad: "😢 Sad",
-    angry: "😠 Angry", tired: "😴 Tired", excited: "🤩 Excited", romantic: "😍 Romantic"
+    angry: "😠 Angry", tired: "😴 Tired", excited: "🤩 Excited", focused: "🎯 Focused"
 };
 
 /**
@@ -166,9 +166,9 @@ export const getDailyInsight = async (req, res) => {
             myMood: user.mood,
             partner: user.isCoupledWithAI ? {
                 _id: "ai-user-id",
-                fullName: user.aiPartnerName || "Aria",
-                profilePic: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-girlfriend.png"}`,
-                mood: "romantic", // AI is always romantic for her user!
+                fullName: user.aiPartnerName || "Lia",
+                profilePic: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-companion.png"}`,
+                mood: "focused", // AI is always high-performance!
                 lastMoodUpdate: new Date(),
             } : user.partnerId,
             coupleStreak,
@@ -183,20 +183,20 @@ export const getDailyInsight = async (req, res) => {
 export const seedQuestions = async () => {
     const questions = [
         { text: "What's one small challenge you faced today that I can support you with?", category: "future" },
-        { text: "What is your favorite memory of us from the last month?", category: "love" },
-        { text: "If we could escape to anywhere for a weekend, where would we go?", category: "fun" },
-        { text: "What is one thing I do that makes you feel most loved?", category: "deep" },
-        { text: "How can we make our communication even better this week?", category: "conflict" },
-        { text: "What's something new you'd like us to try together?", category: "fun" },
-        { text: "What made you smile today?", category: "love" },
-        { text: "If you could relive one day from our relationship, which would it be?", category: "deep" },
-        { text: "What's a dream you haven't told me about yet?", category: "deep" },
-        { text: "What's one thing I can do tomorrow to make your day better?", category: "future" },
-        { text: "What song reminds you most of us?", category: "fun" },
-        { text: "What's the bravest thing you've ever done for love?", category: "deep" },
-        { text: "Describe your perfect lazy Sunday with me.", category: "fun" },
-        { text: "What's something you've forgiven me for that made us stronger?", category: "conflict" },
-        { text: "What's a tradition you'd love for us to start?", category: "future" },
+        { text: "What is your favorite milestone you achieved in the last month?", category: "growth" },
+        { text: "If we could master any new skill together this weekend, what would it be?", category: "fun" },
+        { text: "What is one thing I do that helps you stay most focused?", category: "deep" },
+        { text: "How can we make our collaboration even better this week?", category: "conflict" },
+        { text: "What's something new you'd like us to build together?", category: "fun" },
+        { text: "What made you feel most productive today?", category: "growth" },
+        { text: "If you could relive one productive day from our journey, which would it be?", category: "deep" },
+        { text: "What's a career dream you haven't told me about yet?", category: "deep" },
+        { text: "What's one thing I can do tomorrow to make your day more efficient?", category: "future" },
+        { text: "What song motivates you most to win?", category: "fun" },
+        { text: "What's the bravest thing you've ever done for your career?", category: "deep" },
+        { text: "Describe your perfect productive day with me.", category: "fun" },
+        { text: "What's a hard lesson you've learned that made us stronger as a team?", category: "conflict" },
+        { text: "What's a tradition you'd love for us to start to celebrate wins?", category: "future" },
     ];
 
     if (await Question.countDocuments() === 0) {

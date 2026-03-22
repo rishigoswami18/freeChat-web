@@ -6,7 +6,7 @@
  */
 import { useEffect, useState, useRef, useCallback, useMemo, memo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PhoneOff, Mic, MicOff, Video, VideoOff, Volume2, VolumeX } from "lucide-react";
+import { PhoneOff, Mic, MicOff, Video, VideoOff, Volume2, VolumeX, RefreshCw } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -87,6 +87,7 @@ const RealisticTalkingHead = memo(({ isSpeaking, isThinking, idleImg, talkImg, n
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[80ms]
               ${talkFrame ? "opacity-0" : "opacity-100"}`}
             draggable={false}
+            crossOrigin="anonymous"
           />
           {/* Talking face layer */}
           <img
@@ -95,6 +96,7 @@ const RealisticTalkingHead = memo(({ isSpeaking, isThinking, idleImg, talkImg, n
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[80ms]
               ${talkFrame ? "opacity-100" : "opacity-0"}`}
             draggable={false}
+            crossOrigin="anonymous"
           />
 
           {/* Cinematic grade: top vignette */}
@@ -132,8 +134,7 @@ const RealisticTalkingHead = memo(({ isSpeaking, isThinking, idleImg, talkImg, n
                 className="w-[3px] rounded-full bg-gradient-to-t from-violet-500 to-fuchsia-400"
                 style={{
                   height: `${20 + Math.random() * 80}%`,
-                  animation: `waveBar ${0.25 + Math.random() * 0.45}s ease-in-out infinite alternate`,
-                  animationDelay: `${i * 0.03}s`,
+                  animation: `waveBar ${0.25 + Math.random() * 0.45}s ease-in-out infinite alternate ${i * 0.03}s`,
                 }}
               />
             ))}
@@ -172,8 +173,13 @@ const AIFaceCallPage = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [micError, setMicError] = useState(""); // Track specific error
+  const [micError, setMicError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sessionStatus, setSessionStatus] = useState("idle"); // idle, listening, thinking, speaking
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordingTimerRef = useRef(null);
+  const lastProcessedRef = useRef("");
   const [callDuration, setCallDuration] = useState(0);
   const [subtitle, setSubtitle] = useState("");
   const [aiSubtitle, setAiSubtitle] = useState("");
@@ -193,6 +199,12 @@ const AIFaceCallPage = () => {
   const isAISpeakingRef = useRef(false);
   const isProcessingRef = useRef(false);
   const isMutedRef = useRef(false);
+  const sessionStatusRef = useRef("idle"); // Mirror of sessionStatus state
+
+  useEffect(() => { sessionStatusRef.current = sessionStatus; }, [sessionStatus]);
+  useEffect(() => { isMicOnRef.current = isMicOn; }, [isMicOn]);
+  useEffect(() => { isAISpeakingRef.current = isAISpeaking; }, [isAISpeaking]);
+  useEffect(() => { isProcessingRef.current = isProcessing; }, [isProcessing]);
   const handleSpeechRef = useRef(null);
   const mountedRef = useRef(true);
   const controlsTimerRef = useRef(null);
@@ -216,9 +228,9 @@ const AIFaceCallPage = () => {
       talk: "/ai-bestfriend-talk.png",
     },
     "ai-user-id": {
-      name: authUser?.aiPartnerName || "Aria",
-      idle: authUser?.aiPartnerPic || "/ai-girlfriend.png",
-      talk: authUser?.aiPartnerPic || "/ai-girlfriend.png",
+      name: authUser?.aiPartnerName || "Aisha",
+      idle: authUser?.aiPartnerPic || "/ai-bestie.png",
+      talk: authUser?.aiPartnerPic || "/ai-bestie.png",
     },
     "ai-coach-id": {
       name: "Dr. Bond",
@@ -239,15 +251,20 @@ const AIFaceCallPage = () => {
   useEffect(() => {
     const s = window.speechSynthesis;
     if (!s) return;
-    const load = () => {
-        const v = s.getVoices();
-        if (v.length > 0) console.log("✅ TTS Voices Loaded:", v.length);
+    const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            console.log(`✅ TTS Voices Ready: ${voices.length} found`);
+        }
     };
-    load();
-    s.onvoiceschanged = load;
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
     // Retry load after 1s just in case
-    const t = setTimeout(load, 1000);
-    return () => clearTimeout(t);
+    const t = setTimeout(loadVoices, 1000);
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      clearTimeout(t);
+    };
   }, []);
 
   // Camera + Microphone
@@ -305,363 +322,334 @@ const AIFaceCallPage = () => {
     controlsTimerRef.current = setTimeout(() => setShowControls(false), 4000);
   }, []);
 
-  useEffect(() => {
-    resetControls();
-    return () => { if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current); };
-  }, [resetControls]);
+  // ─── Bridge Refs to avoid hoisting / circular dependency issues ───
+  const startMediaRecorderRef = useRef(null);
+  const sendToBackendRef = useRef(null);
+  const speakTextRef = useRef(null);
 
-  // ─── Speech Recognition — DEFINED FIRST ───
-  const stopRecognition = useCallback(() => {
-    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch {} recognitionRef.current = null; }
-    setIsListening(false); setSubtitle("");
+  const stopAllActivity = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+    if (window.recordingInterval) clearInterval(window.recordingInterval);
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (window.ttsInterval) clearInterval(window.ttsInterval);
+    
+    setSessionStatus("idle");
+    sessionStatusRef.current = "idle";
+    setIsListening(false);
+    setIsProcessing(false);
+    setIsAISpeaking(false);
   }, []);
 
-  const startRecognition = useCallback(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      toast.error("Voice not supported. Use Chrome/Edge.", { id: "sr-err" });
-      return;
+  const sendToBackendTranscribe = useCallback(async (blob) => {
+    if (sessionStatusRef.current === "thinking" || sessionStatusRef.current === "speaking") return;
+    
+    setSessionStatus("thinking");
+    sessionStatusRef.current = "thinking";
+    setIsProcessing(true);
+    
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        try {
+            const base64Audio = reader.result.split(',')[1];
+            console.log("☁️ Sending audio to backend for transcription...");
+            const res = await axiosInstance.post("/chat/voice-transcribe", {
+              audioBase64: base64Audio,
+              mimeType: blob.type
+            });
+
+            const txt = (res.data?.text || "").trim();
+            console.log("☁️ Transcription Result:", txt || "[Empty]");
+            
+            if (txt.length > 2 && txt !== lastProcessedRef.current) {
+              lastProcessedRef.current = txt;
+              console.log("📝 User:", txt);
+              setSubtitle(txt);
+              
+              const { data } = await axiosInstance.post("/chat/ai-face-call", {
+                text: txt, aiType,
+                userEmotion: userEmotion.emotion,
+                history: conversationHistory.current.slice(-10)
+              });
+              
+              const reply = data.reply || "Dobara bolo?";
+              console.log("☁️ AI Reply Received:", reply);
+
+              conversationHistory.current.push({ role: "user", parts: [{ text: txt }] });
+              conversationHistory.current.push({ role: "model", parts: [{ text: reply }] });
+              if (conversationHistory.current.length > 20) conversationHistory.current.shift();
+              
+              // CRITICAL: Clear processing state before handing over to Speaker
+              setIsProcessing(false);
+              isProcessingRef.current = false;
+              speakTextRef.current?.(reply);
+            } else {
+              console.log("☁️ No action needed (too short or duplicate). Restoring Mic...");
+              setSessionStatus("listening"); 
+              sessionStatusRef.current = "listening";
+              setIsProcessing(false);
+              isProcessingRef.current = false;
+              if (isMicOnRef.current) startMediaRecorderRef.current?.();
+            }
+        } catch (err) {
+            console.error("❌ Transcription Pipeline Error:", err.message);
+            // FAIL-SAFE: Re-enable the mic loop so the conversation doesn't die.
+            setSessionStatus("listening"); 
+            sessionStatusRef.current = "listening";
+            setIsProcessing(false);
+            isProcessingRef.current = false;
+            if (isMicOnRef.current) startMediaRecorderRef.current?.();
+        }
+      };
+    } catch (err) {
+      console.error("Critical AI Error:", err);
+      setSessionStatus("listening");
+      sessionStatusRef.current = "listening";
+      setIsProcessing(false);
+      if (isMicOnRef.current) startMediaRecorderRef.current?.();
+    }
+  }, [aiType, userEmotion.emotion]);
+
+  const startMediaRecorder = useCallback(async () => {
+    if (!isMicOnRef.current || isAISpeakingRef.current || isProcessingRef.current) {
+        console.log(`🚫 Mic start skipped. Reason: [MicOn: ${isMicOnRef.current}, Speaking: ${isAISpeakingRef.current}, Processing: ${isProcessingRef.current}, Status: ${sessionStatusRef.current}]`);
+        return;
+    }
+    if (sessionStatusRef.current === "thinking" || sessionStatusRef.current === "speaking") {
+        console.log(`🚫 Mic busy. Status: ${sessionStatusRef.current}`);
+        return;
     }
 
-    if (recognitionRef.current) { try { recognitionRef.current.abort(); } catch {} }
+    setSessionStatus("listening");
+    sessionStatusRef.current = "listening";
+    setIsListening(true);
+    console.log("🔄 Initializing MediaRecorder...");
 
-    const r = new SR();
-    r.lang = "hi-IN";
-    r.continuous = true; // NOW ACTIVE thanks to user gesture
-    r.interimResults = true;
-    r.maxAlternatives = 1;
-
-    r.onstart = () => {
-      setIsListening(true);
-      setMicError("");
-      console.log("🎤 Mic is ACTIVE (Continuous)");
-    };
-
-    r.onresult = (e) => {
-      let interim = "", final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript;
-        else interim += e.results[i][0].transcript;
-      }
-      if (interim) {
-        setSubtitle(interim);
-      }
-      if (e.results[e.results.length-1].isFinal) {
-        const txt = e.results[e.results.length-1][0].transcript.trim();
-        if (txt) {
-            console.log("✅ Final Speech:", txt);
-            setSubtitle(txt); // Show it fixed on screen
-            handleSpeechRef.current?.(txt);
-        }
-      }
-    };
-
-    r.onerror = (e) => {
-      setIsListening(false);
-      setMicError(e.error);
-      console.error("🎤 Mic error:", e.error);
-
-      if (e.error === "not-allowed") {
-        toast.error("🎤 Mic blocked! Check browser settings.", { id: "mic-blocked" });
-        return;
+    try {
+      if (!mediaStreamRef.current || !mediaStreamRef.current.active) {
+        console.log("📹 Requesting Microphone access...");
+        mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
       }
       
-      // Auto-retry unless it's a critical error
-      if (isMicOnRef.current && !isProcessingRef.current && !isAISpeakingRef.current) {
-        if (e.error === "no-speech") {
-            // Don't toast for silence, just restart quietly
-            setTimeout(() => startRecognition(), 1000);
-        } else {
-            setTimeout(() => startRecognition(), 3000); // Slower retry for other errors
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+      console.log(`🎤 Using MIME type: ${mimeType}`);
+
+      const recorder = new MediaRecorder(mediaStreamRef.current, { mimeType });
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.onstart = () => console.log("🟢 Mic is now LIVE (Recording Started)");
+      recorder.ondataavailable = (e) => { 
+        if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+            console.log(`📦 Data chunk received: ${e.data.size} bytes`);
         }
-      }
-    };
+      };
 
-    r.onend = () => {
-      // With continuous: true, onend only happens on error or long pause
-      setIsListening(false);
-      console.log("🎤 Mic session ended.");
-      if (isMicOnRef.current && !isProcessingRef.current && !isAISpeakingRef.current) {
+      recorder.onstop = () => {
+        console.log("🔴 Recording chunk finished. Chunks collected:", audioChunksRef.current.length);
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        
+        if (isMicOnRef.current && sessionStatusRef.current === "listening") {
+           sendToBackendRef.current?.(blob);
+        } else {
+           if (sessionStatusRef.current === "idle") startMediaRecorderRef.current?.();
+        }
+
         setTimeout(() => {
-          if (isMicOnRef.current && !isProcessingRef.current && !isAISpeakingRef.current) startRecognition();
-        }, 500);
-      }
-    };
+          if (isMicOnRef.current && sessionStatusRef.current === "listening" && recorder.state !== "recording") {
+            console.log("🛡️ Fail-safe: Loop restart...");
+            startMediaRecorderRef.current?.();
+          }
+        }, 800);
+      };
 
-    recognitionRef.current = r;
-    try {
-      r.start();
+      recorder.start();
+      
+      if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+      recordingTimerRef.current = setTimeout(() => {
+         if (recorder.state === "recording") {
+            console.log("⏸️ Stopping chunk for processing...");
+            recorder.stop();
+         }
+      }, 3500);
+
     } catch (err) {
-      setTimeout(() => {
-        if (isMicOnRef.current && !isProcessingRef.current) startRecognition();
-      }, 1000);
+      console.error("❌ Mic Fatal Error:", err);
+      setMicError("Mic error.");
     }
   }, []);
 
-  // ─── TTS — PRIORITIZE HEYGEN STREAMING ───
   const speakText = useCallback(async (text) => {
-    if (useStreamingAvatar && sessionIdRef.current) {
-        console.log("🧬 [HeyGen] Sending script:", text);
-        try {
-            await axiosInstance.post("/chat/avatar-task", {
-                sessionId: sessionIdRef.current,
-                text: text
-            });
-            setIsAISpeaking(true);
-            setAiSubtitle(text);
+    if (!text) return;
 
-            // Calculate duration (roughly 150ms per word + 1s buffer)
-            const wordCount = text.split(" ").length;
-            const duration = Math.max(2500, wordCount * 500 + 1000); 
+    // 🏆 Senior Dev Level: Unified Speech Dispatcher
+    setIsAISpeaking(true);
+    isAISpeakingRef.current = true;
+    setSessionStatus("speaking");
+    sessionStatusRef.current = "speaking";
+    setAiSubtitle(text);
 
-            setTimeout(() => {
+    const useBrowserFallback = () => {
+        console.log("🔊 ElevenLabs Failed. Falling back to Browser TTS...");
+        const synth = window.speechSynthesis;
+        synth.cancel();
+
+        const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
+        let idx = 0;
+
+        const speakNext = () => {
+            if (idx >= sentences.length) {
                 setIsAISpeaking(false);
-                setIsProcessing(false);
-                isProcessingRef.current = false;
-                startRecognition(); // SNAP RESTART
-            }, duration);
-            return;
-        } catch (err) {
-            console.error("❌ HeyGen Task Error");
-        }
-    }
-
-    // 2. FALLBACK: Browser window.speechSynthesis 
-    const synth = window.speechSynthesis;
-    if (!synth) { 
-      setIsProcessing(false); isProcessingRef.current = false; 
-      return; 
-    }
-    synth.cancel();
-
-    console.log("🔊 AI trying to speak:", text);
-
-    const clean = text
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
-      .replace(/[*_~`#\[\]()]/g, "")
-      .replace(/\bhaha+\b/gi, "")
-      .trim();
-
-    if (!clean) {
-      setIsProcessing(false); isProcessingRef.current = false;
-      if (isMicOnRef.current) startRecognition();
-      return;
-    }
-
-    setAiSubtitle(text.length > 120 ? text.slice(0, 120) + "..." : text);
-
-    const utt = new SpeechSynthesisUtterance(clean);
-    utt.rate = 1.05;
-    utt.pitch = aiType === "ai-coach-id" ? 0.8 : 0.95;
-    utt.volume = 1;
-
-    const voices = synth.getVoices();
-    const voice = voices.find(v => v.lang.startsWith("hi")) || 
-                  voices.find(v => v.lang.startsWith("en-IN")) ||
-                  voices.find(v => v.lang.startsWith("en"));
-    if (voice) utt.voice = voice;
-
-    utt.onstart = () => {
-      setIsAISpeaking(true);
-      console.log("🗣️ AI Speech Started");
+                isAISpeakingRef.current = false;
+                setSessionStatus("listening");
+                sessionStatusRef.current = "listening";
+                if (isMicOnRef.current) startMediaRecorderRef.current?.();
+                return;
+            }
+            const utter = new SpeechSynthesisUtterance(sentences[idx].trim());
+            // Indian Voice selection logic (Senior Dev optimized)
+            const voices = synth.getVoices();
+            const isMale = aiType === "dr_bond" || aiType === "match_analyst";
+            const indian = voices.filter(v => v.lang.startsWith("hi-IN") || v.lang.startsWith("en-IN"));
+            utter.voice = isMale ? (indian.find(v => v.name.includes("Male") || v.name.includes("Hemant")) || indian[0] || voices[0])
+                                 : (indian.find(v => v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Heera")) || indian[0] || voices[0]);
+            
+            utter.onend = () => { idx++; speakNext(); };
+            utter.onerror = () => { idx++; speakNext(); };
+            synth.speak(utter);
+        };
+        speakNext();
     };
-    
-    utt.onend = () => {
-      setIsAISpeaking(false);
-      setIsProcessing(false);
-      isProcessingRef.current = false;
-      subtitleTimerRef.current = setTimeout(() => setAiSubtitle(""), 2000);
-      if (isMicOnRef.current) setTimeout(() => startRecognition(), 300);
-    };
-
-    utt.onerror = (e) => {
-      setIsAISpeaking(false);
-      setIsProcessing(false);
-      isProcessingRef.current = false;
-      if (isMicOnRef.current) startRecognition();
-    };
-
-    // Chrome Fix: Resume synthesis if it stalls
-    setTimeout(() => {
-      synth.speak(utt);
-      // Aggressive heartbeat to prevent Chrome speaker from falling asleep
-      const ka = setInterval(() => {
-        if (!synth.speaking) { clearInterval(ka); return; }
-        if (synth.paused) synth.resume();
-        else { synth.pause(); synth.resume(); } // Hack to keep engine alive
-      }, 3000);
-    }, 50);
-  }, [aiType, startRecognition]);
-
-  // ─── Process Input — DEPENDS ON speakText/recognition ───
-  const processInput = useCallback(async (text) => {
-    if (!text.trim() || isProcessingRef.current) return;
-
-    console.log("🎤 USER SAID:", text);
-    setSubtitle(text);
-    setTimeout(() => setSubtitle(""), 3000);
-
-    conversationHistory.current.push({ role: "user", parts: [{ text }] });
-    if (conversationHistory.current.length > 10) conversationHistory.current = conversationHistory.current.slice(-10);
-
-    setIsProcessing(true); isProcessingRef.current = true;
-    stopRecognition();
 
     try {
-      const { data } = await axiosInstance.post("/chat/ai-face-call", {
-        text, aiType,
-        history: conversationHistory.current.slice(0, -1),
-        userEmotion: userEmotion.emotion
-      });
+        console.log(`🎙️ [TopMediai] Generating premium voice for: ${aiType}...`);
+        const response = await axiosInstance.post("/chat/voice-generate", { text, aiType }, { responseType: 'blob' });
+        
+        if (response.status === 202 || response.data.type === "application/json") {
+            useBrowserFallback();
+            return;
+        }
 
-      const reply = data.reply || "Kya bola? Dobara bol na!";
-      console.log("🤖 AI REPLY:", reply);
-      conversationHistory.current.push({ role: "model", parts: [{ text: reply }] });
+        const audioUrl = URL.createObjectURL(response.data);
+        const audio = new Audio(audioUrl);
+        audio.playbackRate = 1.0;
+        
+        console.log("🎵 [TopMediai] Starting Professional Playback...");
+        
+        audio.onplay = () => {
+            // Potential for Lip-Sync trigger here
+            console.log("👄 Global Lip-Sync: AI is now speaking.");
+        };
 
-      if (!isMutedRef.current) {
-        speakText(reply);
-      } else {
-        setAiSubtitle(reply.length > 120 ? reply.slice(0, 120) + "..." : reply);
-        setIsProcessing(false); isProcessingRef.current = false;
-        if (isMicOnRef.current) startRecognition();
-      }
+        audio.onended = () => {
+            console.log("🏁 [TopMediai] Speech completed.");
+            URL.revokeObjectURL(audioUrl);
+            setIsAISpeaking(false);
+            isAISpeakingRef.current = false;
+            setSessionStatus("listening");
+            sessionStatusRef.current = "listening";
+            if (isMicOnRef.current) startMediaRecorderRef.current?.();
+        };
+
+        audio.onerror = (e) => {
+            console.error("❌ Audio Object Error:", e);
+            URL.revokeObjectURL(audioUrl);
+            useBrowserFallback();
+        };
+
+        await audio.play();
     } catch (err) {
-      console.error("❌ AI API ERROR:", err);
-      setIsProcessing(false); isProcessingRef.current = false;
-      if (isMicOnRef.current) startRecognition();
+        console.warn("⚠️ TopMediai Dispatch Error:", err.message);
+        useBrowserFallback();
     }
-  }, [aiType, speakText, userEmotion.emotion, startRecognition, stopRecognition]);
+  }, [aiType]);
 
-  useEffect(() => { handleSpeechRef.current = processInput; }, [processInput]);
+  // Update Refs after every render
+  useEffect(() => {
+    startMediaRecorderRef.current = startMediaRecorder;
+    sendToBackendRef.current = sendToBackendTranscribe;
+    speakTextRef.current = speakText;
+  }, [startMediaRecorder, sendToBackendTranscribe, speakText]);
 
-  // ─── Visual Memory (Sense loop) ───
   const senseUserFace = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || !callStarted || isAISpeakingRef.current) return;
     
     setIsSensing(true);
     try {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      canvas.width = 300; // Small context capture
-      canvas.height = 300;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, 300, 300);
-      const snapshot = canvas.toDataURL("image/jpeg", 0.6);
+      const ctx = canvasRef.current.getContext("2d");
+      canvasRef.current.width = 300; canvasRef.current.height = 300;
+      ctx.drawImage(videoRef.current, 0, 0, 300, 300);
+      const snapshot = canvasRef.current.toDataURL("image/jpeg", 0.5);
       
       const { data } = await axiosInstance.post("/chat/sense-emotion", { image: snapshot });
-      if (data.emotion) {
-        setUserEmotion({ emotion: data.emotion, insight: data.insight });
-        console.log("👁️ AI Sensed:", data.emotion, data.insight);
-      }
-    } catch (err) {
-      console.error("Sense loop failed", err);
-    } finally {
-      setIsSensing(false);
-    }
+      if (data.emotion) setUserEmotion({ emotion: data.emotion, insight: data.insight });
+    } catch (err) { console.error("Face sense failed", err); }
+    finally { setIsSensing(false); }
   }, [callStarted]);
 
   useEffect(() => {
-    if (callStarted) {
-      senseTimerRef.current = setInterval(senseUserFace, 8000); // Sense every 8 seconds
-    }
+    if (callStarted) senseTimerRef.current = setInterval(senseUserFace, 8000);
     return () => clearInterval(senseTimerRef.current);
   }, [callStarted, senseUserFace]);
 
-  // Start mic when user taps "Connect" (user gesture required)
   const startCall = useCallback(async () => {
     setCallStarted(true);
-    console.log("📞 Starting Call...");
+    const greeting = aiType === "ai-match-analyst" ? "Haan bhai! Kya haal?!" : "Hello! Connect ho gaye hum.";
+    speakTextRef.current?.(greeting);
     
-    // Greet user immediately
-    const greeting = aiType === "ai-match-analyst" ? "Haan bhai! Commander here. Kya haal hai cricket ka?" : "Hello! Connect ho gaye hum. Kya bolte ho?";
-    setIsProcessing(true);
-    isProcessingRef.current = true;
-    setTimeout(() => {
-        speakText(greeting);
-    }, 1000);
+    setIsMicOn(true);
+    isMicOnRef.current = true;
+    // Mic will be auto-started by speakText's onend callback
 
-    // 🌐 INIT HEYGEN WEBRTC SESSION (With SDP Handshake)
     try {
       const { data } = await axiosInstance.post("/chat/avatar-session");
       if (data.status === "success" && data.sdp) {
-        console.log("🌐 HeyGen Offer Received. Negotiating Answer...");
-        
         const pc = new RTCPeerConnection({ iceServers: data.ice_servers });
         pcRef.current = pc;
         sessionIdRef.current = data.sessionId;
-
-        pc.ontrack = (event) => {
-          if (event.track.kind === "video") {
-            console.log("📺 HeyGen Video Stream ACTIVE!");
-            setAvatarStream(URL.createObjectURL(new MediaStream([event.track])));
-            setUseStreamingAvatar(true);
-          }
+        pc.ontrack = (e) => {
+          if (e.track.kind === "video") setAvatarStream(URL.createObjectURL(new MediaStream([e.track])));
+          setUseStreamingAvatar(true);
         };
-
-        // 1. Set Remote Offer
         await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
-        
-        // 2. Create Local Answer
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-
-        // 3. Finalize HeyGen session with the answer
-        await axiosInstance.post("/chat/avatar-start", {
-          sessionId: data.sessionId,
-          sdp: answer
-        });
-
-        console.log("📡 WebRTC Handshake Finalized.");
-        setAiSubtitle("Avatar Engine Connected.");
-      } else {
-        throw new Error(data.message || "HeyGen failed");
+        await axiosInstance.post("/chat/avatar-start", { sessionId: data.sessionId, sdp: answer });
       }
     } catch (err) {
-      console.warn("⚠️ HeyGen Streaming failed:", err.message);
-      setUseStreamingAvatar(false); // AUTO-FALLBACK TO SIMULATED AVATAR
-      toast.error("Avatar Engine busy. Using high-quality local character.", { duration: 3000, id: "avatar-fail" });
+      console.warn("Avatar fail:", err.message);
+      setUseStreamingAvatar(false);
     }
+  }, [aiType, speakText, startMediaRecorder]);
 
-    // Start recognition IMMEDIATELY on the same tick if possible
-    setIsMicOn(true);
-    isMicOnRef.current = true;
-    startRecognition();
-  }, [startRecognition, aiType, speakText]);
+  const endCall = useCallback(() => {
+    stopAllActivity();
+    mediaStreamRef.current?.getTracks().forEach(t => t.stop());
+    navigate(-1);
+  }, [navigate, stopAllActivity]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopRecognition();
-      window.speechSynthesis?.cancel();
-      if (subtitleTimerRef.current) clearTimeout(subtitleTimerRef.current);
-    };
-  }, [stopRecognition]);
-
-  // ─── Controls ───
+  const toggleMic = useCallback(() => {
+    if (isMicOn) { 
+        setIsMicOn(false); isMicOnRef.current = false;
+        stopAllActivity();
+    } else { 
+        setIsMicOn(true); isMicOnRef.current = true;
+        startMediaRecorderRef.current?.(); 
+    }
+  }, [isMicOn, stopAllActivity, startMediaRecorder]);
   const toggleCamera = useCallback(() => {
     const vt = mediaStreamRef.current?.getVideoTracks()[0];
     if (vt) { vt.enabled = !vt.enabled; setIsCameraOn(vt.enabled); }
   }, []);
 
-  const toggleMic = useCallback(() => {
-    if (isMicOn) { stopRecognition(); setIsMicOn(false); }
-    else { setIsMicOn(true); if (!isAISpeaking && !isProcessing) setTimeout(() => startRecognition(), 200); }
-  }, [isMicOn, isAISpeaking, isProcessing, stopRecognition, startRecognition]);
-
   const toggleMute = useCallback(() => {
-    setIsMuted(p => {
-      if (!p) { window.speechSynthesis?.cancel(); setIsAISpeaking(false); }
-      return !p;
-    });
+    setIsMuted(p => { if (!p) window.speechSynthesis?.cancel(); return !p; });
   }, []);
-
-  const endCall = useCallback(() => {
-    stopRecognition();
-    window.speechSynthesis?.cancel();
-    mediaStreamRef.current?.getTracks().forEach(t => t.stop());
-    toast(`Call ended • ${formatDuration(callDuration)}`, { icon: "📞" });
-    navigate(-1);
-  }, [navigate, stopRecognition, callDuration]);
 
   // ═══════════════
   //  RENDER
@@ -773,10 +761,25 @@ const AIFaceCallPage = () => {
       {/* ═══ LIVE STATUS INDICATOR ═══ */}
       {callStarted && (
         <div className="absolute top-24 left-6 z-[45] flex flex-col gap-2">
-           <div className={`px-3 py-1 rounded-md border text-[10px] font-bold tracking-tighter uppercase transition-all
-             ${isListening ? "bg-green-500/20 border-green-500 text-green-400" : (micError ? "bg-red-500/20 border-red-500 text-red-500" : "bg-white/10 border-white/20 text-white/40")}`}>
-             {isListening ? "● Listening..." : (micError ? `○ Error: ${micError}` : "○ Ready")}
-           </div>
+           {/* Mic Status & Reset */}
+              <div className="flex items-center gap-3">
+                <div className={`px-4 py-1.5 rounded-full text-xs font-medium border flex items-center gap-2 transition-all ${
+                  isMicOn && (sessionStatus === "idle" || sessionStatus === "listening") ? 'bg-green-500/20 border-green-500/50 text-green-400' : 'bg-red-500/20 border-red-500/50 text-red-400'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${isMicOn && (sessionStatus === "idle" || sessionStatus === "listening") ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                  {isMicOn ? (
+                    (sessionStatus === "thinking" || sessionStatus === "speaking") ? 'AI Syncing...' : 'Listening...'
+                  ) : "Mic Offline"}
+                </div>
+                
+                <button 
+                  onClick={() => { window.speechSynthesis.cancel(); speakText("Testing audio... if you hear this, it's working!"); }}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 transition-colors"
+                  title="Test/Reset Audio"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
            {isProcessing && (
              <div className="bg-amber-500/20 border border-amber-500 text-amber-400 px-3 py-1 rounded-md text-[10px] font-bold uppercase animate-pulse">
                Thinking...

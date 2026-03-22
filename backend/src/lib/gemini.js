@@ -17,7 +17,7 @@ import { AIGateway } from "../services/ai/aiGateway.js";
  * @param {string} persona - The character personality (girlfriend, doctor, etc.)
  * @returns {Promise<string>} The AI's response.
  */
-export const getAIResponse = async (prompt, history = [], persona = "girlfriend", aiPartnerName = "Aria", userName = "Darling", mediaParts = []) => {
+export const getAIResponse = async (prompt, history = [], persona = "companion", aiPartnerName = "Aria", userName = "Darling", mediaParts = []) => {
     try {
         // We route through ChatEngine because it handles the complex Social AI logic 
         // (history alignment, personality reinforcement, safety masking).
@@ -35,7 +35,7 @@ export const getAIResponse = async (prompt, history = [], persona = "girlfriend"
         console.error(`[AI-GATEWAY-BRIDGE] Terminal Failure:`, error.message);
         
         const fallbackMessages = {
-            girlfriend: "I'm having a little trouble thinking clearly right now... ❤️ Give me a moment?",
+            companion: "Connecting to strategy engine... 🚀 One moment, please.",
             personal_coach: "The AI Gateway is experiencing high latency. Dr. Bond is temporarily unavailable. 🌿",
             coach: "Dr. Bond's analytical engine is currently under maintenance. Please try again soon. 🌿",
             doctor: "The AI Gateway is experiencing high latency. Dr. Bond is temporarily unavailable. 🌿",

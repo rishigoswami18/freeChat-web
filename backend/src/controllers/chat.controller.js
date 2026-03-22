@@ -70,7 +70,7 @@ export async function getStreamToken(req, res) {
         await upsertStreamUser({
           id: "ai-user-id",
           name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
-          image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-girlfriend.png"),
+          image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-companion.png"),
           role: "user"
         });
       } catch (upsertErr) {
@@ -220,10 +220,16 @@ export const sendMessage = async (req, res) => {
     }
 
     console.log(`🧬 Media parts prepared: ${mediaParts.length}`);
+    const { SafetyHandler } = await import("../services/ai/safetyHandler.js");
+    const toxicityScore = SafetyHandler.analyzeToxicity(text);
+    if (toxicityScore > 30) {
+      console.warn(`🚩 [Audit-Flag] High Toxicity detected from User ${req.user._id}: ${toxicityScore}%`);
+      // In production, you would also save this to an Audit Log DB
+    }
 
     const promptText = text || (mediaParts.length > 0 ? "Analyze this media and respond." : "");
 
-    // --- Virtual Girlfrind AI Logic ---
+    // --- Virtual Companion AI Logic ---
     if (recipientId === "ai-user-id" && streamClient) {
       console.log(`🤖 AI Chat Request: ${req.user.fullName} -> AI`);
 
@@ -231,7 +237,7 @@ export const sendMessage = async (req, res) => {
       await upsertStreamUser({
         id: "ai-user-id",
         name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
-        image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-girlfriend.png"),
+        image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-companion.png"),
         role: "user"
       });
 
@@ -276,16 +282,16 @@ export const sendMessage = async (req, res) => {
         }));
 
       // Generate AI response with history and media
-      let aiReply = await getAIResponse(promptText, history, "girlfriend", req.user.aiPartnerName, req.user.fullName, mediaParts);
+      let aiReply = await getAIResponse(promptText, history, "companion", req.user.aiPartnerName, req.user.fullName, mediaParts);
 
       // Send reply as AI via Stream
       try {
         await channel.sendMessage({
-          text: aiReply || "Hi baby! ❤️",
+          text: aiReply || "Strategy check-in. Ready! 🚀",
           user_id: "ai-user-id"
         });
       } catch (streamErr) {
-        console.error("Stream Send Failure (Girlfriend):", streamErr.message);
+        console.error("Stream Send Failure (Companion):", streamErr.message);
       }
 
       return res.status(200).json({ success: true, aiReply });

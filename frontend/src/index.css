@@ -428,7 +428,7 @@ body.is-chat-active {
 }
 
 
-/* ===== Romantic & Couple UI Utilities ===== */
+/* ===== Enterprise & Couple UI Utilities refitted for Fintech ===== */
 /* ===== Premium Gradient Utilities ===== */
 .gradient-text {
   background: linear-gradient(135deg, oklch(var(--p)) 0%, oklch(var(--s)) 100%);
@@ -438,14 +438,14 @@ body.is-chat-active {
 }
 
 .romantic-gradient-text {
-  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+  background: linear-gradient(135deg, #0EA5E9 0%, #34D399 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .romantic-gradient-bg {
-  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+  background: linear-gradient(135deg, #0EA5E9 0%, #34D399 100%);
 }
 
 .brand-gradient-bg {
@@ -456,17 +456,17 @@ body.is-chat-active {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(255, 78, 80, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.15);
   transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .romantic-card-luxe:hover {
   transform: translateY(-8px) scale(1.01);
-  box-shadow: 0 30px 60px -12px rgba(255, 78, 80, 0.25);
-  border-color: rgba(255, 78, 80, 0.3);
+  box-shadow: 0 30px 60px -12px rgba(14, 165, 233, 0.25);
+  border-color: rgba(14, 165, 233, 0.3);
 }
 
-@keyframes float-heart {
+@keyframes float-data-node {
   0% {
     transform: translateY(0) rotate(0deg);
     opacity: 0;
@@ -489,28 +489,28 @@ body.is-chat-active {
 .heart-particle {
   position: fixed;
   pointer-events: none;
-  animation: float-heart linear forwards;
+  animation: float-data-node linear forwards;
   z-index: 50;
-  color: #ff4e50;
-  filter: drop-shadow(0 0 5px rgba(255, 78, 80, 0.5));
+  color: #0EA5E9;
+  filter: drop-shadow(0 0 5px rgba(14, 165, 233, 0.5));
 }
 
 .luxe-shadow-pink {
-  box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 10px 30px -5px rgba(14, 165, 233, 0.3);
 }
 
 .luxe-shadow-gold {
-  box-shadow: 0 10px 30px -5px rgba(234, 179, 8, 0.3);
+  box-shadow: 0 10px 30px -5px rgba(52, 211, 153, 0.3);
 }
 
 .glow-text-romantic {
-  text-shadow: 0 0 15px rgba(255, 78, 80, 0.4);
+  text-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
 }
 
 .luxe-border-gradient {
   border: 1px solid transparent;
   background: linear-gradient(oklch(var(--b1)), oklch(var(--b1))) padding-box,
-    linear-gradient(135deg, #ff4e50, #f9d423) border-box;
+    linear-gradient(135deg, #0EA5E9, #34D399) border-box;
 }
 
 /* ===== Dot Pulse (Online indicator) ===== */
@@ -795,12 +795,12 @@ body.is-chat-active {
 /* 4. OUTGOING MESSAGES (User) - Right Side */
 .me .str-chat__message-simple-text-inner,
 .str-chat__message-simple--me .str-chat__message-simple-text-inner {
-  background: linear-gradient(135deg, #0099ff 0%, #a033ff 100%) !important;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
   color: #ffffff !important;
   margin-left: auto !important;
   border-radius: 22px 22px 4px 22px !important;
   border: none !important;
-  box-shadow: 0 4px 12px -4px rgba(0, 153, 255, 0.4) !important;
+  box-shadow: 0 4px 12px -4px rgba(2, 132, 199, 0.4) !important;
   letter-spacing: -0.01em;
 }
 

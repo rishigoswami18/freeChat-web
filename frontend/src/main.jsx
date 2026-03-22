@@ -1,6 +1,6 @@
 /**
- * BondBeyond — All Rights Reserved © 2026
- * The Ultimate Relationship Platform
+ * Zyro — All Rights Reserved © 2026
+ * The High-Status Social Hub
  */
 // main.jsx
 
@@ -43,7 +43,7 @@ window.addEventListener('unhandledrejection', (event) => {
   console.error('🔴 UNHANDLED PROMISE:', event.reason);
 });
 
-console.log("🚀 Initializing BondBeyond App...");
+console.log("🚀 Initializing Zyro App...");
 
 import App from "./App.jsx";
 

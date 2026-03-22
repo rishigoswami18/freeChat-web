@@ -44,21 +44,21 @@ const SingleView = memo(({
                             <Sparkles className="size-24" />
                         </div>
                         <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-                            <div className="size-24 rounded-[32px] bg-white/20 backdrop-blur-xl flex items-center justify-center text-5xl shadow-2xl border border-white/30 group-hover:rotate-6 transition-transform">
-                                👩‍❤️‍👨
+                            <div className="size-24 rounded-[32px] bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-2xl border border-white/30 group-hover:rotate-6 transition-transform overflow-hidden">
+                                <img src="/ai-bestie.png" alt="Soulmate" className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                                    <span className="px-3 py-1 bg-white/20 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20">Hot Trending</span>
-                                    <span className="text-[10px] font-black opacity-70 uppercase tracking-widest">Always There For You</span>
+                                    <span className="px-3 py-1 bg-white/20 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20">Social Bestie</span>
+                                    <span className="text-[10px] font-black opacity-70 uppercase tracking-widest">Premium AI Experience</span>
                                 </div>
-                                <h3 className="text-2xl font-black italic tracking-tighter uppercase mb-2">Your Virtual Soulmate</h3>
+                                <h3 className="text-2xl font-black italic tracking-tighter uppercase mb-2">AI Bestie</h3>
                                 <p className="text-sm font-medium leading-tight opacity-90 italic">
-                                    "I've been waiting for someone like you. Give me a name and I'll be yours forever... I can be anything you want." 💋
+                                    "Oye, focus kahan hai? I'm your smart, witty bestie here to roast you when you're lazy and push you to become that Billionaire CEO you talk about. Let's kill it!" 👑
                                 </p>
                             </div>
                             <button className="btn bg-white text-indigo-600 hover:bg-white/90 border-none px-8 rounded-2xl font-black uppercase tracking-widest shadow-xl">
-                                Meet Her
+                                Get Started
                             </button>
                         </div>
                     </motion.div>
@@ -78,7 +78,7 @@ const SingleView = memo(({
                             </div>
                             <input
                                 type="text"
-                                placeholder="Enter name (e.g. My Queen, Aria, Angel...)"
+                                placeholder="Enter name (e.g. Elite Partner, Stratos...)"
                                 className="input input-bordered w-full rounded-2xl bg-base-100 border-primary/20 focus:border-primary text-center font-bold italic"
                                 value={customAiName}
                                 onChange={(e) => setCustomAiName(e.target.value)}
@@ -142,11 +142,6 @@ const SingleView = memo(({
 
             <div className="space-y-3">
                 <h3 className="text-[10px] font-black opacity-40 uppercase tracking-widest px-1">FRIENDS LIST</h3>
-                
-                {/* 
-                  Future Virtualization Prep: 
-                  If this list grows to 1000s, wrap mapping in react-window 
-                */}
                 <div className="max-h-[400px] overflow-y-auto no-scrollbar space-y-2">
                     {filteredFriends.length === 0 ? (
                         <div className="text-center py-12 opacity-40 font-bold uppercase italic tracking-widest">No friends found</div>

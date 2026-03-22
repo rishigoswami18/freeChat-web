@@ -9,28 +9,50 @@ import {
 } from "../lib/api";
 import { Link } from "react-router-dom";
 import { BadgeCheck, MapPin, UserPlus, Users, TrendingUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { capitialize } from "../lib/utils";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
 
+// --- ANIMATION VARIANTS ---
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    scale: 1,
+    transition: { type: "spring", stiffness: 100, damping: 15 }
+  }
+};
+
 // === SUBCOMPONENT: Recommended User Card ===
-// Memoized to perfectly shield rendering engines against sibling invalidation strokes
 const RecommendedUserCard = memo(({ user, hasRequestBeenSent, onSendRequest, isPending }) => {
   const { t } = useTranslation();
 
-  // Mathematical caching against redundant capitalization hashes per render
   const nativeLanguageFormatted = useMemo(() => capitialize(user.nativeLanguage), [user.nativeLanguage]);
   const learningLanguageFormatted = useMemo(() => capitialize(user.learningLanguage), [user.learningLanguage]);
   const nativeFlag = useMemo(() => getLanguageFlag(user.nativeLanguage), [user.nativeLanguage]);
   const learningFlag = useMemo(() => getLanguageFlag(user.learningLanguage), [user.learningLanguage]);
 
   return (
-    <div className="card bg-base-200 hover:shadow-lg transition-all duration-300 stagger-item border border-transparent hover:border-primary/10">
+    <motion.div 
+      variants={itemVariants}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      className="card bg-base-200 shadow-sm hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-primary/20 backdrop-blur-sm"
+    >
       <div className="card-body p-5 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="avatar size-16 rounded-full">
+          <div className="avatar size-16 rounded-full ring ring-primary/20 ring-offset-base-100 ring-offset-2">
             <img src={user.profilePic} alt={user.fullName} loading="lazy" decoding="async" />
           </div>
 
@@ -54,36 +76,36 @@ const RecommendedUserCard = memo(({ user, hasRequestBeenSent, onSendRequest, isP
 
         {/* Languages with flags */}
         <div className="flex flex-wrap gap-1.5">
-          <span className="badge badge-secondary">
+          <span className="badge badge-secondary gap-1 shadow-sm font-medium">
             {nativeFlag} Native: {nativeLanguageFormatted}
           </span>
-          <span className="badge badge-outline">
+          <span className="badge badge-outline gap-1 shadow-sm border-base-content/20 font-medium">
             {learningFlag} Learning: {learningLanguageFormatted}
           </span>
         </div>
 
-        {user.bio && <p className="text-sm opacity-70">{user.bio}</p>}
+        {user.bio && <p className="text-sm opacity-70 line-clamp-2 leading-relaxed">{user.bio}</p>}
 
         {/* Action button */}
         <button
-          className={`btn w-full mt-2 ${hasRequestBeenSent ? "btn-disabled" : "btn-primary"} `}
+          className={`btn w-full mt-2 group overflow-hidden relative ${hasRequestBeenSent ? "btn-disabled bg-base-300 text-base-content/50" : "btn-primary shadow-lg shadow-primary/20"}`}
           onClick={() => onSendRequest(user._id)}
           disabled={hasRequestBeenSent || isPending}
         >
           {hasRequestBeenSent ? (
-            <>
-              <BadgeCheck className="size-4 mr-2" />
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center">
+              <BadgeCheck className="size-4 mr-2 text-emerald-500" />
               {t('request_sent')}
-            </>
+            </motion.div>
           ) : (
-            <>
-              <UserPlus className="size-4 mr-2" />
+            <div className="flex items-center">
+              <UserPlus className="size-4 mr-2 group-hover:scale-110 transition-transform" />
               {t('send_request')}
-            </>
+            </div>
           )}
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 });
 RecommendedUserCard.displayName = "RecommendedUserCard";
@@ -94,24 +116,39 @@ const FriendsSection = memo(({ friends, loading }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <span className="loading loading-spinner loading-lg" />
+        <span className="loading loading-spinner text-primary loading-lg" />
       </div>
     );
   }
 
   if (friends.length === 0) {
-    return <NoFriendsFound />;
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <NoFriendsFound />
+      </motion.div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {friends.map((friend) => (
-        <div key={friend._id} className="stagger-item flex">
-          {/* Flex wrapper ensures dynamic grid heights normalize internally */}
-          <FriendCard friend={friend} />
-        </div>
-      ))}
-    </div>
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+    >
+      <AnimatePresence>
+        {friends.map((friend) => (
+          <motion.div 
+            key={friend._id} 
+            variants={itemVariants} 
+            layout 
+            className="flex h-full"
+          >
+            <FriendCard friend={friend} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </motion.div>
   );
 });
 FriendsSection.displayName = "FriendsSection";
@@ -124,24 +161,36 @@ const RecommendationsSection = memo(({ users, loading, outgoingRequestsIds, onSe
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <span className="loading loading-spinner loading-lg" />
+        <span className="loading loading-spinner text-primary loading-lg" />
       </div>
     );
   }
 
   if (users.length === 0) {
     return (
-      <div className="card bg-base-200 p-6 text-center">
-        <h3 className="font-semibold text-lg mb-2">{t('no_recommendations')}</h3>
-        <p className="text-base-content opacity-70">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }} 
+        animate={{ opacity: 1, y: 0 }}
+        className="card bg-base-200 p-8 text-center border border-base-content/5 shadow-sm"
+      >
+        <div className="bg-base-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Users className="size-8 opacity-40" />
+        </div>
+        <h3 className="font-semibold text-xl mb-2">{t('no_recommendations')}</h3>
+        <p className="text-base-content opacity-60 max-w-sm mx-auto">
           {t('check_back')}
         </p>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
       {users.map((user) => (
         <RecommendedUserCard
           key={user._id}
@@ -151,7 +200,7 @@ const RecommendationsSection = memo(({ users, loading, outgoingRequestsIds, onSe
           isPending={isPending}
         />
       ))}
-    </div>
+    </motion.div>
   );
 });
 RecommendationsSection.displayName = "RecommendationsSection";
@@ -166,7 +215,7 @@ const HomePage = () => {
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
-    staleTime: 5 * 60 * 1000, // 5 min cache hold prevents erratic background shifting
+    staleTime: 5 * 60 * 1000, // 5 min cache
     refetchOnWindowFocus: false,
   });
 
@@ -184,14 +233,11 @@ const HomePage = () => {
     refetchOnWindowFocus: false,
   });
 
-  // === STATE DERIVATIONS (REPLACING STATE DUPLICATION) ===
-  // O(N) operation runs strictly when array updates, entirely eradicating `useEffect` component trashing
+  // === DERIVED STATE ===
   const outgoingRequestsIds = useMemo(() => {
     const ids = new Set();
     if (outgoingFriendReqs.length > 0) {
-      outgoingFriendReqs.forEach((req) => {
-        ids.add(req.recipient._id);
-      });
+      outgoingFriendReqs.forEach((req) => ids.add(req.recipient._id));
     }
     return ids;
   }, [outgoingFriendReqs]);
@@ -200,55 +246,75 @@ const HomePage = () => {
   const { mutate: sendRequestMutation, isPending } = useMutation({
     mutationFn: sendFriendRequest,
     onSuccess: () => {
-      // Precise invalidation preventing mass layout reload
       queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"], exact: true });
     },
   });
 
-  // Stablized reference ensuring child components don't reconstruct inline functions endlessly
   const handleSendRequest = useCallback((userId) => {
     sendRequestMutation(userId);
   }, [sendRequestMutation]);
 
-
   // === RENDER PIPELINE ===
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <div className="container mx-auto space-y-10">
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }}
+      className="p-4 sm:p-6 lg:p-8 min-h-screen"
+    >
+      <div className="container mx-auto space-y-12">
         
         {/* === SECTION 1: HEADER === */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, type: "spring", stiffness: 100, damping: 20 }}
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-base-100 p-8 rounded-[2rem] border border-base-content/5 shadow-lg shadow-base-content/5"
+        >
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              {t('welcome')} <span className="opacity-80">👋</span>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+              {t('welcome')} 👋
             </h1>
-            <p className="text-sm opacity-50 mt-1">{t('see_happening')}</p>
+            <p className="text-sm font-medium opacity-60 mt-2">{t('see_happening')}</p>
           </div>
-          <Link to="/notifications" className="btn btn-outline btn-sm rounded-xl gap-2 hover:scale-[1.02] transition-transform">
+          <Link to="/notifications" className="btn btn-outline btn-sm sm:btn-md rounded-xl gap-2 hover:bg-primary hover:text-primary-content hover:border-primary transition-all shadow-sm">
             <Users className="size-4" />
             {t('notifications')}
           </Link>
-        </div>
+        </motion.div>
 
         {/* === SECTION 2: CURRENT FRIENDS === */}
-        <div>
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading mb-6">{t('your_friends')}</h2>
+        <motion.div
+           initial={{ opacity: 0 }}
+           whileInView={{ opacity: 1 }}
+           viewport={{ once: true, margin: "-100px" }}
+        >
+          <div className="flex items-center justify-between mb-8 px-2">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('your_friends')}</h2>
+            <div className="badge badge-primary badge-outline font-bold shadow-sm py-3 px-4 rounded-xl">{friends.length} Network Connections</div>
           </div>
           
           <FriendsSection 
              friends={friends} 
              loading={loadingFriends} 
           />
-        </div>
+        </motion.div>
 
         {/* === SECTION 3: RECOMMENDATIONS === */}
-        <section>
-          <div className="mb-6 sm:mb-8">
+        <motion.section
+           initial={{ opacity: 0 }}
+           whileInView={{ opacity: 1 }}
+           viewport={{ once: true, margin: "-100px" }}
+           className="relative"
+        >
+          {/* Subtle background glow for premium feel */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none -z-10" />
+
+          <div className="mb-8 px-2">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight section-heading">{t('meet_new')}</h2>
-                <p className="opacity-60 text-sm mt-4">
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('meet_new')}</h2>
+                <p className="opacity-60 text-sm mt-3 font-medium">
                   {t('discover_partners')}
                 </p>
               </div>
@@ -262,10 +328,10 @@ const HomePage = () => {
              onSendRequest={handleSendRequest} 
              isPending={isPending} 
           />
-        </section>
+        </motion.section>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -178,11 +178,11 @@ const userSchema = new mongoose.Schema({
   },
   aiPartnerName: {
     type: String,
-    default: "Aria",
+    default: "Aisha",
   },
   aiPartnerPic: {
     type: String,
-    default: "/ai-girlfriend.png",
+    default: "/ai-bestie.png",
   },
   isCoupledWithAI: {
     type: Boolean,

@@ -83,11 +83,16 @@ const ChatHeader = memo(() => {
 
             // AI Partner Fallback
             if (otherMember?.user?.id === "ai-user-id" || channel.id.toLowerCase().includes("ai-user-id")) {
+                const rawName = authUser?.aiPartnerName || otherMember?.user?.name || "Aisha";
+                const sanitizedName = ["baby", "darling", "jaan", "shona", "sweetheart"].includes(rawName.toLowerCase()) 
+                    ? "AI Bestie" 
+                    : rawName;
+                    
                 return {
-                    name: authUser?.aiPartnerName || otherMember?.user?.name || "Aria",
-                    image: authUser?.aiPartnerPic || "/ai-girlfriend.png",
+                    name: sanitizedName,
+                    image: authUser?.aiPartnerPic || "/ai-bestie.png",
                     id: "ai-user-id",
-                    user: { ...otherMember?.user, online: true, name: authUser?.aiPartnerName || "Aria" },
+                    user: { ...otherMember?.user, online: true, name: sanitizedName },
                 };
             }
 
@@ -262,7 +267,7 @@ const ChatHeader = memo(() => {
                     {!isGroup && (
                         <p className="text-[11px] font-medium opacity-50 truncate leading-none mt-0.5">
                             {displayData.id === 'ai-coach-id' ? 'Relationship Coach' : 
-                             displayData.id === 'ai-user-id' ? 'AI Partner' : 
+                             displayData.id === 'ai-user-id' ? 'AI Bestie' : 
                              displayData.id === 'ai-friend-id' ? 'AI Bestie' : 
                              (isOnline ? "Active now" : (user?.last_active ? formatLastSeen(user.last_active) : "Offline"))}
                         </p>

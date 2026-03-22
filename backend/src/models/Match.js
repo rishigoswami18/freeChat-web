@@ -34,5 +34,8 @@ const MatchSchema = new mongoose.Schema({
     isBallInQueue: { type: Boolean, default: false }
 }, { timestamps: true });
 
+MatchSchema.index({ status: 1, startTime: 1 });
+MatchSchema.index({ seriesId: 1, startTime: 1 });
+
 const Match = mongoose.model("Match", MatchSchema);
 export default Match;

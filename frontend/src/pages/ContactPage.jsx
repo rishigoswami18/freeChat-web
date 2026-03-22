@@ -12,28 +12,28 @@ const ContactPage = () => {
                         <div>
                             <h1 className="text-5xl font-black italic tracking-tighter mb-4">Connect with BondBeyond</h1>
                             <p className="text-white/40 text-lg leading-relaxed max-w-md">
-                                Whether you're a fan seeking support or a brand looking for 'Antigravity' partnerships, our team is standing by.
+                                Whether you're a financial institution seeking secure infrastructure or a brand looking for enterprise solutions, our team is standing by.
                             </p>
                         </div>
 
                         <div className="space-y-8">
                             <ContactItem 
                                 icon={Mail} 
-                                title="Support Hub" 
-                                value="support@freechatweb.in" 
-                                desc="For 24/7 technical and payment support."
+                                title="Enterprise Support & Billing" 
+                                value="freechatweb00@gmail.com | +91-9905755603" 
+                                desc="For 24/7 dedicated technical support and SLA tracking."
                             />
                             <ContactItem 
                                 icon={Globe} 
                                 title="Corporate Inquiries" 
-                                value="info@freechatweb.in" 
-                                desc="For scaling partnerships and media."
+                                value="freechatweb00@gmail.com" 
+                                desc="For banking partnerships, compliance, and media."
                             />
                             <ContactItem 
                                 icon={MapPin} 
-                                title="Headquarters" 
-                                value="India" 
-                                desc="The heart of the cricket universe."
+                                title="Registered Office Address" 
+                                value="LPU University, Phagwara, Punjab, India" 
+                                desc="BondBeyond Technologies Pvt. Ltd."
                             />
                         </div>
                     </div>
@@ -65,7 +65,7 @@ const ContactPage = () => {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-white/30">Your Message</label>
                                 <textarea 
                                     rows="4"
-                                    placeholder="How can we help your fan journey?" 
+                                    placeholder="How can we elevate your financial workflows?" 
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
                                 />
                             </div>

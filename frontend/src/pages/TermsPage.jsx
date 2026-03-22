@@ -16,13 +16,13 @@ const TermsPage = () => {
                             <div className="size-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-500">
                                 <Scale className="size-6" />
                             </div>
-                            <h2 className="text-2xl font-black italic">1. Nature of Service: A Game of Skill</h2>
+                            <h2 className="text-2xl font-black italic">1. Enterprise Software License</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed mb-6">
-                            <strong>BondBeyond</strong> is strictly a <strong>"Game of Skill"</strong> platform. All predictions, engagement activities, and community challenges hosted on the platform require users to possess a deep understanding of player statistics, pitch conditions, historical performance data, and real-time match dynamics. 
+                            Welcome to Zyro, operated by <strong>Zyro Technologies Pvt. Ltd.</strong> ("we," "us," or "our"). We provide a high-status social platform for strategic connections and AI-driven growth. By using our app and website, you agree to these simple terms.
                         </p>
                         <p className="text-white/70 leading-relaxed">
-                            Success on the platform is directly proportional to the user's analytical ability and research. We do not host or facilitate any activities based on luck, chance, or random probability.
+                            Whether you are subscribing via Razorpay or just syncing with your Zyro Bestie, these rules help keep our community elite and secure.
                         </p>
                     </section>
 
@@ -31,14 +31,14 @@ const TermsPage = () => {
                             <div className="size-12 rounded-2xl bg-red-500/20 flex items-center justify-center text-red-500">
                                 <ShieldAlert className="size-6" />
                             </div>
-                            <h2 className="text-2xl font-black italic">2. No Gambling Policy</h2>
+                            <h2 className="text-2xl font-black italic">2. Acceptable Use Policy</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed mb-6">
-                            BondBeyond strictly prohibits real-money wagering, betting, or any form of gambling. Our platform is designed for social engagement and merit-based recognition.
+                            We want Zyro to be a high-status, secure place for elite networking. Please do not use our platform for anything illegal, spamming, or harming others.
                         </p>
                         <div className="p-6 bg-red-500/10 rounded-3xl border border-red-500/20">
                             <p className="text-sm font-bold text-red-400">
-                                Virtual Currency Usage: Our 'Bond Coins' are virtual loyalty rewards used exclusively for in-app customization, social recognition, and unlocking high-level analytical tools. They have no real-world monetary value and cannot be withdrawn as cash.
+                                Zero-Tolerance: © 2026 Zyro. Zero-tolerance for inappropriate content, fraudulent activities, scams, or NSFW material. We will immediately suspend accounts that violate our professionalism standards.
                             </p>
                         </div>
                     </section>
@@ -48,10 +48,10 @@ const TermsPage = () => {
                             <div className="size-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-500">
                                 <Users className="size-6" />
                             </div>
-                            <h2 className="text-2xl font-black italic">3. Eligibility</h2>
+                            <h2 className="text-2xl font-black italic">3. Billing & Payments</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed">
-                            Users must be <strong>18 years of age or older</strong> to access the platform. Furthermore, users must reside in states or territories where skill-based gaming is legally permitted and recognized. It is the user's responsibility to comply with local laws before using our premium analytical features.
+                            Whenever you purchase a premium feature or subscription, your payment is processed safely through our trusted partner, <strong>Razorpay</strong>. Subscriptions renew automatically unless you cancel them. Standard taxes (like 18% GST) apply as per Indian laws.
                         </p>
                     </section>
 
@@ -60,18 +60,18 @@ const TermsPage = () => {
                             <div className="size-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500">
                                 <Info className="size-6" />
                             </div>
-                            <h2 className="text-2xl font-black italic">4. Limitation of Liability</h2>
+                            <h2 className="text-2xl font-black italic">4. Limitation of Liability & Jurisdiction</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed">
-                            BondBeyond provides analytical data and match visualizations on an "as-is" basis. While we strive for 100% accuracy via our Antigravity Engine, we are not responsible for any decisions made by users based on the platform's insights.
+                            We work hard to keep our app running 24/7 without issues, but we provide our services "as-is" without any guaranteed warranties. If things go wrong due to third-party services, we won't be held liable. These Terms are governed by the laws of India, with jurisdiction in Phagwara, Punjab.
                         </p>
                     </section>
                 </div>
 
                 <div className="mt-20 p-10 bg-gradient-to-br from-indigo-900/40 to-black border border-white/10 rounded-[40px] text-center">
                     <h3 className="text-xl font-bold mb-4">Questions about our Terms?</h3>
-                    <p className="text-white/40 mb-8 max-w-md mx-auto">Our compliance team is here to help ensure you have a professional experience.</p>
-                    <a href="mailto:support@freechatweb.in" className="text-indigo-400 font-bold hover:underline">support@freechatweb.in</a>
+                    <p className="text-white/40 mb-8 max-w-md mx-auto">Got any questions? Just shoot us an email and our team will be quickly in touch.</p>
+                    <a href="mailto:freechatweb00@gmail.com" className="text-indigo-400 font-bold hover:underline">freechatweb00@gmail.com</a>
                 </div>
             </div>
         </div>

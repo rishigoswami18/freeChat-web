@@ -281,7 +281,7 @@ const ChatPage = () => {
       const isAi = isAiUser(targetUserId);
       if (isAi) setIsThinking(true);
 
-      const messageObj = { ...data, isVoice: true, text: "Voice Message" };
+      const messageObj = { ...data, type: "regular", text: "Voice Message" };
       await channel.sendMessage(messageObj);
 
       if (isAi) {
@@ -327,10 +327,16 @@ const ChatPage = () => {
 
         const messageObj = {
           text: "Sent a snap",
-          isSnap: true,
+          type: "regular",
+          attachments: [{
+            type: type,
+            thumb_url: res.data.url,
+            asset_url: res.data.url
+          }],
           mediaUrl: res.data.url,
           mediaType: type,
           isViewed: false,
+          isSnap: true
         };
 
         await channel.sendMessage(messageObj);
@@ -406,6 +412,7 @@ const ChatPage = () => {
                 handleSnapClick={handleSnapClick}
                 handleVoiceSend={handleVoiceSend}
               />
+              <Thread />
             </div>
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*,video/*" onChange={handleFileChange} />
           </Window>
@@ -432,7 +439,6 @@ const ChatPage = () => {
 
       <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-base-100">
         {chatUI}
-        <Thread />
       </div>
     </div>
   );

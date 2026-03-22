@@ -34,8 +34,8 @@ const Footer = () => {
                     {/* Brand Identity & Description (Takes 2 units) */}
                     <div className="col-span-1 sm:col-span-2 lg:col-span-2">
                         <FooterBrand 
-                            tagline="India's Largest Fan Engagement Ecosystem"
-                            description="BondBeyond is a cutting-edge Sports-Tech platform redefining the fan experience through the Antigravity Engine. We transform passive viewing into an active, data-driven analytical journey."
+                            tagline="Connect Safely. Chat Freely."
+                            description="Zyro is the high-status social platform for strategic connections and AI-driven growth. We focus on keeping your chats private, fast, and completely safe."
                         />
                     </div>
 
@@ -59,7 +59,7 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Bar: Copyright & Signature */}
-                <FooterBottom brandName="BondBeyond" />
+                <FooterBottom brandName="Zyro" />
             </div>
         </footer>
     );

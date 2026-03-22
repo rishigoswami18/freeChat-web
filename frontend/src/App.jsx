@@ -1,6 +1,6 @@
 /**
- * BondBeyond — All Rights Reserved © 2026
- * The Ultimate Relationship Platform
+ * Zyro — All Rights Reserved © 2026
+ * The High-Status Social Platform
  */
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -407,7 +407,20 @@ const App = () => {
                     }
                   />
 
-                  {/* Couple feature disabled for now */}
+                  <Route
+                    path="/couple"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <CoupleProfilePage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  {/* Couple feature re-enabled */}
 
                   <Route
                     path="/communities"
@@ -553,7 +566,11 @@ const App = () => {
                   <Route path="/about-hriskesh-giri" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
                   <Route path="/hriskesh-giri-ai-developer" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
 
-                  {/* Relationship SEO disabled for now */}
+                  {/* Relationship SEO re-enabled */}
+                  <Route path="/soul-bond" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  <Route path="/ai-girlfriend" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  <Route path="/virtual-partner" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
+                  <Route path="/best-ai-girlfriend-app" element={<Layout showSidebar={false}><AIGirlfriendSEOPage /></Layout>} />
 
                   <Route path="/future-of-social-media" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />
                   <Route path="/next-gen-social-platform" element={<Layout showSidebar={false}><FutureSocialSEOPage /></Layout>} />

@@ -1,4 +1,4 @@
-/** BondBeyond — Backend API Gateway | Sync: 2026-03-17 02:55 */
+/** Zyro — Backend API Gateway | Rebrand: 2026-03-23 04:55 */
 import http from "http";
 import app from "./app.js";
 import validateEnv from "./config/env.js";
@@ -39,7 +39,7 @@ const bootstrap = async () => {
 
         // 7. Start Listening
         server.listen(PORT, () => {
-            console.log(`🚀 [Server] BondBeyond API Gateway running on port ${PORT}`);
+            console.log(`🚀 [Server] Zyro API Gateway running on port ${PORT}`);
             console.log(`📡 [Real-time] IPL Reward Engine Primed.`);
         });
 

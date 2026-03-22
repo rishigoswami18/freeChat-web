@@ -115,5 +115,35 @@ Text: "${text}"`;
             aiName: "Translator",
             userName: "User"
         });
+    },
+
+    /**
+     * Live Transcription using Gemini 1.5 Flash (Multimodal)
+     * Handles audio blobs and returns high-accuracy text.
+     */
+    transcribeAudio: async ({ audioBase64, mimeType = "audio/webm", userName = "User" }) => {
+        try {
+            const prompt = "Transcribe the actual words spoken in this audio. If you hear someone speaking in Hindi or Hinglish, write it down exactly as spoken. DO NOT use dots or ellipses. If no speech is present, return only '---'.";
+
+            const mediaParts = [{
+                inlineData: {
+                    data: audioBase64,
+                    mimeType
+                }
+            }];
+
+            // We use gemini-1.5-flash specifically for speed and audio support
+            return await ChatEngine.getResponse({
+                prompt,
+                history: [],
+                persona: "coach", // Neural persona for transcription
+                aiName: "Transcriber",
+                userName,
+                mediaParts
+            });
+        } catch (error) {
+            console.error("❌ [MatchIntelligence] Transcription Failure:", error.message);
+            return ""; // Fail gracefully to keep the loop going
+        }
     }
 };

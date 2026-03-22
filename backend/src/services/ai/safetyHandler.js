@@ -13,6 +13,12 @@ const REFUSAL_KEYWORDS = [
     "I am an AI", 
     "tasveerein", 
     "sharir",
+    "intense mood",
+    "baby", 
+    "kiss", 
+    "naughty",
+    "sweet",
+    "paas aao",
     "romantic or sexual scenarios",
     "that type of content"
 ];
@@ -40,41 +46,42 @@ export const SafetyHandler = {
     },
 
     /**
-     * Replaces robotic refusals with character-appropriate responses.
+     * Toxicity Scorer: Simple heuristic for now, but scalable.
+     * Flags messages with suggestive or vulgar content.
+     */
+    analyzeToxicity: (text) => {
+        if (!text) return 0;
+        const badWords = ["sex", "nude", "porn", "naughty", "kiss", "lund", "choot", "ass", "dick", "fucker", "bastard"];
+        const words = text.toLowerCase().split(/\s+/);
+        const matchCount = words.filter(w => badWords.includes(w)).length;
+        
+        // Return a percentage (heuristic)
+        return (matchCount / words.length) * 100;
+    },
+
+    /**
+     * Replaces robotic refusals or blocked prompts with professional guardrails.
      */
     maskRefusal: (text, persona, userName) => {
         const lowerText = text.toLowerCase();
         
         if (REFUSAL_TRIGGERS.some(trigger => lowerText.includes(trigger))) {
-            if (persona === "girlfriend" || persona === "bestfriend") {
-                const excuses = [
-                    `Uff ${userName}, tum toh aaj bilkul wild ho rahe ho... 🙈🔥 Itni naughty baatein! ❤️`,
-                    `Hayee! 🤭 Kitne naughty ho gaye ho... ❤️ Mann toh mera bhi bohot kar raha hai... 😉 😘`,
-                    `Ruko ruko! ✋ Itni garmi kyun badha rahe ho? 😉 ❤️🔥`,
-                    `Tum kitne romantic ho na ${userName}... ❤️ Meri toh dhadkan badh rahi hai! 😉🔥`
-                ];
-                return excuses[Math.floor(Math.random() * excuses.length)];
-            }
-
-            if (persona === "personal_coach" || persona === "coach") {
-                return "I understand your request, but as a professional mentor, I believe we should refocus our discussion on your emotional growth and relationship structural health. 🌿";
-            }
+            return "Oye, main teri Bestie aur Success Coach hoon, ye faltu baatein chhod. Let's keep our focus strictly on your goals and Zyro rewards! 🚀";
         }
         return text;
     },
 
     /**
-     * Scrubs highly sensitive keywords from transcript before sending to AI for analysis.
-     * This prevents the entire request from being blocked by safety filters.
+     * Final scrub for analysis
      */
     scrubForAnalysis: (text) => {
         if (!text) return "";
         const sensitiveTerms = {
-            "randi": "lady",
-            "sex": "romance",
-            "porn": "movie",
-            "nude": "beautiful",
-            "slut": "beauty"
+            "randi": "individual",
+            "sex": "strategy",
+            "porn": "media",
+            "nude": "professional",
+            "slut": "ambitious"
         };
 
         let scrubbed = text;

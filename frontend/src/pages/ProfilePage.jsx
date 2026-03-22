@@ -218,6 +218,20 @@ const ProfilePage = () => {
                     />
                 )}
             </Suspense>
+            {/* Compliance & Safety Badge — Professional Audit Ready */}
+            <div className="mt-16 py-8 border-t border-base-content/5 text-center px-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-3">
+                    <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Security & Compliance Guard Active</span>
+                </div>
+                <p className="text-[11px] font-medium opacity-40 max-w-xs mx-auto leading-relaxed">
+                    BondBeyond is a high-security platform. All interactions are monitored for safety and compliance with global standards.
+                </p>
+                <div className="flex justify-center gap-6 mt-6 opacity-30 grayscale hover:grayscale-0 transition-all">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" className="h-4" alt="Razorpay" />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Google_Play_Arrow_logo.svg" className="h-4" alt="Google Play" />
+                </div>
+            </div>
         </div>
     );
 };

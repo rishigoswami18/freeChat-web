@@ -28,6 +28,7 @@ const staticNavItems = [
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
   { to: "/communities", icon: Users, labelKey: "Communities" },
+  { to: "/couple", icon: Sparkles, label: "AI Bestie", isSacred: true },
   { to: "/reels", icon: Film, labelKey: "Reels" },
   { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
   { to: "/notifications", icon: Heart, labelKey: "notifications" },
@@ -95,7 +96,7 @@ const Sidebar = memo(() => {
   useEffect(() => {
     if (!authUser?._id) return;
 
-    const initialTitle = "BondBeyond | Connect & Play";
+    const initialTitle = "Zyro | Master Your Mindset";
     document.title = initialTitle;
 
     const handleVisibilityChange = () => {
@@ -119,7 +120,7 @@ const Sidebar = memo(() => {
   // === STABLE CALLBACKS ===
   const handleDownload = useCallback((e) => {
     e.preventDefault();
-    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "BondBeyond_app.apk");
+    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "Zyro_app.apk");
   }, []);
 
   const handleCreatePost = useCallback(() => {
@@ -184,7 +185,6 @@ const Sidebar = memo(() => {
       id: `tour-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, '-')}`
     }));
 
-    // Couple feature disabled for now
     return items;
   }, [isCoupled, partnerId]);
 
@@ -194,11 +194,13 @@ const Sidebar = memo(() => {
       {/* Brand area */}
       <div className="pt-8 pb-6 px-4 xl:px-6">
         <Link to="/" className="flex items-center gap-4 group/logo focus:outline-none">
-           <div className="size-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg group-hover/logo:scale-105 transition-transform shrink-0">
-             <Heart className="size-6 text-white fill-white" />
+           <div className="size-10 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover/logo:scale-110 transition-transform shrink-0 overflow-hidden">
+             <svg viewBox="0 0 24 24" fill="none" className="size-6 text-white" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16l-12 16h16" />
+             </svg>
            </div>
-           <span className="hidden xl:block text-2xl font-black tracking-tight font-outfit truncate">
-             BondBeyond
+           <span className="hidden xl:block text-2xl font-black tracking-tight font-outfit truncate uppercase italic">
+             Zyro
            </span>
         </Link>
       </div>

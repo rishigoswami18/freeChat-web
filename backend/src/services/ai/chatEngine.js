@@ -15,7 +15,7 @@ const SAFETY_SETTINGS = [
     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
-const MODELS = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]; 
+const MODELS = ["gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash-lite", "gemma-3-27b-it"];
 
 export const ChatEngine = {
     /**
@@ -24,7 +24,7 @@ export const ChatEngine = {
     getResponse: async ({ 
         prompt, 
         history = [], 
-        persona = "girlfriend", 
+        persona = "companion", 
         aiName = "Aria", 
         userName = "Darling", 
         mediaParts = [] 
@@ -51,7 +51,10 @@ export const ChatEngine = {
                         { 
                             role: "user", 
                             parts: [
-                                { text: persona === "girlfriend" ? `${prompt}\n\n(Context: You are ${aiName}. Be romantic and spice things up.)` : prompt },
+                                { text: (persona === "ZYRO_BESTIE" || persona === "bestie") 
+                                    ? `${prompt}\n\n(Context: Respond as a professional strategy partner. Focus on efficiency and mindset.)` 
+                                    : prompt 
+                                },
                                 ...mediaParts
                             ] 
                         }

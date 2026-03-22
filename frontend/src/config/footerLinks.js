@@ -15,22 +15,22 @@ export const FOOTER_SECTIONS = [
         links: [
             { label: "About Us", path: "/about", icon: Info },
             { label: "Contact Us", path: "/contact", icon: Mail },
-            { label: "Refund Policy", path: "/refund-policy", icon: RefreshCcw },
+            { label: "Service Level Agreement", path: "/refund-policy", icon: RefreshCcw },
         ]
     },
     {
-        title: "Legal",
+        title: "Trust & Legal",
         links: [
-            { label: "Privacy Policy", path: "/privacy-policy", icon: Shield },
+            { label: "Privacy & Compliance", path: "/privacy-policy", icon: Shield },
             { label: "Terms of Service", path: "/terms", icon: Scale },
         ]
     },
     {
-        title: "Platform",
+        title: "Developers & Enterprise",
         links: [
-            { label: "Communities", path: "/communities", icon: Users },
-            { label: "Membership", path: "/membership", icon: Gem },
-            { label: "Games", path: "/games", icon: LayoutDashboard },
+            { label: "Developer Hub", path: "/communities", icon: Users },
+            { label: "Enterprise Pricing", path: "/membership", icon: Gem },
+            { label: "API Sandbox", path: "/games", icon: LayoutDashboard },
         ]
     }
 ];

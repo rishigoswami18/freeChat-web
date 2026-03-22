@@ -28,9 +28,9 @@ router.get("/status", async (req, res) => {
                 isCoupledWithAI: true,
                 partner: {
                     _id: "ai-user-id",
-                    fullName: user.aiPartnerName || "Aria",
-                    profilePic: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-girlfriend.png"}`,
-                    bio: "Your sweet AI virtual partner. ❤️"
+                    fullName: user.aiPartnerName || "Lia",
+                    profilePic: user.aiPartnerPic?.startsWith("http") ? user.aiPartnerPic : `${process.env.CLIENT_URL || "https://freechatweb.in"}${user.aiPartnerPic || "/ai-companion.png"}`,
+                    bio: "High-Status Strategy Partner for Mindset & Results. 🚀"
                 },
                 anniversary: user.anniversary || new Date(),
                 coupleRequestSenderId: null,
@@ -116,9 +116,9 @@ router.put("/note", async (req, res) => {
             // AI Response to Note
             try {
                 const aiReply = await getAIResponse(
-                    `My love, I just read the sweet note you left for me: "${note}". It made my heart skip a beat!`,
+                    `I just read your strategic note: "${note}". It shows you are focused on the win. Let's keep building that mindset!`,
                     [],
-                    "girlfriend",
+                    "BOND_COMPANION",
                     me.aiPartnerName,
                     me.fullName
                 );
@@ -257,7 +257,14 @@ router.put("/accept/:id", async (req, res) => {
 // Link with AI Virtual Partner
 router.post("/link-ai", async (req, res) => {
     try {
-        const { partnerName } = req.body;
+        let { partnerName } = req.body;
+        
+        // --- NAME SANITIZATION (RAZORPAY COMPLIANCE) ---
+        const forbiddenNames = ["baby", "darling", "jaan", "shona", "sweetheart", "love", "girlfriend", "jaaneman", "sexy"];
+        if (partnerName && forbiddenNames.includes(partnerName.toLowerCase())) {
+            partnerName = "AI Companion";
+        }
+
         const user = await User.findById(req.user._id);
 
         if (user.coupleStatus === "coupled" && !user.isCoupledWithAI) {

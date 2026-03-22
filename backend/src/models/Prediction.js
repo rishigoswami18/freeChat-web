@@ -16,5 +16,10 @@ const PredictionSchema = new mongoose.Schema({
     ipAddress: { type: String }
 }, { timestamps: true });
 
+// Core Operational Indexes for High-Velocity Live Matches
+PredictionSchema.index({ matchId: 1, status: 1 });  // Crucial for MatchAutomationSystem payouts
+PredictionSchema.index({ userId: 1, createdAt: -1 }); // Crucial for displaying user's history
+PredictionSchema.index({ status: 1 }); // For global admin metrics
+
 const Prediction = mongoose.model("Prediction", PredictionSchema);
 export default Prediction;

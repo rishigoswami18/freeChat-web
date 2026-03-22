@@ -16,6 +16,7 @@ import { sendPushNotification } from "../lib/push.service.js";
 import { streamClient } from "../lib/stream.js";
 import { getAIResponse } from "../lib/gemini.js";
 import { MatchIntelligence } from "../services/ai/matchIntelligence.js";
+import { TopMediaiService } from "../services/ai/topMediai.js";
 import RealtimeAvatar from "../services/ai/realtimeAvatar.js";
 
 const router = express.Router();
@@ -396,6 +397,46 @@ router.post("/sense-emotion", protectRoute, async (req, res) => {
     const analysis = await RealtimeAvatar.senseEmotion(image);
     res.json(analysis);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.post("/voice-transcribe", protectRoute, async (req, res) => {
+  try {
+    const { audioBase64, mimeType = "audio/webm" } = req.body;
+    if (!audioBase64) return res.status(400).json({ message: "Audio data is required" });
+
+    console.log(`🎤 [Voice Transcribe] ${req.user.fullName} sent audio segment (${Math.round(audioBase64.length/1024)} KB)`);
+
+    const transcription = await MatchIntelligence.transcribeAudio({
+      audioBase64,
+      mimeType,
+      userName: req.user.fullName
+    });
+
+    console.log(`📝 [Transcribed] "${transcription.substring(0, 40)}..."`);
+    res.status(200).json({ text: transcription });
+  } catch (error) {
+    console.error("❌ [Voice Transcribe] Error:", error.message);
+    res.status(500).json({ message: "Transcription failed" });
+  }
+});
+
+router.post("/voice-generate", protectRoute, async (req, res) => {
+  try {
+    const { text, aiType } = req.body;
+    if (!text) return res.status(400).json({ message: "Text is required" });
+
+    const audioBuffer = await TopMediaiService.generateVoice(text, aiType);
+    
+    // Stream Binary MP3
+    res.set({
+      "Content-Type": "audio/mpeg",
+      "Content-Length": audioBuffer.byteLength
+    });
+    res.end(Buffer.from(audioBuffer));
+  } catch (error) {
+    console.warn("⚠️ [TopMediai] Falling back to browser TTS:", error.message);
+    res.status(202).json({ fallback: true });
+  }
 });
 
 export default router;

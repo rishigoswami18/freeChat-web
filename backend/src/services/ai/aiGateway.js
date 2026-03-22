@@ -15,7 +15,7 @@ export const AIGateway = {
     generate: async (options) => {
         const {
             provider = "gemini",
-            model = "gemini-1.5-flash",
+            model = "gemini-flash-latest",
             messages = [],
             systemInstruction = "",
             safetySettings = [],
@@ -74,45 +74,95 @@ export const AIGateway = {
     },
 
     /**
-     * Internal: Gemini implementation
+     * Internal: Gemini implementation using direct REST API to avoid SDK 404 bugs
      */
     _callGemini: async ({ model, messages, systemInstruction, safetySettings, signal }) => {
         const apiKey = process.env.GEMINI_API_KEY;
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const modelInstance = genAI.getGenerativeModel({
-            model,
-            systemInstruction,
-            safetySettings
-        });
+        if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
 
-        const history = messages.slice(0, -1);
-        const latest = messages[messages.length - 1];
+        // The user's system generates roles as "user" and "model". 
+        // We must map it precisely to the REST API schema
+        const contents = messages.map(msg => ({
+            role: msg.role === "model" ? "model" : "user",
+            parts: msg.parts // usually [{text: "..."}]
+        }));
 
-        // Diagnostic Logging to catch role alternation errors
-        console.log(`[AIGateway] Request Model: ${model} | History: ${history.length} msgs | Roles: ${messages.map(m => m.role).join(" -> ")}`);
-
-        const chat = modelInstance.startChat({ history });
-        const result = await chat.sendMessage(latest.parts);
-        const response = await result.response;
-
-        // Check for safety blocks manually to provide better errors
-        if (response.promptFeedback?.blockReason) {
-            throw new Error(`BLOCKED_BY_SAFETY: ${response.promptFeedback.blockReason}`);
+        if (systemInstruction) {
+            contents.unshift({
+                role: "user",
+                parts: [{ text: `SYSTEM_INSTRUCTION: ${systemInstruction}\n\nUnderstood? Respond briefly.` }]
+            }, {
+                role: "model",
+                parts: [{ text: "Understood. I'm ready." }]
+            });
         }
 
-        const candidate = response.candidates?.[0];
-        if (candidate?.finishReason === "SAFETY" || candidate?.finishReason === "RECITATION") {
-            throw new Error(`BLOCKED_BY_SAFETY_CANDIDATE: ${candidate.finishReason}`);
+        const payload = {
+            contents,
+        };
+
+        // Simplify safety settings for REST (snake_case)
+        if (safetySettings && safetySettings.length > 0) {
+            payload.safety_settings = safetySettings;
         }
+
+        // Add generation config (snake_case)
+        payload.generation_config = {
+            temperature: 0.9,
+            topP: 0.95,
+            topK: 40,
+            maxOutputTokens: 2048,
+        };
+
+        // Log request for debugging
+        const lastMsg = contents.length > 0 ? contents[contents.length-1] : { parts: [] };
+        console.log(`📡 [Gemini Request] Model: ${model} | Parts: ${lastMsg.parts.length}`);
+
+        // Upgrade to v1beta for Multimodal Audio (inlineData) support
+        const fetchUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
         try {
-            return response.text().trim();
-        } catch (e) {
-            // This happens if safety triggers late or other SDK internal issues
-            if (e.message?.includes("SAFETY")) {
-                throw new Error("BLOCKED_BY_SAFETY: Late detection");
+            const response = await fetch(fetchUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                signal
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                console.error(`❌ [Gemini API Error] Status: ${response.status} | Msg: ${data.error?.message || "Unknown"}`);
+                return ""; 
             }
-            throw e;
+
+            // Check for safety blocks
+            if (data.promptFeedback?.blockReason) {
+                console.warn(`⚠️ [Gemini] Blocked by safety: ${data.promptFeedback.blockReason}`);
+                return "";
+            }
+
+            const candidate = data.candidates?.[0];
+            if (!candidate) {
+                console.warn(`⚠️ [Gemini] API returned no candidates. Raw payload: ${JSON.stringify(data).substring(0, 150)}`);
+                return "";
+            }
+
+            if (candidate.finishReason === "SAFETY" || candidate.finishReason === "RECITATION") {
+                console.warn(`⚠️ [Gemini] Blocked Candidate: ${candidate.finishReason}`);
+                return ""; 
+            }
+
+            const rawText = candidate.content?.parts?.[0]?.text;
+            if (rawText) {
+                return rawText.trim();
+            }
+
+            console.warn(`⚠️ [Gemini] Candidate returned empty string. Raw candidate: ${JSON.stringify(candidate)}`);
+            return "";
+        } catch (fetchError) {
+            console.error(`❌ [Gemini Network/Abort Error]: ${fetchError.message}`);
+            return "";
         }
     },
 

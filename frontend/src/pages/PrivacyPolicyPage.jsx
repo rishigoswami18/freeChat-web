@@ -19,10 +19,10 @@ const PrivacyPolicyPage = () => {
                             <div className="size-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500">
                                 <ShieldCheck className="size-6" />
                             </div>
-                            <h2 className="text-2xl font-black italic">1. Our Commitment</h2>
+                            <h2 className="text-2xl font-black italic">1. Enterprise Data Collection</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed relative z-10">
-                            At <strong>BondBeyond</strong>, we recognize that privacy is a cornerstone of trust. We collect minimal user data—such as your Favorite Team and Location—solely to personalize the <strong>'Antigravity'</strong> visualizations and ensure you get relevant regional updates. 
+                            At <strong>Zyro Technologies Pvt. Ltd.</strong>, we strongly believe in protecting your privacy. We only collect basic information—like your profile details and standard usage logs—just to help personalize your experience, secure your account, and keep the app running smoothly.
                         </p>
                     </section>
 
@@ -34,7 +34,7 @@ const PrivacyPolicyPage = () => {
                             <h2 className="text-2xl font-black italic">2. Data Non-Disclosure</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed">
-                            We have a strict non-disclosure policy. We **do not sell, rent, or trade** user data to third parties or advertising conglomerates. Your fan journey and analytical history remain strictly between you and the BondBeyond platform.
+                            We have a strict privacy policy. We **do not sell, rent, or trade** your personal data or chats to anyone. Your messages and personal information always stay strictly between you and Zyro.
                         </p>
                     </section>
 
@@ -46,12 +46,12 @@ const PrivacyPolicyPage = () => {
                             <h2 className="text-2xl font-black italic">3. Transactional Security</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed mb-6">
-                            All financial transactions for 'Bond Coins' are processed through industry-standard, **PCI-DSS compliant gateways (Razorpay)**. 
+                            Whenever you buy something on our app, the payment is processed directly through our secure, industry-standard partner **Razorpay**. 
                         </p>
                         <div className="p-6 bg-white/[0.03] rounded-3xl border border-white/10">
                             <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Encryption Standards</p>
                             <p className="text-sm text-white/70 leading-relaxed">
-                                We utilize 256-bit SSL encryption to protect your identity and payment information. BondBeyond never stores sensitive card details on its servers.
+                                We use modern SSL encryption to protect your data. Zyro never stores your credit card details or bank passwords on our servers.
                             </p>
                         </div>
                     </section>
@@ -61,10 +61,10 @@ const PrivacyPolicyPage = () => {
                             <div className="size-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-500">
                                 <FileText className="size-6" />
                             </div>
-                            <h2 className="text-2xl font-black italic">4. Your Rights</h2>
+                            <h2 className="text-2xl font-black italic">4. Your Rights & Data Deletion</h2>
                         </div>
                         <p className="text-white/70 leading-relaxed">
-                            You have the right to request access to your data or its deletion at any time. Simply contact our support team to clear your vault and personal profile from our analytical engine.
+                            You totally own your data. You have the right to request a copy of it or ask us to delete your account entirely at any time. Just drop us an email, and we'll take care of it for you.
                         </p>
                     </section>
                 </div>
@@ -72,7 +72,7 @@ const PrivacyPolicyPage = () => {
                 <div className="mt-20 p-10 bg-white/5 border border-white/10 rounded-[40px] flex flex-col items-center">
                     <p className="text-white/30 text-center mb-6">For detailed data inquiries, reach out to our DPO at:</p>
                     <div className="px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-black italic text-indigo-400">
-                        privacy@freechatweb.in
+                        freechatweb00@gmail.com
                     </div>
                 </div>
             </div>

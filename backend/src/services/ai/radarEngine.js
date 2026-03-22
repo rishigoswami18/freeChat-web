@@ -1,5 +1,6 @@
 import { getAIResponse } from "../../lib/gemini.js";
 import EmpathyRadar from "../../models/EmpathyRadar.js";
+import User from "../../models/User.js";
 import { streamClient } from "../../lib/stream.js";
 import { SafetyHandler } from "../ai/safetyHandler.js";
 
@@ -30,9 +31,14 @@ export const RadarEngine = {
 
       console.log(`[Radar] Analyzing ${messages.length} messages for channel ${channelId}`);
 
+      const user = await User.findById(userId).select("fullName aiPartnerName");
+      const clientName = user?.fullName || "User";
+      const partnerName = user?.aiPartnerName || "Companion";
+
       const prompt = `
         ACT AS A SENIOR RELATIONSHIP PSYCHOLOGIST AND DATA ANALYST.
         Analyze the following chat transcript to detect emotional distance, vibe, and ghosting risk.
+        The conversation is between ${clientName} (User) and ${partnerName} (AI Companion).
         
         Transcript:
         ${transcript}
@@ -46,7 +52,7 @@ export const RadarEngine = {
         }
       `;
 
-      const aiResponse = await getAIResponse(prompt, [], "personal_coach");
+      const aiResponse = await getAIResponse(prompt, [], "personal_coach", partnerName, clientName);
       console.log(`[Radar] AI Raw Response:`, aiResponse);
       
       // Clean up AI response (remove markdown code blocks if any)
