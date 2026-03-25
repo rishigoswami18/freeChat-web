@@ -85,7 +85,7 @@ const ChatHeader = memo(() => {
             if (otherMember?.user?.id === "ai-user-id" || channel.id.toLowerCase().includes("ai-user-id")) {
                 const rawName = authUser?.aiPartnerName || otherMember?.user?.name || "Aisha";
                 const sanitizedName = ["baby", "darling", "jaan", "shona", "sweetheart"].includes(rawName.toLowerCase()) 
-                    ? "AI Bestie" 
+                    ? "Aisha" 
                     : rawName;
                     
                 return {
@@ -109,7 +109,7 @@ const ChatHeader = memo(() => {
             // AI Coach Fallback
             if (otherMember?.user?.id === "ai-coach-id" || channel.id.toLowerCase().includes("ai-coach-id")) {
                 return {
-                    name: "Dr. Bond (Relationship Coach)",
+                    name: "Dr. Bond (Success Coach)",
                     image: "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png",
                     id: "ai-coach-id",
                     user: { ...otherMember?.user, online: true, name: "Dr. Bond" },
@@ -214,7 +214,7 @@ const ChatHeader = memo(() => {
     const handleCoolDown = async () => {
         try {
             await channel.sendMessage({
-                text: "✨ [BondBeyond Insight] Let's take a 5-minute 'Cool Down' break. Take a deep breath and reflect on how much you mean to each other. 🧘‍♀️🧘‍♂️",
+                text: "✨ [Zyro Insight] Let's take a 5-minute 'Cool Down' break. Take a deep breath and reflect on how much you mean to each other. 🧘‍♀️🧘‍♂️",
                 silent: false,
             });
             toast.success("Suggested a 5-minute break. ✨");
@@ -266,9 +266,9 @@ const ChatHeader = memo(() => {
                     </div>
                     {!isGroup && (
                         <p className="text-[11px] font-medium opacity-50 truncate leading-none mt-0.5">
-                            {displayData.id === 'ai-coach-id' ? 'Relationship Coach' : 
-                             displayData.id === 'ai-user-id' ? 'AI Bestie' : 
-                             displayData.id === 'ai-friend-id' ? 'AI Bestie' : 
+                            {displayData.id === 'ai-coach-id' ? 'Success Coach' : 
+                             displayData.id === 'ai-user-id' ? 'Female Bestie' : 
+                             displayData.id === 'ai-friend-id' ? 'Zyro Peer' : 
                              (isOnline ? "Active now" : (user?.last_active ? formatLastSeen(user.last_active) : "Offline"))}
                         </p>
                     )}

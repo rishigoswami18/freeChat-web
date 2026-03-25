@@ -12,7 +12,7 @@ const whyReasons = [
     {
         icon: Shield,
         title: "Your Data Stays Yours",
-        desc: "We don't sell your data. BondBeyond is built on trust and user privacy.",
+        desc: "We don't sell your data. Zyro is built on trust and user privacy.",
     },
     {
         icon: Globe,
@@ -22,7 +22,7 @@ const whyReasons = [
     {
         icon: Star,
         title: "Premium Features, Zero Cost",
-        desc: "What other apps lock behind paywalls, BondBeyond gives you for free. Always.",
+        desc: "What other apps lock behind paywalls, Zyro gives you for free. Always.",
     },
 ];
 
@@ -38,7 +38,7 @@ const WhySection = memo(() => {
                     variants={fadeUp}
                 >
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4 section-heading section-heading-center">
-                        Why Choose <span className="text-primary">BondBeyond</span>?
+                        Why Choose <span className="text-primary">Zyro</span>?
                     </h2>
                 </motion.div>
 

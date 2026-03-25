@@ -20,7 +20,7 @@ export const launchRazorpayCheckout = ({
         key,
         amount: order.amount,
         currency: order.currency,
-        name: "BondBeyond Premium",
+        name: "Zyro Premium",
         description: "Monthly Premium Membership — ₹49/month",
         order_id: order.id,
         handler: async (response) => {

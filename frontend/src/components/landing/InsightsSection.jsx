@@ -12,7 +12,7 @@ const insights = [
     {
         date: "March 10, 2026",
         title: "Why Privacy is the Future of Social Media",
-        excerpt: "In an era of data tracking, BondBeyond puts your privacy first with Stealth Mode and end-to-end encryption for all calls and messages. Your data belongs to you, always.",
+        excerpt: "In an era of data tracking, Zyro puts your privacy first with Stealth Mode and end-to-end encryption for all calls and messages. Your data belongs to you, always.",
         tag: "Privacy"
     },
     {
@@ -36,7 +36,7 @@ const InsightsSection = memo(() => {
                 >
                     <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px] mb-2 block">Developer Diary</span>
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">Latest Insights & Updates</h2>
-                    <p className="opacity-60">Discover how BondBeyond is changing the way people connect, chat, and spend time together.</p>
+                    <p className="opacity-60">Discover how Zyro is changing the way people connect, chat, and spend time together.</p>
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto text-left">

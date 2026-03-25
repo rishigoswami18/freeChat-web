@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: #6366f1; /* BondBeyond Default Indigo */
+  --primary-color: #6366f1; /* Zyro Default Indigo */
 }
 
 /* ===== Global Typography & Defaults ===== */
@@ -723,7 +723,7 @@ body.is-chat-active {
 /* The actual bubble component */
 /* ===== 🚀 FINAL PRODUCTION-SAFE MESSAGE STYLING ===== */
 
-/* ===== 🚀 BONDBEYOND GLOBAL CHAT SYSTEM (v2.0) ===== */
+/* ===== 🚀 Zyro GLOBAL CHAT SYSTEM (v2.0) ===== */
 
 /* 1. Canvas & Structural Reset */
 .str-chat-channel,

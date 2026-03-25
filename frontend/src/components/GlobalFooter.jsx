@@ -16,12 +16,12 @@ const GlobalFooter = () => {
                             B
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black italic tracking-tighter uppercase">BondBeyond</h2>
+                            <h2 className="text-2xl font-black italic tracking-tighter uppercase">Zyro</h2>
                             <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] -mt-1">India's #1 Fan Engagement Hub</p>
                         </div>
                     </div>
                     <p className="text-sm font-bold text-white/40 leading-relaxed max-w-sm">
-                        BondBeyond is a cutting-edge Sports-Tech platform redefining the fan experience through the Antigravity Engine. We transform passive viewing into an active, data-driven analytical journey.
+                        Zyro is a cutting-edge Sports-Tech platform redefining the fan experience through the Antigravity Engine. We transform passive viewing into an active, data-driven analytical journey.
                     </p>
                     <div className="flex items-center gap-4">
                         <button className="size-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all">
@@ -69,7 +69,7 @@ const GlobalFooter = () => {
                                 <Mail className="size-5 text-indigo-400" />
                                 <div>
                                     <p className="text-[9px] font-black uppercase text-white/20">Email Support</p>
-                                    <p className="text-xs font-bold text-white/60 group-hover:text-white">help@bondbeyond.in</p>
+                                    <p className="text-xs font-bold text-white/60 group-hover:text-white">help@Zyro.in</p>
                                 </div>
                             </div>
                         </a>
@@ -89,7 +89,7 @@ const GlobalFooter = () => {
                 <div className="space-y-4">
                     <p className="text-[10px] uppercase font-black tracking-widest text-white/20">Registered Office</p>
                     <p className="text-xs font-bold text-white/40 leading-relaxed italic">
-                        BondBeyond Tech Solutions,<br />
+                        Zyro Tech Solutions,<br />
                         3rd Floor, Silicon Valley Wing,<br />
                         Lovely Professional University, Phagwara,<br />
                         Punjab, India - 144411
@@ -100,7 +100,7 @@ const GlobalFooter = () => {
                         <ShieldCheck className="size-3" /> Responsible Gaming Awareness
                     </h4>
                     <p className="text-[11px] font-bold text-white/30 leading-relaxed">
-                        BondBeyond is a "Game of Skill" where winning depends on your analytical prowess and sports knowledge. 
+                        Zyro is a "Game of Skill" where winning depends on your analytical prowess and sports knowledge. 
                         Fantasy sports involve an element of financial risk and may be addictive. Please play responsibly and at your own risk. 
                         Participation is prohibited for users under 18 years of age or residents of restricted Indian states.
                     </p>
@@ -110,7 +110,7 @@ const GlobalFooter = () => {
             {/* Bottom Bar */}
             <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div className="flex items-center gap-2 text-white/20 font-black text-[10px] uppercase tracking-widest">
-                    <Copyright className="size-3" /> 2026 BondBeyond Network • Founded by Hrishikesh Giri
+                    <Copyright className="size-3" /> 2026 Zyro Network • Founded by Hrishikesh Giri
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full">

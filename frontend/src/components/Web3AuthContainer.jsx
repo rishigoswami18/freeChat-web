@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Wallet, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 
 /**
- * Web3AuthContainer — The entry point for Decentralized BondBeyond.
+ * Web3AuthContainer — The entry point for Decentralized Zyro.
  * Uses Privy to bridge the gap between Web2 emails and Web3 wallets.
  */
 
@@ -23,7 +23,7 @@ const LoginScreen = () => {
                     <div className="size-20 bg-indigo-600 rounded-[2.5rem] mx-auto flex items-center justify-center shadow-2xl shadow-indigo-500/40">
                         <ShieldCheck className="size-10 text-white" />
                     </div>
-                    <h1 className="text-4xl font-black tracking-tighter text-white">BondBeyond 2.0</h1>
+                    <h1 className="text-4xl font-black tracking-tighter text-white">Zyro 2.0</h1>
                     <p className="text-white/40 font-bold uppercase tracking-[0.2em] text-[10px]">The Decentralized Social Layer</p>
                 </motion.div>
 

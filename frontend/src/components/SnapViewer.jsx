@@ -18,7 +18,7 @@ const SnapViewer = ({ snap, isMyMessage }) => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `bondbeyond_${mediaType}_${Date.now()}.${mediaType === 'video' ? 'mp4' : 'jpg'}`;
+            a.download = `Zyro_${mediaType}_${Date.now()}.${mediaType === 'video' ? 'mp4' : 'jpg'}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

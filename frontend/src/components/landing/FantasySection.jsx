@@ -35,7 +35,7 @@ const FantasySection = memo(() => {
                                 },
                                 {
                                     title: "Skill-Based Rewards",
-                                    desc: "BondBeyond is a Game of Skill. Leverage your sports knowledge to win engagement rewards and platform badges.",
+                                    desc: "Zyro is a Game of Skill. Leverage your sports knowledge to win engagement rewards and platform badges.",
                                     icon: <Trophy className="size-6 text-secondary" />
                                 }
                             ].map((item, idx) => (

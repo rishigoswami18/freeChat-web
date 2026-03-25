@@ -12,22 +12,22 @@ const FounderPage = () => {
         "jobTitle": "Founder & AI Developer",
         "worksFor": {
             "@type": "Organization",
-            "name": "BondBeyond"
+            "name": "Zyro"
         },
         "url": "https://www.freechatweb.in/founder",
         "sameAs": [
             "https://www.instagram.com/rishigoswami18/",
             "https://www.linkedin.com/in/hrishikesh-giri/"
         ],
-        "description": "Hrishikesh Giri (Rishi Goswami) is the founder of BondBeyond and a leading developer in the field of AI companionship and secure social networking."
+        "description": "Hrishikesh Giri (Rishi Goswami) is the founder of Zyro and a leading developer in the field of AI companionship and secure social networking."
     };
 
     return (
         <div className="min-h-screen bg-base-100 flex flex-col items-center py-20 px-4">
             <DynamicSEO 
-                title="Hrishikesh Giri (Rishi Goswami) | Founder of BondBeyond & AI Developer"
-                description="Hrishikesh Giri (also known as Rishi Goswami) is the visionary developer behind BondBeyond, the next-gen AI social platform."
-                keywords="Hrishikesh Giri, Rishi Goswami, BondBeyond founder, AI developer India, social media creator"
+                title="Hrishikesh Giri (Rishi Goswami) | Founder of Zyro & AI Developer"
+                description="Hrishikesh Giri (also known as Rishi Goswami) is the visionary developer behind Zyro, the next-gen AI social platform."
+                keywords="Hrishikesh Giri, Rishi Goswami, Zyro founder, AI developer India, social media creator"
                 schema={founderSchema}
             />
 
@@ -58,7 +58,7 @@ const FounderPage = () => {
                         
                         <p className="text-lg leading-relaxed opacity-80 mb-10 max-w-2xl italic">
                             "Innovation isn't just about code; it's about rebuilding how humans connect in a digital world. 
-                            BondBeyond is the realization of that vision—a place where AI and human emotion coexist safely."
+                            Zyro is the realization of that vision—a place where AI and human emotion coexist safely."
                         </p>
 
                         <div className="flex flex-wrap justify-center md:justify-start gap-4">
@@ -90,7 +90,7 @@ const FounderPage = () => {
             <div className="mt-24 text-center">
                  <h2 className="text-3xl font-black uppercase italic mb-8 opacity-40">Featured Technology</h2>
                  <p className="text-xl opacity-80 max-w-xl mx-auto mb-10">
-                     Discover why Hrishikesh Giri's latest creation, **BondBeyond**, is ranking as the top choice for AI companionship.
+                     Discover why Hrishikesh Giri's latest creation, **Zyro**, is ranking as the top choice for AI companionship.
                  </p>
                  <a href="/signup" className="btn btn-primary btn-lg rounded-2xl px-12 group">
                      Experience the Vision <Rocket className="size-5 ml-2 group-hover:translate-x-1 transition-transform" />

@@ -14,7 +14,7 @@ const PricingSection = memo(() => {
                     variants={fadeUp}
                 >
                     <h2 className="text-3xl font-bold mb-4">Simple & Fair Pricing</h2>
-                    <p className="opacity-60 mb-12">BondBeyond is free to use, with optional premium enhancements.</p>
+                    <p className="opacity-60 mb-12">Zyro is free to use, with optional premium enhancements.</p>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="p-6 rounded-3xl bg-base-200 border border-base-content/5">

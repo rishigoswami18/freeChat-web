@@ -42,7 +42,7 @@ const LiveArenaGrid = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ y: -5 }}
-            className="group relative bg-[#0a0a0f] border border-white/5 rounded-[32px] p-6 overflow-hidden hover:border-red-500/30 transition-all shadow-2xl"
+            className="group relative bg-[#0a0a0f] border border-white/5 rounded-2xl md:rounded-[32px] p-5 md:p-6 overflow-hidden hover:border-red-500/30 transition-all shadow-2xl"
           >
             {/* Background Glow */}
             <div className="absolute top-0 right-0 size-32 bg-red-600/5 blur-[60px] rounded-full group-hover:bg-red-600/10 transition-colors" />

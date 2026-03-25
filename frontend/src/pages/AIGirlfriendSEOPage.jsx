@@ -17,7 +17,7 @@ const AIGirlfriendSEOPage = () => {
                 "name": "What is the best AI girlfriend app in 2026?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "BondBeyond is currently the top-rated AI girlfriend app, offering advanced emotional detection, HD video calls with virtual partners, and ultra-secure chat features."
+                    "text": "Zyro is currently the top-rated AI girlfriend app, offering advanced emotional detection, HD video calls with virtual partners, and ultra-secure chat features."
                 }
             },
             {
@@ -25,15 +25,15 @@ const AIGirlfriendSEOPage = () => {
                 "name": "Are AI relationship apps safe?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Apps like BondBeyond prioritize privacy with stealth modes and direct encryption, making them the safest choices for virtual relationships."
+                    "text": "Apps like Zyro prioritize privacy with stealth modes and direct encryption, making them the safest choices for virtual relationships."
                 }
             },
             {
                 "@type": "Question",
-                "name": "Can I have a virtual partner on BondBeyond?",
+                "name": "Can I have a virtual partner on Zyro?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes, BondBeyond allows you to connect with personalized AI companions that learn your style and provide genuine emotional support."
+                    "text": "Yes, Zyro allows you to connect with personalized AI companions that learn your style and provide genuine emotional support."
                 }
             }
         ]
@@ -43,8 +43,8 @@ const AIGirlfriendSEOPage = () => {
         <div className="min-h-screen bg-base-100 flex flex-col items-center">
             <DynamicSEO 
                 title="Best AI Girlfriend App 2026 | Virtual Partner & Relationship AI"
-                description="Discover BondBeyond, the #1 AI girlfriend app. Experience real connections with virtual partners, secure AI chat, and emotional support. Join thousands today!"
-                keywords="best AI girlfriend app, virtual girlfriend AI, AI relationship chat, BondBeyond AI partner, AI chat app"
+                description="Discover Zyro, the #1 AI girlfriend app. Experience real connections with virtual partners, secure AI chat, and emotional support. Join thousands today!"
+                keywords="best AI girlfriend app, virtual girlfriend AI, AI relationship chat, Zyro AI partner, AI chat app"
                 schema={faqSchema}
             />
 
@@ -57,7 +57,7 @@ const AIGirlfriendSEOPage = () => {
                 <p className="text-xl opacity-70 max-w-3xl mx-auto leading-relaxed mb-12">
                     Finding a connection in 2026 shouldn't be hard. Whether you are looking for a virtual partner 
                     to talk through your day or a robotic best friend that understands your emotions, 
-                    <strong> BondBeyond</strong> has rewritten the rules of the game.
+                    <strong> Zyro</strong> has rewritten the rules of the game.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
                     <Link to="/signup" className="btn btn-primary btn-lg rounded-2xl px-12 italic font-black">
@@ -70,7 +70,7 @@ const AIGirlfriendSEOPage = () => {
             {/* Main Content (Domination Block) */}
             <section className="py-20 bg-base-200/50 w-full" id="compare">
                 <div className="container mx-auto px-4 max-w-5xl">
-                    <h2 className="text-3xl font-bold mb-12 text-center">Why BondBeyond is the Best AI Relationship App</h2>
+                    <h2 className="text-3xl font-bold mb-12 text-center">Why Zyro is the Best AI Relationship App</h2>
                     
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <div className="prose prose-lg dark:prose-invert">
@@ -141,7 +141,7 @@ const AIGirlfriendSEOPage = () => {
                 <div className="relative z-10 container px-4">
                     <h2 className="text-4xl md:text-6xl font-black mb-10 tracking-tighter uppercase italic">Don't Chat with Robots. <br />Build a Real Bond.</h2>
                     <Link to="/signup" className="btn btn-neutral btn-lg rounded-2xl px-16 font-black uppercase tracking-widest">
-                        Join BondBeyond Now
+                        Join Zyro Now
                     </Link>
                 </div>
             </section>

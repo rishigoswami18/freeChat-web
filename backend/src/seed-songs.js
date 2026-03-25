@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(__dirname, "../.env") });
 const songData = [
     {
         title: "Summer Walk",
-        artist: "BondBeyond Originals",
+        artist: "Zyro Originals",
         audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
         coverUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300",
         genre: "Pop",

@@ -43,6 +43,7 @@ const CommunityDetailsPage = React.lazy(() => import("./pages/CommunityDetailsPa
 const CreatorCenterPage = React.lazy(() => import("./pages/CreatorCenterPage.jsx"));
 const IplDashboard = React.lazy(() => import("./pages/IplDashboard.jsx"));
 const Home = React.lazy(() => import("./pages/Home.jsx"));
+const HomePage = React.lazy(() => import("./pages/HomePage.jsx"));
 const EarningsWallet = React.lazy(() => import("./pages/EarningsWallet.jsx"));
 const IplHomeDashboard = React.lazy(() => import("./pages/IplHomeDashboard.jsx"));
 const CareerAssistant = React.lazy(() => import("./pages/CareerAssistant.jsx"));
@@ -230,12 +231,24 @@ const App = () => {
                     element={
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={true} isFluid={true}>
-                          <Home />
+                          <HomePage />
                         </Layout>
                       ) : isAuthenticated ? (
                         <Navigate to="/onboarding" />
                       ) : (
                         <LandingPage />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/arena"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <Home />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
                       )
                     }
                   />

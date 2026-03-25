@@ -365,7 +365,7 @@ const AIFaceCallPage = () => {
             const txt = (res.data?.text || "").trim();
             console.log("☁️ Transcription Result:", txt || "[Empty]");
             
-            if (txt.length > 2 && txt !== lastProcessedRef.current) {
+            if (txt.length > 2 && txt !== "---" && txt !== lastProcessedRef.current) {
               lastProcessedRef.current = txt;
               console.log("📝 User:", txt);
               setSubtitle(txt);
@@ -514,7 +514,7 @@ const AIFaceCallPage = () => {
             const utter = new SpeechSynthesisUtterance(sentences[idx].trim());
             // Indian Voice selection logic (Senior Dev optimized)
             const voices = synth.getVoices();
-            const isMale = aiType === "dr_bond" || aiType === "match_analyst";
+            const isMale = ["ai-coach-id", "ai-match-analyst", "dr_bond", "match_analyst"].includes(aiType);
             const indian = voices.filter(v => v.lang.startsWith("hi-IN") || v.lang.startsWith("en-IN"));
             utter.voice = isMale ? (indian.find(v => v.name.includes("Male") || v.name.includes("Hemant")) || indian[0] || voices[0])
                                  : (indian.find(v => v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Heera")) || indian[0] || voices[0]);

@@ -55,7 +55,7 @@ export const createRelease = async (req, res) => {
         console.log(`📦 Saving APK locally: ${sizeMB}MB`);
 
         // Save APK to local filesystem
-        const fileName = `BondBeyond_v${versionName.replace(/\./g, "_")}_${Date.now()}.apk`;
+        const fileName = `Zyro_v${versionName.replace(/\./g, "_")}_${Date.now()}.apk`;
         const filePath = path.join(APK_DIR, fileName);
         fs.writeFileSync(filePath, buffer);
 
@@ -128,7 +128,7 @@ export const downloadRelease = async (req, res) => {
         }
 
         const vName = release.versionName || "1_0_0";
-        const filename = `BondBeyond_v${vName.replace(/\./g, "_")}.apk`;
+        const filename = `Zyro_v${vName.replace(/\./g, "_")}.apk`;
         const localFileName = path.basename(release.apkUrl);
         const localFilePath = path.join(APK_DIR, localFileName);
 

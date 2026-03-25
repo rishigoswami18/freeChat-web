@@ -60,7 +60,7 @@ const ModeSwitcher = () => {
                 {/* Secondary Info (App Name) */}
                 <div className="px-5 py-2 border-l border-white/5 flex items-center gap-3 ml-2">
                     <div className="size-2 rounded-full bg-[#FF5722] animate-pulse shadow-[0_0_8px_rgba(255,87,34,0.8)]" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">BondBeyond</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Zyro</span>
                 </div>
             </motion.div>
         </div>

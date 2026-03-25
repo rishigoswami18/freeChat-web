@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import SnapViewer from "./SnapViewer";
 
 /**
- * BondBeyond — Premium Emotion Message Component
+ * Zyro — Premium Emotion Message Component
  * Optimized for High Performance & Dark Mode Readability.
  */
 
@@ -62,7 +62,7 @@ const EmotionMessage = memo((props) => {
       <MessageSimple
         {...props}
         className={additionalClasses}
-        // These are nullified because we use our proprietary BondBeyond Header/Footer logic
+        // These are nullified because we use our proprietary Zyro Header/Footer logic
         MessageHeader={() => null}
         MessageTimestamp={() => null}
         MessageStatus={() => null}

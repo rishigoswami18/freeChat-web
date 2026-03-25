@@ -28,8 +28,8 @@ const LandingPage = () => {
     const handleDownload = useCallback((e) => {
         e.preventDefault();
         const filename = latestApk?.versionName
-            ? `BondBeyond_v${latestApk.versionName.replace(/\./g, "_")}.apk`
-            : "BondBeyond_app.apk";
+            ? `Zyro_v${latestApk.versionName.replace(/\./g, "_")}.apk`
+            : "Zyro_app.apk";
         downloadFile(`${APK_DOWNLOAD_URL}/latest`, filename);
     }, [latestApk]);
 
@@ -59,13 +59,13 @@ const LandingPage = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-base-100" data-theme="bondbeyond">
+        <div className="min-h-screen bg-base-100" data-theme="zyro">
             {/* SEO & Meta Tags for Global Reach */}
-            <title>BondBeyond | #1 Indian Social Media App & Free Video Calls</title>
-            <meta name="description" content="Join BondBeyond, the premier Made in India social media platform. Experience high-quality video calls, viral reels, and safe chatting—completely free. Proudly Indian." />
-            <meta name="keywords" content="Indian social media app, best Indian chat app, Made in India messaging app, free video calls India, AI girlfriend India, BondBeyond" />
-            <meta property="og:title" content="BondBeyond | India's Top Social & Chat App" />
-            <meta property="og:description" content="Secure messaging, HD video calls, and viral reels—all in one Made in India app. Join the revolution." />
+            <title>Zyro | #1 High-Status Social Hub & AI Growth Engine</title>
+            <meta name="description" content="Join Zyro, the premier high-status social platform for strategic connections and AI-driven growth. Experience elite networking, mindset coaching, and social edge." />
+            <meta name="keywords" content="Zyro social, high-status networking app, elite social hub, AI mindset coach, strategic connections, Zyro App" />
+            <meta property="og:title" content="Zyro | Master Your Mindset. Win the Game." />
+            <meta property="og:description" content="Strategic connections, AI-driven growth, and the social edge—all in one elite platform. Join the revolution." />
             <meta property="og:type" content="website" />
             <meta name="twitter:card" content="summary_large_image" />
 
@@ -74,13 +74,13 @@ const LandingPage = () => {
                 {JSON.stringify({
                     "@context": "https://schema.org",
                     "@type": "SoftwareApplication",
-                    "name": "BondBeyond",
+                    "name": "Zyro",
                     "operatingSystem": "Android, iOS, Web",
                     "applicationCategory": "SocialNetworkingApplication",
                     "contentRating": "Everyone",
                     "author": {
                          "@type": "Organization",
-                         "name": "BondBeyond India"
+                         "name": "Zyro Social"
                     },
                     "offers": {
                         "@type": "Offer",
@@ -114,10 +114,10 @@ const LandingPage = () => {
                 <section className="py-20 sm:py-28 text-center max-w-3xl mx-auto container px-4">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t('what_is')}</h2>
                     <p className="text-lg opacity-70 leading-relaxed mt-6">
-                        BondBeyond is a free social platform built for real human connection.
-                        Whether you're chatting with friends, building your community,
-                        sharing stories, or boosting your career with AI — BondBeyond makes
-                        every interaction meaningful.
+                        Zyro is a high-status social platform built for elite networking.
+                        Whether you're chatting with elite peers, building your strategic community,
+                        leveraging AI for your career — Zyro makes
+                        every interaction professional and high-value.
                     </p>
                 </section>
             

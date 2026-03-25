@@ -15,7 +15,7 @@ const SAFETY_SETTINGS = [
     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
 ];
 
-const MODELS = ["gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash-lite", "gemma-3-27b-it"];
+const MODELS = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest"];
 
 export const ChatEngine = {
     /**
@@ -26,7 +26,7 @@ export const ChatEngine = {
         history = [], 
         persona = "companion", 
         aiName = "Aria", 
-        userName = "Darling", 
+        userName = "Bhai", 
         mediaParts = [] 
     }) => {
         const apiKey = process.env.GEMINI_API_KEY;

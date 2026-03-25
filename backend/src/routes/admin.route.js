@@ -45,7 +45,7 @@ router.delete("/support/:id", deleteSupportMessage);
 router.get("/firebase-users", getFirebaseNonUsers);
 router.post("/invite", sendInvites);
 
-// BondBeyond Specific Managed Features
+// Zyro Specific Managed Features
 router.get("/matches", getMatches);
 router.post("/matches", createMatch);
 router.patch("/matches/:id", updateMatchStatus);

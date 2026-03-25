@@ -17,6 +17,8 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
         isPublic: true,
         aiPartnerName: "",
         aiFriendName: "",
+        instagram: "",
+        linkedin: "",
     });
 
     useEffect(() => {
@@ -31,6 +33,8 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
                 isPublic: authUser.isPublic !== undefined ? authUser.isPublic : true,
                 aiPartnerName: authUser.aiPartnerName || "",
                 aiFriendName: authUser.aiFriendName || "",
+                instagram: authUser.instagram || "",
+                linkedin: authUser.linkedin || "",
             });
         }
     }, [authUser]);
@@ -207,6 +211,44 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
                         className="input input-bordered focus:input-primary transition-all rounded-xl"
                         required
                     />
+                </div>
+            </div>
+
+            {/* Social Connectivity Section */}
+            <div className="bg-base-200/50 p-6 rounded-2xl border border-base-content/5 space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest opacity-50">Social Reach</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="form-control">
+                        <label className="label pt-0">
+                            <span className="label-text font-semibold text-xs flex items-center gap-2">
+                                <Globe className="size-3" /> Instagram Handle
+                            </span>
+                        </label>
+                        <input
+                            type="text"
+                            name="instagram"
+                            value={formData.instagram}
+                            onChange={handleInputChange}
+                            placeholder="@username"
+                            className="input input-sm input-bordered focus:input-primary transition-all rounded-lg"
+                        />
+                    </div>
+                    
+                    <div className="form-control">
+                        <label className="label pt-0">
+                            <span className="label-text font-semibold text-xs flex items-center gap-2">
+                                <Shield className="size-3" /> LinkedIn URL / Handle
+                            </span>
+                        </label>
+                        <input
+                            type="text"
+                            name="linkedin"
+                            value={formData.linkedin}
+                            onChange={handleInputChange}
+                            placeholder="username"
+                            className="input input-sm input-bordered focus:input-primary transition-all rounded-lg"
+                        />
+                    </div>
                 </div>
             </div>
 

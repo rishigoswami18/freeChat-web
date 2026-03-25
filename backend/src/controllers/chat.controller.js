@@ -69,7 +69,7 @@ export async function getStreamToken(req, res) {
       try {
         await upsertStreamUser({
           id: "ai-user-id",
-          name: `${req.user.aiPartnerName || "Aria"} (AI Partner)`,
+          name: `${req.user.aiPartnerName || "Aisha"} (Strategic Bestie)`,
           image: resolveAiPic(req.user.aiPartnerPic, "https://freechatweb.in/ai-companion.png"),
           role: "user"
         });
@@ -83,7 +83,7 @@ export async function getStreamToken(req, res) {
       try {
         await upsertStreamUser({
           id: "ai-friend-id",
-          name: `${req.user.aiFriendName || "Golu"} (Best Friend)`,
+          name: `${req.user.aiFriendName || "Golu"} (Zyro Peer)`,
           image: resolveAiPic(req.user.aiFriendPic, "https://freechatweb.in/ai-bestfriend.png"),
           role: "user"
         });
@@ -97,17 +97,24 @@ export async function getStreamToken(req, res) {
       return res.status(500).json({ message: "Stream token generation failed" });
     }
 
-    // Unconditionally add the AI Coach so everyone can talk to it
+    // Unconditionally add the AI Coach and AI Strategist so everyone can talk to them
     if (streamClient) {
       try {
         await upsertStreamUser({
           id: "ai-coach-id",
-          name: "Dr. Bond (Relationship Coach)",
+          name: "Dr. Bond (Success Coach)",
           image: "https://res.cloudinary.com/dqvu0bjyp/image/upload/v1773500620/dr_bond_avatar.png", 
           role: "user"
         });
-      } catch (coachErr) {
-        console.error("Failed to ensure AI coach in Stream:", coachErr);
+        
+        await upsertStreamUser({
+          id: "ai-strategist-id",
+          name: "Aisha (Arena Strategist)",
+          image: "https://freechatweb.in/ai-companion.png", 
+          role: "user"
+        });
+      } catch (err) {
+        console.error("Failed to ensure global AI roles in Stream:", err);
       }
     }
 
@@ -287,7 +294,7 @@ export const sendMessage = async (req, res) => {
       // Send reply as AI via Stream
       try {
         await channel.sendMessage({
-          text: aiReply || "Strategy check-in. Ready! 🚀",
+          text: aiReply || "Aisha here! Zyro sync thoda slow hai, par main tere saath hoon. Sub theek hai? 🚀",
           user_id: "ai-user-id"
         });
       } catch (streamErr) {
@@ -346,7 +353,7 @@ export const sendMessage = async (req, res) => {
 
       try {
         await channel.sendMessage({
-          text: aiReply || "Hey! 👊",
+          text: aiReply || "Connectivity thodi kam hai, par hustle chalu hai! Let's focus on Zyro. 👊",
           user_id: "ai-friend-id"
         });
       } catch (streamErr) {

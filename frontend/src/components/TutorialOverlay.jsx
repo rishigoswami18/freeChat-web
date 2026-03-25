@@ -14,7 +14,7 @@ const TutorialOverlay = () => {
 
     useEffect(() => {
         // Detect first-time user
-        const hasSeen = localStorage.getItem("bondbeyond_has_seen_tutorial");
+        const hasSeen = localStorage.getItem("Zyro_has_seen_tutorial");
         if (!hasSeen) {
             // Delay to allow App layout and Sidebar to render correctly
             const timer = setTimeout(() => setIsVisible(true), 2000);
@@ -23,13 +23,13 @@ const TutorialOverlay = () => {
 
         // Event listener for manual reopen (from Sidebar/Settings)
         const handleReopen = () => setIsVisible(true);
-        window.addEventListener("bondbeyond_start_tutorial", handleReopen);
-        return () => window.removeEventListener("bondbeyond_start_tutorial", handleReopen);
+        window.addEventListener("Zyro_start_tutorial", handleReopen);
+        return () => window.removeEventListener("Zyro_start_tutorial", handleReopen);
     }, []);
 
     const steps = [
         {
-            title: "Welcome to BondBeyond",
+            title: "Welcome to Zyro",
             description: "The next generation social platform where AI and human connection meet. Let's take a quick tour of your new home.",
             selector: null, // Full screen welcome
             icon: PartyPopper
@@ -60,19 +60,19 @@ const TutorialOverlay = () => {
         },
         {
             title: "Ready to Explore!",
-            description: "You're all set. Start building meaningful bonds today within BondBeyond.",
+            description: "You're all set. Start building meaningful bonds today within Zyro.",
             selector: null,
             icon: Sparkles
         }
     ];
 
     const handleComplete = () => {
-        localStorage.setItem("bondbeyond_has_seen_tutorial", "true");
+        localStorage.setItem("Zyro_has_seen_tutorial", "true");
         setIsVisible(false);
     };
 
     const handleSkip = () => {
-        localStorage.setItem("bondbeyond_has_seen_tutorial", "true");
+        localStorage.setItem("Zyro_has_seen_tutorial", "true");
         setIsVisible(false);
     };
 

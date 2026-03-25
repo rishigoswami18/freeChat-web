@@ -129,7 +129,7 @@ const RedeemCashPage = () => {
                         <div className="bg-amber-500/10 border border-amber-500/20 rounded-[32px] p-6 flex items-start gap-4">
                             <AlertTriangle className="size-5 text-amber-500 mt-1 shrink-0" />
                             <p className="text-xs font-medium text-amber-500/80 leading-relaxed">
-                                Ensure your UPI ID is correct. BondBeyond is not responsible for transfers to incorrect VPAs. Only "Winnings" (earned from predictions) are withdrawable. Bonus coins are for play only.
+                                Ensure your UPI ID is correct. Zyro is not responsible for transfers to incorrect VPAs. Only "Winnings" (earned from predictions) are withdrawable. Bonus coins are for play only.
                             </p>
                         </div>
                     </div>

@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { axiosInstance } from '../../lib/axios';
-import { Trophy, Zap, Users, TrendingUp, ChevronRight, Award } from 'lucide-react';
+import { Trophy, Users, Award, ChevronRight, Zap, Target } from "lucide-react";
+import StrategicAiWidget from "../StrategicAiWidget";
 import { HeroSkeleton } from '../Skeletons';
 
 const IplHome = () => {
@@ -69,7 +69,7 @@ const IplHome = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative min-h-[500px] rounded-[60px] overflow-hidden border border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.8)]"
+        className="relative min-h-[400px] md:min-h-[500px] rounded-[2.5rem] md:rounded-[60px] overflow-hidden border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.8)]"
       >
         {/* Animated Background Engine */}
         <div className={`absolute inset-0 transition-all duration-1000 ${
@@ -94,7 +94,7 @@ const IplHome = () => {
           />
         </div>
 
-        <div className="relative z-10 p-12 h-full flex flex-col justify-between items-center text-center md:items-start md:text-left">
+        <div className="relative z-10 p-6 md:p-12 h-full flex flex-col justify-between items-center text-center md:items-start md:text-left">
           {/* Header Info */}
           <div className="w-full flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="space-y-3">
@@ -129,16 +129,16 @@ const IplHome = () => {
             <div className="flex-1 space-y-8">
               {!isSeasonStarted || !match || !match._id ? (
                 <div className="space-y-8">
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4">
                     {[
                       { label: 'Days', val: timeLeft.days },
                       { label: 'Hrs', val: timeLeft.hours },
                       { label: 'Min', val: timeLeft.minutes },
                       { label: 'Sec', val: timeLeft.seconds },
                     ].map((t, idx) => (
-                      <div key={idx} className="flex flex-col items-center bg-white/5 backdrop-blur-3xl border border-white/5 p-6 rounded-[2.5rem] min-w-[100px] shadow-inner">
-                        <span className="text-5xl font-black italic tracking-tighter leading-none text-white">{String(t.val).padStart(2, '0')}</span>
-                        <span className="text-[9px] font-black text-white/30 tracking-widest mt-2 uppercase">{t.label}</span>
+                      <div key={idx} className="flex flex-col items-center bg-white/5 backdrop-blur-3xl border border-white/5 p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] min-w-[70px] md:min-w-[100px] shadow-inner">
+                        <span className="text-3xl md:text-5xl font-black italic tracking-tighter leading-none text-white">{String(t.val).padStart(2, '0')}</span>
+                        <span className="text-[8px] md:text-[9px] font-black text-white/30 tracking-widest mt-1 md:mt-2 uppercase">{t.label}</span>
                       </div>
                     ))}
                   </div>
@@ -156,7 +156,7 @@ const IplHome = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-7xl md:text-9xl font-black italic tracking-tighter leading-none text-white drop-shadow-2xl">
+                    <h3 className="text-5xl md:text-9xl font-black italic tracking-tighter leading-none text-white drop-shadow-2xl">
                       {match?.score || '0/0'}
                     </h3>
                     <div className="flex items-center gap-4 justify-center md:justify-start text-xs font-black text-white/40 tracking-[0.3em] uppercase">
@@ -170,7 +170,7 @@ const IplHome = () => {
             </div>
 
             {/* Action Card */}
-            <div className="w-full md:w-[350px] bg-white text-black rounded-[40px] p-10 flex flex-col justify-between min-h-[300px] shadow-[0_20px_50px_rgba(255,255,255,0.1)] group hover:scale-[1.02] transition-transform cursor-pointer">
+            <div className="w-full md:w-[350px] bg-white text-black rounded-[32px] md:rounded-[40px] p-6 md:p-10 flex flex-col justify-between min-h-[250px] md:min-h-[300px] shadow-[0_15px_40px_rgba(255,255,255,0.1)] group hover:scale-[1.02] transition-transform cursor-pointer">
               <div className="space-y-4">
                 <div className="size-16 rounded-2xl bg-black/5 flex items-center justify-center">
                   <Zap className="size-8 fill-black" />
@@ -190,6 +190,9 @@ const IplHome = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Strategic AI Hub Insight */}
+      <StrategicAiWidget matchData={match} />
 
       {/* Seasonal Insights Hub */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-2">
@@ -237,7 +240,7 @@ const TeamSphere = ({ name, shortName, logo, color }) => (
 const InsightCard = ({ icon, label, value, color }) => (
   <motion.div 
     whileHover={{ y: -5 }}
-    className="bg-white/[0.03] backdrop-blur-3xl p-10 rounded-[3.5rem] border border-white/5 flex flex-col justify-between gap-8 group cursor-pointer hover:bg-white/[0.05] transition-colors"
+    className="bg-white/[0.03] backdrop-blur-3xl p-6 md:p-10 rounded-[2.5rem] md:rounded-[3.5rem] border border-white/5 flex flex-col justify-between gap-6 md:gap-8 group cursor-pointer hover:bg-white/[0.05] transition-colors"
   >
     <div className={`size-14 rounded-2xl ${color} flex items-center justify-center shadow-lg`}>
       {icon}

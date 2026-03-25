@@ -99,7 +99,7 @@ router.put("/note", async (req, res) => {
                 sendNotificationEmail(partner.email, {
                     emoji: "💌",
                     title: `${req.user.fullName.split(' ')[0]} left you a love note!`,
-                    body: `Your special someone wrote something just for you on BondBeyond. Open the app to read their romantic note! 💕`,
+                    body: `Your special someone wrote something just for you on Zyro. Open the app to read their romantic note! 💕`,
                     ctaText: "Read the Note",
                     ctaUrl: `${process.env.CLIENT_URL || "https://freechatweb.in"}/couple`,
                 });

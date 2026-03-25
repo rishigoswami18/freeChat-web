@@ -4,14 +4,14 @@
  */
 export const THEMES = [
     {
-        name: "bondbeyond",
-        label: "BondBeyond (Default)",
+        name: "Zyro",
+        label: "Zyro (Default)",
         colors: ["#5a67d8", "#8b5cf6", "#75d1f0", "#ffffff"],
         type: "light"
     },
     {
-        name: "bondbeyonddark",
-        label: "BondBeyond Dark",
+        name: "Zyrodark",
+        label: "Zyro Dark",
         colors: ["#15172a", "#8b5cf6", "#ec4899", "#ffffff"],
         type: "dark"
     },
@@ -71,5 +71,5 @@ export const THEMES = [
     }
 ];
 
-export const DEFAULT_THEME = "bondbeyond";
-export const STORAGE_KEY = "bondbeyond-theme";
+export const DEFAULT_THEME = "Zyro";
+export const STORAGE_KEY = "Zyro-theme";

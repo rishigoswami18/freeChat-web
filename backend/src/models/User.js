@@ -140,7 +140,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  // BondBeyond Relationship fields
+  // Zyro Relationship fields
   mood: {
     type: String,
     enum: ["happy", "neutral", "sad", "angry", "tired", "excited", "romantic", ""],
@@ -235,6 +235,14 @@ const userSchema = new mongoose.Schema({
   wallet: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserWallet'
+  },
+  instagram: {
+    type: String,
+    default: "",
+  },
+  linkedin: {
+    type: String,
+    default: "",
   }
 }
   , {

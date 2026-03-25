@@ -12,7 +12,7 @@ const PageLoader = () => {
         <Logo className="size-16" showText={false} />
       </div>
       <span className="text-xl font-extrabold gradient-text tracking-tight mt-2">
-        BondBeyond
+        Zyro
       </span>
     </div>
   );

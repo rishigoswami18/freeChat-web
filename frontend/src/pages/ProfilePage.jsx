@@ -225,7 +225,7 @@ const ProfilePage = () => {
                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Security & Compliance Guard Active</span>
                 </div>
                 <p className="text-[11px] font-medium opacity-40 max-w-xs mx-auto leading-relaxed">
-                    BondBeyond is a high-security platform. All interactions are monitored for safety and compliance with global standards.
+                    Zyro is a high-security platform. All interactions are monitored for safety and compliance with global standards.
                 </p>
                 <div className="flex justify-center gap-6 mt-6 opacity-30 grayscale hover:grayscale-0 transition-all">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" className="h-4" alt="Razorpay" />

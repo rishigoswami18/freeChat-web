@@ -4,7 +4,7 @@ import CricketScraperService from "./CricketScraperService.js";
 import CricketDataProvider from "./providers/CricketDataProvider.js";
 
 /**
- * CricketProviderManager — Resilience Engine for BondBeyond
+ * CricketProviderManager — Resilience Engine for Zyro
  * Manages Multi-Provider Fallback, Scraping Backups, and Extreme Caching.
  */
 class CricketProviderManager {

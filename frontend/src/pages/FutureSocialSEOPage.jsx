@@ -8,8 +8,8 @@ const FutureSocialSEOPage = () => {
         <div className="min-h-screen bg-base-100 flex flex-col items-center">
             <DynamicSEO 
                 title="The Future of Social Media | Next-Gen AI Social Platform 2026"
-                description="What is the future of social media? Discover BondBeyond, the next generation platform by developer Hrishikesh Giri that merges AI with human connection."
-                keywords="future of social media, next gen social platform, AI social network, new social media apps 2026, BondBeyond social media"
+                description="What is the future of social media? Discover Zyro, the next generation platform by developer Hrishikesh Giri that merges AI with human connection."
+                keywords="future of social media, next gen social platform, AI social network, new social media apps 2026, Zyro social media"
             />
 
             <section className="py-28 text-center px-4 max-w-5xl">
@@ -22,7 +22,7 @@ const FutureSocialSEOPage = () => {
                     The Next <span className="text-primary italic">Generation</span> of Social.
                 </h1>
                 <p className="text-xl opacity-60 max-w-2xl mx-auto mb-12">
-                    Traditional social media is broken. BondBeyond, founded by Hrishikesh Giri, 
+                    Traditional social media is broken. Zyro, founded by Hrishikesh Giri, 
                     is the world's first platform architected for AI-Human synergy.
                 </p>
             </section>
@@ -51,7 +51,7 @@ const FutureSocialSEOPage = () => {
                     <h2 className="text-3xl font-bold mb-10 italic uppercase">A Message from the Creator</h2>
                     <blockquote className="text-2xl italic opacity-80 leading-relaxed mb-10">
                         "The next phase of the internet isn't just about sharing content; it's about sharing humanity. 
-                        With BondBeyond, we've built the tools to help you do just that."
+                        With Zyro, we've built the tools to help you do just that."
                     </blockquote>
                     <p className="font-bold tracking-widest uppercase text-sm">— Hrishikesh Giri, Founder</p>
                 </div>

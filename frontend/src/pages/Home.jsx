@@ -7,6 +7,7 @@ import {
     MessageSquare, Award, Clock
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import StrategicAiWidget from "../components/StrategicAiWidget";
 import useAuthUser from "../hooks/useAuthUser";
 import { useMatch } from "../context/MatchContext";
 import { DateTime } from "luxon";
@@ -23,7 +24,7 @@ import IPLPlayersList from "../components/IPLPlayersList";
 const FanPulse = React.lazy(() => import("../components/FanPulse.jsx"));
 
 /**
- * Hero Arena Widget — The 'Antigravity' Heart of BondBeyond.
+ * Hero Arena Widget — The 'Antigravity' Heart of Zyro.
  * Automatically toggles between Live Arena and Upcoming Countdown.
  */
 const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
@@ -113,7 +114,7 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                 )}
             </AnimatePresence>
 
-            <div className="relative z-10 p-10 h-64 md:h-80 flex flex-col justify-between">
+            <div className="relative z-10 p-5 md:p-10 h-72 md:h-80 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                     <div className="flex flex-col gap-2">
                         <div className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest flex items-center gap-2 ${isLive ? "bg-red-600 animate-pulse" : "bg-indigo-600"
@@ -168,12 +169,12 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                                         key={matchData.score}
                                         initial={{ y: 20, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
-                                        className="text-6xl md:text-8xl font-black italic tracking-tighter"
+                                        className="text-5xl md:text-8xl font-black italic tracking-tighter"
                                     >
                                         {matchData.score || "0/0"}
                                     </motion.h3>
-                                    <p className="text-sm font-bold text-white/60 uppercase tracking-widest">
-                                        {matchData.overs || "0.0"} Overs • {matchData.battingTeam || "TBA"} Batting
+                                    <p className="text-xs font-bold text-white/60 uppercase tracking-widest">
+                                        {matchData.overs || "0.0"} Overs • {matchData.battingTeam || "TBA"}
                                     </p>
                                 </div>
                                 <div className="mt-4">
@@ -184,8 +185,8 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                             </>
                         ) : (
                             <>
-                                <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] block mb-2">Arena Launch</span>
-                                <h3 className="text-4xl md:text-6xl font-black italic tracking-tighter leading-none mb-2 uppercase">
+                                <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] block mb-1">Arena Launch</span>
+                                <h3 className="text-3xl md:text-6xl font-black italic tracking-tighter leading-none mb-1 uppercase">
                                     {currentMatch.matchName || "UPCOMING MATCH"}
                                 </h3>
                                 <div className="flex flex-col gap-1 text-xs font-bold text-white/40 uppercase tracking-[0.2em] mt-4">
@@ -455,10 +456,10 @@ const Home = () => {
                 <div className="relative z-10 flex-1 flex flex-col pt-0 pb-32">
                     <LiveTicker />
                     {/* Fixed Top Header */}
-                    <header className="px-8 mt-8 mb-10 flex justify-between items-center">
+                    <header className="px-6 md:px-8 mt-4 md:mt-8 mb-6 md:mb-10 flex justify-between items-center">
                         <div>
-                            <h1 className="text-4xl font-black italic tracking-tighter">BOND BEYOND</h1>
-                            <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] leading-none mt-1">Unified OS Dashboard</p>
+                            <h1 className="text-3xl md:text-4xl font-black italic tracking-tighter text-primary">ZYRO</h1>
+                            <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] leading-none mt-1 text-accent">Unified Edge Dashboard</p>
                         </div>
                         <div className="size-14 rounded-[20px] bg-white/5 border border-white/10 flex items-center justify-center relative">
                             <Bell className="size-6 text-white/70" />
@@ -540,6 +541,10 @@ const Home = () => {
                                                     <div className="size-14 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-orange-500 group-hover:text-white transition-all">
                                                         <Zap className="size-6" />
                                                     </div>
+                                                </div>
+
+                                                <div className="md:col-span-2">
+                                                    <StrategicAiWidget matchData={displayMatch} />
                                                 </div>
 
                                                 {upcomingMatches?.length > 0 && (
@@ -627,8 +632,8 @@ const Home = () => {
                 </div>
 
                 {/* Bottom Unified Navigation Tab Bar - Optimized Antigravity Design */}
-                <nav className="fixed bottom-8 left-0 right-0 z-[100] px-4">
-                    <div className="max-w-md mx-auto h-20 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[40px] flex items-center justify-between px-2 relative shadow-2xl">
+                <nav className="fixed bottom-6 md:bottom-8 left-0 right-0 z-[100] px-4">
+                    <div className="max-w-md mx-auto h-16 md:h-20 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2rem] md:rounded-[40px] flex items-center justify-between px-1 md:px-2 relative shadow-2xl">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;

@@ -14,7 +14,7 @@ const MembershipHeader = memo(() => {
                 <span className="text-sm font-semibold text-amber-400">Premium</span>
             </div>
             
-            <h1 id="membership-title" className="text-2xl sm:text-3xl font-bold mb-2">BondBeyond Premium</h1>
+            <h1 id="membership-title" className="text-2xl sm:text-3xl font-bold mb-2">Zyro Premium</h1>
             <p className="text-sm opacity-60">Unlock couple profiles and exclusive features</p>
         </header>
     );

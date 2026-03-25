@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosInstance } from '../lib/axios';
 
 /**
- * Creator Dashboard — The monetization command center for BondBeyond Creators.
+ * Creator Dashboard — The monetization command center for Zyro Creators.
  * Features glassmorphism, real-time metrics, and Elite Fan tracking.
  */
 

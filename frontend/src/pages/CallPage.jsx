@@ -438,10 +438,17 @@ const CallUI = memo(({ isAudioCall }) => {
                   <span className="text-[9px] text-[#25D366]/80 font-bold">Connected</span>
                 </span>
               ) : (
-                <span className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8">
                   <WifiOff className="size-3 text-yellow-400 animate-pulse" />
-                  <span className="text-[9px] text-yellow-400/80 font-bold">Waiting ({60 - waitingTime}s)</span>
-                </span>
+                  <span className="text-[9px] text-yellow-400/80 font-bold uppercase tracking-tighter">Waiting ({60 - waitingTime}s)</span>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="ml-2 p-1 hover:bg-white/10 rounded-full transition-colors"
+                    title="Retry Connection"
+                  >
+                    <RefreshCw className="size-3 text-white/50" />
+                  </button>
+                </div>
               )}
             </div>
           </div>

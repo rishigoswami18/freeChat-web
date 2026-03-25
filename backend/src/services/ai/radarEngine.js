@@ -31,7 +31,11 @@ export const RadarEngine = {
 
       console.log(`[Radar] Analyzing ${messages.length} messages for channel ${channelId}`);
 
-      const user = await User.findById(userId).select("fullName aiPartnerName");
+      const isSpecialAiId = userId.startsWith("ai-");
+      let user = null;
+      if (!isSpecialAiId) {
+        user = await User.findById(userId).select("fullName aiPartnerName");
+      }
       const clientName = user?.fullName || "User";
       const partnerName = user?.aiPartnerName || "Companion";
 

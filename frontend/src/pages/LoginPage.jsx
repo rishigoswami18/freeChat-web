@@ -51,7 +51,7 @@ const LoginPage = () => {
                   <div>
                     <h2 className="text-3xl font-extrabold tracking-tight mb-2">Welcome Back</h2>
                     <p className="text-base opacity-60">
-                      Sign in to continue your journey on <span className="text-primary font-medium">BondBeyond</span>
+                      Sign in to continue your journey on <span className="text-primary font-medium">Zyro</span>
                     </p>
                   </div>
 
@@ -154,7 +154,7 @@ const LoginPage = () => {
             <div className="relative aspect-square w-80 mx-auto transform transition duration-500 hover:scale-105">
               <img
                 src="/Video call-bro.png"
-                alt="BondBeyond Connection"
+                alt="Zyro Connection"
                 className="w-full h-full object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
               />
             </div>

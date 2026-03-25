@@ -88,7 +88,7 @@ const MobileDrawer = memo(() => {
 
   const handleDownload = useCallback((e) => {
     e.preventDefault();
-    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "BondBeyond_app.apk");
+    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "Zyro_app.apk");
   }, []);
 
   const handleCreatePost = useCallback(() => {
@@ -182,17 +182,15 @@ const MobileDrawer = memo(() => {
       <CreateStoryModal isOpen={isStoryModalOpen} onClose={closeStoryModal} />
 
       {/* === MOBILE TOP BAR === */}
-      <div className={`lg:hidden sticky top-0 left-0 right-0 z-50 glass-panel-solid border-b border-white/5 px-4 py-3 flex items-center justify-between safe-area-top ${isHiddenRoute ? "hidden" : ""}`}>
+      <div className={`md:hidden sticky top-0 left-0 right-0 z-50 glass-panel-solid border-b border-white/5 px-4 py-3 flex items-center justify-between safe-area-top ${isHiddenRoute ? "hidden" : ""}`}>
         <div className="flex items-center">
            <button onClick={handleCreatePost} className="p-1 hover:opacity-60 active:scale-90 transition-all text-base-content" aria-label="Create Post">
              <Pencil className="size-[22px]" strokeWidth={2.5} />
            </button>
         </div>
 
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-           <span className="text-xl font-black italic tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary">
-             BondBeyond
-           </span>
+        <div className="absolute left-1/2 -translate-x-1/2">
+           <Logo showText={true} fontSize="text-xl" />
         </div>
 
         <div className="flex items-center gap-4">
@@ -211,7 +209,7 @@ const MobileDrawer = memo(() => {
 
       {/* === SLIDE-OUT DRAWER === */}
       {/* Optimized transform animation preventing CSS layout thrashing */}
-      <div className={`fixed inset-y-0 left-0 w-72 bg-base-100 border-r border-base-300 z-[60] transform ${isOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col`}>
+      <div className={`fixed md:hidden inset-y-0 left-0 w-72 bg-base-100 border-r border-base-300 z-[60] transform ${isOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col`}>
         <div className="p-4 flex justify-between items-center border-b border-base-300">
           <Logo className="size-6" fontSize="text-lg" />
           <div className="flex items-center gap-1">
@@ -309,14 +307,14 @@ const MobileDrawer = memo(() => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[55]"
+            className="fixed md:hidden inset-0 bg-black/50 backdrop-blur-sm z-[55]"
             onClick={toggleDrawer}
           />
         )}
       </AnimatePresence>
 
       {/* === BOTTOM TAB BAR === */}
-      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${isHiddenRoute ? "hidden" : ""}`}>
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-[60] glass-panel-solid border-t border-base-300/50 safe-area-bottom ${isHiddenRoute ? "hidden" : ""}`}>
         <div className="flex items-center justify-around py-1.5 px-1">
           {bottomTabs.map(({ to, icon: Icon, labelKey, label }) => {
             const isActive = location.pathname === to;

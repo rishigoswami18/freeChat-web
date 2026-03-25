@@ -22,7 +22,7 @@ const FreeTrialBanner = memo(({ trialEndDate }) => {
                     <span className="font-semibold text-emerald-300">
                         {displayDate.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
                     </span>.
-                    Enjoy everything BondBeyond has to offer!
+                    Enjoy everything Zyro has to offer!
                 </p>
             </div>
         </section>

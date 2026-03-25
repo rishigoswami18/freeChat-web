@@ -43,7 +43,7 @@ export const buildFcmPayload = (tokens, { title, body, data, icon }) => {
         notification: {
             title,
             body,
-            image: icon || "https://www.bondbeyond.in/logo.png"
+            image: icon || "https://www.Zyro.in/logo.png"
         },
         data: {}, // Handled below
         android: {
@@ -61,11 +61,11 @@ export const buildFcmPayload = (tokens, { title, body, data, icon }) => {
                 Urgency: config.priority === "high" ? "high" : "normal"
             },
             notification: {
-                icon: "https://www.bondbeyond.in/logo.png",
-                badge: "https://www.bondbeyond.in/logo.png",
+                icon: "https://www.Zyro.in/logo.png",
+                badge: "https://www.Zyro.in/logo.png",
                 requireInteraction: config.requireInteraction,
                 timestamp: Date.now(),
-                click_action: data?.url ? `https://www.bondbeyond.in${data.url}` : "https://www.bondbeyond.in"
+                click_action: data?.url ? `https://www.Zyro.in${data.url}` : "https://www.Zyro.in"
             }
         }
     };

@@ -24,10 +24,10 @@ const DownloadSection = memo(({ latestApk, handleDownload }) => {
                             >
                                 <span className="badge badge-accent badge-sm mb-4 font-bold p-3">MOBILE EXPERIENCE</span>
                                 <h2 className="text-3xl sm:text-5xl font-black mb-6 leading-tight">
-                                    Take <span className="text-primary italic">BondBeyond</span> <br /> Anywhere You Go
+                                    Take <span className="text-primary italic">Zyro</span> <br /> Anywhere You Go
                                 </h2>
                                 <p className="text-lg opacity-70 mb-8 leading-relaxed">
-                                    Experience the full power of BondBeyond on your Android device.
+                                    Experience the full power of Zyro on your Android device.
                                     Stay connected with instant notifications, faster loading,
                                     and a premium mobile interface optimized for your relationship.
                                 </p>

@@ -62,10 +62,10 @@ export const sendBroadcastEmail = async (email, subject, message) => {
 
 // Also support legacy sendInviteEmail
 export const sendInviteEmail = async (email, customSubject, customMessage) => {
-    const appUrl = process.env.CLIENT_URL || "https://bondbeyond.in";
+    const appUrl = process.env.CLIENT_URL || "https://Zyro.in";
     const body = `
         <h2 style="color:#1f2937;margin:0 0 16px 0;font-size:24px;font-weight:800;">Hey there! 👋</h2>
-        <p style="color:#4b5563;line-height:1.8;font-size:16px;">${customMessage || "You've been personally invited to join BondBeyond!"}</p>
+        <p style="color:#4b5563;line-height:1.8;font-size:16px;">${customMessage || "You've been personally invited to join Zyro!"}</p>
         <div style="text-align:center;margin:32px 0;">
             <a href="${appUrl}" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;padding:16px 48px;border-radius:50px;font-size:18px;font-weight:800;">Join Now →</a>
         </div>
@@ -73,7 +73,7 @@ export const sendInviteEmail = async (email, customSubject, customMessage) => {
 
     return await EmailDispatcher.dispatch({
         to: email,
-        subject: customSubject || "You're Invited to BondBeyond",
+        subject: customSubject || "You're Invited to Zyro",
         html: baseTemplate(body, { title: "Invitation" }),
         type: "invite"
     });

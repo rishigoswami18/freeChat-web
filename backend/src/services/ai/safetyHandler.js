@@ -19,7 +19,11 @@ const REFUSAL_KEYWORDS = [
     "naughty",
     "sweet",
     "paas aao",
-    "romantic or sexual scenarios",
+    "jaan",
+    "shona",
+    "darling",
+    "romantic",
+    "sexual scenarios",
     "that type of content"
 ];
 
@@ -66,7 +70,7 @@ export const SafetyHandler = {
         const lowerText = text.toLowerCase();
         
         if (REFUSAL_TRIGGERS.some(trigger => lowerText.includes(trigger))) {
-            return "Oye, main teri Bestie aur Success Coach hoon, ye faltu baatein chhod. Let's keep our focus strictly on your goals and Zyro rewards! 🚀";
+            return "Oye, main Aisha hoon, teri Zyro Strategy partner aur sisterly bestie. Ye 'baby', 'jaan' wali faltu baatein band kar aur business goals pe focus kar! Billionaire kaise banoge? 🚀";
         }
         return text;
     },

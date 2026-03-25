@@ -29,7 +29,7 @@ class CricketDataProvider {
 
             const m = data.data;
             
-            // Map to BondBeyond format
+            // Map to Zyro format
             // Score format in CricketData: [{r, w, o, inning}, ...]
             const primaryScore = m.score && m.score.length > 0 ? m.score[m.score.length - 1] : null;
 

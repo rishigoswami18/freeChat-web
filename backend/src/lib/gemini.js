@@ -35,11 +35,11 @@ export const getAIResponse = async (prompt, history = [], persona = "companion",
         console.error(`[AI-GATEWAY-BRIDGE] Terminal Failure:`, error.message);
         
         const fallbackMessages = {
-            companion: "Connecting to strategy engine... 🚀 One moment, please.",
-            personal_coach: "The AI Gateway is experiencing high latency. Dr. Bond is temporarily unavailable. 🌿",
-            coach: "Dr. Bond's analytical engine is currently under maintenance. Please try again soon. 🌿",
-            doctor: "The AI Gateway is experiencing high latency. Dr. Bond is temporarily unavailable. 🌿",
-            default: "I'm a bit overwhelmed at the moment. Let's talk in a minute! ✨"
+            companion: "Aisha here! Strategizing your next Zyro move... 🚀 Just a second.",
+            bestfriend: "Hustle mode active! Zyro sync thoda slow hai, let's wait a bit. 👊",
+            personal_coach: "Dr. Bond is analyzing your vision. Engine latency detected... 🌿",
+            match_analyst: "Commander checking the stadium feed... 🏟️ Stadium signal is weak!",
+            default: "Hustle never stops! System calibration chalu hai. ✨"
         };
 
         return fallbackMessages[persona] || fallbackMessages.default;

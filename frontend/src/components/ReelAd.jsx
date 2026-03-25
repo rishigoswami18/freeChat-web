@@ -52,7 +52,7 @@ const ReelAd = memo(({ isActive }) => {
                 <div className="z-10 text-center space-y-4 max-w-sm px-4">
                     <div className="space-y-2">
                         <h2 className="text-2xl font-black text-white leading-tight">
-                            Enjoying <span className="text-primary italic">BondBeyond?</span>
+                            Enjoying <span className="text-primary italic">Zyro?</span>
                         </h2>
                         <p className="text-white/60 text-sm leading-relaxed">
                             Upgrade to Premium to remove all ads and support our platform!

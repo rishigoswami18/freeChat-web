@@ -10,7 +10,7 @@ const ContactPage = () => {
                     {/* Contact Info */}
                     <div className="space-y-12">
                         <div>
-                            <h1 className="text-5xl font-black italic tracking-tighter mb-4">Connect with BondBeyond</h1>
+                            <h1 className="text-5xl font-black italic tracking-tighter mb-4">Connect with Zyro</h1>
                             <p className="text-white/40 text-lg leading-relaxed max-w-md">
                                 Whether you're a financial institution seeking secure infrastructure or a brand looking for enterprise solutions, our team is standing by.
                             </p>
@@ -33,7 +33,7 @@ const ContactPage = () => {
                                 icon={MapPin} 
                                 title="Registered Office Address" 
                                 value="LPU University, Phagwara, Punjab, India" 
-                                desc="BondBeyond Technologies Pvt. Ltd."
+                                desc="Zyro Technologies Pvt. Ltd."
                             />
                         </div>
                     </div>

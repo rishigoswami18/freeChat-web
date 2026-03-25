@@ -51,7 +51,7 @@ const EarningsWallet = () => {
                 key: keyRes.key,
                 amount: orderRes.order.amount,
                 currency: orderRes.order.currency,
-                name: "BondBeyond",
+                name: "Zyro",
                 description: `Purchase ${pack.name} (Skill Analysis & Community Access)`,
                 order_id: orderRes.order.id,
                 handler: async (response) => {
@@ -231,7 +231,7 @@ const EarningsWallet = () => {
                             </div>
                             <button 
                                 onClick={() => {
-                                    navigator.clipboard.writeText(`JOIN BOND BEYOND: Use code BOND-${authUser?._id.toString().slice(-6).toUpperCase()} for extra 500 coins!`);
+                                    navigator.clipboard.writeText(`JOIN ZYRO: Use code BOND-${authUser?._id.toString().slice(-6).toUpperCase()} for extra 500 coins!`);
                                     toast.success("Referral link copied! 🚀");
                                 }}
                                 className="w-full sm:w-auto px-10 h-14 bg-indigo-600 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-500 transition-all flex items-center justify-center gap-2"

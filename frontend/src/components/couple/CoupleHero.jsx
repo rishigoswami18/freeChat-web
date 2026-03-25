@@ -4,7 +4,7 @@ import { Flame } from "lucide-react";
 
 /**
  * CoupleHero
- * Top section displaying "BONDBeyond", user's current streak and streak banner.
+ * Top section displaying "Zyro", user's current streak and streak banner.
  */
 const CoupleHero = memo(({ streakCount, showStreakBanner = true }) => {
     return (
@@ -17,7 +17,7 @@ const CoupleHero = memo(({ streakCount, showStreakBanner = true }) => {
                     className="flex flex-col"
                 >
                     <h1 className="text-3xl sm:text-5xl font-black flex items-center gap-3 romantic-gradient-text tracking-tighter italic">
-                        BONDBeyond
+                        Zyro
                         <span className="text-[10px] bg-primary/20 backdrop-blur-md text-primary border border-primary/20 px-3 py-1 rounded-full animate-pulse uppercase tracking-[0.2em] not-italic">v2.1 GOLD</span>
                     </h1>
                     <p className="text-[10px] opacity-40 uppercase font-black tracking-[0.4em] mt-1 ml-1">THE WORLD'S BEST SOCIAL APP FOR COUPLES</p>

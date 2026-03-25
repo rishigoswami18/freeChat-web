@@ -35,7 +35,7 @@ const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   
   const [formState, setFormState] = useState(() => {
-    const saved = localStorage.getItem("bondbeyond_onboarding_draft");
+    const saved = localStorage.getItem("Zyro_onboarding_draft");
     const defaultData = {
       fullName: authUser?.fullName || "",
       favTeam: "NONE",
@@ -52,13 +52,13 @@ const OnboardingPage = () => {
 
   // Persist draft to local storage
   useMemo(() => {
-    localStorage.setItem("bondbeyond_onboarding_draft", JSON.stringify(formState));
+    localStorage.setItem("Zyro_onboarding_draft", JSON.stringify(formState));
   }, [formState]);
 
   const { mutate: onboardingMutation, isPending } = useMutation({
     mutationFn: completeOnboarding,
     onSuccess: () => {
-      localStorage.removeItem("bondbeyond_onboarding_draft");
+      localStorage.removeItem("Zyro_onboarding_draft");
       toast.success("Welcome to the Arena! 🏟️ +500 Coins added!");
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },

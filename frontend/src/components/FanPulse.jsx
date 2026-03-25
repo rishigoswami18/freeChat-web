@@ -60,7 +60,7 @@ const FanPulse = ({ teamA, teamB, stats }) => {
       </div>
 
       <p className="mt-8 text-xs font-bold text-white/30 leading-relaxed italic text-center">
-        *Vote for your team! Stats analyzed in real-time from BondBeyond fans.
+        *Vote for your team! Stats analyzed in real-time from Zyro fans.
       </p>
     </div>
   );

@@ -15,7 +15,7 @@ const VideoClientContext = createContext(null);
 export const useVideoClient = () => useContext(VideoClientContext);
 
 /**
- * BondBeyond — Premium Video/Voice Service Provider
+ * Zyro — Premium Video/Voice Service Provider
  * Robust initialization architecture with auto-retries and identity verification.
  */
 const VideoProvider = ({ children }) => {
@@ -34,6 +34,15 @@ const VideoProvider = ({ children }) => {
         staleTime: 5 * 60 * 1000, 
         retry: 3,
     });
+
+    useEffect(() => {
+        if (fetchError) {
+            console.error("❌ [VideoProvider] Credentials fetch failed:", fetchError);
+            import("react-hot-toast").then(({ toast }) => {
+                toast.error("Video service connection failed. Please check your network.", { id: "stream-fetch-error" });
+            });
+        }
+    }, [fetchError]);
 
     const tokenProvider = useCallback(async () => {
         try {

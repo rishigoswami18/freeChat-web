@@ -15,7 +15,7 @@ export const AIGateway = {
     generate: async (options) => {
         const {
             provider = "gemini",
-            model = "gemini-flash-latest",
+            model = "gemini-2.0-flash",
             messages = [],
             systemInstruction = "",
             safetySettings = [],
@@ -132,25 +132,26 @@ export const AIGateway = {
             const data = await response.json();
             
             if (!response.ok) {
-                console.error(`❌ [Gemini API Error] Status: ${response.status} | Msg: ${data.error?.message || "Unknown"}`);
-                return ""; 
+                const errMsg = data.error?.message || "Unknown API Error";
+                console.error(`❌ [Gemini API Error] Status: ${response.status} | Msg: ${errMsg}`);
+                throw new Error(`GEMINI_API_ERROR: ${errMsg}`);
             }
 
             // Check for safety blocks
             if (data.promptFeedback?.blockReason) {
                 console.warn(`⚠️ [Gemini] Blocked by safety: ${data.promptFeedback.blockReason}`);
-                return "";
+                throw new Error(`SAFETY_BLOCK: ${data.promptFeedback.blockReason}`);
             }
 
             const candidate = data.candidates?.[0];
             if (!candidate) {
                 console.warn(`⚠️ [Gemini] API returned no candidates. Raw payload: ${JSON.stringify(data).substring(0, 150)}`);
-                return "";
+                throw new Error("EMPTY_API_RESPONSE");
             }
 
             if (candidate.finishReason === "SAFETY" || candidate.finishReason === "RECITATION") {
                 console.warn(`⚠️ [Gemini] Blocked Candidate: ${candidate.finishReason}`);
-                return ""; 
+                throw new Error(`CANDIDATE_BLOCKED: ${candidate.finishReason}`);
             }
 
             const rawText = candidate.content?.parts?.[0]?.text;

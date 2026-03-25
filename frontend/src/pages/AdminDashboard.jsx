@@ -110,7 +110,7 @@ const AdminDashboard = () => {
         apkFile: null // base64
     });
 
-    // BondBeyond Specific State
+    // Zyro Specific State
     const [matches, setMatches] = useState([]);
     const [withdrawals, setWithdrawals] = useState([]);
     const [bondStats, setBondStats] = useState(null);
@@ -429,7 +429,7 @@ const AdminDashboard = () => {
                 await sendEmailToUser(targetedUser._id, targetedSubject, targetedBody);
                 toast.success(`Email sent to ${targetedUser.fullName}`);
             } else {
-                await sendNotificationToUser(targetedUser._id, targetedSubject || "BondBeyond Update", targetedBody);
+                await sendNotificationToUser(targetedUser._id, targetedSubject || "Zyro Update", targetedBody);
                 toast.success(`Notification sent to ${targetedUser.fullName}`);
             }
             setTargetedUser(null);
@@ -696,7 +696,7 @@ const AdminDashboard = () => {
                                                         onClick={() => {
                                                             setTargetedUser(u);
                                                             setTargetedType('email');
-                                                            setTargetedSubject("Message from BondBeyond Admin");
+                                                            setTargetedSubject("Message from Zyro Admin");
                                                         }}
                                                         className="btn btn-ghost btn-xs btn-circle text-secondary"
                                                         title="Send Direct Email"
@@ -972,7 +972,7 @@ const AdminDashboard = () => {
                                 <div className="card bg-base-200 p-12 rounded-3xl text-center border border-base-content/5">
                                     <UserCheck className="size-12 text-success mx-auto mb-4 opacity-50" />
                                     <h3 className="text-xl font-black uppercase italic tracking-tight">All Caught Up!</h3>
-                                    <p className="text-sm opacity-50 mt-2">Every Firebase user has already joined BondBeyond. 🎉</p>
+                                    <p className="text-sm opacity-50 mt-2">Every Firebase user has already joined Zyro. 🎉</p>
                                 </div>
                             ) : (
                                 <>
@@ -1436,7 +1436,7 @@ const AdminDashboard = () => {
                                     </div>
                                     <div>
                                         <h2 className="text-2xl font-black italic tracking-tighter uppercase">Release Registry</h2>
-                                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Manage BondBeyond Build Artifacts</p>
+                                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Manage Zyro Build Artifacts</p>
                                     </div>
                                 </div>
                                 <button
@@ -1515,7 +1515,7 @@ const AdminDashboard = () => {
                                                     href={`${APK_DOWNLOAD_URL}/${release._id}`}
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        downloadFile(`${APK_DOWNLOAD_URL}/${release._id}`, `BondBeyond_v${(release.versionName || "1_0_0").replace(/\./g, "_")}.apk`);
+                                                        downloadFile(`${APK_DOWNLOAD_URL}/${release._id}`, `Zyro_v${(release.versionName || "1_0_0").replace(/\./g, "_")}.apk`);
                                                     }}
                                                     className="btn btn-sm btn-circle bg-base-200 hover:bg-primary hover:text-white transition-all border-none"
                                                     title="Download Artifact"

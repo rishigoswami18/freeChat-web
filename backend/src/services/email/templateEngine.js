@@ -1,11 +1,11 @@
 /**
- * Base template for all BondBeyond emails
+ * Base template for all Zyro emails
  */
-export const baseTemplate = (content, { title = "BondBeyond", appUrl = "https://www.bondbeyond.in", footerExtra = "" } = {}) => `
+export const baseTemplate = (content, { title = "Zyro", appUrl = "https://www.Zyro.in", footerExtra = "" } = {}) => `
 <div style="font-family:'Segoe UI',Tahoma,sans-serif;max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);padding:40px 30px;text-align:center;">
-        <h1 style="color:#ffffff;margin:0;font-size:36px;font-style:italic;font-weight:900;letter-spacing:-1px;">BondBeyond</h1>
+        <h1 style="color:#ffffff;margin:0;font-size:36px;font-style:italic;font-weight:900;letter-spacing:-1px;">Zyro</h1>
         <p style="color:rgba(255,255,255,0.8);margin:8px 0 0 0;font-size:13px;text-transform:uppercase;letter-spacing:3px;font-weight:600;">${title}</p>
     </div>
 
@@ -17,8 +17,8 @@ export const baseTemplate = (content, { title = "BondBeyond", appUrl = "https://
     <!-- Footer -->
     <div style="background:#f9fafb;padding:20px 30px;text-align:center;border-top:1px solid #e5e7eb;">
         ${footerExtra}
-        <p style="color:#9ca3af;font-size:11px;margin:0;">You received this because you are a member of BondBeyond.</p>
-        <p style="color:#d1d5db;font-size:11px;margin:8px 0 0 0;">© 2026 BondBeyond. All rights reserved.</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;">You received this because you are a member of Zyro.</p>
+        <p style="color:#d1d5db;font-size:11px;margin:8px 0 0 0;">© 2026 Zyro. All rights reserved.</p>
     </div>
 </div>
 `;
@@ -43,7 +43,7 @@ export const generateOtpContent = (otp, type = "verification") => `
 export const generateWelcomeContent = (firstName) => `
 <h2 style="color:#1f2937;margin:0 0 16px 0;font-size:24px;font-weight:800;">Hi ${firstName}! 🎉</h2>
 <p style="color:#4b5563;line-height:1.8;font-size:16px;margin:0 0 24px 0;">
-    Thank you so much for joining BondBeyond! We're thrilled to have you here. You've just unlocked a world where you can chat with friends, share stories, match with language partners, and strengthen your relationships.
+    Thank you so much for joining Zyro! We're thrilled to have you here. You've just unlocked a world where you can chat with friends, share stories, match with language partners, and strengthen your relationships.
 </p>
 <div style="background:#f8fafc;border-radius:12px;padding:24px;margin:24px 0;border:1px solid #e5e7eb;">
     <p style="margin:0 0 12px 0;font-size:14px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:1px;">What you can do next:</p>
@@ -54,7 +54,7 @@ export const generateWelcomeContent = (firstName) => `
     </ul>
 </div>
 <div style="text-align:center;margin:32px 0;">
-    <a href="https://www.bondbeyond.in" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;padding:16px 48px;border-radius:50px;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
+    <a href="https://www.Zyro.in" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#ffffff;text-decoration:none;padding:16px 48px;border-radius:50px;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(99,102,241,0.4);">
         Get Started →
     </a>
 </div>

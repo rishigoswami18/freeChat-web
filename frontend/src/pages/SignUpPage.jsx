@@ -88,7 +88,7 @@ const SignUpPage = () => {
                       Create an Account
                     </h2>
                     <p className="text-base opacity-60">
-                      Join <span className="text-primary font-medium">BondBeyond</span> and start connecting
+                      Join <span className="text-primary font-medium">Zyro</span> and start connecting
                     </p>
                   </div>
 
@@ -314,7 +314,7 @@ const SignUpPage = () => {
             <div className="relative aspect-square w-80 mx-auto transform transition duration-500 hover:scale-105">
               <img
                 src="/Video call-bro.png"
-                alt="BondBeyond Connection"
+                alt="Zyro Connection"
                 className="w-full h-full object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
               />
             </div>

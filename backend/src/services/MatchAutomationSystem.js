@@ -1,5 +1,5 @@
 /**
- * MatchAutomationSystem — BondBeyond Backend Architect
+ * MatchAutomationSystem — Zyro Backend Architect
  * Specialized in Automated Match Lifecycles, Live Syncing, and Mass Payouts.
  */
 import cron from "node-cron";
@@ -75,8 +75,15 @@ class MatchAutomationSystem {
             console.log("🌏 [MatchSystem] Syncing ALL Global Fixtures (Multi-Source)...");
             
             // Source 1: RapidAPI
-            const response = await axios.get(`${PRIMARY_API}/fixtures`, { headers: this.headers });
-            const rapidMatches = response.data.results || [];
+            let rapidMatches = [];
+            if (this.headers['x-rapidapi-key'] && this.headers['x-rapidapi-key'] !== "undefined") {
+              try {
+                const response = await axios.get(`${PRIMARY_API}/fixtures`, { headers: this.headers });
+                rapidMatches = response.data.results || [];
+              } catch (err) {
+                console.warn("⚠️ [MatchSystem] RapidAPI Sync deferred (Missing or invalid key)");
+              }
+            }
 
             // Source 2: CricketData.org (The new key provided by user)
             const cricDataMatches = await CricketDataProvider.getCurrentMatches();
@@ -354,7 +361,7 @@ class MatchAutomationSystem {
             await Match.findByIdAndUpdate(matchId, { status: "completed", isPredictionsEnabled: false });
 
             // 2. Scan All Predictions for this match
-            // Note: In BondBeyond, users predict ball-by-ball, but a 'Match Winner' bet is settled here.
+            // Note: In Zyro, users predict ball-by-ball, but a 'Match Winner' bet is settled here.
             const pendingPredictions = await Prediction.find({ matchId, status: "pending" });
             
             console.log(`🔍 [MatchSystem] Scanning ${pendingPredictions.length} pending payouts...`);

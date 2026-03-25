@@ -19,7 +19,7 @@ const AboutPage = () => {
                             Our Mission
                         </span>
                         <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter mb-8 leading-[0.9]">
-                            BondBeyond — Redefining the <br/>
+                            Zyro — Redefining the <br/>
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/20">Fan Experience</span>
                         </h1>
                     </motion.div>
@@ -30,7 +30,7 @@ const AboutPage = () => {
                     <div className="space-y-8">
                         <h2 className="text-4xl font-black italic tracking-tighter">Beyond Passive Viewing</h2>
                         <p className="text-xl text-white/60 leading-relaxed font-medium">
-                            BondBeyond is a cutting-edge Sports-Tech platform designed to bring fans closer to the game they love. Our mission is to transform passive sports viewing into an active, data-driven social experience.
+                            Zyro is a cutting-edge Sports-Tech platform designed to bring fans closer to the game they love. Our mission is to transform passive sports viewing into an active, data-driven social experience.
                         </p>
                         <p className="text-lg text-white/40 leading-relaxed">
                             Powered by our proprietary <strong>Antigravity Engine</strong>, we provide real-time analytics, high-fidelity match visualizations, and a community-centric platform where fans can engage, predict, and connect based on their sporting knowledge and analytical skills.
@@ -43,7 +43,7 @@ const AboutPage = () => {
                             <div className="flex items-center gap-4">
                                 <div className="size-12 rounded-full bg-white/10" />
                                 <div>
-                                    <p className="font-bold">Team BondBeyond</p>
+                                    <p className="font-bold">Team Zyro</p>
                                     <p className="text-[10px] uppercase font-black tracking-widest text-white/30">Founder & CEO</p>
                                 </div>
                             </div>

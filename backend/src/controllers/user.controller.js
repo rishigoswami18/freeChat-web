@@ -149,9 +149,9 @@ export async function sendFriendRequest(req, res) {
     sendNotificationEmail(recipient.email, {
       emoji: "👋",
       title: "New Friend Request!",
-      body: `<strong>${req.user.fullName}</strong> wants to be your friend on BondBeyond! Log in to accept or decline their request.`,
+      body: `<strong>${req.user.fullName}</strong> wants to be your friend on Zyro! Log in to accept or decline their request.`,
       ctaText: "View Request",
-      ctaUrl: `${process.env.CLIENT_URL || "https://www.bondbeyond.in"}/notifications`,
+      ctaUrl: `${process.env.CLIENT_URL || "https://www.Zyro.in"}/notifications`,
     });
 
     // Send push notification (fire-and-forget)
@@ -159,7 +159,7 @@ export async function sendFriendRequest(req, res) {
       const { sendPushNotification } = await import("../lib/push.service.js");
       sendPushNotification(recipientId, {
         title: "👋 New Friend Request!",
-        body: `${req.user.fullName} wants to be your friend on BondBeyond!`,
+        body: `${req.user.fullName} wants to be your friend on Zyro!`,
         icon: req.user.profilePic,
         data: { url: "/notifications" }
       });
@@ -243,8 +243,8 @@ export async function getOutgoingFriendReqs(req, res) {
 export async function updateProfile(req, res) {
   try {
     const userId = req.user._id;
-    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut, isPublic, aiPartnerName, aiFriendName } = req.body;
-    const updateData = { fullName, bio, nativeLanguage, learningLanguage, location, isPublic, aiPartnerName, aiFriendName };
+    const { fullName, bio, nativeLanguage, learningLanguage, location, profilePic, dateOfBirth, isStealthMode, panicShortcut, isPublic, aiPartnerName, aiFriendName, instagram, linkedin } = req.body;
+    const updateData = { fullName, bio, nativeLanguage, learningLanguage, location, isPublic, aiPartnerName, aiFriendName, instagram, linkedin };
     const isPremium = hasPremiumAccess(req.user);
 
     if (isStealthMode !== undefined) {
@@ -270,7 +270,7 @@ export async function updateProfile(req, res) {
     if (profilePic && profilePic.startsWith("data:image")) {
       // Upload new profile pic to Cloudinary
       const uploadResponse = await cloudinary.uploader.upload(profilePic, {
-        folder: "bondbeyond_profiles",
+        folder: "Zyro_profiles",
       });
       updateData.profilePic = uploadResponse.secure_url;
     }

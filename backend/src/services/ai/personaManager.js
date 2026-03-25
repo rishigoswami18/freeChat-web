@@ -8,16 +8,18 @@ class PersonaProvider {
     constructor() {
         this.personas = new Map(Object.entries(PERSONA_STRATEGIES));
         this.aliasMap = new Map([
-            ["companion", "ZYRO_BESTIE"],
-            ["bestie", "ZYRO_BESTIE"],
-            ["female_bestie", "ZYRO_BESTIE"],
-            ["strategy_partner", "ZYRO_BESTIE"],
-            ["wellness_partner", "ZYRO_BESTIE"],
+            ["companion", "FEMALE_BESTIE"],
+            ["bestie", "FEMALE_BESTIE"],
+            ["female_bestie", "FEMALE_BESTIE"],
+            ["strategy_partner", "ARENA_STRATEGIST"],
+            ["wellness_partner", "ARENA_STRATEGIST"],
             ["bestfriend", "PEER_WIDGET"],
             ["doctor", "SUCCESS_COACH"],
             ["coach", "SUCCESS_COACH"],
             ["personal_coach", "SUCCESS_COACH"],
-            ["match_analyst", "EVENT_ANALYST"],
+            ["match_analyst", "ARENA_STRATEGIST"],
+            ["strategist", "ARENA_STRATEGIST"],
+            ["ai-strategist-id", "ARENA_STRATEGIST"],
             ["face_call", "IMMERSIVE_INTERFACE"]
         ]);
         this.fallbackKey = "SUCCESS_COACH";

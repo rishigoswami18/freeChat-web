@@ -25,7 +25,7 @@ const CTASection = memo(() => {
                         {t('get_started')}
                     </h2>
                     <p className="text-lg opacity-70 mb-10 max-w-xl mx-auto leading-relaxed">
-                        Join thousands of people who've switched to BondBeyond for real,
+                        Join thousands of people who've switched to Zyro for real,
                         meaningful connections. It's free. It's fast. It's yours.
                     </p>
                     <Link

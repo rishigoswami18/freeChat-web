@@ -138,7 +138,7 @@ const GemShopPage = () => {
                 key,
                 amount: order.amount,
                 currency: order.currency,
-                name: "BondBeyond Gems",
+                name: "Zyro Gems",
                 description: `${pack.amount} Gems + ${pack.bonus} Bonus`,
                 order_id: order.id,
                 handler: async (response) => {

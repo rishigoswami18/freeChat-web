@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { BadgeCheck, Globe, Languages, MapPin } from "lucide-react";
+import { BadgeCheck, Globe, Languages, MapPin, Instagram, Linkedin } from "lucide-react";
 import UserProfileActions from "./UserProfileActions";
 
 const UserProfileHeader = memo(({ user, userId, authUser, userPostsLength, onShowDP, onShowFriends, isPublic }) => {
@@ -76,6 +76,26 @@ const UserProfileHeader = memo(({ user, userId, authUser, userPostsLength, onSho
                             <span className="text-xs font-semibold bg-base-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-base-300/50" title={`Lives in ${user.location}`}>
                                 <MapPin className="size-3 text-accent" aria-hidden="true" /> {user.location}
                             </span>
+                        )}
+                        {user.instagram && (
+                             <a 
+                                href={`https://instagram.com/${user.instagram.replace('@', '')}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="size-7 rounded-lg bg-base-200 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-base-300/50"
+                             >
+                                <Instagram className="size-4" />
+                             </a>
+                        )}
+                        {user.linkedin && (
+                             <a 
+                                href={user.linkedin.includes('http') ? user.linkedin : `https://linkedin.com/in/${user.linkedin}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="size-7 rounded-lg bg-base-200 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all duration-300 border border-base-300/50"
+                             >
+                                <Linkedin className="size-4" />
+                             </a>
                         )}
                     </div>
                 </div>

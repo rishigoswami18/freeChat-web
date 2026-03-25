@@ -32,7 +32,7 @@ const SuggestedUserRow = memo(({ user, isRequested, onFollow, isPending }) => {
                         )}
                     </div>
                     <div className="text-[12px] text-base-content/50 font-normal truncate">
-                        {user.isTandemMatch ? "Suggested for you" : "New to BondBeyond"}
+                        {user.isTandemMatch ? "Suggested for you" : "New to Zyro"}
                     </div>
                 </div>
             </Link>
@@ -253,7 +253,7 @@ const RightSidebar = memo(() => {
                     <a href="#" className="hover:underline hover:text-primary">Language</a>
                 </div>
                 <div className="uppercase tracking-wider font-semibold opacity-60">
-                    © 2026 BONDBEYOND FROM freechatweb.in
+                    © 2026 Zyro FROM freechatweb.in
                 </div>
             </div>
         </aside>

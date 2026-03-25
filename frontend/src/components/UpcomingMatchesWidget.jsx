@@ -7,7 +7,7 @@ const UpcomingMatchesWidget = ({ matches, isLoading }) => {
     if (!matches?.length) return null;
 
     return (
-        <div className="bg-white/5 border border-white/5 rounded-[40px] p-8 space-y-6">
+        <div className="bg-white/5 border border-white/5 rounded-[2.5rem] md:rounded-[40px] p-6 md:p-8 space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-xl font-black italic tracking-tight text-white">UPCOMING ARENAS</h3>
                 <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-white/40 uppercase tracking-widest">Season Schedule</span>

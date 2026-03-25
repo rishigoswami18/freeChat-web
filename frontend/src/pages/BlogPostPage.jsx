@@ -34,7 +34,7 @@ const BlogPostPage = () => {
     return (
         <div className="min-h-screen bg-base-100">
             <DynamicSEO 
-                title={`${post.title} | BondBeyond AI Insights`}
+                title={`${post.title} | Zyro AI Insights`}
                 description={post.description}
                 keywords={post.keywords}
                 ogImage={post.image}
@@ -103,7 +103,7 @@ const BlogPostPage = () => {
                         <div className="text-center md:text-left">
                             <h4 className="text-xl font-bold mb-2 uppercase italic">About the Team</h4>
                             <p className="opacity-60 leading-relaxed mb-4">
-                                This article was written by the technical team at BondBeyond, 
+                                This article was written by the technical team at Zyro, 
                                 specializing in the intersection of AI architecture and human communication.
                             </p>
                             <Link to="/founder" className="text-primary font-bold hover:underline">Learn more about the vision →</Link>

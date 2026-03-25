@@ -13,15 +13,15 @@ const BlogPage = () => {
     return (
         <div className="min-h-screen bg-base-100 py-20">
             <DynamicSEO 
-                title="BondBeyond Blog | AI Relationships, Virtual Partners & Tech Insights"
-                description="Read the latest from BondBeyond. Expert insights on AI girlfriend apps, the future of social media, and updates from founder Hrishikesh Giri."
-                keywords="AI relationship blog, virtual partner insights, BondBeyond news, AI social media articles"
+                title="Zyro Blog | AI Relationships, Virtual Partners & Tech Insights"
+                description="Read the latest from Zyro. Expert insights on AI girlfriend apps, the future of social media, and updates from founder Hrishikesh Giri."
+                keywords="AI relationship blog, virtual partner insights, Zyro news, AI social media articles"
             />
 
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="text-center mb-20">
                     <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter uppercase italic">
-                        The <span className="text-primary italic">BondBeyond</span> Journal
+                        The <span className="text-primary italic">Zyro</span> Journal
                     </h1>
                     <p className="text-xl opacity-60 max-w-2xl mx-auto">
                         Deep dives into the intersection of Artificial Intelligence, 

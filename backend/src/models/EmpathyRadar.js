@@ -9,7 +9,7 @@ const empathyRadarSchema = new mongoose.Schema(
     },
     participants: [
       { 
-        type: mongoose.Schema.Types.ObjectId, 
+        type: String, 
         ref: "User" 
       }
     ],
@@ -23,7 +23,7 @@ const empathyRadarSchema = new mongoose.Schema(
     },
     insights: [
       {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        userId: { type: String, ref: "User" },
         emotionDetected: String,
         unsaidFear: String,
         actionableAdvice: String,

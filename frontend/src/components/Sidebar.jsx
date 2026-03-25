@@ -11,7 +11,7 @@ import useAuthUser from "../hooks/useAuthUser";
 import {
   Home, Users, HeartHandshake, Crown, Gamepad2, Search, Film, 
   MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, 
-  Heart, Sparkles, PlusCircle, Compass, Menu, Zap, DollarSign, Globe, Newspaper, Gift
+  Heart, Sparkles, PlusCircle, Compass, Menu, Zap, DollarSign, Globe, Newspaper, Gift, Trophy
 } from "lucide-react";
 
 import CreateStoryModal from "./CreateStoryModal";
@@ -24,7 +24,7 @@ import { logout } from "../lib/api";
 const staticNavItems = [
   { to: "/", icon: Home, labelKey: "Home" },
   { to: "/ipl-dashboard", icon: Zap, label: "IPL Exclusive", isSacred: true },
-  { to: "/feed", icon: Newspaper, labelKey: "feed" },
+  { to: "/arena", icon: Trophy, label: "Arena" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
   { to: "/communities", icon: Users, labelKey: "Communities" },
@@ -192,17 +192,13 @@ const Sidebar = memo(() => {
     <aside className="w-[80px] xl:w-[244px] hidden md:flex flex-col h-screen fixed top-0 left-0 border-r border-base-content/10 bg-base-100 z-50 overflow-hidden transition-all duration-300">
       
       {/* Brand area */}
-      <div className="pt-8 pb-6 px-4 xl:px-6">
-        <Link to="/" className="flex items-center gap-4 group/logo focus:outline-none">
-           <div className="size-10 bg-primary rounded-xl flex items-center justify-center shadow-lg group-hover/logo:scale-110 transition-transform shrink-0 overflow-hidden">
-             <svg viewBox="0 0 24 24" fill="none" className="size-6 text-white" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 4h16l-12 16h16" />
-             </svg>
-           </div>
-           <span className="hidden xl:block text-2xl font-black tracking-tight font-outfit truncate uppercase italic">
-             Zyro
-           </span>
-        </Link>
+      <div className="pt-8 pb-6 px-4 xl:px-6 flex justify-center xl:justify-start">
+        <div className="hidden xl:block">
+          <Logo showText={true} fontSize="text-2xl" />
+        </div>
+        <div className="xl:hidden">
+          <Logo showText={false} />
+        </div>
       </div>
 
       {/* Navigation */}
@@ -314,7 +310,7 @@ const Sidebar = memo(() => {
 
         {/* Watch Tutorial */}
         <button
-          onClick={() => window.dispatchEvent(new CustomEvent("bondbeyond_start_tutorial"))}
+          onClick={() => window.dispatchEvent(new CustomEvent("Zyro_start_tutorial"))}
           className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content opacity-70 hover:opacity-100 hover:bg-base-content/5 group/nav"
           title="Watch Tutorial"
         >

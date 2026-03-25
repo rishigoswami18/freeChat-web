@@ -19,6 +19,6 @@ export const sendViaSMTP = async ({ to, subject, text, html, replyTo }) => {
         socketTimeout: 10000,
     });
 
-    const from = `"BondBeyond" <${user}>`;
+    const from = `"Zyro" <${user}>`;
     return await transporter.sendMail({ from, to, replyTo, subject, text, html });
 };

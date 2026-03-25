@@ -5,10 +5,10 @@ export const sendViaBrevo = async ({ to, subject, html, replyTo }) => {
     const apiKey = process.env.BREVO_API_KEY;
     if (!apiKey) throw new Error("BREVO_API_KEY not set");
 
-    const senderEmail = process.env.SMTP_USER || process.env.OWNER_EMAIL || "support@bondbeyond.in";
+    const senderEmail = process.env.SMTP_USER || process.env.OWNER_EMAIL || "support@Zyro.in";
 
     const body = {
-        sender: { name: "BondBeyond", email: senderEmail },
+        sender: { name: "Zyro", email: senderEmail },
         to: [{ email: to }],
         subject,
         htmlContent: html,

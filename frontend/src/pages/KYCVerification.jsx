@@ -33,7 +33,7 @@ const KYCVerification = () => {
                     </div>
                     <h1 className="text-4xl font-black tracking-tight">Trust Verified</h1>
                     <p className="text-white/40 font-bold leading-relaxed">
-                        You have successfully completed the BondBeyond Trust Check. Your account is now fully compliant with international payment standards.
+                        You have successfully completed the Zyro Trust Check. Your account is now fully compliant with international payment standards.
                     </p>
                     <button className="w-full py-5 bg-indigo-600 rounded-3xl font-black text-lg">Continue to Dashboard</button>
                 </motion.div>
@@ -92,7 +92,7 @@ const KYCVerification = () => {
                                         </button>
                                     </div>
                                     <p className="text-xs text-white/30 font-bold leading-relaxed px-10">
-                                        *Encoded data is handled by our PCI-compliant processing layer. BondBeyond does not store plain-text identity documents.
+                                        *Encoded data is handled by our PCI-compliant processing layer. Zyro does not store plain-text identity documents.
                                     </p>
                                 </div>
                             )}

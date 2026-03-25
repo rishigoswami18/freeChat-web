@@ -48,7 +48,7 @@ export const DelayedEmailWorker = {
                             title: `Unread messages from ${record.senderName}`,
                             body: `Hey ${recipient.fullName.split(' ')[0]}, you still have unread messages waiting for you: "${record.messageText}"`,
                             ctaText: "Reply Now",
-                            ctaUrl: `${process.env.CLIENT_URL || "https://www.bondbeyond.in"}/inbox`
+                            ctaUrl: `${process.env.CLIENT_URL || "https://www.Zyro.in"}/inbox`
                         });
                         console.log(`✅ [DelayedEmailWorker] Sent reminder to ${recipient.email}`);
                     }

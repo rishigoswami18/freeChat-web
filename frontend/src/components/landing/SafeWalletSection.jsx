@@ -21,7 +21,7 @@ const SafeWalletSection = memo(() => {
                                     <div className="size-12 rounded-2xl bg-primary/20 flex items-center justify-center">
                                         <Lock className="text-primary size-6" />
                                     </div>
-                                    <span className="text-[10px] font-black tracking-widest uppercase opacity-40">BondBeyond Secured</span>
+                                    <span className="text-[10px] font-black tracking-widest uppercase opacity-40">Zyro Secured</span>
                                 </div>
                                 <div className="space-y-6">
                                     <div className="p-5 rounded-2xl bg-base-100 border border-base-content/5 flex items-center gap-4">

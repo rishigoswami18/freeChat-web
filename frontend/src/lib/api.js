@@ -397,7 +397,7 @@ export const verifyGemPayment = async (paymentData) => {
 };
 
 
-// ----------------- BONDBEYOND / RELATIONSHIP -----------------
+// ----------------- Zyro / RELATIONSHIP -----------------
 
 export const getDailyInsight = async () => {
   const response = await axiosInstance.get("/bond/insight");
@@ -573,7 +573,7 @@ export const createCommunityPost = async (id, data) => {
   const response = await axiosInstance.post(`/communities/${id}/posts`, data);
   return response.data;
 };
-// ----------------- BONDBEYOND ADMIN -----------------
+// ----------------- Zyro ADMIN -----------------
 
 export const getAdminMatches = async () => {
     const response = await axiosInstance.get("/admin/matches");

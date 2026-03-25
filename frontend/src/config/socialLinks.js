@@ -9,7 +9,7 @@ import {
 export const SOCIAL_LINKS = [
     { 
         name: "Instagram", 
-        url: "https://www.instagram.com/bondbeyond_webapp/?hl=en", 
+        url: "https://www.instagram.com/Zyro_webapp/?hl=en", 
         icon: Instagram, 
         color: "hover:text-pink-500" 
     },

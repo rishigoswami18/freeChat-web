@@ -37,9 +37,9 @@ const HeroSection = memo(({ handleDownload }) => {
                         variants={fadeUp}
                         custom={1}
                     >
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary italic uppercase tracking-tighter">
+                        <span className="inline-block px-10 bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-400 italic uppercase tracking-tighter">
                             Zyro
-|                      </span>
+                        </span>
                         <div className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 mt-2 mb-4 flex justify-center text-primary">
                             Master Your Mindset, Win the Game.
                         </div>

@@ -1,20 +1,24 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useCallback, memo } from "react";
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo, useCallback, memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   getOutgoingFriendReqs,
   getRecommendedUsers,
   getUserFriends,
   sendFriendRequest,
+  getPosts,
 } from "../lib/api";
 import { Link } from "react-router-dom";
-import { BadgeCheck, MapPin, UserPlus, Users, TrendingUp } from "lucide-react";
+import { BadgeCheck, MapPin, UserPlus, Users, TrendingUp, Sparkles, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { capitialize } from "../lib/utils";
+import useAuthUser from "../hooks/useAuthUser";
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
-import NoFriendsFound from "../components/NoFriendsFound";
+import PostsFeed from "../components/PostsFeed";
+import CreatePost from "../components/CreatePost";
 
 // --- ANIMATION VARIANTS ---
 const containerVariants = {
@@ -39,299 +43,221 @@ const itemVariants = {
 const RecommendedUserCard = memo(({ user, hasRequestBeenSent, onSendRequest, isPending }) => {
   const { t } = useTranslation();
 
-  const nativeLanguageFormatted = useMemo(() => capitialize(user.nativeLanguage), [user.nativeLanguage]);
-  const learningLanguageFormatted = useMemo(() => capitialize(user.learningLanguage), [user.learningLanguage]);
   const nativeFlag = useMemo(() => getLanguageFlag(user.nativeLanguage), [user.nativeLanguage]);
-  const learningFlag = useMemo(() => getLanguageFlag(user.learningLanguage), [user.learningLanguage]);
 
   return (
     <motion.div 
       variants={itemVariants}
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="card bg-base-200 shadow-sm hover:shadow-2xl transition-all duration-300 border border-transparent hover:border-primary/20 backdrop-blur-sm"
+      className="flex items-center justify-between p-3 bg-base-200/50 rounded-2xl border border-transparent hover:border-primary/20 transition-all group"
     >
-      <div className="card-body p-5 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="avatar size-16 rounded-full ring ring-primary/20 ring-offset-base-100 ring-offset-2">
-            <img src={user.profilePic} alt={user.fullName} loading="lazy" decoding="async" />
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-              {user.fullName}
-              {user.isBoosted && (
-                <div className="badge badge-success badge-xs gap-1 font-black uppercase tracking-tighter py-2 border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <TrendingUp className="size-2.5" /> Featured
-                </div>
-              )}
-            </h3>
-            {user.location && (
-              <div className="flex items-center text-xs opacity-70 mt-1">
-                <MapPin className="size-3 mr-1" />
-                {user.location}
-              </div>
-            )}
-          </div>
+      <div className="flex items-center gap-3">
+        <Link to={`/user/${user._id}`} className="avatar size-10 rounded-full ring-2 ring-primary/10 overflow-hidden shrink-0 group-hover:scale-105 transition-transform">
+          <img src={user.profilePic || "/avatar.png"} alt={user.fullName} className="object-cover" />
+        </Link>
+        <div className="min-w-0">
+          <h4 className="text-xs font-bold truncate flex items-center gap-1">
+            {user.fullName}
+            {(user.isVerified || user.role === "admin") && <BadgeCheck className="size-3 text-[#1d9bf0] fill-current" />}
+          </h4>
+          <p className="text-[10px] opacity-50 truncate">{nativeFlag} {capitialize(user.nativeLanguage)}</p>
         </div>
-
-        {/* Languages with flags */}
-        <div className="flex flex-wrap gap-1.5">
-          <span className="badge badge-secondary gap-1 shadow-sm font-medium">
-            {nativeFlag} Native: {nativeLanguageFormatted}
-          </span>
-          <span className="badge badge-outline gap-1 shadow-sm border-base-content/20 font-medium">
-            {learningFlag} Learning: {learningLanguageFormatted}
-          </span>
-        </div>
-
-        {user.bio && <p className="text-sm opacity-70 line-clamp-2 leading-relaxed">{user.bio}</p>}
-
-        {/* Action button */}
-        <button
-          className={`btn w-full mt-2 group overflow-hidden relative ${hasRequestBeenSent ? "btn-disabled bg-base-300 text-base-content/50" : "btn-primary shadow-lg shadow-primary/20"}`}
-          onClick={() => onSendRequest(user._id)}
-          disabled={hasRequestBeenSent || isPending}
-        >
-          {hasRequestBeenSent ? (
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center">
-              <BadgeCheck className="size-4 mr-2 text-emerald-500" />
-              {t('request_sent')}
-            </motion.div>
-          ) : (
-            <div className="flex items-center">
-              <UserPlus className="size-4 mr-2 group-hover:scale-110 transition-transform" />
-              {t('send_request')}
-            </div>
-          )}
-        </button>
       </div>
-    </motion.div>
-  );
-});
-RecommendedUserCard.displayName = "RecommendedUserCard";
 
-
-// === SUBCOMPONENT: Friends Section ===
-const FriendsSection = memo(({ friends, loading }) => {
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <span className="loading loading-spinner text-primary loading-lg" />
-      </div>
-    );
-  }
-
-  if (friends.length === 0) {
-    return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <NoFriendsFound />
-      </motion.div>
-    );
-  }
-
-  return (
-    <motion.div 
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-    >
-      <AnimatePresence>
-        {friends.map((friend) => (
-          <motion.div 
-            key={friend._id} 
-            variants={itemVariants} 
-            layout 
-            className="flex h-full"
-          >
-            <FriendCard friend={friend} />
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </motion.div>
-  );
-});
-FriendsSection.displayName = "FriendsSection";
-
-
-// === SUBCOMPONENT: Recommendations Section ===
-const RecommendationsSection = memo(({ users, loading, outgoingRequestsIds, onSendRequest, isPending }) => {
-  const { t } = useTranslation();
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <span className="loading loading-spinner text-primary loading-lg" />
-      </div>
-    );
-  }
-
-  if (users.length === 0) {
-    return (
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }} 
-        animate={{ opacity: 1, y: 0 }}
-        className="card bg-base-200 p-8 text-center border border-base-content/5 shadow-sm"
+      <button
+        className={`btn btn-xs rounded-lg ${hasRequestBeenSent ? "btn-disabled bg-base-300" : "btn-primary"}`}
+        onClick={() => onSendRequest(user._id)}
+        disabled={hasRequestBeenSent || isPending}
       >
-        <div className="bg-base-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Users className="size-8 opacity-40" />
-        </div>
-        <h3 className="font-semibold text-xl mb-2">{t('no_recommendations')}</h3>
-        <p className="text-base-content opacity-60 max-w-sm mx-auto">
-          {t('check_back')}
-        </p>
-      </motion.div>
-    );
-  }
-
-  return (
-    <motion.div 
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      {users.map((user) => (
-        <RecommendedUserCard
-          key={user._id}
-          user={user}
-          hasRequestBeenSent={outgoingRequestsIds.has(user._id)}
-          onSendRequest={onSendRequest}
-          isPending={isPending}
-        />
-      ))}
+        {hasRequestBeenSent ? <BadgeCheck className="size-3" /> : <UserPlus className="size-3" />}
+      </button>
     </motion.div>
   );
 });
-RecommendationsSection.displayName = "RecommendationsSection";
-
 
 // === MAIN PAGE ARCHITECTURE ===
 const HomePage = () => {
   const { t } = useTranslation();
+  const { authUser } = useAuthUser();
   const queryClient = useQueryClient();
+  const [localPosts, setLocalPosts] = useState([]);
 
-  // === DATA FETCHING LOGIC (OPTIMIZED) ===
+  // === FEED DATA FETCHING (INFINITE) ===
+  const {
+    data: feedData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: loadingFeed,
+    refetch: refetchFeed
+  } = useInfiniteQuery({
+    queryKey: ["homeFeed", authUser?.friends],
+    queryFn: ({ pageParam }) => getPosts(authUser?._id, authUser?.friends || [], pageParam, 10),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
+    enabled: !!authUser?._id,
+    staleTime: 60000,
+  });
+
+  const allPosts = useMemo(() => {
+    const serverPosts = feedData?.pages.flatMap(page => page.posts) || [];
+    // Efficiently merge local optimistic posts with server data
+    // Local posts come first for better UX
+    const merged = [...localPosts, ...serverPosts];
+    // De-duplicate by ID
+    const seen = new Set();
+    return merged.filter(p => {
+        if (!p || seen.has(p._id)) return false;
+        seen.add(p._id);
+        return true;
+    });
+  }, [feedData, localPosts]);
+
+  const { observerTarget } = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
+
+  // === SIDEBAR DATA ===
   const { data: friends = [], isLoading: loadingFriends } = useQuery({
     queryKey: ["friends"],
     queryFn: getUserFriends,
-    staleTime: 5 * 60 * 1000, // 5 min cache
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: recommendedUsers = [], isLoading: loadingUsers } = useQuery({
     queryKey: ["users"],
     queryFn: getRecommendedUsers,
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
   });
 
   const { data: outgoingFriendReqs = [] } = useQuery({
     queryKey: ["outgoingFriendReqs"],
     queryFn: getOutgoingFriendReqs,
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
   });
 
-  // === DERIVED STATE ===
-  const outgoingRequestsIds = useMemo(() => {
-    const ids = new Set();
-    if (outgoingFriendReqs.length > 0) {
-      outgoingFriendReqs.forEach((req) => ids.add(req.recipient._id));
-    }
-    return ids;
-  }, [outgoingFriendReqs]);
+  const outgoingRequestsIds = useMemo(() => new Set((outgoingFriendReqs || []).map(r => r.recipient._id)), [outgoingFriendReqs]);
 
-  // === MUTATION LOGIC ===
+  // === MUTATIONS ===
   const { mutate: sendRequestMutation, isPending } = useMutation({
     mutationFn: sendFriendRequest,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["outgoingFriendReqs"] });
     },
   });
 
-  const handleSendRequest = useCallback((userId) => {
-    sendRequestMutation(userId);
-  }, [sendRequestMutation]);
+  const handleNewPost = useCallback((post) => {
+    setLocalPosts(prev => [post, ...prev]);
+    // Optionally invalidate after a small delay to get clean server sync
+    setTimeout(() => queryClient.invalidateQueries({ queryKey: ["homeFeed"] }), 5000);
+  }, [queryClient]);
 
-  // === RENDER PIPELINE ===
+  // === RENDER ===
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }}
-      className="p-4 sm:p-6 lg:p-8 min-h-screen"
-    >
-      <div className="container mx-auto space-y-12">
+    <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto p-4 sm:p-6 min-h-screen animate-fade-in font-outfit">
+      
+      {/* 🚀 MAIN FEED COLUMN (LEFT/CENTER) */}
+      <div className="flex-1 space-y-8 min-w-0">
         
-        {/* === SECTION 1: HEADER === */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: -20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 100, damping: 20 }}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-base-100 p-8 rounded-[2rem] border border-base-content/5 shadow-lg shadow-base-content/5"
-        >
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-              {t('welcome')} 👋
-            </h1>
-            <p className="text-sm font-medium opacity-60 mt-2">{t('see_happening')}</p>
+        {/* Welcome Header */}
+        <div className="bg-base-100 p-8 rounded-[2rem] border border-base-content/5 shadow-2xl shadow-primary/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
+            <Sparkles className="size-24 text-primary" />
           </div>
-          <Link to="/notifications" className="btn btn-outline btn-sm sm:btn-md rounded-xl gap-2 hover:bg-primary hover:text-primary-content hover:border-primary transition-all shadow-sm">
-            <Users className="size-4" />
-            {t('notifications')}
-          </Link>
-        </motion.div>
+          <div className="relative z-10">
+            <h1 className="text-3xl font-black italic tracking-tighter uppercase mb-1">
+              {t('welcome')}, {authUser?.fullName?.split(' ')[0]}
+            </h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary opacity-60">
+              Zyro Intelligent Feed
+            </p>
+          </div>
+        </div>
 
-        {/* === SECTION 2: CURRENT FRIENDS === */}
-        <motion.div
-           initial={{ opacity: 0 }}
-           whileInView={{ opacity: 1 }}
-           viewport={{ once: true, margin: "-100px" }}
-        >
-          <div className="flex items-center justify-between mb-8 px-2">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('your_friends')}</h2>
-            <div className="badge badge-primary badge-outline font-bold shadow-sm py-3 px-4 rounded-xl">{friends.length} Network Connections</div>
+        {/* Create Post Module */}
+        <CreatePost onPost={handleNewPost} authUser={authUser} />
+
+        {/* Infinite Scroll Posts */}
+        <div className="space-y-6">
+            <PostsFeed posts={allPosts} setPosts={setLocalPosts} />
+            
+            {/* Scroll Sentinel */}
+            <div ref={observerTarget} className="py-20 flex justify-center w-full">
+                {isFetchingNextPage ? (
+                    <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="size-6 animate-spin text-primary opacity-40" />
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-20">Syncing Feed...</span>
+                    </div>
+                ) : hasNextPage ? (
+                    <div className="h-20" />
+                ) : allPosts.length > 0 && (
+                    <div className="text-center opacity-20 text-[10px] font-black uppercase tracking-[0.4em] py-10">
+                        You've reached the digital edge
+                    </div>
+                )}
+            </div>
+        </div>
+      </div>
+
+      {/* 🪄 DISCOVERY SIDEBAR (RIGHT) */}
+      <aside className="lg:w-[350px] shrink-0 space-y-8 h-fit lg:sticky lg:top-24 hidden lg:block">
+        
+        {/* Recommended Creators Section */}
+        <section className="bg-base-200/30 rounded-[2.5rem] p-6 border border-base-content/5">
+          <div className="flex items-center justify-between mb-6 px-1">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] opacity-40">Who to follow</h2>
+            <Link to="/search" className="text-[10px] font-bold text-primary hover:underline">Discover More</Link>
           </div>
           
-          <FriendsSection 
-             friends={friends} 
-             loading={loadingFriends} 
-          />
-        </motion.div>
-
-        {/* === SECTION 3: RECOMMENDATIONS === */}
-        <motion.section
-           initial={{ opacity: 0 }}
-           whileInView={{ opacity: 1 }}
-           viewport={{ once: true, margin: "-100px" }}
-           className="relative"
-        >
-          {/* Subtle background glow for premium feel */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl h-64 bg-primary/5 blur-3xl rounded-full pointer-events-none -z-10" />
-
-          <div className="mb-8 px-2">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('meet_new')}</h2>
-                <p className="opacity-60 text-sm mt-3 font-medium">
-                  {t('discover_partners')}
-                </p>
-              </div>
-            </div>
+          <div className="space-y-3">
+             {loadingUsers ? (
+                [1,2,3].map(i => <div key={i} className="h-16 w-full bg-base-300 rounded-2xl animate-pulse" />)
+             ) : recommendedUsers.length > 0 ? (
+                recommendedUsers.slice(0, 5).map(user => (
+                   <RecommendedUserCard 
+                      key={user._id} 
+                      user={user} 
+                      hasRequestBeenSent={outgoingRequestsIds.has(user._id)} 
+                      onSendRequest={(id) => sendRequestMutation(id)}
+                      isPending={isPending}
+                   />
+                ))
+             ) : (
+                <p className="text-[10px] opacity-40 font-bold px-2 py-4">No suggestions in your region.</p>
+             )}
           </div>
+        </section>
 
-          <RecommendationsSection 
-             users={recommendedUsers} 
-             loading={loadingUsers} 
-             outgoingRequestsIds={outgoingRequestsIds} 
-             onSendRequest={handleSendRequest} 
-             isPending={isPending} 
-          />
-        </motion.section>
+        {/* Global Stats Matrix */}
+        <section className="bg-primary/5 rounded-[2.5rem] p-8 border border-primary/10 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="relative z-10 space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Your Status</h3>
+                    <TrendingUp className="size-4 text-primary opacity-40" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                        <p className="text-2xl font-black italic tracking-tighter">{friends.length}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-40">Strategic Peers</p>
+                    </div>
+                    <div className="space-y-1">
+                        <p className="text-2xl font-black italic tracking-tighter">{authUser?.streak || 0}</p>
+                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-40">Elite Streak</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-      </div>
-    </motion.div>
+        {/* Legal & Compliance Quick View */}
+        <div className="px-8 text-[10px] font-bold opacity-20 uppercase tracking-[0.1em] space-y-2">
+            <div className="flex gap-4">
+                <Link to="/about" className="hover:text-primary transition-colors">About</Link>
+                <Link to="/terms" className="hover:text-primary transition-colors">Privacy</Link>
+                <Link to="/refund-policy" className="hover:text-primary transition-colors">Terms</Link>
+            </div>
+            <p>© {new Date().getFullYear()} Zyro Social Edge</p>
+        </div>
+      </aside>
+
+    </div>
   );
 };
 

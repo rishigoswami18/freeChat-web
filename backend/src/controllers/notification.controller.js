@@ -90,9 +90,9 @@ export const broadcastSystemNotification = async (req, res) => {
 
                 // 2. ALSO: Send Native Push Notification via FCM
                 await sendPushNotification(targetId, {
-                    title: "BondBeyond Announcement 📢",
+                    title: "Zyro Announcement 📢",
                     body: message,
-                    icon: "https://www.bondbeyond.in/logo.png"
+                    icon: "https://www.Zyro.in/logo.png"
                 });
 
                 // NO need to hide for admin anymore, because the admin is NO LONGER a member of this specific channel!
@@ -223,7 +223,7 @@ export const notifyPendingActions = async (req, res) => {
                         title: "You have unread activity!",
                         body: `Hey <strong>${user.fullName.split(' ')[0]}</strong>, you have <strong>${unreadCount} unread messages</strong> and <strong>pending friend requests</strong> waiting for you! Log in now to catch up.`,
                         ctaText: "Open Inbox",
-                        ctaUrl: `${process.env.CLIENT_URL || "https://www.bondbeyond.in"}/inbox`
+                        ctaUrl: `${process.env.CLIENT_URL || "https://www.Zyro.in"}/inbox`
                     });
                     notifiedCount++;
                     // Rate limiting sleep to avoid SMTP pressure

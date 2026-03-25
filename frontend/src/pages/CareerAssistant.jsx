@@ -8,7 +8,7 @@ const CareerAssistant = () => {
     const features = {
         resume: {
             title: "AI Resume Architect",
-            desc: "Optimized for ATS systems using the BondBeyond AI Engine.",
+            desc: "Optimized for ATS systems using the Zyro AI Engine.",
             items: ["Keyword Optimization", "Format Cleanup", "Skill Gap Analysis"],
             icon: FileText,
             color: "text-blue-400"
@@ -72,7 +72,7 @@ const CareerAssistant = () => {
 
                         <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-[2rem] mt-12 shadow-2xl relative overflow-hidden group">
                            <Rocket className="absolute -bottom-6 -right-6 size-32 text-white/10 group-hover:rotate-12 transition-transform" />
-                           <h4 className="font-black text-xl mb-2 italic">BondBeyond Plus</h4>
+                           <h4 className="font-black text-xl mb-2 italic">Zyro Plus</h4>
                            <p className="text-sm font-bold text-white/70 mb-6">Unlock 10+ AI Career Tools and unlimited Mock Interviews.</p>
                            <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black shadow-lg">UPGRADE NOW</button>
                         </div>

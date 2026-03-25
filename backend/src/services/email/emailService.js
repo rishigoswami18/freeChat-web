@@ -14,7 +14,7 @@ export const EmailService = {
      * Send OTP for verification or reset
      */
     sendOTP: async (email, otp, type = "verification") => {
-        const subject = `${otp} is your BondBeyond ${type === 'verification' ? 'verification' : 'password reset'} code`;
+        const subject = `${otp} is your Zyro ${type === 'verification' ? 'verification' : 'password reset'} code`;
         const html = baseTemplate(generateOtpContent(otp, type), { title: type === 'verification' ? 'Verify' : 'Reset' });
         
         return await EmailDispatcher.dispatch({ 
@@ -35,7 +35,7 @@ export const EmailService = {
         
         return await EmailDispatcher.dispatch({
             to: email,
-            subject: `🎉 Welcome to BondBeyond, ${firstName}!`,
+            subject: `🎉 Welcome to Zyro, ${firstName}!`,
             html,
             type: "onboarding"
         });
