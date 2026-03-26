@@ -25,7 +25,7 @@ const DynamicSEO = ({ title, description, keywords, canonical, schema, ogImage }
         updateMeta("keywords", keywords);
         updateMeta("og:title", title, "property");
         updateMeta("og:description", description, "property");
-        updateMeta("og:image", ogImage || "https://www.freechatweb.in/og-image.png", "property");
+        updateMeta("og:image", ogImage || "https://www.zyro.social/og-image.png", "property");
         updateMeta("twitter:title", title);
         updateMeta("twitter:description", description);
 

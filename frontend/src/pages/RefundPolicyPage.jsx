@@ -53,7 +53,7 @@ const RefundPolicyPage = () => {
 
                 <div className="mt-20 p-10 bg-white/5 border border-white/10 rounded-[40px] text-center">
                     <p className="text-white/40 mb-4">Payment disputes? Email our support hub:</p>
-                    <a href="mailto:freechatweb00@gmail.com" className="text-xl font-bold text-white hover:text-amber-500 transition-colors">freechatweb00@gmail.com</a>
+                    <a href="mailto:official.zyro@gmail.com" className="text-xl font-bold text-white hover:text-amber-500 transition-colors">official.zyro@gmail.com</a>
                 </div>
             </div>
         </div>

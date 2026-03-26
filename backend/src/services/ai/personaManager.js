@@ -16,6 +16,7 @@ class PersonaProvider {
             ["bestfriend", "PEER_WIDGET"],
             ["doctor", "SUCCESS_COACH"],
             ["coach", "SUCCESS_COACH"],
+            ["relationship_coach", "SUCCESS_COACH"],
             ["personal_coach", "SUCCESS_COACH"],
             ["match_analyst", "ARENA_STRATEGIST"],
             ["strategist", "ARENA_STRATEGIST"],

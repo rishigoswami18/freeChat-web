@@ -15,7 +15,7 @@ export const AIGateway = {
     generate: async (options) => {
         const {
             provider = "gemini",
-            model = "gemini-2.0-flash",
+            model = "gemini-1.5-flash",
             messages = [],
             systemInstruction = "",
             safetySettings = [],
@@ -162,8 +162,8 @@ export const AIGateway = {
             console.warn(`⚠️ [Gemini] Candidate returned empty string. Raw candidate: ${JSON.stringify(candidate)}`);
             return "";
         } catch (fetchError) {
-            console.error(`❌ [Gemini Network/Abort Error]: ${fetchError.message}`);
-            return "";
+            console.error(`❌ [Gemini Pipeline Error]: ${fetchError.message}`);
+            throw fetchError; // Rethrow so the outer retry logic can catch it
         }
     },
 
@@ -176,6 +176,7 @@ export const AIGateway = {
             msg.includes("429") || // Rate Limit
             msg.includes("500") || // Server Error
             msg.includes("503") || // Service Unavailable
+            msg.includes("404") || // Model Not Found (allows fallback/version update)
             msg.includes("timeout") ||
             msg.includes("abort") ||
             msg.includes("deadline exceeded")

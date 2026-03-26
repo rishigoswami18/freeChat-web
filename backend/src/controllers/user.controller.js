@@ -372,7 +372,10 @@ export async function getUserProfile(req, res) {
 
 export async function getUserFriends(req, res) {
   try {
-    const { id } = req.params;
+    let { id } = req.params;
+    if (id === "[object Object]") {
+      id = req.user.id;
+    }
     const user = await User.findById(id);
 
     if (!user) return res.status(404).json({ message: "User not found" });
