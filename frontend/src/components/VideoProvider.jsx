@@ -112,7 +112,7 @@ const VideoProvider = ({ children }) => {
         return () => {
             isMounted = false;
         };
-    }, [userId, streamData, authUser, tokenProvider, videoClient, isInitializing]);
+    }, [userId, streamData, authUser, tokenProvider]);
 
     // Cleanup on complete auth loss
     useEffect(() => {

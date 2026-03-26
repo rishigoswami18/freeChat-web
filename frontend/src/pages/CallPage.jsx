@@ -47,6 +47,13 @@ const formatTime = (secs) => {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 };
 
+// Helper to safely check remote participants on a call instance
+const remoteParticipantsEmpty = (callInstance) => {
+  try {
+    return (callInstance.state.remoteParticipants?.length ?? 0) === 0;
+  } catch { return true; }
+};
+
 const CallPage = () => {
   const { id: callId } = useParams();
   const location = useLocation();
@@ -76,39 +83,48 @@ const CallPage = () => {
       console.log("🔌 [CallPage] Initializing WebRTC session:", callId);
       setIsConnecting(true);
 
-      // Security timeout: If call doesn't connect in 15s, bail out
+      // Security timeout: If call doesn't connect in 25s, bail out
       timeoutId = setTimeout(() => {
-          if (isMounted && !call) {
+          if (isMounted) {
               console.warn("⏱️ [CallPage] Connection timed out.");
               toast.error("Connection timed out. Please try again.");
               navigate("/");
           }
-      }, 15000);
+      }, 25000);
 
       try {
         const callInstance = videoClient.call("default", callId);
         
-        console.log("📡 [CallPage] Syncing call state...");
-        await callInstance.getOrCreate().catch(err => {
-            console.warn("Retrying call sync...", err.message);
-            return callInstance.getOrCreate(); // One retry
-        });
+        // Fetch existing call state — DO NOT use getOrCreate() here
+        // because the caller already created the call in ChatHeader.
+        // Using get() simply fetches current state without side-effects.
+        console.log("📡 [CallPage] Fetching call state...");
+        try {
+          await callInstance.get();
+        } catch (fetchErr) {
+          console.warn("📡 [CallPage] get() failed, falling back to getOrCreate:", fetchErr.message);
+          await callInstance.getOrCreate();
+        }
 
         const state = callInstance.state.callingState;
         console.log("📊 [CallPage] Calling State:", state);
 
         if (state === CallingState.RINGING) {
-           console.log("🔔 [CallPage] Accepting incoming call...");
+           // CALLEE: join() automatically accepts ringing calls (per SDK docs)
+           console.log("🔔 [CallPage] Joining incoming ringing call...");
            if (window.AndroidBridge?.vibrate) window.AndroidBridge.vibrate(50);
-           await callInstance.accept();
+           await callInstance.join();
+        } else if (state === CallingState.JOINED) {
+           // Already joined (e.g., page refresh), skip join
+           console.log("📤 [CallPage] Already in call, skipping join.");
         } else {
-           console.log("📤 [CallPage] Joining outgoing call...");
-           if (callInstance.state.remoteParticipants.length === 0) {
+           // CALLER: Join the call we already created via ChatHeader
+           console.log("📤 [CallPage] Joining call...");
+           if (remoteParticipantsEmpty(callInstance)) {
               safePlayAudio(ringbackTone);
            }
+           await callInstance.join({ create: true });
         }
-
-        await callInstance.join({ create: true });
 
         if (isAudioCall) {
           await callInstance.camera.disable().catch(() => {});
@@ -144,10 +160,6 @@ const CallPage = () => {
       clearTimeout(timeoutId);
       safeStopAudio(ringbackTone);
       if (wakeLock) wakeLock.release().catch(() => {});
-      // Note: we don't call leave() here as it might be handled by the End Call button 
-      // or we want the user to be able to stay in the call if they just navigate briefly.
-      // But usually, CallPage unmount = call end in this UX.
-      // However, Stream Video hooks handle some of this.
     };
   }, [videoClient, callId, navigate, isAudioCall]);
 
