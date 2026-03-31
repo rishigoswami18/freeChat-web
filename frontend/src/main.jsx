@@ -11,7 +11,7 @@ import "./index.css";
 import "./i18n";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
-import { MatchProvider } from "./context/MatchContext.jsx";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
@@ -56,9 +56,7 @@ try {
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <MatchProvider>
               <App />
-            </MatchProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </BrowserRouter>
