@@ -11,13 +11,13 @@ import HeroSection from "../components/landing/HeroSection";
 import StatsSection from "../components/landing/StatsSection";
 import FooterSection from "../components/landing/FooterSection";
 
-// Lazy loaded below the fold
-const FeaturesSection = React.lazy(() => import("../components/landing/FeaturesSection"));
-const WhySection = React.lazy(() => import("../components/landing/WhySection"));
-const InsightsSection = React.lazy(() => import("../components/landing/InsightsSection"));
-const DownloadSection = React.lazy(() => import("../components/landing/DownloadSection"));
-const PricingSection = React.lazy(() => import("../components/landing/PricingSection"));
-const CTASection = React.lazy(() => import("../components/landing/CTASection"));
+// Eagerly loaded to ensure Google AdSense crawler can index the content
+import FeaturesSection from "../components/landing/FeaturesSection";
+import WhySection from "../components/landing/WhySection";
+import InsightsSection from "../components/landing/InsightsSection";
+import DownloadSection from "../components/landing/DownloadSection";
+import PricingSection from "../components/landing/PricingSection";
+import CTASection from "../components/landing/CTASection";
 
 const LandingPage = () => {
     const { t } = useTranslation();
@@ -109,8 +109,8 @@ const LandingPage = () => {
             <HeroSection handleDownload={handleDownload} />
             <StatsSection totalDownloads={totalDownloads} />
 
-            {/* ===== LAZY LOADED BLOCKS TO BOOST CRITICAL FRAME RENDER ===== */}
-            <Suspense fallback={<div className="min-h-[200px] flex items-center justify-center bg-base-100 opacity-50 animated-pulse" />}>
+            {/* ===== CORE CONTENT BLOCKS (Eagerly rendered for AdSense indexing) ===== */}
+            <div className="landing-content">
                 <section className="py-20 sm:py-28 text-center max-w-3xl mx-auto container px-4">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">{t('what_is')}</h2>
                     <p className="text-lg opacity-70 leading-relaxed mt-6">
@@ -140,7 +140,7 @@ const LandingPage = () => {
                 <DownloadSection latestApk={latestApk} handleDownload={handleDownload} />
                 <PricingSection />
                 <CTASection />
-            </Suspense>
+            </div>
 
             {/* ===== FOOTER ===== */}
             <FooterSection handleDownload={handleDownload} />
