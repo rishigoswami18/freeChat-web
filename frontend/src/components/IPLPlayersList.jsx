@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Search, DollarSign, Award, ChevronDown, ChevronUp, Star, Shield, Zap } from "lucide-react";
 import { getIplSquads } from "../lib/api";

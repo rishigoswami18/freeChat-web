@@ -19,6 +19,7 @@ import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import FriendCard, { getLanguageFlag } from "../components/FriendCard";
 import PostsFeed from "../components/PostsFeed";
 import CreatePost from "../components/CreatePost";
+import FeedStories from "../components/feed/FeedStories";
 
 // --- ANIMATION VARIANTS ---
 const containerVariants = {
@@ -170,6 +171,9 @@ const HomePage = () => {
             </p>
           </div>
         </div>
+
+        {/* Stories */}
+        <FeedStories />
 
         {/* Create Post Module */}
         <CreatePost onPost={handleNewPost} authUser={authUser} />

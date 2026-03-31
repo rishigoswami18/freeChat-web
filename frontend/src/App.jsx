@@ -52,6 +52,7 @@ const AntigravityEnginePage = React.lazy(() => import("./pages/AntigravityEngine
 const LiveArena = React.lazy(() => import("./pages/LiveArena.jsx"));
 const DesiArena = React.lazy(() => import("./pages/DesiArena.jsx"));
 const AIFaceCallPage = React.lazy(() => import("./pages/AIFaceCallPage.jsx"));
+const IPLProArena = React.lazy(() => import("./pages/IPLProArena.jsx"));
 
 // SEO Domination Pages
 const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
@@ -635,6 +636,19 @@ const App = () => {
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
                           <IplDashboard />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+
+                  <Route
+                    path="/ipl-pro"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
+                          <IPLProArena />
                         </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

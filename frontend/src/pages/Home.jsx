@@ -122,7 +122,7 @@ const HeroArenaWidget = ({ matchData, upcomingMatches, isMatchToday }) => {
                             <div className={`size-2 rounded-full bg-white ${isLive ? "animate-ping" : ""}`} />                            {isLive ? "LIVE ARENA" : "FEATURED ARENA"}
                         </div>
                         <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.4em] ml-1">
-                            {matchData.seriesName || "Global Cricket Hub"}
+                            {matchData?.seriesName || "Global Cricket Hub"}
                         </p>
                     </div>
 

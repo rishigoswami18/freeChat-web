@@ -127,7 +127,7 @@ const IplHome = () => {
           {/* Main Visual Content */}
           <div className="flex flex-col md:flex-row items-center justify-between w-full gap-12 mt-8">
             <div className="flex-1 space-y-8">
-              {!isSeasonStarted || !match || !match._id ? (
+              {(!isSeasonStarted && match?.status !== 'live') || !match || !match._id ? (
                 <div className="space-y-8">
                   <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4">
                     {[
@@ -170,13 +170,16 @@ const IplHome = () => {
             </div>
 
             {/* Action Card */}
-            <div className="w-full md:w-[350px] bg-white text-black rounded-[32px] md:rounded-[40px] p-6 md:p-10 flex flex-col justify-between min-h-[250px] md:min-h-[300px] shadow-[0_15px_40px_rgba(255,255,255,0.1)] group hover:scale-[1.02] transition-transform cursor-pointer">
+            <div 
+              onClick={() => navigate('/ipl-pro')}
+              className="w-full md:w-[350px] bg-white text-black rounded-[32px] md:rounded-[40px] p-6 md:p-10 flex flex-col justify-between min-h-[250px] md:min-h-[300px] shadow-[0_15px_40px_rgba(255,255,255,0.1)] group hover:scale-[1.02] transition-transform cursor-pointer"
+            >
               <div className="space-y-4">
                 <div className="size-16 rounded-2xl bg-black/5 flex items-center justify-center">
                   <Zap className="size-8 fill-black" />
                 </div>
                 <h4 className="text-3xl font-black italic tracking-tighter leading-tight">
-                  {isSeasonStarted ? 'Enter the Live Arena Now' : 'Join the IPL Elite List'}
+                  {match?.status === 'live' || isSeasonStarted ? 'Enter the Live Arena Now' : 'Join the IPL Elite List'}
                 </h4>
                 <p className="text-[10px] font-bold text-black/50 uppercase tracking-widest leading-relaxed">
                   Earn double Bond Coins during the opening weekend festivities.
@@ -184,7 +187,7 @@ const IplHome = () => {
               </div>
               
               <button className="w-full py-5 bg-black text-white rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all">
-                {isSeasonStarted ? 'START PREDICTING' : 'SECURE ACCESS'} <ChevronRight className="size-4" />
+                {match?.status === 'live' || isSeasonStarted ? 'START PREDICTING' : 'SECURE ACCESS'} <ChevronRight className="size-4" />
               </button>
             </div>
           </div>

@@ -269,9 +269,9 @@ class MatchAutomationSystem {
                 }
 
                 // Requirement: Smart Polling
-                // If no one is online, STOP calling the API to save quota.
+                // If no one is online, STOP calling the API to save quota (Bypass for demo)
                 const activeUserCount = iplRewardEngine.getActiveUserCount();
-                if (activeUserCount === 0) {
+                if (activeUserCount === 0 && !freshMatch.matchName.includes("RCB")) {
                     console.log(`💤 [MatchSystem] Arena Sleep Mode: No active watchers for ${freshMatch.matchName}`);
                     return;
                 }

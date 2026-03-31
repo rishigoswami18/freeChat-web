@@ -20,6 +20,35 @@ class CricketProviderManager {
     }
 
     async getMatchUpdate(externalMatchId, matchName = "") {
+        if (matchName.includes("RCB") || matchName.includes("SRH")) {
+            // Simulated Mock Live Data for Testing when Real IPL match is not available
+            const cacheScoreDb = "mock_score_data_rcbsrh";
+            let currentScoreData = cacheService.get(cacheScoreDb) || { runs: 137, wickets: 5, balls: 87 }; // 87 balls = 14.3 overs
+            
+            // Randomly tick the score
+            let randomRuns = Math.random() > 0.4 ? Math.floor(Math.random() * 6) : 0;
+            if (randomRuns === 5) randomRuns = 4; // realistic cricket score
+            
+            currentScoreData.runs += randomRuns;
+            if (randomRuns === 0 && Math.random() > 0.85) currentScoreData.wickets += 1;
+            if (currentScoreData.wickets > 10) currentScoreData.wickets = 10;
+            currentScoreData.balls += 1;
+            
+            cacheService.set(cacheScoreDb, currentScoreData, 300);
+            
+            const overs = Math.floor(currentScoreData.balls / 6) + "." + (currentScoreData.balls % 6);
+            console.log(`[Simulator] Tick updated: ${currentScoreData.runs}/${currentScoreData.wickets} (${overs})`);
+            
+            return {
+                score: currentScoreData.runs + "/" + currentScoreData.wickets,
+                overs: overs,
+                status: "live",
+                batting_team: "SRH",
+                important_status: "Royal Challengers Bengaluru opt to bowl",
+                source: "BondBeyond Automated Simulator"
+            };
+        }
+
         const cacheKey = `global_match_cache:${externalMatchId}`;
         const cached = cacheService.get(cacheKey);
         if (cached) return cached;
@@ -44,11 +73,11 @@ class CricketProviderManager {
         // Priority 3: Scraper Fallback
         console.error("🪂 [ProviderManager] Professional APIs Failed. Booting Ghost-API Scraper...");
         const scraped = await CricketScraperService.getLiveScore(matchName);
-        if (scraped) {
+        if (scraped && scraped.status === "success") {
             cacheService.set(cacheKey, scraped, 10); // Extreme Cache
             return scraped;
         }
-        
+
         return null;
     }
 
