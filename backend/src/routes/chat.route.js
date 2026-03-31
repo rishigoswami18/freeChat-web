@@ -15,7 +15,7 @@ import { sendNotificationEmail } from "../lib/email.service.js";
 import { sendPushNotification } from "../lib/push.service.js";
 import { streamClient } from "../lib/stream.js";
 import { getAIResponse } from "../lib/gemini.js";
-import { MatchIntelligence } from "../services/ai/matchIntelligence.js";
+
 import { TopMediaiService } from "../services/ai/topMediai.js";
 import RealtimeAvatar from "../services/ai/realtimeAvatar.js";
 
@@ -110,89 +110,6 @@ router.post("/ai-face-call", protectRoute, async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════════════════
-//  EXPERT EYE — Screenshot/Image Analysis
-// ═══════════════════════════════════════════════════
-router.post("/analyze-screenshot", protectRoute, async (req, res) => {
-  try {
-    const { image, mimeType, context } = req.body;
-
-    if (!image) {
-      return res.status(400).json({ message: "Image data is required" });
-    }
-
-    console.log(`👁️ [Expert Eye] ${req.user.fullName} sent screenshot for analysis`);
-
-    // Extract base64 data (handle data URIs)
-    const base64Data = image.includes(",") ? image.split(",")[1] : image;
-    const resolvedMime = mimeType || (image.startsWith("data:") ? image.split(";")[0].split(":")[1] : "image/jpeg");
-
-    const analysis = await MatchIntelligence.analyzeScreenshot({
-      imageBase64: base64Data,
-      mimeType: resolvedMime,
-      userName: req.user.fullName,
-      context
-    });
-
-    res.status(200).json({ analysis });
-  } catch (error) {
-    console.error("❌ [Expert Eye] Analysis Error:", error.message);
-    res.status(500).json({ message: "Analysis failed. Try again." });
-  }
-});
-
-// ═══════════════════════════════════════════════════
-//  MATCH RECAP — Post-match War Room Summary
-// ═══════════════════════════════════════════════════
-router.post("/match-recap", protectRoute, async (req, res) => {
-  try {
-    const { matchName, predictions, chatHighlights, finalScore } = req.body;
-
-    if (!matchName) {
-      return res.status(400).json({ message: "Match name is required" });
-    }
-
-    console.log(`📊 [Match Recap] Generating for ${req.user.fullName}: ${matchName}`);
-
-    const recap = await MatchIntelligence.generateMatchRecap({
-      matchName,
-      userPredictions: predictions || [],
-      chatHighlights: chatHighlights || [],
-      finalScore: finalScore || "Not available",
-      userName: req.user.fullName
-    });
-
-    res.status(200).json({ recap });
-  } catch (error) {
-    console.error("❌ [Match Recap] Error:", error.message);
-    res.status(500).json({ message: "Recap generation failed" });
-  }
-});
-
-// ═══════════════════════════════════════════════════
-//  GLOBAL STADIUM — AI-Powered Translation
-// ═══════════════════════════════════════════════════
-router.post("/ai-translate", protectRoute, async (req, res) => {
-  try {
-    const { text, targetLang } = req.body;
-
-    if (!text || !targetLang) {
-      return res.status(400).json({ message: "Text and target language required" });
-    }
-
-    console.log(`🌍 [Global Stadium] Translating to ${targetLang}: "${text.substring(0, 40)}..."`);
-
-    const translated = await MatchIntelligence.translateMessage({
-      text,
-      targetLang
-    });
-
-    res.status(200).json({ translatedText: translated });
-  } catch (error) {
-    console.error("❌ [Translation] Error:", error.message);
-    res.status(500).json({ message: "Translation failed" });
-  }
-});
 
 // DIAGNOSTIC routes (run these in browser to check connection status)
 router.get("/test-ml", testMLConnection);
@@ -399,26 +316,6 @@ router.post("/sense-emotion", protectRoute, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-router.post("/voice-transcribe", protectRoute, async (req, res) => {
-  try {
-    const { audioBase64, mimeType = "audio/webm" } = req.body;
-    if (!audioBase64) return res.status(400).json({ message: "Audio data is required" });
-
-    console.log(`🎤 [Voice Transcribe] ${req.user.fullName} sent audio segment (${Math.round(audioBase64.length/1024)} KB)`);
-
-    const transcription = await MatchIntelligence.transcribeAudio({
-      audioBase64,
-      mimeType,
-      userName: req.user.fullName
-    });
-
-    console.log(`📝 [Transcribed] "${transcription.substring(0, 40)}..."`);
-    res.status(200).json({ text: transcription });
-  } catch (error) {
-    console.error("❌ [Voice Transcribe] Error:", error.message);
-    res.status(500).json({ message: "Transcription failed" });
-  }
-});
 
 router.post("/voice-generate", protectRoute, async (req, res) => {
   try {

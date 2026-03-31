@@ -41,7 +41,6 @@ const GlobalFooter = () => {
                     <h3 className="text-[10px] font-black uppercase text-amber-500 tracking-[0.3em]">Network</h3>
                     <ul className="space-y-4">
                         <li><a href="/dashboard" className="text-sm font-bold text-white/40 hover:text-white transition-colors">Dashboard</a></li>
-                        <li><a href="/ipl-arena" className="text-sm font-bold text-white/40 hover:text-white transition-colors">IPL Arena</a></li>
                         <li><a href="/feed" className="text-sm font-bold text-white/40 hover:text-white transition-colors">FanPulse Feed</a></li>
                         <li><a href="/wallet" className="text-sm font-bold text-white/40 hover:text-white transition-colors">Earnings Vault</a></li>
                         <li><a href="/about" className="text-sm font-bold text-white/40 hover:text-white transition-colors">About Story</a></li>
@@ -86,23 +85,13 @@ const GlobalFooter = () => {
 
             {/* Compliance & Address Section */}
             <div className="max-w-7xl mx-auto mt-20 grid grid-cols-1 lg:grid-cols-3 gap-12 pt-12 border-t border-white/5">
-                <div className="space-y-4">
+                <div className="space-y-4 lg:col-span-3 text-center md:text-left">
                     <p className="text-[10px] uppercase font-black tracking-widest text-white/20">Registered Office</p>
                     <p className="text-xs font-bold text-white/40 leading-relaxed italic">
                         Zyro Tech Solutions,<br />
                         3rd Floor, Silicon Valley Wing,<br />
                         Lovely Professional University, Phagwara,<br />
                         Punjab, India - 144411
-                    </p>
-                </div>
-                <div className="lg:col-span-2 p-6 bg-white/5 border border-white/5 rounded-[2rem]">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-3 flex items-center gap-2">
-                        <ShieldCheck className="size-3" /> Responsible Gaming Awareness
-                    </h4>
-                    <p className="text-[11px] font-bold text-white/30 leading-relaxed">
-                        Zyro is a "Game of Skill" where winning depends on your analytical prowess and sports knowledge. 
-                        Fantasy sports involve an element of financial risk and may be addictive. Please play responsibly and at your own risk. 
-                        Participation is prohibited for users under 18 years of age or residents of restricted Indian states.
                     </p>
                 </div>
             </div>

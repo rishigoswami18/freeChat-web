@@ -494,7 +494,7 @@ const AIFaceCallPage = () => {
     sessionStatusRef.current = "speaking";
     setAiSubtitle(text);
 
-    const useBrowserFallback = () => {
+    const fallbackToBrowserTTS = () => {
         console.log("🔊 ElevenLabs Failed. Falling back to Browser TTS...");
         const synth = window.speechSynthesis;
         synth.cancel();
@@ -531,7 +531,7 @@ const AIFaceCallPage = () => {
         const response = await axiosInstance.post("/chat/voice-generate", { text, aiType }, { responseType: 'blob' });
         
         if (response.status === 202 || response.data.type === "application/json") {
-            useBrowserFallback();
+            fallbackToBrowserTTS();
             return;
         }
 
@@ -557,15 +557,13 @@ const AIFaceCallPage = () => {
         };
 
         audio.onerror = (e) => {
-            console.error("❌ Audio Object Error:", e);
-            URL.revokeObjectURL(audioUrl);
-            useBrowserFallback();
+            fallbackToBrowserTTS();
         };
 
         await audio.play();
     } catch (err) {
         console.warn("⚠️ TopMediai Dispatch Error:", err.message);
-        useBrowserFallback();
+        fallbackToBrowserTTS();
     }
   }, [aiType]);
 

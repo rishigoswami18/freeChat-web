@@ -1,7 +1,6 @@
 import Match from "../models/Match.js";
 import WithdrawalRequest from "../models/WithdrawalRequest.js";
 import UserWallet from "../models/UserWallet.js";
-import iplRewardEngine from "../services/iplRewardEngine.js";
 import TransactionHistory from "../models/TransactionHistory.js";
 import User from "../models/User.js";
 
@@ -32,29 +31,6 @@ export const updateMatchStatus = async (req, res) => {
         const { status, isPredictionsEnabled } = req.body;
         const match = await Match.findByIdAndUpdate(id, { status, isPredictionsEnabled }, { new: true });
         res.status(200).json({ success: true, match });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-/**
- * Resolution Engine Trigger
- */
-export const resolveMatchBall = async (req, res) => {
-    const { matchId, correctOutcome, ballId } = req.body;
-    try {
-        // 1. Resolve bets via Engine
-        await iplRewardEngine.resolveOutcome(matchId, ballId, correctOutcome);
-        
-        // 2. Broadcast the 'Score Blast' update to all users
-        await iplRewardEngine.scoreBlast(matchId, {
-            lastBallResult: correctOutcome,
-            isBallStarting: false,
-            specialEvent: correctOutcome === "WICKET" ? "WICKET" : null,
-            blastMessage: correctOutcome === "6" ? "MAXIMUM! 🚀" : ""
-        });
-
-        res.status(200).json({ success: true, message: "Outcome resolved and coins distributed." });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -122,7 +98,7 @@ export const getFinancialStats = async (req, res) => {
             { $group: { _id: null, total: { $sum: "$winnings" } } }
         ]);
 
-        const activeUsersCount = iplRewardEngine.io ? iplRewardEngine.io.engine.clientsCount : 0;
+        const activeUsersCount = 0;
 
         res.status(200).json({
             activeUsers: activeUsersCount,

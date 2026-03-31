@@ -5,9 +5,6 @@ import validateEnv from "./config/env.js";
 import { connectDB } from "./lib/db.js";
 import { seedQuestions } from "./controllers/bond.controller.js";
 import { startWorkers } from "./workers/workerManager.js";
-import iplRewardEngine from "./services/iplRewardEngine.js";
-import liveScoreService from "./services/LiveScoreService.js";
-import matchAutomationSystem from "./services/MatchAutomationSystem.js";
 
 /**
  * Server Bootstrap
@@ -32,15 +29,9 @@ const bootstrap = async () => {
         // 5. Create HTTP Server for Socket.io
         const server = http.createServer(app);
 
-        // 6. Initialize Real-time Engines
-        iplRewardEngine.init(server);
-        liveScoreService.start();
-        matchAutomationSystem.init();
-
-        // 7. Start Listening
+        // 6. Start Listening
         server.listen(PORT, () => {
             console.log(`🚀 [Server] Zyro API Gateway running on port ${PORT}`);
-            console.log(`📡 [Real-time] IPL Reward Engine Primed.`);
         });
 
     } catch (error) {

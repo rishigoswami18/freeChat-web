@@ -1,7 +1,7 @@
 import React from "react";
 import DynamicSEO from "../components/DynamicSEO";
 import { Link } from "react-router-dom";
-import { Zap, ShieldCheck, Globe, Cpu, Users, EyeOff } from "lucide-react";
+import { Zap, ShieldCheck, Globe, Cpu, Users, EyeOff, Bot } from "lucide-react";
 
 const FutureSocialSEOPage = () => {
     return (

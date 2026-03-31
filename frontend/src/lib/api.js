@@ -610,13 +610,4 @@ export const getFinancialStats = async () => {
     return response.data;
 };
 
-// ----------------- IPL ARENA -----------------
-export const getUpcomingMatches = async () => {
-    const response = await axiosInstance.get("/ipl/upcoming");
-    return response.data;
-};
 
-export const getIplSquads = async () => {
-    const response = await axiosInstance.get("/ipl/squads");
-    return response.data;
-};

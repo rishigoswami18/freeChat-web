@@ -3,7 +3,7 @@ import useAuthUser from '../hooks/useAuthUser';
 
 // === DEV WARNINGS ===
 const checkProps = (slot) => {
-    if (process.env.NODE_ENV !== 'production' && !slot) {
+    if (import.meta.env.MODE !== 'production' && !slot) {
         console.warn('AdSense Component Error: Missing required `slot` prop. Ad will fail to load.');
     }
 };

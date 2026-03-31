@@ -71,7 +71,7 @@ const LoginScreen = () => {
 export const Web3AuthWrapper = ({ children }) => {
     return (
         <PrivyProvider
-            appId={process.env.VITE_PRIVY_APP_ID || "insert_app_id"}
+            appId={import.meta.env.VITE_PRIVY_APP_ID || "insert_app_id"}
             config={{
                 loginMethods: ['email', 'wallet', 'google', 'apple'],
                 appearance: {

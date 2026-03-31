@@ -41,18 +41,12 @@ const GemShopPage = React.lazy(() => import("./pages/GemShopPage.jsx"));
 const CommunityPage = React.lazy(() => import("./pages/CommunityPage.jsx"));
 const CommunityDetailsPage = React.lazy(() => import("./pages/CommunityDetailsPage.jsx"));
 const CreatorCenterPage = React.lazy(() => import("./pages/CreatorCenterPage.jsx"));
-const IplDashboard = React.lazy(() => import("./pages/IplDashboard.jsx"));
-const Home = React.lazy(() => import("./pages/Home.jsx"));
 const HomePage = React.lazy(() => import("./pages/HomePage.jsx"));
 const EarningsWallet = React.lazy(() => import("./pages/EarningsWallet.jsx"));
-const IplHomeDashboard = React.lazy(() => import("./pages/IplHomeDashboard.jsx"));
 const CareerAssistant = React.lazy(() => import("./pages/CareerAssistant.jsx"));
 const KYCVerification = React.lazy(() => import("./pages/KYCVerification.jsx"));
 const AntigravityEnginePage = React.lazy(() => import("./pages/AntigravityEnginePage.jsx"));
-const LiveArena = React.lazy(() => import("./pages/LiveArena.jsx"));
-const DesiArena = React.lazy(() => import("./pages/DesiArena.jsx"));
 const AIFaceCallPage = React.lazy(() => import("./pages/AIFaceCallPage.jsx"));
-const IPLProArena = React.lazy(() => import("./pages/IPLProArena.jsx"));
 
 // SEO Domination Pages
 const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
@@ -238,18 +232,6 @@ const App = () => {
                         <Navigate to="/onboarding" />
                       ) : (
                         <LandingPage />
-                      )
-                    }
-                  />
-                  <Route
-                    path="/arena"
-                    element={
-                      isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true} isFluid={true}>
-                          <Home />
-                        </Layout>
-                      ) : (
-                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
                       )
                     }
                   />
@@ -598,57 +580,6 @@ const App = () => {
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={true} isFluid={true}>
                           <CreatorCenterPage />
-                        </Layout>
-                      ) : (
-                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                      )
-                    }
-                  />
-
-                  <Route
-                    path="/ipl-arena"
-                    element={
-                      isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true} isFluid={true}>
-                          <IplDashboard />
-                        </Layout>
-                      ) : (
-                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                      )
-                    }
-                  />
-
-                  <Route
-                    path="/live-arena"
-                    element={
-                      isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true} isFluid={true} showRightSidebar={false}>
-                          <LiveArena />
-                        </Layout>
-                      ) : (
-                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                      )
-                    }
-                  />
-                  <Route
-                    path="/ipl-dashboard"
-                    element={
-                      isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
-                          <IplDashboard />
-                        </Layout>
-                      ) : (
-                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
-                      )
-                    }
-                  />
-
-                  <Route
-                    path="/ipl-pro"
-                    element={
-                      isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={false} isFluid={true} showRightSidebar={false} showNavbar={false} showFooter={false}>
-                          <IPLProArena />
                         </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

@@ -130,7 +130,6 @@ const MobileDrawer = memo(() => {
   const dynamicNavItems = useMemo(() => {
     const baseItems = [
       { to: "/", icon: Home, labelKey: "Home" },
-      { to: "/ipl-dashboard", icon: Zap, label: "IPL Exclusive", isSacred: true },
       { to: "/feed", icon: Newspaper, labelKey: "feed" },
       { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
       { to: "/friends", icon: Users, label: "Community" },

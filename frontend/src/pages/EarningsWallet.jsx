@@ -271,7 +271,7 @@ const EarningsWallet = () => {
                     
                     <div className="space-y-4 relative z-10 text-center md:text-left">
                         <div className="px-3 py-1 bg-black/20 backdrop-blur-xl rounded-full text-[9px] font-black tracking-widest inline-block">SEASON PASS</div>
-                        <h3 className="text-4xl font-black italic tracking-tighter leading-tight">Master the IPL Season<br/>with Pro Pass</h3>
+                        <h3 className="text-4xl font-black italic tracking-tighter leading-tight">Master the Exclusive Season<br/>with Pro Pass</h3>
                         <p className="text-sm font-bold text-white/50 max-w-md">Unlimited predictions, 2X Coin rewards, and exclusive early access to Arena events.</p>
                     </div>
 

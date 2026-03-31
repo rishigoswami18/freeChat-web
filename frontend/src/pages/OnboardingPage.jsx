@@ -7,19 +7,6 @@ import useAuthUser from "../hooks/useAuthUser";
 import { Trophy, User, MapPin, ChevronRight, CheckCircle, Zap } from "lucide-react";
 import Logo from "../components/Logo";
 
-const IPL_TEAMS = [
-  { id: "CSK", name: "Chennai Super Kings", color: "#FDB913", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/CHH/Logos/LogoLight/CSK.png" },
-  { id: "RCB", name: "Royal Challengers Bengaluru", color: "#D11D26", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/RCB/Logos/LogoLight/RCB.png" },
-  { id: "MI", name: "Mumbai Indians", color: "#004BA0", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/MI/Logos/LogoLight/MI.png" },
-  { id: "GT", name: "Gujarat Titans", color: "#1B2133", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/GT/Logos/LogoLight/GT.png" },
-  { id: "LSG", name: "Lucknow Super Giants", color: "#0057E2", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/LSG/Logos/LogoLight/LSG.png" },
-  { id: "RR", name: "Rajasthan Royals", color: "#EA1A85", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/RR/Logos/LogoLight/RR.png" },
-  { id: "DC", name: "Delhi Capitals", color: "#0078BC", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/DC/Logos/LogoLight/DC.png" },
-  { id: "PBKS", name: "Punjab Kings", color: "#D31D24", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/PBKS/Logos/LogoLight/PBKS.png" },
-  { id: "KKR", name: "Kolkata Knight Riders", color: "#3A225D", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/KKR/Logos/LogoLight/KKR.png" },
-  { id: "SRH", name: "Sunrisers Hyderabad", color: "#FF822A", logo: "https://bcciplayerimages.s3.ap-south-1.amazonaws.com/ipl/SRH/Logos/LogoLight/SRH.png" },
-];
-
 const STATE_CITY_DATA = {
   "Punjab": ["Jalandhar", "Ludhiana", "Amritsar", "Patiala", "Mohali"],
   "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane"],
@@ -32,17 +19,16 @@ const STATE_CITY_DATA = {
 const OnboardingPage = () => {
   const { authUser } = useAuthUser();
   const queryClient = useQueryClient();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(2);
   
   const [formState, setFormState] = useState(() => {
     const saved = localStorage.getItem("Zyro_onboarding_draft");
     const defaultData = {
       fullName: authUser?.fullName || "",
-      favTeam: "NONE",
       gender: "NONE",
       state: "",
       city: "",
-      bio: "I'm a die-hard IPL fan!",
+      bio: "I'm ready to dominate!",
       nativeLanguage: "hindi",
       learningLanguage: "english",
       location: "",
@@ -67,18 +53,6 @@ const OnboardingPage = () => {
     },
   });
 
-  const updateTheme = (color) => {
-    document.documentElement.style.setProperty("--primary-color", color);
-  };
-
-  const handleTeamSelect = (teamId, color) => {
-    setFormState({ ...formState, favTeam: teamId });
-    updateTheme(color);
-    setTimeout(() => setStep(2), 600);
-  };
-
-  const nextStep = () => setStep(step + 1);
-  const prevStep = () => setStep(step - 1);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -92,76 +66,9 @@ const OnboardingPage = () => {
     <div className="min-h-screen bg-[#0a0c14] text-white flex flex-col font-outfit overflow-hidden relative">
       <div className="absolute inset-0 bg-primary/5 blur-[120px] pointer-events-none" />
 
-      {/* Cricket Pitch Progress Bar */}
-      <div className="w-full h-3 bg-[#13331d] relative overflow-hidden">
-        {/* Pitch markings */}
-        <div className="absolute inset-0 flex justify-between px-12 pointer-events-none opacity-40">
-          <div className="h-full w-1 bg-white" />
-          <div className="h-full w-1 bg-white" />
-          <div className="absolute left-1/2 -translate-x-1/2 h-full w-1 bg-white" />
-        </div>
-        
-        {/* Grass texture effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-green-900/20 via-transparent to-green-900/20" />
-
-        <motion.div 
-          className="h-full bg-primary relative shadow-[0_0_30px_rgba(34,197,94,0.3)]" 
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-        >
-          <motion.div 
-            className="absolute -right-6 -top-5 text-3xl filter drop-shadow-lg"
-            animate={{ 
-              x: [0, 4, 0],
-              y: [0, -2, 0]
-            }}
-            transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut" }}
-          >
-            🏏
-          </motion.div>
-        </motion.div>
-      </div>
-
       <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 relative z-10">
         <div className="max-w-4xl w-full">
           <AnimatePresence mode="wait">
-            {step === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ x: 300, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -300, opacity: 0 }}
-                className="space-y-8"
-              >
-                <div className="text-center space-y-2">
-                  <h1 className="text-5xl font-black italic tracking-tighter">PICK YOUR WARRIORS ⚔️</h1>
-                  <p className="text-white/40 uppercase tracking-widest text-sm font-bold">Select your favorite IPL team</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {IPL_TEAMS.map((team) => (
-                    <motion.button
-                      key={team.id}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleTeamSelect(team.id, team.color)}
-                      className={`relative aspect-square rounded-[32px] p-6 flex flex-col items-center justify-center gap-4 transition-all border ${
-                        formState.favTeam === team.id 
-                        ? "bg-primary border-white" 
-                        : "bg-white/5 border-white/10 hover:border-white/30 backdrop-blur-xl"
-                      }`}
-                    >
-                      <img src={team.logo} alt={team.id} className="w-full h-full object-contain" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-center">{team.id}</span>
-                      {formState.favTeam === team.id && (
-                        <CheckCircle className="absolute top-4 right-4 size-5 text-white" />
-                      )}
-                    </motion.button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
             {step === 2 && (
               <motion.div
                 key="step2"
@@ -249,18 +156,11 @@ const OnboardingPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
-                    <button 
-                      type="button"
-                      onClick={prevStep}
-                      className="px-8 bg-white/5 hover:bg-white/10 rounded-2xl font-black uppercase text-xs"
-                    >
-                      Back
-                    </button>
+                  <div className="w-full">
                     <button 
                       type="submit"
                       disabled={isPending}
-                      className="flex-1 h-16 bg-primary text-white rounded-2xl font-black uppercase italic tracking-tighter flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-2xl"
+                      className="w-full h-16 bg-primary text-white rounded-2xl font-black uppercase italic tracking-tighter flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-2xl"
                     >
                       {isPending ? "Syncing..." : <>Enter the Arena <Zap className="size-5 fill-white" /></>}
                     </button>

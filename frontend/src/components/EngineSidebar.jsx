@@ -27,8 +27,8 @@ const EngineSidebar = () => {
                     <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Main Arenas</span>
                 </div>
                 {[
-                    { icon: Radio, name: 'Live Cricket', count: 12 },
-                    { icon: Trophy, name: 'IPL 2026', count: 1, active: true },
+                    { icon: Radio, name: 'Live Events', count: 12 },
+                    { icon: Trophy, name: 'Championship', count: 1, active: true },
                     { icon: Globe, name: 'World Cup', count: 8 },
                     { icon: TrendingUp, name: 'Top Predicted', count: 95 },
                 ].map((item) => (
@@ -41,7 +41,7 @@ const EngineSidebar = () => {
                         <div className="flex items-center gap-3">
                             <item.icon className={`size-4 ${item.active ? 'text-white' : 'group-hover:text-orange-500'} transition-colors`} />
                             <span className="text-[11px] font-black uppercase tracking-tight">{item.name}</span>
-                            {item.name === 'IPL 2026' && (
+                            {item.name === 'Championship' && (
                                 <span className="size-1.5 rounded-full bg-red-400 animate-pulse" />
                             )}
                         </div>

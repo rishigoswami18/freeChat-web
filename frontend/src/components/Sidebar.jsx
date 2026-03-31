@@ -23,8 +23,6 @@ import { logout } from "../lib/api";
 // === STATIC CONFIGURATION ===
 const staticNavItems = [
   { to: "/", icon: Home, labelKey: "Home" },
-  { to: "/ipl-dashboard", icon: Zap, label: "IPL Exclusive", isSacred: true },
-  { to: "/arena", icon: Trophy, label: "Arena" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
   { to: "/communities", icon: Users, labelKey: "Communities" },
@@ -360,13 +358,6 @@ const Sidebar = memo(() => {
               </Link>
             </li>
             
-            <li>
-              <Link to="/ipl-arena" className="flex items-center gap-3 p-3 rounded-xl hover:bg-orange-500/10 text-orange-500 font-bold">
-                <Zap className="size-5 fill-orange-500/20" />
-                IPL Live Arena
-              </Link>
-            </li>
-
             <li>
               <Link to="/antigravity-engine" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 text-blue-500 font-bold">
                 <Globe className="size-5 fill-blue-500/20" />

@@ -16,7 +16,6 @@ import {
     createMatch,
     getMatches,
     updateMatchStatus,
-    resolveMatchBall,
     getWithdrawalRequests,
     processWithdrawal,
     getFinancialStats
@@ -49,7 +48,7 @@ router.post("/invite", sendInvites);
 router.get("/matches", getMatches);
 router.post("/matches", createMatch);
 router.patch("/matches/:id", updateMatchStatus);
-router.post("/resolve-ball", resolveMatchBall);
+
 
 // Financial & Operations
 router.get("/withdrawals", getWithdrawalRequests);
