@@ -254,8 +254,8 @@ const HomePage = () => {
         <div className="px-8 text-[10px] font-bold opacity-20 uppercase tracking-[0.1em] space-y-2">
             <div className="flex gap-4">
                 <Link to="/about" className="hover:text-primary transition-colors">About</Link>
-                <Link to="/terms" className="hover:text-primary transition-colors">Privacy</Link>
-                <Link to="/refund-policy" className="hover:text-primary transition-colors">Terms</Link>
+                <Link to="/privacy-policy" className="hover:text-primary transition-colors">Privacy</Link>
+                <Link to="/terms" className="hover:text-primary transition-colors">Terms</Link>
             </div>
             <p>© {new Date().getFullYear()} Zyro Social Edge</p>
         </div>
