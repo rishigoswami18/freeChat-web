@@ -39,7 +39,7 @@ const Navbar = memo(() => {
   }, [logoutMutation]);
 
   return (
-    <nav className="sticky top-4 z-40 h-14 hidden lg:flex items-center glass-panel rounded-full px-4 border-white/20 luxe-shadow-pink ml-auto mb-6">
+    <nav className="sticky top-4 z-40 ml-auto mb-6 hidden h-16 items-center rounded-full border border-slate-200 bg-white/80 px-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:flex">
       <div className="flex items-center gap-2 w-full">
           {/* === DYNAMIC LOGO RENDERING === */}
           {/* Uses CSS transitions to prevent hard layout jumping when mounting/unmounting Logo on navigation */}
@@ -53,7 +53,7 @@ const Navbar = memo(() => {
                 {/* Streak Badge */}
                 {authUser.streak > 0 && (
                   <div 
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500/15 to-red-500/10 rounded-full border border-orange-500/20 text-orange-500 mr-1"
+                    className="mr-1 flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-orange-600"
                     title={`${authUser.streak} Day Login Streak!`}
                   >
                     <Flame className="size-4 fill-current" />
@@ -65,8 +65,8 @@ const Navbar = memo(() => {
 
                 {/* Notifications */}
                 <Link to="/notifications" className="relative group/notif" aria-label="Notifications">
-                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
-                    <Bell className="size-[18px] text-base-content/60" />
+                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-slate-100 transition-colors">
+                    <Bell className="size-[18px] text-slate-600" />
                   </button>
                   <NavBadge 
                     count={notificationCount} 
@@ -77,8 +77,8 @@ const Navbar = memo(() => {
 
                 {/* Inbox */}
                 <Link to="/inbox" className="relative group/inbox" aria-label="Inbox">
-                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
-                    <MessageSquare className="size-[18px] text-base-content/60" />
+                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-slate-100 transition-colors">
+                    <MessageSquare className="size-[18px] text-slate-600" />
                   </button>
                   <NavBadge 
                     count={unreadMessages} 
@@ -92,15 +92,15 @@ const Navbar = memo(() => {
 
                 {/* New Post */}
                 <Link to="/posts" aria-label="Create Post">
-                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-base-300/60 transition-colors">
-                    <Pencil className="size-[18px] text-base-content/60" />
+                  <button className="btn btn-ghost btn-circle btn-sm hover:bg-slate-100 transition-colors">
+                    <Pencil className="size-[18px] text-slate-600" />
                   </button>
                 </Link>
 
                 {/* Avatar */}
                 {/* Fixed layout shifting by adding a concrete background container matching image dimensions */}
                 <Link to="/profile" className="avatar ml-1" aria-label="User Profile">
-                  <div className="w-8 h-8 rounded-full ring-2 ring-primary/20 hover:ring-primary/50 transition-all duration-200 overflow-hidden bg-base-300 shrink-0 border border-base-200">
+                  <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-base-300 ring-2 ring-slate-200 transition-all duration-200 hover:ring-slate-300">
                     <img
                       src={authUser.profilePic || "/avatar.png"}
                       alt={authUser.fullName || "User Avatar"}
@@ -113,7 +113,7 @@ const Navbar = memo(() => {
 
                 {/* Logout */}
                 <button
-                  className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error active:scale-90 transition-all duration-200 group"
+                  className="btn btn-ghost btn-circle btn-sm group transition-all duration-200 hover:bg-red-50 hover:text-red-600 active:scale-90"
                   onClick={handleLogout}
                   disabled={isLoggingOut}
                   title="Logout"

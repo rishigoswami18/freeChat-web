@@ -37,7 +37,7 @@ const AppLayout = ({
     const CurrentLayout = layoutMap[mode] || FeedLayout;
 
     return (
-        <div className="min-h-screen bg-base-300 relative overflow-x-hidden transition-colors duration-500">
+        <div className="relative min-h-screen overflow-x-hidden bg-transparent transition-colors duration-300">
             {/* 1. Global Background (Optimized) */}
             {config.showBackground && <BackgroundEffects />}
 
@@ -52,8 +52,8 @@ const AppLayout = ({
             )}
 
             {/* 4. Adaptive Content Container */}
-            <div className={`flex flex-col min-h-screen relative z-10 transition-all duration-300 ${
-                config.showSidebar ? "md:ml-[80px] xl:ml-[244px]" : ""
+            <div className={`relative z-10 flex min-h-screen flex-col transition-[padding] duration-300 ${
+                config.showSidebar ? "md:pl-[var(--zyro-sidebar-offset,116px)]" : ""
             }`}>
                 <CurrentLayout config={config} sideNav={sideNav}>
                     {children}

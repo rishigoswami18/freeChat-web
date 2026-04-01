@@ -122,11 +122,17 @@ const RightSidebar = memo(() => {
     if (!authUser) return null;
 
     return (
-        <aside className="w-[320px] hidden lg:block h-screen sticky top-0 pt-10 px-4 font-outfit text-base-content">
+        <aside className="sticky top-0 hidden h-screen w-[340px] px-4 pt-10 text-base-content lg:block">
             {/* Current User Profile Switcher */}
-            <div className="flex items-center justify-between mb-8 group">
+            <div className="group mb-6 rounded-[30px] border border-slate-200 bg-white/80 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-sm">
+                <div className="mb-4 flex items-center justify-between">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">Your profile</p>
+                    <button className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-200">
+                        Switch
+                    </button>
+                </div>
                 <Link to="/profile" className="flex items-center gap-4">
-                    <div className="size-14 rounded-full overflow-hidden border border-white/10 shrink-0 bg-base-300">
+                    <div className="size-14 rounded-full overflow-hidden border border-slate-200 shrink-0 bg-base-300 shadow-sm">
                         <img 
                             src={authUser.profilePic || "/avatar.png"} 
                             alt={authUser.fullName} 
@@ -136,7 +142,7 @@ const RightSidebar = memo(() => {
                         />
                     </div>
                     <div>
-                        <div className="font-semibold text-[15px] leading-tight group-hover:text-primary transition-colors flex items-center gap-1">
+                        <div className="flex items-center gap-1 text-[15px] font-semibold leading-tight text-slate-900 transition-colors group-hover:text-slate-700">
                             {authUser.fullName?.replace(" ", "_").toLowerCase() || "user"}
                             {(authUser.isVerified || authUser.role === "admin") && (
                                 <div className="flex items-center justify-center shrink-0" title="Verified Professional">
@@ -144,29 +150,26 @@ const RightSidebar = memo(() => {
                                 </div>
                             )}
                         </div>
-                        <div className="text-[14px] text-base-content/60 font-normal mt-0.5 mt-[-1px]">
+                        <div className="mt-0.5 text-[14px] font-normal text-slate-500">
                             {authUser.fullName}
                         </div>
                     </div>
                 </Link>
-                <button className="text-[12px] font-bold text-primary hover:opacity-70 transition-colors">
-                    Switch
-                </button>
             </div>
 
             {/* Suggested for You Header */}
-            <div className="flex items-center justify-between mb-4 mt-2">
-                <span className="text-[14px] font-semibold text-base-content/50">Suggested for you</span>
-                <Link to="/search" className="text-[12px] font-semibold hover:text-primary transition-colors">
+            <div className="rounded-[30px] border border-slate-200 bg-white/80 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-sm">
+            <div className="mb-4 mt-1 flex items-center justify-between">
+                <span className="text-[14px] font-semibold text-slate-500">Suggested for you</span>
+                <Link to="/search" className="text-[12px] font-semibold text-slate-900 transition-colors hover:text-slate-600">
                     See all
                 </Link>
             </div>
 
-            {/* Suggestions List */}
             <div className="space-y-4">
                 
                 {/* AI Coach Always Visible */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-[22px] bg-slate-50 p-3">
                     <Link to="/chat/ai-coach-id" className="flex items-center gap-3 group min-w-0 pr-2">
                         <div className="size-11 rounded-full overflow-hidden border-2 border-green-500/50 shrink-0 bg-black">
                             <img 
@@ -189,7 +192,7 @@ const RightSidebar = memo(() => {
                     </Link>
                     <Link 
                         to="/chat/ai-coach-id"
-                        className="text-[12px] font-bold text-primary-content bg-primary px-3 py-1.5 rounded-full hover:opacity-90 transition-colors ml-2 flex-shrink-0"
+                        className="ml-2 flex-shrink-0 rounded-full bg-slate-950 px-3 py-1.5 text-[12px] font-bold text-white transition-colors hover:bg-slate-800"
                     >
                         Chat
                     </Link>
@@ -225,35 +228,36 @@ const RightSidebar = memo(() => {
                         );
                     })
                 ) : (
-                    <div className="text-[14px] text-white/50 text-left py-4">
+                    <div className="py-4 text-left text-[14px] text-slate-500">
                         No suggestions found.
                     </div>
                 )}
             </div>
+            </div>
 
             {/* Links Section matching premium application layout standards */}
-            <div className="mt-10 text-[12px] text-base-content/40 space-y-4">
+            <div className="mt-6 rounded-[30px] border border-slate-200 bg-white/80 p-5 text-[12px] text-slate-400 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-sm">
                 <div className="flex flex-wrap gap-x-2 gap-y-1 font-medium">
-                    <a href="#" className="hover:underline hover:text-primary">About</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">About</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Help</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Help</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Press</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Press</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">API</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">API</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Jobs</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Jobs</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Privacy</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Privacy</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Terms</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Terms</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Locations</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Locations</a>
                     <span>•</span>
-                    <a href="#" className="hover:underline hover:text-primary">Language</a>
+                    <a href="#" className="hover:underline hover:text-slate-700">Language</a>
                 </div>
-                <div className="uppercase tracking-wider font-semibold opacity-60">
-                    © 2026 Zyro FROM freechatweb.in
+                <div className="mt-4 uppercase tracking-wider font-semibold opacity-70">
+                    © 2026 Zyro social platform
                 </div>
             </div>
         </aside>

@@ -11,6 +11,7 @@ import "./index.css";
 import "./i18n";
 import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+import GlobalErrorBoundary from "./components/GlobalErrorBoundary.jsx";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -53,13 +54,15 @@ try {
 
   root.render(
     <StrictMode>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-              <App />
-          </ThemeProvider>
-        </QueryClientProvider>
-      </BrowserRouter>
+      <GlobalErrorBoundary>
+        <BrowserRouter>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+                <App />
+            </ThemeProvider>
+          </QueryClientProvider>
+        </BrowserRouter>
+      </GlobalErrorBoundary>
     </StrictMode>
   );
   console.log("✅ React render called");

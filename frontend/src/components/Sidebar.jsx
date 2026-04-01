@@ -1,32 +1,48 @@
-import { memo, useState, useEffect, useMemo, useCallback } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { updateProfile, getCoupleStatus, claimDailyReward } from "../lib/api";
-import { APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
+import { AnimatePresence, motion } from "framer-motion";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import useNotificationCounts from "../hooks/useNotificationCounts";
-import useAuthUser from "../hooks/useAuthUser";
 import {
-  Home, Users, HeartHandshake, Crown, Gamepad2, Search, Film, 
-  MessageSquare, Smartphone, ShieldAlert, BadgeCheck, Gem, 
-  Heart, Sparkles, PlusCircle, Compass, Menu, Zap, DollarSign, Globe, Newspaper, Gift, Trophy
+  BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  Crown,
+  DollarSign,
+  Film,
+  Gamepad2,
+  Gem,
+  Gift,
+  Globe,
+  Heart,
+  Home,
+  Menu,
+  MessageSquare,
+  PanelTopOpen,
+  PlusCircle,
+  Search,
+  ShieldAlert,
+  Smartphone,
+  Sparkles,
+  Users,
+  Zap,
 } from "lucide-react";
 
-import CreateStoryModal from "./CreateStoryModal";
-import ProfilePhotoViewer from "./ProfilePhotoViewer";
+import useAuthUser from "../hooks/useAuthUser";
+import useNotificationCounts from "../hooks/useNotificationCounts";
+import { claimDailyReward, logout, updateProfile } from "../lib/api";
+import { APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import FocusModeView from "./FocusModeView";
 import Logo from "./Logo";
-import { logout } from "../lib/api";
+import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
-// === STATIC CONFIGURATION ===
-const staticNavItems = [
+const primaryNavItems = [
   { to: "/", icon: Home, labelKey: "Home" },
   { to: "/search", icon: Search, labelKey: "Search" },
   { to: "/friends", icon: Compass, labelKey: "Explore" },
   { to: "/communities", icon: Users, labelKey: "Communities" },
-  { to: "/couple", icon: Sparkles, label: "AI Bestie", isSacred: true },
   { to: "/reels", icon: Film, labelKey: "Reels" },
   { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
   { to: "/notifications", icon: Heart, labelKey: "notifications" },
@@ -35,74 +51,79 @@ const staticNavItems = [
   { to: "/prize-vault", icon: Gift, label: "Prize Vault" },
 ];
 
-// === PERFORMANCE OPTIMIZATION: Memoized Sub-Components ===
-// Extracted pure UI components to prevent the entire sidebar from rendering
-// when internal counters or dates tick.
-const NavBadge = memo(({ count, maxCount = 9 }) => {
-  if (!count || count <= 0) return null;
+const mobileNavItems = [
+  { to: "/", icon: Home, label: "Home" },
+  { to: "/search", icon: Search, label: "Search" },
+  { to: "/reels", icon: Film, label: "Reels" },
+];
+
+const buttonMotion = {
+  whileHover: { scale: 1.02 },
+  whileTap: { scale: 0.98 },
+};
+
+const NavBadge = memo(({ count }) => {
+  if (!count || count < 1) return null;
+
   return (
-    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-base-100">
-      {count > maxCount ? `${maxCount}+` : count}
+    <span className="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full border border-slate-900 bg-orange-500 px-1 text-[10px] font-bold leading-none text-white">
+      {count > 9 ? "9+" : count}
     </span>
   );
 });
+
 NavBadge.displayName = "NavBadge";
 
-const DailyRewardButton = memo(({ authUser, onClaim }) => {
-  if (!authUser) return null;
-  const todayStr = new Date().toISOString().split('T')[0];
-  const lastClaimDate = authUser.lastRewardClaimDate ? new Date(authUser.lastRewardClaimDate) : null;
-  const lastClaimStr = lastClaimDate ? lastClaimDate.toISOString().split('T')[0] : null;
+const triggerHaptic = () => {
+  if (typeof window === "undefined") return;
 
-  if (lastClaimStr === todayStr) return null;
+  window.navigator?.vibrate?.(14);
+  window.AndroidBridge?.vibrate?.(14);
+};
 
-  return (
-    <button
-      className="w-full flex items-center gap-4 p-3 rounded-lg transition-all duration-200 text-purple-500 hover:bg-purple-500/10 group/nav"
-      title="Claim Reward"
-      onClick={onClaim}
-    >
-      <div className="relative shrink-0 flex items-center justify-center w-8">
-        <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-ping opacity-50"></div>
-        <Gem className="size-[26px] stroke-2 group-hover/nav:scale-110 transition-transform" />
-      </div>
-      <span className="hidden xl:block text-[16px] font-semibold tracking-tight truncate">
-        Claim Gems
-      </span>
-    </button>
-  );
-});
-DailyRewardButton.displayName = "DailyRewardButton";
+const isActivePath = (pathname, target) => {
+  if (target === "/") return pathname === "/";
+  return pathname.startsWith(target);
+};
 
-
-// === MAIN COMPONENT ===
 const Sidebar = memo(() => {
   const { authUser } = useAuthUser();
+  const { t } = useTranslation();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { t } = useTranslation();
-  const { notificationCount, unreadMessages } = useNotificationCounts();
-  
-  const currentPath = location.pathname;
-  
-  // Modals state
-  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const { unreadMessages, notificationCount } = useNotificationCounts();
+
   const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
   const [viewingDP, setViewingDP] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
 
-  // === RETENTION HOOK: Tab Title Optimization ===
+    const stored = window.localStorage.getItem("zyro-sidebar-collapsed");
+    if (stored !== null) return stored === "true";
+
+    return window.innerWidth < 1440;
+  });
+
+  useEffect(() => {
+    const sidebarWidth = isCollapsed ? "92px" : "264px";
+    const sidebarOffset = isCollapsed ? "116px" : "288px";
+
+    document.documentElement.style.setProperty("--zyro-sidebar-width", sidebarWidth);
+    document.documentElement.style.setProperty("--zyro-sidebar-offset", sidebarOffset);
+    window.localStorage.setItem("zyro-sidebar-collapsed", String(isCollapsed));
+  }, [isCollapsed]);
+
   useEffect(() => {
     if (!authUser?._id) return;
 
-    const initialTitle = "Zyro | Master Your Mindset";
-    document.title = initialTitle;
+    const initialTitle = "Zyro | Professional Social Platform";
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         const hooks = [
-          "Don't break your streak! 🔥",
-          "New Reels for you! 🍿",
-          "Claim your daily gems! 💎"
+          "Zyro | Your feed is moving",
+          "Zyro | New creator updates waiting",
+          "Zyro | Claim your daily reward",
         ];
         document.title = hooks[Math.floor(Math.random() * hooks.length)];
       } else {
@@ -110,327 +131,423 @@ const Sidebar = memo(() => {
       }
     };
 
+    document.title = initialTitle;
     document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  // Bound to scalar ID rather than auth object to prevent infinite teardown loops
   }, [authUser?._id]);
 
-  // === STABLE CALLBACKS ===
-  const handleDownload = useCallback((e) => {
-    e.preventDefault();
+  const handleDownload = useCallback((event) => {
+    event.preventDefault();
+    triggerHaptic();
     downloadFile(`${APK_DOWNLOAD_URL}/latest`, "Zyro_app.apk");
   }, []);
 
   const handleCreatePost = useCallback(() => {
-     window.scrollTo({ top: 0, behavior: 'smooth' });
-     toast("Create post is at the top of your feed!", { icon: "✨" });
+    triggerHaptic();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    toast("Create post is at the top of your feed.", { icon: "✦" });
   }, []);
 
   const claimReward = useCallback(async () => {
     try {
-      const res = await claimDailyReward();
-      toast.success(res.message, { icon: '💎' });
-      // Single targeted invalidation avoids crashing the query stack
+      triggerHaptic();
+      const response = await claimDailyReward();
+      toast.success(response.message, { icon: "💎" });
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Wait for tomorrow!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Reward already claimed.");
     }
   }, [queryClient]);
 
-  const { mutate: doUpdate } = useMutation({
+  const { mutateAsync: mutateProfile } = useMutation({
     mutationFn: updateProfile,
     onSuccess: (data) => {
-      toast.success("Profile photo updated! ✨");
       queryClient.setQueryData(["authUser"], data.user);
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      toast.success("Profile updated.");
     },
-    onError: (err) => {
-      toast.error(err.response?.data?.message || "Failed to update photo");
-    }
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Could not update profile.");
+    },
   });
+
+  const handleDPUpdate = useCallback(
+    async (base64) => {
+      await mutateProfile({ profilePic: base64 });
+      setViewingDP(null);
+    },
+    [mutateProfile]
+  );
 
   const handleLogout = useCallback(async () => {
     try {
+      triggerHaptic();
       await logout();
       queryClient.setQueryData(["authUser"], null);
       window.location.href = "/login";
-    } catch (err) {
-      toast.error("Logout failed. Try clearing cache.");
+    } catch {
+      toast.error("Logout failed. Please try again.");
     }
   }, [queryClient]);
 
-  const handleDPUpdate = useCallback(async (base64) => {
-    await doUpdate({ profilePic: base64 });
-    setViewingDP(null);
-  }, [doUpdate]);
+  const desktopNavItems = useMemo(
+    () =>
+      primaryNavItems.map((item) => ({
+        ...item,
+        id: `zyro-nav-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, "-")}`,
+      })),
+    []
+  );
 
-  // Couple Relationship status stream
-  const { data: coupleData } = useQuery({
-    queryKey: ["coupleStatus"],
-    queryFn: getCoupleStatus,
-    enabled: !!authUser?._id,
-    staleTime: 1000 * 60 * 10
-  });
+  const renderLabel = (item) => item.label || t(item.labelKey) || item.labelKey;
 
-  const isCoupled = coupleData?.coupleStatus === "coupled";
-  const partnerId = coupleData?.partner?._id;
-
-  // === DATA MEMOIZATION ===
-  // Prevents recreation of 14 complex Nav Objects containing Lucide SVG bindings on every scroll/keystroke.
-  const dynamicNavItems = useMemo(() => {
-    const items = staticNavItems.map(item => ({
-      ...item,
-      id: `tour-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, '-')}`
-    }));
-
-    return items;
-  }, [isCoupled, partnerId]);
+  const actionButtonClass = (active = false, collapsed = false) =>
+    [
+      "group relative flex w-full items-center rounded-2xl border px-3 text-sm font-medium transition-colors",
+      "zyro-touch-target min-h-[48px]",
+      collapsed ? "justify-center" : "gap-3",
+      active
+        ? "border-orange-500/30 bg-orange-500/10 text-orange-300"
+        : "border-transparent text-slate-400 hover:border-slate-800 hover:bg-slate-900/80 hover:text-slate-100",
+    ].join(" ");
 
   return (
-    <aside className="w-[80px] xl:w-[244px] hidden md:flex flex-col h-screen fixed top-0 left-0 border-r border-base-content/10 bg-base-100 z-50 overflow-hidden transition-all duration-300">
-      
-      {/* Brand area */}
-      <div className="pt-8 pb-6 px-4 xl:px-6 flex justify-center xl:justify-start">
-        <div className="hidden xl:block">
-          <Logo showText={true} fontSize="text-2xl" />
-        </div>
-        <div className="xl:hidden">
-          <Logo showText={false} />
-        </div>
-      </div>
+    <>
+      <aside
+        className="zyro-shell-panel fixed inset-y-4 left-4 z-50 hidden md:flex flex-col rounded-[28px] px-3 py-4 text-slate-100"
+        style={{ width: "var(--zyro-sidebar-width)" }}
+      >
+        <div className={`flex ${isCollapsed ? "flex-col items-center gap-3" : "items-center justify-between gap-3"} border-b border-slate-800 px-2 pb-4`}>
+          <div className={`${isCollapsed ? "" : "min-w-0 flex-1"}`}>
+            <Logo showText={!isCollapsed} fontSize="text-xl" />
+          </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-        {dynamicNavItems.map(({ to, icon: Icon, labelKey, isSacred, label: directLabel, id }) => {
-          const isActive = currentPath === to;
-          const displayLabel = isSacred || directLabel ? (directLabel) : t(labelKey) || labelKey;
+          <motion.button
+            type="button"
+            {...buttonMotion}
+            onClick={() => setIsCollapsed((current) => !current)}
+            className="zyro-touch-target inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/70 text-slate-300 hover:border-slate-700 hover:text-white"
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? <ChevronRight className="size-4" strokeWidth={2} /> : <ChevronLeft className="size-4" strokeWidth={2} />}
+          </motion.button>
+        </div>
+
+        <nav className="custom-scrollbar flex-1 space-y-1 overflow-y-auto px-1 py-4">
+          <div className="space-y-1">
+            {desktopNavItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActivePath(location.pathname, item.to);
+              const label = renderLabel(item);
+
+              return (
+                <motion.div key={item.to} {...buttonMotion}>
+                  <Link id={item.id} to={item.to} className={actionButtonClass(active, isCollapsed)} title={label}>
+                    {active ? (
+                      <motion.span
+                        layoutId="zyro-sidebar-active-pill"
+                        className="absolute left-1 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-orange-500"
+                      />
+                    ) : null}
+
+                    <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
+                      <Icon className="size-[18px]" strokeWidth={2} />
+                      {item.to === "/inbox" ? <NavBadge count={unreadMessages} /> : null}
+                      {item.to === "/notifications" ? <NavBadge count={notificationCount} /> : null}
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {!isCollapsed ? (
+                        <motion.span
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -6 }}
+                          className="truncate"
+                        >
+                          {label}
+                        </motion.span>
+                      ) : null}
+                    </AnimatePresence>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="pt-4">
+            <motion.button
+              type="button"
+              {...buttonMotion}
+              onClick={handleCreatePost}
+              className={`${actionButtonClass(false, isCollapsed)} border-orange-500/35 bg-orange-500 text-white hover:bg-orange-600`}
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
+                <PlusCircle className="size-[18px]" strokeWidth={2} />
+              </div>
+
+              <AnimatePresence initial={false}>
+                {!isCollapsed ? (
+                  <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
+                    Create Post
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
+            </motion.button>
+          </div>
+        </nav>
+
+        <div className="space-y-2 border-t border-slate-800 px-1 pt-4">
+          {authUser ? (
+            <motion.button
+              type="button"
+              {...buttonMotion}
+              onClick={claimReward}
+              className={actionButtonClass(false, isCollapsed)}
+            >
+              <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-300">
+                <Gem className="size-[18px]" strokeWidth={2} />
+              </div>
+              <AnimatePresence initial={false}>
+                {!isCollapsed ? (
+                  <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
+                    Daily Reward
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
+            </motion.button>
+          ) : null}
+
+          <motion.button
+            type="button"
+            {...buttonMotion}
+            onClick={() => {
+              triggerHaptic();
+              setIsFocusModalOpen(true);
+            }}
+            className={actionButtonClass(false, isCollapsed)}
+            title="Focus Mode"
+          >
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
+              <Zap className="size-[18px]" strokeWidth={2} />
+            </div>
+            <AnimatePresence initial={false}>
+              {!isCollapsed ? (
+                <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
+                  Focus Mode
+                </motion.span>
+              ) : null}
+            </AnimatePresence>
+          </motion.button>
+
+          <motion.a
+            href={`${APK_DOWNLOAD_URL}/latest`}
+            {...buttonMotion}
+            onClick={handleDownload}
+            className={actionButtonClass(false, isCollapsed)}
+            title="Download App"
+          >
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
+              <Smartphone className="size-[18px]" strokeWidth={2} />
+            </div>
+            <AnimatePresence initial={false}>
+              {!isCollapsed ? (
+                <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
+                  Download App
+                </motion.span>
+              ) : null}
+            </AnimatePresence>
+          </motion.a>
+
+          <div className="dropdown dropdown-top dropdown-end w-full">
+            <motion.button
+              type="button"
+              {...buttonMotion}
+              tabIndex={0}
+              className={actionButtonClass(false, isCollapsed)}
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
+                <Menu className="size-[18px]" strokeWidth={2} />
+              </div>
+              <AnimatePresence initial={false}>
+                {!isCollapsed ? (
+                  <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
+                    More
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
+            </motion.button>
+
+            <ul className="dropdown-content zyro-shell-panel z-[70] mb-3 w-64 space-y-1 rounded-[24px] p-2 text-sm">
+              <li className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Creator Ops</li>
+
+              <li>
+                <Link to="/creator-center" className="flex min-h-[44px] items-center gap-3 rounded-2xl px-3 py-2 text-slate-200 transition-colors hover:bg-slate-900/80 hover:text-white">
+                  <DollarSign className="size-4 text-orange-400" strokeWidth={2} />
+                  Creator Monetization
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/antigravity-engine" className="flex min-h-[44px] items-center gap-3 rounded-2xl px-3 py-2 text-slate-200 transition-colors hover:bg-slate-900/80 hover:text-white">
+                  <Globe className="size-4 text-orange-400" strokeWidth={2} />
+                  Antigravity Engine
+                </Link>
+              </li>
+
+              {authUser?.role === "admin" ? (
+                <li>
+                  <Link to="/admin" className="flex min-h-[44px] items-center gap-3 rounded-2xl px-3 py-2 text-slate-200 transition-colors hover:bg-slate-900/80 hover:text-white">
+                    <ShieldAlert className="size-4 text-orange-400" strokeWidth={2} />
+                    Admin Console
+                  </Link>
+                </li>
+              ) : null}
+
+              <li>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex min-h-[44px] w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                >
+                  <PanelTopOpen className="size-4" strokeWidth={2} />
+                  Logout
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <motion.div {...buttonMotion}>
+            <Link
+              to="/profile"
+              className={`${actionButtonClass(isActivePath(location.pathname, "/profile"), isCollapsed)} overflow-hidden`}
+              title="Profile"
+            >
+              {isActivePath(location.pathname, "/profile") ? (
+                <motion.span
+                  layoutId="zyro-sidebar-active-pill"
+                  className="absolute left-1 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-orange-500"
+                />
+              ) : null}
+
+              <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
+                <img
+                  src={authUser?.profilePic || "/avatar.png"}
+                  alt="Profile"
+                  className="size-8 rounded-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                {authUser?.isVerified || authUser?.role === "admin" ? (
+                  <div className="absolute -bottom-1 -right-1 rounded-full bg-slate-950 p-[2px]">
+                    <BadgeCheck className="size-3.5 fill-sky-500 text-white" strokeWidth={2} />
+                  </div>
+                ) : null}
+              </div>
+
+              <AnimatePresence initial={false}>
+                {!isCollapsed ? (
+                  <motion.div
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    className="min-w-0"
+                  >
+                    <p className="truncate text-sm font-medium text-slate-100">{authUser?.fullName || "Profile"}</p>
+                    <p className="truncate text-xs text-slate-500">@{authUser?.username || "zyro-user"}</p>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </Link>
+          </motion.div>
+        </div>
+      </aside>
+
+      <motion.nav
+        initial={{ y: 16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="zyro-shell-panel fixed inset-x-3 bottom-3 z-[100] flex items-center justify-between rounded-[24px] px-2 py-2 md:hidden"
+      >
+        {mobileNavItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActivePath(location.pathname, item.to);
 
           return (
-            <Link
-              key={to}
-              to={to}
-              id={id}
-              className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav ${
-                isActive ? "font-bold text-base-content bg-base-content/5" : "text-base-content hover:bg-base-content/5"
-              }`}
-              title={displayLabel}
-            >
-              <div className="relative shrink-0 flex items-center justify-center w-8">
-                <Icon
-                  className={`size-[26px] transition-transform duration-200 group-hover/nav:scale-105 ${
-                    isActive && labelKey !== "Search" ? "stroke-[2.5px]" : "stroke-2 opacity-90"
-                  } ${isSacred ? "text-pink-500" : ""}`}
-                  // Optimization: Directly binding fill to currentColor eliminates expensive CSS specificity overwrites
-                  fill={isActive && labelKey !== "Search" && labelKey !== "Explore" ? "currentColor" : "none"}
-                />
-                
-                {labelKey === "inbox" && <NavBadge count={unreadMessages} />}
-                {labelKey === "notifications" && <NavBadge count={notificationCount} />}
-              </div>
-              <span className={`hidden xl:block text-[16px] tracking-tight truncate ${isActive ? "" : "opacity-90"} ${isSacred ? "text-pink-500 font-semibold" : ""}`}>
-                {displayLabel}
-              </span>
-            </Link>
+            <motion.div key={item.to} className="flex-1" {...buttonMotion}>
+              <Link
+                to={item.to}
+                onClick={triggerHaptic}
+                className={`relative flex min-h-[48px] flex-col items-center justify-center rounded-2xl px-3 py-2 text-[11px] font-medium ${
+                  active ? "bg-orange-500/10 text-orange-300" : "text-slate-400"
+                }`}
+              >
+                {active ? <span className="absolute left-1/2 top-1 h-1 w-7 -translate-x-1/2 rounded-full bg-orange-500" /> : null}
+                <Icon className="size-[18px]" strokeWidth={2} />
+                <span className="mt-1">{item.label}</span>
+                {item.to === "/inbox" ? <NavBadge count={unreadMessages} /> : null}
+              </Link>
+            </motion.div>
           );
         })}
 
-        {/* Create Post Button */}
-        <button
-          onClick={handleCreatePost}
-          id="tour-create"
-          className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content hover:bg-base-content/5 group/nav"
-          title="Create"
-        >
-          <div className="relative shrink-0 flex items-center justify-center w-8">
-            <PlusCircle className="size-[26px] stroke-2 opacity-90 transition-transform duration-200 group-hover/nav:scale-105" />
-          </div>
-          <span className="hidden xl:block text-[16px] tracking-tight truncate opacity-90">
-            Create
-          </span>
-        </button>
+        <motion.div className="flex-1" {...buttonMotion}>
+          <button
+            type="button"
+            onClick={handleCreatePost}
+            className="mx-auto flex min-h-[52px] min-w-[52px] items-center justify-center rounded-2xl bg-orange-500 text-white zyro-soft-shadow"
+          >
+            <PlusCircle className="size-[20px]" strokeWidth={2} />
+          </button>
+        </motion.div>
 
-        {/* Profile Link */}
-        <Link
-          to="/profile"
-          id="tour-profile"
-          className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav ${
-            currentPath === "/profile" ? "font-bold text-base-content bg-base-content/5" : "text-base-content hover:bg-base-content/5"
-          }`}
-          title="Profile"
-        >
-          <div className="relative shrink-0 flex items-center justify-center w-8">
-             <div className={`size-7 rounded-full overflow-hidden shrink-0 bg-base-300 transition-transform duration-200 group-hover/nav:scale-105 ${
-               currentPath === "/profile" ? "ring-2 ring-base-content ring-offset-2 ring-offset-base-100" : ""
-             }`}>
-                 <img
-                    src={authUser?.profilePic || "/avatar.png"}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                 />
-             </div>
-             {(authUser?.isVerified || authUser?.role === "admin") && (
-                <div className="absolute -bottom-1 -right-1 size-3.5 bg-white rounded-full flex items-center justify-center p-[1px] shadow-sm ring-1 ring-base-content/5 overflow-hidden">
-                   <BadgeCheck className="size-full text-white fill-[#1d9bf0]" strokeWidth={2} />
-                </div>
-             )}
-          </div>
-          <span className={`hidden xl:block text-[16px] tracking-tight truncate ${currentPath === "/profile" ? "" : "opacity-90"}`}>
-            Profile
-          </span>
-        </Link>
-        
-        {/* Admin Link */}
-        {authUser?.role === "admin" && (
+        <motion.div className="flex-1" {...buttonMotion}>
           <Link
-            to="/admin"
-            className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group/nav mt-4 bg-primary/10 ${
-              currentPath === "/admin" ? "font-bold text-primary" : "text-primary hover:bg-primary/20"
+            to="/profile"
+            onClick={triggerHaptic}
+            className={`relative flex min-h-[48px] flex-col items-center justify-center rounded-2xl px-3 py-2 text-[11px] font-medium ${
+              isActivePath(location.pathname, "/profile") ? "bg-orange-500/10 text-orange-300" : "text-slate-400"
             }`}
-            title="Admin"
           >
-            <div className="relative shrink-0 flex items-center justify-center w-8">
-              <ShieldAlert className="size-[24px] stroke-2 transition-transform duration-200 group-hover/nav:scale-105" />
-            </div>
-            <span className="hidden xl:block text-[16px] tracking-tight truncate">
-              {t('admin_command') || "Admin"}
-            </span>
+            {isActivePath(location.pathname, "/profile") ? (
+              <span className="absolute left-1/2 top-1 h-1 w-7 -translate-x-1/2 rounded-full bg-orange-500" />
+            ) : null}
+            <img src={authUser?.profilePic || "/avatar.png"} alt="Profile" className="size-5 rounded-full object-cover" />
+            <span className="mt-1">Profile</span>
           </Link>
-        )}
-      </nav>
+        </motion.div>
+      </motion.nav>
 
-      {/* DAILY REWARDS & BOTTOM ACTIONS */}
-      <div className="px-3 pb-6 pt-2 space-y-2 mt-auto">
-      
-        {/* Memoized Daily Reward Integration */}
-        {authUser && <DailyRewardButton authUser={authUser} onClaim={claimReward} />}
-
-        {/* Watch Tutorial */}
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent("Zyro_start_tutorial"))}
-          className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content opacity-70 hover:opacity-100 hover:bg-base-content/5 group/nav"
-          title="Watch Tutorial"
-        >
-          <div className="relative shrink-0 flex items-center justify-center w-8">
-            <Sparkles className="size-[26px] stroke-2 text-primary group-hover/nav:scale-105 transition-transform" />
-          </div>
-          <span className="hidden xl:block text-[16px] tracking-tight truncate">
-            Help & Tutorial
-          </span>
-        </button>
-
-        {/* Download App */}
-        <a
-          href={`${APK_DOWNLOAD_URL}/latest`}
-          onClick={handleDownload}
-          className="flex items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content opacity-70 hover:opacity-100 hover:bg-base-content/5 group/nav"
-          title="Download App"
-        >
-          <div className="relative shrink-0 flex items-center justify-center w-8">
-            <Smartphone className="size-[26px] stroke-2 group-hover/nav:scale-105 transition-transform" />
-          </div>
-          <span className="hidden xl:block text-[16px] tracking-tight truncate">
-            Get App
-          </span>
-        </a>
-
-        {/* Menu (More) — Optimized with Premium Dropdown */}
-        <div className="dropdown dropdown-top dropdown-end w-full">
-          <label 
-            tabIndex={0} 
-            className="flex w-full items-center gap-4 p-3 rounded-lg transition-all duration-200 text-base-content hover:bg-base-content/5 group/nav cursor-pointer"
-          >
-            <div className="relative shrink-0 flex items-center justify-center w-8">
-              <Menu className="size-[26px] stroke-2 opacity-90 transition-transform duration-200 group-hover/nav:scale-105" />
-            </div>
-            <span className="hidden xl:block text-[16px] tracking-tight truncate opacity-90 font-medium">
-              More
-            </span>
-          </label>
-          <ul tabIndex={0} className="dropdown-content z-[60] menu p-2 shadow-2xl bg-base-100 border border-base-content/10 rounded-2xl w-64 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <li className="menu-title px-4 py-2 opacity-40 text-[10px] uppercase font-black tracking-widest">Bond OS Menu</li>
-            
-            <li>
-              <Link to="/creator-center" className="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-500/10 text-emerald-500 font-bold">
-                <DollarSign className="size-5 fill-emerald-500/20" />
-                Creator Monetization
-              </Link>
-            </li>
-            
-            <li>
-              <Link to="/antigravity-engine" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-500/10 text-blue-500 font-bold">
-                <Globe className="size-5 fill-blue-500/20" />
-                Antigravity Engine
-              </Link>
-            </li>
-
-            <li>
-              <button 
-                onClick={() => setIsFocusModalOpen(true)}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/10 text-primary font-bold"
-              >
-                <Zap className="size-5 fill-primary/20" />
-                AI Career Focus Mode
-              </button>
-            </li>
-
-            <li>
-              <Link to="/settings" className="flex items-center gap-3 p-3 rounded-xl">
-                 <BadgeCheck className="size-5 text-info" />
-                 Verification & Settings
-              </Link>
-            </li>
-
-            <div className="divider my-0 opacity-5"></div>
-
-            <li>
-              <button 
-                onClick={handleLogout}
-                className="flex items-center gap-3 p-3 rounded-xl text-error hover:bg-error/10"
-              >
-                Logout Account
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <CreateStoryModal
-        isOpen={isStoryModalOpen}
-        onClose={() => setIsStoryModalOpen(false)}
-      />
-
-      {/* AI Career Focus Mode Modal */}
       <AnimatePresence>
-        {isFocusModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
+        {isFocusModalOpen ? (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsFocusModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-xl z-10"
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="relative z-10 w-full max-w-xl"
             >
-               <button 
-                 onClick={() => setIsFocusModalOpen(false)}
-                 className="absolute -top-12 right-0 text-white opacity-50 hover:opacity-100 font-bold bg-white/10 px-4 py-2 rounded-full"
-               >
-                 Close Esc
-               </button>
-               <FocusModeView />
+              <button
+                type="button"
+                onClick={() => setIsFocusModalOpen(false)}
+                className="absolute -top-12 right-0 inline-flex min-h-[44px] items-center rounded-full border border-slate-700 bg-slate-950/90 px-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200"
+              >
+                Close
+              </button>
+              <FocusModeView />
             </motion.div>
           </div>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {viewingDP && (
+      {viewingDP ? (
         <ProfilePhotoViewer
           imageUrl={viewingDP.url}
           fullName={viewingDP.name}
@@ -438,10 +555,11 @@ const Sidebar = memo(() => {
           onClose={() => setViewingDP(null)}
           onUpdate={handleDPUpdate}
         />
-      )}
-    </aside>
+      ) : null}
+    </>
   );
 });
 
 Sidebar.displayName = "Sidebar";
+
 export default Sidebar;

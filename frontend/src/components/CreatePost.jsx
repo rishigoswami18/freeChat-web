@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from "react";
 import { createPost, getSongs } from "../lib/api";
-import { ImageIcon, VideoIcon, X, Loader2, Play, BadgeCheck, Square } from "lucide-react";
+import { ImageIcon, VideoIcon, X, Loader2, Play, BadgeCheck, Square, Sparkles, Wand2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 // === ENVIRONMENT CONFIGURATION ===
@@ -62,9 +62,9 @@ const uploadToCloudinary = (file, resourceType = "image", onProgress) => {
 // === HELPER COMPONENTS ===
 // Shield inputs tightly to prevent keystroke lag
 const PostInputs = memo(({ content, setContent, authUser }) => (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-4">
         <div className="avatar flex-shrink-0">
-            <div className="w-10 h-10 rounded-full border border-base-content/10 overflow-hidden bg-base-300">
+            <div className="w-12 h-12 rounded-full border border-slate-200 overflow-hidden bg-base-300 shadow-sm">
                 <img
                     src={authUser?.profilePic || "/avatar.png"}
                     alt={authUser?.fullName}
@@ -80,15 +80,18 @@ const PostInputs = memo(({ content, setContent, authUser }) => (
             </div>
         </div>
         <div className="flex-1 min-w-0 relative group">
+            <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                <Sparkles className="size-3.5" />
+                Share a post
+            </div>
             <textarea
-                className="w-full bg-transparent resize-none text-[15px] focus:outline-none placeholder:opacity-50 min-h-[40px] leading-relaxed pt-2 pb-1"
-                placeholder="Share your thoughts..."
+                className="w-full bg-transparent resize-none text-[15px] text-slate-900 focus:outline-none placeholder:text-slate-400 min-h-[72px] leading-relaxed pt-1 pb-2"
+                placeholder="Share an update, clip, launch, or creator insight..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                rows={2}
+                rows={3}
             />
-            {/* Animated focus indicator line */}
-            <div className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-primary group-focus-within:w-full transition-all duration-300 ease-out"></div>
+            <div className="absolute bottom-0 left-0 h-[2px] w-0 rounded-full bg-slate-900 group-focus-within:w-full transition-all duration-300 ease-out"></div>
         </div>
     </div>
 ));
@@ -312,13 +315,25 @@ const CreatePost = memo(({ onPost, authUser }) => {
     const isWorking = uploadStatus !== "idle";
 
     return (
-        <div className="flex flex-col gap-3 p-4 bg-base-100 rounded-[8px] border border-base-content/10 shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
+        <div className="flex flex-col gap-4 rounded-[32px] border border-slate-200 bg-white p-5 shadow-[0_24px_80px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Creator composer
+                    </p>
+                    <h3 className="mt-1 text-xl font-bold text-slate-950">Post to your audience</h3>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                    <Wand2 className="size-3.5" />
+                    Feed-ready layout
+                </div>
+            </div>
             
             <PostInputs content={content} setContent={setContent} authUser={authUser} />
 
             {/* Media Preview Container */}
             {mediaPreview && (
-                <div className="relative mt-2 rounded-2xl overflow-hidden bg-base-300 border border-base-content/10 mx-auto w-full max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="relative mt-1 mx-auto w-full max-w-2xl overflow-hidden rounded-[28px] border border-slate-200 bg-slate-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <button
                         onClick={removeMedia}
                         disabled={isWorking}
@@ -348,14 +363,14 @@ const CreatePost = memo(({ onPost, authUser }) => {
 
             {/* Smart Progress Pipeline UI */}
             {isWorking && uploadProgress > 0 && (
-                <div className="mt-2 w-full animate-in fade-in duration-300">
-                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5 px-0.5">
-                        <span className="opacity-50">{uploadStatus === "uploading" ? "Syncing to edge network" : "Publishing to feeds"}</span>
-                        <span className="text-primary">{uploadProgress}%</span>
+                <div className="mt-1 w-full animate-in fade-in duration-300">
+                    <div className="mb-2 flex items-center justify-between px-0.5 text-[10px] font-bold uppercase tracking-widest">
+                        <span className="text-slate-500">{uploadStatus === "uploading" ? "Syncing media" : "Publishing post"}</span>
+                        <span className="text-slate-900">{uploadProgress}%</span>
                     </div>
-                    <div className="h-1.5 w-full bg-base-300 rounded-full overflow-hidden">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
                         <div
-                            className="h-full bg-primary transition-all duration-300 ease-out relative"
+                            className="relative h-full bg-slate-900 transition-all duration-300 ease-out"
                             style={{ width: `${uploadProgress}%` }}
                         >
                             <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_1s_infinite]"></div>
@@ -366,7 +381,7 @@ const CreatePost = memo(({ onPost, authUser }) => {
 
             {/* Song Audio Extractor Module (Videos Only) */}
             {mediaType === "video" && (
-                <div className="mt-4 p-4 rounded-2xl bg-base-200/50 border border-base-content/5 space-y-4 animate-in fade-in duration-300">
+                <div className="mt-2 space-y-4 rounded-[28px] border border-slate-200 bg-slate-50 p-4 animate-in fade-in duration-300">
                     <div className="flex flex-col sm:flex-row gap-3">
                         <input
                             type="text"
@@ -377,8 +392,8 @@ const CreatePost = memo(({ onPost, authUser }) => {
                             disabled={isWorking}
                         />
                         {songName && (
-                            <div className="flex-1 px-4 py-2.5 bg-primary/10 rounded-xl border border-primary/20 flex items-center shadow-inner">
-                                <span className="text-xs font-black text-primary uppercase tracking-wider truncate w-full">
+                            <div className="flex flex-1 items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                                <span className="w-full truncate text-xs font-black uppercase tracking-wider text-slate-700">
                                     {songName}
                                 </span>
                             </div>
@@ -392,7 +407,7 @@ const CreatePost = memo(({ onPost, authUser }) => {
                             const isPlaying = currentPreviewPlaying === song._id;
 
                             return (
-                                <div key={song._id} className={`flex items-center gap-1 pl-3 pr-1 py-1 rounded-full border transition-all ${isSelected ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-base-100 border-base-content/10 hover:border-primary/50 text-base-content/70'}`}>
+                                <div key={song._id} className={`flex items-center gap-1 rounded-full border pl-3 pr-1 py-1 transition-all ${isSelected ? 'border-slate-900 bg-slate-900 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'}`}>
                                     <button
                                         onClick={() => {
                                             setSongName(label);
@@ -405,10 +420,10 @@ const CreatePost = memo(({ onPost, authUser }) => {
                                     </button>
                                     {song.audioUrl && (
                                         <button
-                                            className={`btn btn-ghost btn-xs btn-circle ${isSelected ? 'text-primary' : 'text-base-content/40 hover:text-primary'} ${isPlaying ? 'bg-primary/20 animate-pulse' : ''}`}
-                                            disabled={isWorking}
-                                            onClick={(e) => {
-                                                e.preventDefault();
+                                        className={`btn btn-ghost btn-xs btn-circle ${isSelected ? 'text-white' : 'text-slate-400 hover:text-slate-900'} ${isPlaying ? 'animate-pulse bg-white/10' : ''}`}
+                                        disabled={isWorking}
+                                        onClick={(e) => {
+                                            e.preventDefault();
                                                 handleAudioPreview(song.audioUrl, song._id);
                                             }}
                                             aria-label={isPlaying ? "Stop audio preview" : "Play audio preview"}
@@ -428,7 +443,7 @@ const CreatePost = memo(({ onPost, authUser }) => {
                                     setAudioUrl("");
                                 }}
                                 disabled={isWorking}
-                                className={`text-xs font-semibold px-4 py-1.5 rounded-full border transition-all cursor-pointer ${songName === "Original Audio" ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-base-100 border-base-content/10 hover:border-primary/50 text-base-content/70'}`}
+                                className={`cursor-pointer rounded-full border px-4 py-1.5 text-xs font-semibold transition-all ${songName === "Original Audio" ? 'border-slate-900 bg-slate-900 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'}`}
                             >
                                 Original Audio
                             </button>
@@ -438,10 +453,11 @@ const CreatePost = memo(({ onPost, authUser }) => {
             )}
 
             {/* Action Triggers Configuration */}
-            <div className="flex items-center justify-between mt-2 pt-4 border-t border-base-content/5">
-                <div className="flex items-center gap-2">
-                    <label className={`group flex items-center justify-center size-10 rounded-full transition-colors ${isWorking ? 'opacity-50 cursor-not-allowed' : 'hover:bg-base-200 cursor-pointer'}`}>
-                        <ImageIcon className="size-5 text-base-content/50 group-hover:text-success transition-colors" />
+            <div className="mt-1 flex flex-col gap-4 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                    <label className={`group flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${isWorking ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400' : 'cursor-pointer border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'}`}>
+                        <ImageIcon className="size-4.5 transition-colors group-hover:text-emerald-600" />
+                        Photo
                         <input
                             ref={imageInputRef}
                             type="file"
@@ -452,8 +468,9 @@ const CreatePost = memo(({ onPost, authUser }) => {
                         />
                     </label>
 
-                    <label className={`group flex items-center justify-center size-10 rounded-full transition-colors ${isWorking ? 'opacity-50 cursor-not-allowed' : 'hover:bg-base-200 cursor-pointer'}`}>
-                        <VideoIcon className="size-5 text-base-content/50 group-hover:text-info transition-colors" />
+                    <label className={`group flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${isWorking ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400' : 'cursor-pointer border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'}`}>
+                        <VideoIcon className="size-4.5 transition-colors group-hover:text-sky-600" />
+                        Video
                         <input
                             ref={videoInputRef}
                             type="file"
@@ -466,7 +483,7 @@ const CreatePost = memo(({ onPost, authUser }) => {
                 </div>
 
                 <button
-                    className="btn btn-primary rounded-xl px-8 shadow-[0_4px_14px_0_oklch(var(--p)/0.3)] hover:shadow-[0_6px_20px_oklch(var(--p)/0.23)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-sm font-bold h-10 min-h-10"
+                    className="btn h-11 min-h-11 rounded-full border-0 bg-slate-950 px-8 text-sm font-bold text-white shadow-[0_18px_50px_rgba(15,23,42,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 active:scale-95"
                     onClick={handlePost}
                     disabled={isWorking || (!content.trim() && !mediaFile)}
                 >

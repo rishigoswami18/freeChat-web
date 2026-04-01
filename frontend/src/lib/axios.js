@@ -6,6 +6,7 @@ export const APK_DOWNLOAD_URL = import.meta.env.MODE === "development" ? "/apk-d
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true, // send cookies with the request
+  timeout: 8000,
 });
 
 /**
