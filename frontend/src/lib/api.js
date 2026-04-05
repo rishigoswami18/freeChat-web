@@ -372,6 +372,42 @@ export const getCoupleStatus = async () => {
     const response = await axiosInstance.get("/couple/status");
     return response.data;
 };
+export const sendCoupleRequest = async (partnerId) => {
+    const response = await axiosInstance.post(`/couple/request/${partnerId}`);
+    return response.data;
+};
+export const acceptCoupleRequest = async (requestId) => {
+    const response = await axiosInstance.put(`/couple/accept/${requestId}`);
+    return response.data;
+};
+export const unlinkCouple = async () => {
+    const response = await axiosInstance.delete("/couple/unlink");
+    return response.data;
+};
+export const updateRomanticNote = async (data) => {
+    const response = await axiosInstance.put("/couple/note", data);
+    return response.data;
+};
+export const getDailyInsight = async () => {
+    try {
+        const response = await axiosInstance.get("/couple/insight");
+        return response.data;
+    } catch (err) {
+        return { coupleStreak: 0, partner: null };
+    }
+};
+export const updateMood = async (data) => {
+    try {
+        const response = await axiosInstance.put("/couple/mood", data);
+        return response.data;
+    } catch (err) {
+        return { user: { mood: data?.mood || "neutral", coupleStreak: 0 } };
+    }
+};
+export const linkAI = async (data) => {
+    const response = await axiosInstance.post("/couple/link-ai", data);
+    return response.data;
+};
 export const notifyCall = async (data) => {
     const response = await axiosInstance.post("/chat/notify-call", data);
     return response.data;
