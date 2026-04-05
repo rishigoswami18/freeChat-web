@@ -100,5 +100,18 @@ export const ChatSkeleton = () => (
                 </div>
             </div>
         ))}
+        ))}
+    </div>
+);
+
+export const GameSkeleton = () => (
+    <div className="space-y-6 p-4">
+        <div className="h-48 bg-white/[0.02] border border-white/5 rounded-3xl relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+             <div className="h-24 bg-white/[0.02] border border-white/5 rounded-2xl" />
+             <div className="h-24 bg-white/[0.02] border border-white/5 rounded-2xl" />
+        </div>
     </div>
 );

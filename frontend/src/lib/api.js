@@ -292,6 +292,14 @@ export const getRazorpayKey = async () => {
     const response = await axiosInstance.get("/gems/razorpay-key");
     return response.data;
 };
+export const createMembershipOrder = async () => {
+    const response = await axiosInstance.post("/membership/order");
+    return response.data;
+};
+export const verifyMembershipPayment = async (data) => {
+    const response = await axiosInstance.post("/membership/verify", data);
+    return response.data;
+};
 
 // Communities
 export const getCommunities = async () => {
