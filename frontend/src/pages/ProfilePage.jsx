@@ -7,14 +7,15 @@ import useLogout from "../hooks/useLogout";
 import toast from "react-hot-toast";
 import { useStealthStore } from "../store/useStealthStore";
 import { isPremiumUser } from "../lib/premium";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 // Sub-component Architectures
-import ProfileHeader from "../components/profile/ProfileHeader";
+import PremiumProfileHeader from "../components/profile/PremiumProfileHeader";
 import EditProfileForm from "../components/profile/EditProfileForm";
 import SecuritySettings from "../components/profile/SecuritySettings";
 import StealthSettings from "../components/profile/StealthSettings";
 import DangerZone from "../components/profile/DangerZone";
+import { ProfileSkeleton } from "../components/Skeletons";
 
 // Lazy-loaded Weight Fragments reducing initial JavaScript Bundle parsed by browser
 const ProfilePosts = lazy(() => import("../components/profile/ProfilePosts"));
@@ -93,11 +94,7 @@ const ProfilePage = () => {
 
     // === RENDER FALLBACKS ===
     if (authLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center">
-                <Loader2 className="size-8 animate-spin text-primary" />
-            </div>
-        );
+        return <ProfileSkeleton />;
     }
 
     // === RENDER: EDIT MODE ===
@@ -158,30 +155,29 @@ const ProfilePage = () => {
     // === RENDER: VIEW MODE ===
     return (
         <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 animate-fade-in">
-            {/* Decoupled Header Matrix */}
-            <ProfileHeader 
+            <PremiumProfileHeader 
                 authUser={authUser} 
                 postsCount={userPosts.length} 
                 onEditClick={() => setIsEditing(true)} 
                 onShareClick={handleShareProfile} 
-                onFriendsClick={() => setShowFriends(true)} 
                 onLogout={logoutMutation}
-                isLoggingOut={isLoggingOut}
             />
 
             {/* View Mode Toggle Controls */}
-            <div className="flex justify-center border-t sm:border-t-0 sm:border-b border-base-300 mb-6">
+            <div className="flex justify-center border-b border-white/5 mb-10 pb-2">
                 <button
                     onClick={() => setViewMode("grid")}
-                    className={`flex items-center gap-2 px-8 py-3 transition-all font-bold text-xs uppercase tracking-widest sm:border-t-2 ${viewMode === "grid" ? "sm:border-primary text-primary" : "border-transparent opacity-40"}`}
+                    className={`flex items-center gap-3 px-10 py-4 transition-all font-black text-[10px] uppercase tracking-[0.2em] relative ${viewMode === "grid" ? "text-primary" : "text-white/20"}`}
                 >
-                    <Grid className="size-4" /> Posts
+                    <Grid className="size-4" /> Portfolio
+                    {viewMode === "grid" && <motion.div layoutId="profileTab" className="absolute bottom-0 inset-x-0 h-1 bg-primary rounded-full shadow-[0_0_15px_rgba(99,101,241,0.5)]" />}
                 </button>
                 <button
                     onClick={() => setViewMode("feed")}
-                    className={`flex items-center gap-2 px-8 py-3 transition-all font-bold text-xs uppercase tracking-widest sm:border-t-2 ${viewMode === "feed" ? "sm:border-primary text-primary" : "border-transparent opacity-40"}`}
+                    className={`flex items-center gap-3 px-10 py-4 transition-all font-black text-[10px] uppercase tracking-[0.2em] relative ${viewMode === "feed" ? "text-primary" : "text-white/20"}`}
                 >
-                    <List className="size-4" /> Feed
+                    <List className="size-4" /> Live Feed
+                    {viewMode === "feed" && <motion.div layoutId="profileTab" className="absolute bottom-0 inset-x-0 h-1 bg-primary rounded-full shadow-[0_0_15px_rgba(99,101,241,0.5)]" />}
                 </button>
             </div>
 
@@ -218,18 +214,18 @@ const ProfilePage = () => {
                     />
                 )}
             </Suspense>
-            {/* Compliance & Safety Badge — Professional Audit Ready */}
-            <div className="mt-16 py-8 border-t border-base-content/5 text-center px-4">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 mb-3">
-                    <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Security & Compliance Guard Active</span>
+            {/* Footer Trust Badge */}
+            <div className="mt-16 py-8 border-t border-white/5 text-center px-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 rounded-xl border border-emerald-500/15 mb-3">
+                    <div className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400">Secure & Verified</span>
                 </div>
-                <p className="text-[11px] font-medium opacity-40 max-w-xs mx-auto leading-relaxed">
-                    Zyro is a high-security platform. All interactions are monitored for safety and compliance with global standards.
+                <p className="text-[11px] text-white/30 font-medium max-w-xs mx-auto leading-relaxed">
+                    FreeChat is committed to user safety. All interactions comply with global privacy standards.
                 </p>
-                <div className="flex justify-center gap-6 mt-6 opacity-30 grayscale hover:grayscale-0 transition-all">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" className="h-4" alt="Razorpay" />
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Google_Play_Arrow_logo.svg" className="h-4" alt="Google Play" />
+                <div className="flex justify-center gap-6 mt-5 opacity-20 grayscale hover:grayscale-0 hover:opacity-40 transition-all">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" className="h-3.5" alt="Razorpay" />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d1/Google_Play_Arrow_logo.svg" className="h-3.5" alt="Google Play" />
                 </div>
             </div>
         </div>

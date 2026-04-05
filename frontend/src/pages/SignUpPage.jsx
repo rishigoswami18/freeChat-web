@@ -6,6 +6,8 @@ import GoogleSignInButton from "../components/GoogleSignInButton";
 import Logo from "../components/Logo";
 import toast from "react-hot-toast";
 import { requestOTP } from "../lib/api";
+import { motion } from "framer-motion";
+import { ArrowRight, Shield, Sparkles, Heart } from "lucide-react";
 
 const SignUpPage = () => {
   const [signupData, setSignupData] = useState({
@@ -13,34 +15,29 @@ const SignUpPage = () => {
     email: "",
     password: "",
     dateOfBirth: "",
-    otp: "", // Added otp field
+    otp: "",
   });
 
-  const [isSendingOtp, setIsSendingOtp] = useState(false); // Added isSendingOtp state
-  const [otpSent, setOtpSent] = useState(false); // Added otpSent state
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   const maxDate = new Date();
   const maxDateStr = maxDate.toISOString().split("T")[0];
 
   const { isPending, error, signupMutation } = useSignUp();
 
-  // Added handleSendCode function
   const handleSendCode = async () => {
     if (!signupData.email) return toast.error("Please enter your email first");
-
-    // Quick local regex check
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(signupData.email)) {
       return toast.error("Please enter a valid email address");
     }
-
     setIsSendingOtp(true);
     try {
       await requestOTP(signupData.email);
       setOtpSent(true);
       toast.success("Verification code sent to your email!");
     } catch (err) {
-      console.error("OTP Error:", err);
       toast.error(err.response?.data?.message || err.message || "Failed to send code");
     } finally {
       setIsSendingOtp(false);
@@ -53,30 +50,33 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden bg-base-300">
-      {/* Premium ambient animated background */}
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden bg-[#020617]">
+      {/* Ambient background */}
       <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] animate-pulse max-w-[600px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/20 rounded-full blur-[120px] animate-pulse max-w-[600px] delay-1000" />
+        <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-500/8 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-violet-500/5 rounded-full blur-[150px]" />
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
       </div>
 
-      <div className="glass-panel-heavy z-10 flex flex-col lg:flex-row w-full max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl transition-all duration-300">
-        {/* SIGNUP FORM - LEFT SIDE */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="z-10 flex flex-col lg:flex-row w-full max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-2xl border border-white/5 bg-white/[0.02] backdrop-blur-xl"
+      >
+        {/* SIGNUP FORM */}
         <div className="w-full lg:w-1/2 p-8 sm:p-12 flex flex-col justify-center relative">
-          {/* Subtle noise texture over the glass */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay"></div>
-          
           <div className="relative z-10">
-            {/* LOGO */}
             <div className="mb-8">
-              <Logo className="size-12" fontSize="text-4xl" />
+              <Logo className="size-12" fontSize="text-3xl" />
             </div>
 
-            {/* ERROR MESSAGE IF ANY */}
             {error && (
-              <div className="alert alert-error mb-6 rounded-2xl text-sm border-error/20 bg-error/10 text-error-content shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span>{error.response?.data?.message || "Signup failed"}</span>
+              <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/15 flex items-center gap-3">
+                <div className="size-8 rounded-xl bg-rose-500/20 flex items-center justify-center shrink-0">
+                  <span className="text-rose-400 text-sm">!</span>
+                </div>
+                <span className="text-sm text-rose-300 font-medium">{error.response?.data?.message || "Signup failed"}</span>
               </div>
             )}
 
@@ -84,58 +84,38 @@ const SignUpPage = () => {
               <form onSubmit={handleSignup}>
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-3xl font-extrabold tracking-tight mb-2">
-                      Create an Account
-                    </h2>
-                    <p className="text-base opacity-60">
-                      Join <span className="text-primary font-medium">Zyro</span> and start connecting
+                    <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2 text-white">Create your account</h2>
+                    <p className="text-sm text-white/40 font-medium">
+                      Join <span className="text-indigo-400">FreeChat</span> — India's social platform
                     </p>
                   </div>
 
                   <div className="space-y-4">
                     {/* FULLNAME */}
-                    <div className="form-control w-full">
-                      <label className="label pb-2">
-                        <span className="label-text font-semibold text-xs uppercase tracking-widest opacity-70">
-                          Full Name
-                        </span>
-                      </label>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-white/40 ml-1">Full Name</label>
                       <input
                         type="text"
                         placeholder="John Doe"
                         className="input-premium w-full rounded-2xl px-4 py-3.5 text-base"
                         value={signupData.fullName}
-                        onChange={(e) =>
-                          setSignupData({
-                            ...signupData,
-                            fullName: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
                         required
                       />
                     </div>
 
                     {/* EMAIL */}
-                    <div className="form-control w-full">
-                      <label className="label pb-2">
-                        <span className="label-text font-semibold text-xs uppercase tracking-widest opacity-70">
-                          Email
-                        </span>
-                      </label>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-white/40 ml-1">Email</label>
                       <div className="relative">
                         <input
                           type="email"
                           placeholder="john@example.com"
                           className={`input-premium w-full rounded-2xl px-4 py-3.5 text-base pr-26 ${signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email)
-                            ? "border-error focus:border-error ring-1 ring-error/20" : ""
+                            ? "border-rose-500/30 focus:border-rose-500/50" : ""
                             }`}
                           value={signupData.email}
-                          onChange={(e) =>
-                            setSignupData({
-                              ...signupData,
-                              email: e.target.value,
-                            })
-                          }
+                          onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                           required
                           disabled={otpSent}
                         />
@@ -144,157 +124,101 @@ const SignUpPage = () => {
                             type="button"
                             onClick={handleSendCode}
                             disabled={isSendingOtp}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-xs h-8 px-3 btn-primary text-xs font-bold rounded-xl shadow-sm"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 px-3 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold rounded-xl transition-all"
                           >
                             {isSendingOtp ? <span className="loading loading-spinner loading-xs"></span> : "Send Code"}
                           </button>
                         )}
                       </div>
                       {signupData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(signupData.email) && (
-                        <p className="text-[11px] font-medium text-error mt-1.5 pl-1">
-                          Please enter a valid email address
-                        </p>
+                        <p className="text-[11px] text-rose-400 mt-1 pl-1">Please enter a valid email address</p>
                       )}
                       {otpSent && (
-                        <p className="text-[11px] text-success mt-1.5 pl-1 font-bold">
-                          ✓ Email locked for verification
-                        </p>
+                        <p className="text-[11px] text-emerald-400 mt-1 pl-1 font-medium">✓ Code sent — check your inbox</p>
                       )}
                     </div>
 
                     {/* OTP FIELD */}
                     {otpSent && (
-                      <div className="form-control w-full animate-in fade-in slide-in-from-top-2 duration-300">
-                        <label className="label pb-2">
-                          <span className="label-text font-semibold text-xs uppercase tracking-widest text-primary">
-                            Verification Code
-                          </span>
-                        </label>
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="space-y-2"
+                      >
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400 ml-1">Verification Code</label>
                         <input
                           type="text"
                           placeholder="6-digit code"
                           maxLength={6}
                           className="input-premium w-full rounded-2xl px-4 py-3.5 text-base font-mono tracking-[0.5em] text-center"
                           value={signupData.otp}
-                          onChange={(e) =>
-                            setSignupData({
-                              ...signupData,
-                              otp: e.target.value.replace(/\D/g, ""),
-                            })
-                          }
+                          onChange={(e) => setSignupData({ ...signupData, otp: e.target.value.replace(/\D/g, "") })}
                           required
                         />
-                      </div>
+                      </motion.div>
                     )}
 
                     {/* PASSWORD */}
-                    <div className="form-control w-full">
-                      <label className="label pb-2">
-                        <span className="label-text font-semibold text-xs uppercase tracking-widest opacity-70">
-                          Password
-                        </span>
-                      </label>
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-white/40 ml-1">Password</label>
                       <input
                         type="password"
                         placeholder="••••••••"
                         className="input-premium w-full rounded-2xl px-4 py-3.5 text-base"
                         value={signupData.password}
-                        onChange={(e) =>
-                          setSignupData({
-                            ...signupData,
-                            password: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                         required
                       />
-                      <p className="text-[11px] font-medium opacity-50 mt-1.5 pl-1">
-                        Minimum 6 characters
-                      </p>
+                      <p className="text-[10px] text-white/25 mt-1 pl-1">Minimum 6 characters</p>
                     </div>
 
-                    {/* DATE OF BIRTH */}
-                    <div className="form-control w-full">
-                      <label className="label pb-2">
-                        <span className="label-text font-semibold text-xs uppercase tracking-widest opacity-70">
-                          Date of Birth
-                        </span>
-                      </label>
+                    {/* DOB */}
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-white/40 ml-1">Date of Birth</label>
                       <input
                         type="date"
                         className="input-premium w-full rounded-2xl px-4 py-3.5 text-base"
                         value={signupData.dateOfBirth}
-                        onChange={(e) =>
-                          setSignupData({
-                            ...signupData,
-                            dateOfBirth: e.target.value,
-                          })
-                        }
+                        onChange={(e) => setSignupData({ ...signupData, dateOfBirth: e.target.value })}
                         max={maxDateStr}
                         required
                       />
                     </div>
 
-                    <div className="form-control mt-2 mb-2">
-                      <label className="label cursor-pointer justify-start gap-3 pl-1">
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-sm checkbox-primary rounded shadow-sm border-base-content/20"
-                          required
-                        />
-                        <span className="text-xs leading-tight opacity-70 font-medium">
-                          I agree to the{" "}
-                          <Link
-                            to="/terms"
-                            className="text-primary hover:underline font-bold"
-                          >
-                            Terms of Service
-                          </Link>{" "}
-                          and{" "}
-                          <Link
-                            to="/privacy-policy"
-                            className="text-primary hover:underline font-bold"
-                          >
-                            Privacy Policy
-                          </Link>
-                        </span>
-                      </label>
+                    <div className="flex items-start gap-3 mt-2">
+                      <input type="checkbox" className="checkbox checkbox-sm checkbox-primary rounded mt-0.5" required />
+                      <span className="text-xs text-white/40 leading-relaxed">
+                        I agree to the{" "}
+                        <Link to="/terms" className="text-indigo-400 hover:text-indigo-300 font-semibold">Terms</Link>{" "}and{" "}
+                        <Link to="/privacy-policy" className="text-indigo-400 hover:text-indigo-300 font-semibold">Privacy Policy</Link>
+                      </span>
                     </div>
                   </div>
 
-                  <button
-                    className="btn btn-primary w-full rounded-2xl shadow-[0_4px_14px_0_oklch(var(--p)/0.39)] hover:shadow-[0_6px_20px_oklch(var(--p)/0.23)] hover:-translate-y-0.5 transition-all duration-200 text-base font-bold mt-2"
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="h-14 bg-indigo-500 hover:bg-indigo-400 w-full rounded-2xl text-white shadow-lg shadow-indigo-500/20 transition-all text-sm font-semibold flex items-center justify-center gap-2"
                     type="submit"
                     disabled={isPending}
                   >
                     {isPending ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Creating account...
-                      </>
+                      <><span className="loading loading-spinner loading-xs"></span> Creating account...</>
                     ) : (
-                      "Create Account"
+                      <>Create Account <ArrowRight size={16} /></>
                     )}
-                  </button>
+                  </motion.button>
 
-                  <div className="divider text-xs uppercase tracking-widest opacity-40 before:bg-base-content/10 after:bg-base-content/10 my-1">OR</div>
+                  <div className="divider text-[10px] uppercase tracking-wider text-white/20 before:bg-white/5 after:bg-white/5 my-1">or continue with</div>
 
-                  {/* Google Sign Up */}
-                  <div className="w-full relative group">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-                    <div className="relative">
-                      <GoogleSignInButton text="signup_with" />
-                    </div>
+                  <div className="w-full">
+                    <GoogleSignInButton text="signup_with" />
                   </div>
 
-                  <div className="text-center mt-6">
-                    <p className="text-sm opacity-70">
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-white/40">
                       Already have an account?{" "}
-                      <Link
-                        to="/login"
-                        className="text-primary font-bold hover:underline underline-offset-4 decoration-2"
-                      >
-                        Sign in
-                      </Link>
+                      <Link to="/login" className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors">Sign in</Link>
                     </p>
                   </div>
                 </div>
@@ -303,40 +227,45 @@ const SignUpPage = () => {
           </div>
         </div>
 
-        {/* SIGNUP FORM - RIGHT SIDE */}
-        <div className="hidden lg:flex w-full lg:w-1/2 bg-base-200/50 backdrop-blur-md items-center justify-center relative overflow-hidden border-l border-base-content/5">
-          {/* Grid pattern overlay */}
-          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: "radial-gradient(oklch(var(--bc)) 1px, transparent 1px)", backgroundSize: "24px 24px" }}></div>
+        {/* RIGHT PANEL */}
+        <div className="hidden lg:flex w-full lg:w-1/2 bg-gradient-to-br from-violet-500/10 via-transparent to-indigo-500/5 items-center justify-center relative overflow-hidden border-l border-white/5">
+          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/10 rounded-full blur-[100px]" />
-
-          <div className="max-w-md p-10 relative z-10 flex flex-col items-center">
-            <div className="relative aspect-square w-80 mx-auto transform transition duration-500 hover:scale-105">
+          <div className="max-w-sm p-10 relative z-10 flex flex-col items-center">
+            <div className="relative w-64 h-64 mx-auto">
               <img
                 src="/Video call-bro.png"
-                alt="Zyro Connection"
-                className="w-full h-full object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.15)]"
+                alt="Join FreeChat"
+                className="w-full h-full object-contain"
               />
             </div>
 
-            <div className="text-center space-y-5 mt-10">
-              <h2 className="text-2xl font-black tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Join the network.
+            <div className="text-center space-y-6 mt-8">
+              <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Join the community
               </h2>
-              <p className="opacity-60 text-base leading-relaxed font-medium px-4">
-                Experience unparalleled communication, rich community features, and instant video calling wrapped in a premium interface.
+              <p className="text-white/40 text-sm leading-relaxed font-medium">
+                Connect, create, and grow with millions of users across India.
               </p>
 
-              {/* Feature badges */}
-              <div className="flex flex-wrap justify-center gap-3 pt-4">
-                <span className="glass-panel-flat px-4 py-2 rounded-full text-sm font-semibold tracking-wide shadow-sm"><span className="text-primary mr-2">✦</span>Free Forever</span>
-                <span className="glass-panel-flat px-4 py-2 rounded-full text-sm font-semibold tracking-wide shadow-sm"><span className="text-primary mr-2">✦</span>Premium Games</span>
-                <span className="glass-panel-flat px-4 py-2 rounded-full text-sm font-semibold tracking-wide shadow-sm"><span className="text-primary mr-2">✦</span>Reels & Stories</span>
+              <div className="grid grid-cols-3 gap-3 pt-2">
+                <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <Shield size={18} className="text-indigo-400" />
+                  <span className="text-[9px] font-semibold text-white/40 uppercase">Free Forever</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <Sparkles size={18} className="text-amber-400" />
+                  <span className="text-[9px] font-semibold text-white/40 uppercase">Games</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                  <Heart size={18} className="text-rose-400" />
+                  <span className="text-[9px] font-semibold text-white/40 uppercase">Stories</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

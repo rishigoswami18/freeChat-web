@@ -1,116 +1,104 @@
 import React from "react";
+import { motion } from "framer-motion";
 
-export const HeroSkeleton = () => (
-  <div className="relative w-full h-64 md:h-80 rounded-[40px] bg-white/5 border border-white/10 animate-pulse overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-    <div className="p-10 flex flex-col justify-between h-full">
-      <div className="flex justify-between items-start">
-        <div className="space-y-3">
-          <div className="w-24 h-6 bg-white/10 rounded-full" />
-          <div className="w-48 h-4 bg-white/5 rounded-full" />
-        </div>
-        <div className="w-20 h-4 bg-white/5 rounded-full" />
-      </div>
-      <div className="space-y-4">
-        <div className="w-3/4 h-16 bg-white/10 rounded-2xl" />
-        <div className="w-1/2 h-6 bg-white/5 rounded-full" />
-      </div>
-    </div>
-  </div>
-);
-
-export const PulseSkeleton = () => (
-  <div className="bg-white/5 border border-white/10 p-8 rounded-[3rem] h-full animate-pulse">
-    <div className="flex justify-between items-center mb-10">
-      <div className="w-32 h-6 bg-white/10 rounded-full" />
-      <div className="w-24 h-6 bg-white/5 rounded-full" />
-    </div>
-    <div className="space-y-12">
-      <div className="flex items-center gap-4">
-        <div className="size-10 rounded-xl bg-white/10" />
-        <div className="flex-1 h-3 bg-white/5 rounded-full" />
-        <div className="w-8 h-4 bg-white/10" />
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="size-10 rounded-xl bg-white/10" />
-        <div className="flex-1 h-3 bg-white/5 rounded-full" />
-        <div className="w-8 h-4 bg-white/10" />
-      </div>
-    </div>
-  </div>
-);
-
-export const MatchListSkeleton = () => (
-  <div className="space-y-4">
-    <div className="w-40 h-6 bg-white/10 rounded-full mb-6" />
-    {[1, 2, 3].map((i) => (
-      <div key={i} className="p-5 bg-white/5 border border-white/5 rounded-3xl flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="size-12 rounded-2xl bg-white/10" />
-          <div className="space-y-2">
-            <div className="w-32 h-4 bg-white/10 rounded-full" />
-            <div className="w-24 h-3 bg-white/5 rounded-full" />
-          </div>
-        </div>
-        <div className="size-5 bg-white/5 rounded-full" />
-      </div>
-    ))}
-  </div>
+const Shimmer = () => (
+    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" />
 );
 
 export const PostSkeleton = () => (
-  <div className="bg-white/5 border border-white/5 rounded-[32px] p-6 animate-pulse space-y-6">
-    <div className="flex items-center gap-4">
-      <div className="size-12 rounded-2xl bg-white/10" />
-      <div className="space-y-2 flex-1">
-        <div className="w-32 h-4 bg-white/10 rounded-full" />
-        <div className="w-24 h-3 bg-white/5 rounded-full" />
-      </div>
+    <div className="w-full bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden mb-8 p-6 space-y-6 relative">
+        <Shimmer />
+        <div className="flex items-center gap-4">
+            <div className="size-12 rounded-2xl bg-white/5" />
+            <div className="space-y-2 flex-1">
+                <div className="w-32 h-4 bg-white/10 rounded-full" />
+                <div className="w-24 h-2 bg-white/5 rounded-full" />
+            </div>
+        </div>
+        <div className="aspect-square w-full bg-white/5 rounded-[2rem]" />
+        <div className="flex justify-between items-center px-2">
+            <div className="flex gap-4">
+                <div className="w-16 h-8 bg-white/5 rounded-xl" />
+                <div className="w-16 h-8 bg-white/5 rounded-xl" />
+            </div>
+            <div className="w-8 h-8 bg-white/5 rounded-xl" />
+        </div>
     </div>
-    <div className="space-y-3">
-      <div className="w-full h-40 bg-white/5 rounded-[24px]" />
-      <div className="w-3/4 h-4 bg-white/5 rounded-full" />
-    </div>
-  </div>
 );
 
-export const ChatSkeleton = () => (
-  <div className="space-y-4">
-    {[1, 2, 3, 4, 5].map((i) => (
-      <div key={i} className="flex items-center gap-4 px-4 py-3 animate-pulse">
-        <div className="size-14 rounded-full bg-white/10" />
-        <div className="flex-1 space-y-3">
-          <div className="w-32 h-4 bg-white/10 rounded-full" />
-          <div className="w-3/4 h-3 bg-white/5 rounded-full" />
+export const ProfileSkeleton = () => (
+    <div className="space-y-8 animate-pulse p-8">
+        <div className="relative h-[300px] w-full rounded-[3rem] bg-white/5 overflow-hidden">
+            <Shimmer />
         </div>
-      </div>
-    ))}
-  </div>
+        <div className="flex flex-col items-center -mt-20 relative z-10 space-y-4">
+            <div className="size-32 rounded-[2.5rem] bg-white/10 border-4 border-[#020617]" />
+            <div className="w-48 h-6 bg-white/10 rounded-full" />
+            <div className="w-32 h-4 bg-white/5 rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="h-40 bg-white/5 rounded-[2rem]" />
+            <div className="h-40 bg-white/5 rounded-[2rem]" />
+        </div>
+    </div>
 );
 
 export const StorySkeleton = () => (
-    <div className="flex gap-4 animate-pulse">
-        {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex flex-col items-center gap-2">
-                <div className="size-[66px] rounded-full bg-white/10 p-[3px]">
-                    <div className="size-full rounded-full bg-white/5 border-[2.5px] border-black/20" />
+    <div className="flex gap-5 px-2 overflow-hidden">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="flex flex-col items-center gap-3 shrink-0">
+                <div className="size-[72px] rounded-full bg-white/5 border border-white/10 p-1">
+                    <div className="size-full rounded-full bg-white/5" />
                 </div>
-                <div className="w-12 h-3 bg-white/5 rounded-full" />
+                <div className="w-12 h-2 bg-white/5 rounded-full" />
             </div>
         ))}
     </div>
 );
 
-export const GameSkeleton = () => (
-  <div className="min-h-screen bg-[#060606] p-10 space-y-12 animate-pulse">
-    <div className="space-y-4">
-      <div className="w-32 h-8 bg-white/5 rounded-2xl" />
-      <div className="w-64 h-12 bg-white/10 rounded-3xl" />
-      <div className="w-48 h-4 bg-white/5 rounded-full" />
+export const BusinessCardSkeleton = () => (
+    <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-between relative overflow-hidden">
+        <Shimmer />
+        <div className="flex items-center gap-3">
+            <div className="size-11 rounded-xl bg-white/5" />
+            <div className="space-y-2">
+                <div className="w-24 h-3 bg-white/10 rounded-full" />
+                <div className="w-16 h-2 bg-white/5 rounded-full" />
+            </div>
+        </div>
+        <div className="size-8 rounded-lg bg-white/5" />
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="h-64 bg-white/5 rounded-[40px]" />
-      <div className="h-64 bg-white/5 rounded-[40px]" />
+);
+
+export const WidgetSkeleton = () => (
+    <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-6 relative overflow-hidden">
+        <Shimmer />
+        <div className="space-y-2">
+            <div className="w-20 h-2 bg-white/5 rounded-full" />
+            <div className="w-32 h-8 bg-white/10 rounded-xl" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+            <div className="h-14 bg-white/5 rounded-2xl" />
+            <div className="h-14 bg-white/5 rounded-2xl" />
+        </div>
+        <div className="h-12 w-full bg-white/10 rounded-2xl" />
     </div>
-  </div>
+);
+
+export const ChatSkeleton = () => (
+    <div className="flex flex-col gap-4 p-4">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="flex items-center gap-4 relative overflow-hidden p-4 rounded-3xl bg-white/[0.02] border border-white/5">
+                <Shimmer />
+                <div className="size-14 rounded-2xl bg-white/5" />
+                <div className="flex-1 space-y-3">
+                    <div className="flex justify-between items-center">
+                        <div className="w-32 h-4 bg-white/10 rounded-full" />
+                        <div className="w-12 h-2 bg-white/5 rounded-full" />
+                    </div>
+                    <div className="w-48 h-2 bg-white/5 rounded-full" />
+                </div>
+            </div>
+        ))}
+    </div>
 );

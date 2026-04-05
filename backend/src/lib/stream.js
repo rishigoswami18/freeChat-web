@@ -43,3 +43,20 @@ export const generateStreamToken = (userId) => {
     console.error("Error generating Stream token:", error);
   }
 };
+export const sendAutomatedMessage = async (senderId, recipientId, text) => {
+    if (!streamClient) return;
+    try {
+        const channel = streamClient.channel("messaging", {
+            members: [senderId.toString(), recipientId.toString()],
+        });
+        await channel.create();
+        await channel.sendMessage({
+            text,
+            user_id: senderId.toString(),
+            silent: false
+        });
+        console.log(`✅ Auto-reply sent from ${senderId} to ${recipientId}`);
+    } catch (error) {
+        console.error("❌ Failed to send auto-reply:", error.message);
+    }
+};

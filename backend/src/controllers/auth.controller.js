@@ -311,16 +311,19 @@ export async function signup(req, res) {
       return res.status(400).json({ message: "Temporary or throwaway email domains are not allowed." });
     }
 
-    // OTP Verification (optional — allows signup even when email service is down)
+    // OTP Verification (Strict Enforcement)
     const { otp: userOtp, referralCode: usedReferralCode } = req.body;
-    if (userOtp) {
-      const validOtp = await OTP.findOne({ email, otp: userOtp });
-      if (!validOtp) {
-        console.warn(`Signup: Invalid OTP attempt for ${email}`);
-        return res.status(400).json({ message: "Invalid or expired verification code" });
-      }
-      await OTP.deleteOne({ _id: validOtp._id });
+    if (!userOtp) {
+      return res.status(400).json({ message: "Verification code (OTP) is required. Please verify your email first." });
     }
+
+    const validOtp = await OTP.findOne({ email, otp: userOtp });
+    if (!validOtp) {
+      console.warn(`Signup Security: Invalid OTP attempt for ${email}`);
+      return res.status(401).json({ message: "Invalid or expired verification code" });
+    }
+    await OTP.deleteOne({ _id: validOtp._id });
+
 
     let referringUserId = null;
     if (usedReferralCode) {
@@ -348,12 +351,13 @@ export async function signup(req, res) {
       const { default: UserWallet } = await import("../models/UserWallet.js");
       const wallet = await UserWallet.create({
         userId: newUser._id,
-        bonusBalance: 100,
-        totalBalance: 100
+        bonusBalance: 500, // Starting reward for FreeChat
+        totalBalance: 500
       });
 
       newUser.wallet = wallet._id;
       await newUser.save();
+
     }
 
     // Emit Event for all secondary tasks
@@ -458,17 +462,25 @@ export async function onboard(req, res) {
       return res.status(400).json({ message: "Essential Fan-Identity details are required" });
     }
 
-    // Credits 500 Bond Coins for completing onboarding
+    // Upgrading to UserWallet logic
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { 
         ...req.body, 
         isOnboarded: true,
-        bondCoins: 500, // Reward
         rank: 'Rookie'
       },
       { new: true }
     );
+
+    // Any missing wallet initialization?
+    const { default: UserWallet } = await import("../models/UserWallet.js");
+    await UserWallet.findOneAndUpdate(
+      { userId },
+      { $setOnInsert: { bonusBalance: 500, totalBalance: 500 } },
+      { upsert: true }
+    );
+
 
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
 

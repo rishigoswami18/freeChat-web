@@ -35,14 +35,28 @@ const UserWalletSchema = new mongoose.Schema({
         type: String,
         default: "BC" 
     },
+    gems: {
+        type: Number,
+        default: 0
+    },
+    lastRewardClaimDate: {
+        type: Date,
+        default: null
+    },
     lastUpdated: {
         type: Date,
         default: Date.now
     }
 }, { timestamps: true });
 
-// Optimistic lock check (optional for high traffic but recommended)
-UserWalletSchema.index({ userId: 1, winnings: 1 });
-UserWalletSchema.index({ userId: 1, totalBalance: 1 });
+// Automatically calculate totalBalance before each save
+UserWalletSchema.pre('save', function(next) {
+    this.totalBalance = (this.winnings || 0) + (this.bonusBalance || 0) + (this.frozenBalance || 0);
+    this.lastUpdated = new Date();
+    next();
+});
+
+// For findOneAndUpdate, we need a separate way or just ensure totalBalance isn't relied on for critical logic
+// or use a post-find middleware. For now, display logic should just sum the fields on frontend.
 
 export default mongoose.model("UserWallet", UserWalletSchema);

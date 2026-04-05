@@ -8,118 +8,143 @@ import {
     ShieldAlert,
     UserX,
     ShieldCheck,
-    Trash2,
     Send,
     Loader2,
     RefreshCcw,
     CheckCircle2,
-    Sparkles,
     Mail,
     UserPlus,
-    CheckSquare,
-    Square,
-    UserCheck,
-    LifeBuoy,
-    Star,
     X,
     Smartphone,
-    Package,
     ArrowDownToLine,
     Plus,
-    CheckCircle,
-    BadgeCheck,
-    Calendar
+    Trophy,
+    TrendingUp,
+    Zap,
+    LifeBuoy,
+    ExternalLink,
+    ChevronRight,
+    Filter,
+    Shield
 } from "lucide-react";
 import {
     getAdminStats,
     getAdminUsers,
-    getAdminPosts,
     deleteUserAdmin,
     toggleUserRole,
     broadcastNotification,
     broadcastEmail,
-    deletePost,
-    clearAdminInbox,
-    getFirebaseNonUsers,
-    sendInvites,
-    sweepPendingActions,
     getAdminSupportMessages,
-    deleteSupportMessage,
     sendEmailToUser,
     sendNotificationToUser,
     getAllReleases,
-    createRelease,
-    updateRelease,
-    deleteRelease,
     getAdminMatches,
-    createMatch,
-    updateMatchStatusAdmin,
-    resolveMatchBall,
-    getWithdrawalRequests,
-    processWithdrawal,
     getFinancialStats
 } from "../lib/api";
-import { BASE_URL, APK_DOWNLOAD_URL, downloadFile } from "../lib/axios";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+
+const StatCard = ({ label, value, icon: Icon, trend }) => (
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <Icon size={20} />
+            </div>
+            {trend && (
+                <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${trend > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-500'}`}>
+                    {trend > 0 ? <TrendingUp size={12} /> : null}
+                    {trend}%
+                </div>
+            )}
+        </div>
+        <div className="space-y-1">
+            <h4 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h4>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</p>
+        </div>
+    </div>
+);
+
+const UserItem = ({ user, onAction }) => (
+    <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-slate-200 hover:shadow-sm transition-all duration-200 group">
+        <div className="flex items-center gap-4">
+            <div className="relative">
+                <img 
+                    src={user.profilePic || "/avatar.png"} 
+                    alt="" 
+                    className="size-12 rounded-full object-cover border border-slate-100 shadow-sm"
+                />
+                {user.role === 'admin' && (
+                    <div className="absolute -bottom-1 -right-1 p-1 bg-white rounded-full shadow-sm">
+                        <ShieldCheck size={12} className="text-indigo-600" />
+                    </div>
+                )}
+            </div>
+            <div>
+                <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-slate-900">{user.fullName}</p>
+                    {user.isVerified && <CheckCircle2 size={14} className="text-blue-500 fill-blue-50" />}
+                </div>
+                <p className="text-xs text-slate-400 font-medium">{user.email}</p>
+            </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+            <div className="hidden md:flex flex-col items-end mr-4">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter ${user.role === 'admin' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-500'}`}>
+                    {user.role}
+                </span>
+                <span className="text-[10px] font-medium text-slate-300 mt-1">Gems: {user.gems || 0}</span>
+            </div>
+            
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                    onClick={() => onAction('notify', user)}
+                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    title="Send Alert"
+                >
+                    <Megaphone size={16} />
+                </button>
+                <button 
+                    onClick={() => onAction('email', user)}
+                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    title="Send Email"
+                >
+                    <Mail size={16} />
+                </button>
+                <button 
+                    onClick={() => onAction('delete', user)}
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    title="Delete User"
+                >
+                    <UserX size={16} />
+                </button>
+            </div>
+        </div>
+    </div>
+);
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState("stats");
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
-    const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    
+    // Broadcast State
     const [broadcastMsg, setBroadcastMsg] = useState("");
     const [isBroadcasting, setIsBroadcasting] = useState(false);
-    const [emailSubject, setEmailSubject] = useState("");
-    const [emailBody, setEmailBody] = useState("");
-    const [isEmailSending, setIsEmailSending] = useState(false);
-    const [isCleaning, setIsCleaning] = useState(false);
-    const [isSweeping, setIsSweeping] = useState(false);
-    const [supportMessages, setSupportMessages] = useState([]);
-    const [isSupportLoading, setIsSupportLoading] = useState(false);
-
-    // Individual Targeted Modal State
-    const [targetedUser, setTargetedUser] = useState(null); // The user being targeted
-    const [targetedType, setTargetedType] = useState(null); // 'email' or 'notification'
+    
+    // Targeted State
+    const [targetedUser, setTargetedUser] = useState(null);
+    const [targetedType, setTargetedType] = useState('notification');
     const [targetedSubject, setTargetedSubject] = useState("");
     const [targetedBody, setTargetedBody] = useState("");
     const [isTargetedSending, setIsTargetedSending] = useState(false);
 
-    // Invite system state
-    const [firebaseUsers, setFirebaseUsers] = useState([]);
-    const [firebaseStats, setFirebaseStats] = useState({ total: 0, registered: 0 });
-    const [selectedEmails, setSelectedEmails] = useState(new Set());
-    const [inviteLoading, setInviteLoading] = useState(false);
-    const [isSendingInvites, setIsSendingInvites] = useState(false);
-    const [inviteSearch, setInviteSearch] = useState("");
-    const [inviteSubject, setInviteSubject] = useState("");
-    const [inviteMessage, setInviteMessage] = useState("");
-
-    // APK Manager State
-    const [releases, setReleases] = useState([]);
-    const [isApkLoading, setIsApkLoading] = useState(false);
-    const [isApkUploading, setIsApkUploading] = useState(false);
-    const [showApkModal, setShowApkModal] = useState(false);
-    const [apkForm, setApkForm] = useState({
-        versionCode: "",
-        versionName: "",
-        releaseNotes: "",
-        isUpdateRequired: false,
-        apkFile: null // base64
-    });
-
-    // Zyro Specific State
-    const [matches, setMatches] = useState([]);
-    const [withdrawals, setWithdrawals] = useState([]);
-    const [bondStats, setBondStats] = useState(null);
-    const [newMatch, setNewMatch] = useState({ matchName: "", team1: { name: "" }, team2: { name: "" }, startTime: "" });
-    const [resolution, setResolution] = useState({ matchId: "", ballId: "", correctOutcome: "" });
-
     useEffect(() => {
-        fetchStats();
-    }, []);
+        if (activeTab === "stats") fetchStats();
+        if (activeTab === "users") fetchUsers();
+    }, [activeTab]);
 
     const fetchStats = async () => {
         try {
@@ -127,1596 +152,318 @@ const AdminDashboard = () => {
             const data = await getAdminStats();
             setStats(data.stats);
         } catch (err) {
-            toast.error("Failed to load stats");
+            toast.error("Analytics sync failed");
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchUsers = async (query = "") => {
+    const fetchUsers = async () => {
         try {
             setLoading(true);
-            const data = await getAdminUsers(query);
-            setUsers(data);
+            const data = await getAdminUsers(searchQuery);
+            const items = data?.data?.items || (Array.isArray(data) ? data : []);
+            setUsers(items);
         } catch (err) {
-            toast.error("Failed to load users");
+            toast.error("User database sync failed");
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchPosts = async () => {
-        try {
-            setLoading(true);
-            const data = await getAdminPosts();
-            setPosts(data);
-        } catch (err) {
-            toast.error("Failed to load posts");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchSupportMessages = async () => {
-        setIsSupportLoading(true);
-        try {
-            const data = await getAdminSupportMessages();
-            setSupportMessages(data || []);
-        } catch (err) {
-            toast.error("Failed to load support messages");
-        } finally {
-            setIsSupportLoading(false);
-        }
-    };
-
-    const handleDeleteSupport = async (id) => {
-        if (!window.confirm("Delete this support request?")) return;
-        try {
-            await deleteSupportMessage(id);
-            toast.success("Support request deleted");
-            fetchSupportMessages();
-        } catch (err) {
-            toast.error("Failed to delete request");
-        }
-    };
-
-    const fetchFirebaseUsers = async () => {
-        setInviteLoading(true);
-        try {
-            const data = await getFirebaseNonUsers();
-            setFirebaseUsers(data.nonUsers || []);
-            setFirebaseStats({ total: data.total, registered: data.registered });
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to fetch Firebase users");
-        } finally {
-            setInviteLoading(false);
-        }
-    };
-
-    const toggleEmailSelection = (email) => {
-        setSelectedEmails((prev) => {
-            const next = new Set(prev);
-            if (next.has(email)) next.delete(email);
-            else next.add(email);
-            return next;
-        });
-    };
-
-    const toggleSelectAll = () => {
-        const filtered = filteredFirebaseUsers;
-        if (selectedEmails.size === filtered.length) {
-            setSelectedEmails(new Set());
+    const handleAction = async (type, user) => {
+        if (type === 'delete') {
+            if (!window.confirm("Are you sure you want to delete this account?")) return;
+            try {
+                await deleteUserAdmin(user._id);
+                toast.success("Account deleted");
+                fetchUsers();
+            } catch (err) { toast.error("Delete operation failed"); }
         } else {
-            setSelectedEmails(new Set(filtered.map((u) => u.email)));
-        }
-    };
-
-    const handleSendInvites = async () => {
-        if (selectedEmails.size === 0) return toast.error("No users selected");
-        if (!window.confirm(`Send invite emails to ${selectedEmails.size} users?`)) return;
-
-        setIsSendingInvites(true);
-        try {
-            const res = await sendInvites(
-                Array.from(selectedEmails),
-                inviteSubject.trim() || undefined,
-                inviteMessage.trim() || undefined
-            );
-            toast.success(res.message);
-            setSelectedEmails(new Set());
-            setInviteSubject("");
-            setInviteMessage("");
-            // Refresh list to remove any that might have been registered
-            fetchFirebaseUsers();
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to send invites");
-        } finally {
-            setIsSendingInvites(false);
-        }
-    };
-
-    const filteredFirebaseUsers = firebaseUsers.filter(
-        (u) =>
-            u.email.toLowerCase().includes(inviteSearch.toLowerCase()) ||
-            (u.displayName && u.displayName.toLowerCase().includes(inviteSearch.toLowerCase()))
-    );
-
-    useEffect(() => {
-        if (activeTab === "users") fetchUsers(searchQuery);
-        if (activeTab === "posts") fetchPosts();
-        if (activeTab === "stats") fetchStats();
-        if (activeTab === "invite") fetchFirebaseUsers();
-        if (activeTab === "support") fetchSupportMessages();
-        if (activeTab === "apk") fetchReleases();
-        if (activeTab === "bondMatches") fetchMatches();
-        if (activeTab === "bondWithdrawals") fetchWithdrawals();
-        if (activeTab === "bondStats") fetchBondStats();
-    }, [activeTab]);
-
-    const fetchMatches = async () => {
-        try {
-            const data = await getAdminMatches();
-            setMatches(data || []);
-        } catch (err) { toast.error("Failed to load matches"); }
-    };
-
-    const fetchWithdrawals = async () => {
-        try {
-            const data = await getWithdrawalRequests();
-            setWithdrawals(data || []);
-        } catch (err) { toast.error("Failed to load withdrawals"); }
-    };
-
-    const fetchBondStats = async () => {
-        try {
-            const data = await getFinancialStats();
-            setBondStats(data);
-        } catch (err) { toast.error("Failed to load Bond stats"); }
-    };
-
-    const handleCreateMatch = async () => {
-        if (!newMatch.matchName || !newMatch.startTime) {
-            return toast.error("Match Name and Start Time required ⏳");
-        }
-        try {
-            await createMatch(newMatch);
-            toast.success("Match Scheduled! 🏏");
-            setNewMatch({ matchName: "", team1: { name: "" }, team2: { name: "" }, startTime: "" });
-            fetchMatches();
-        } catch (err) { 
-            console.error("Match creation error:", err);
-            toast.error(err.response?.data?.message || "Match creation failed"); 
-        }
-    };
-
-    const handleTogglePrediction = async (id, current) => {
-        try {
-            await updateMatchStatusAdmin(id, { isPredictionsEnabled: !current });
-            toast.success(`Predictions ${!current ? 'Enabled' : 'Disabled'}! 🔒`);
-            fetchMatches();
-        } catch (err) { toast.error("Update failed"); }
-    };
-
-    const handleResolveBall = async () => {
-        if (!resolution.matchId || !resolution.correctOutcome) return toast.error("Match & Outcome required");
-        try {
-            await resolveMatchBall(resolution);
-            toast.success("Coins Distributed! 🪙💎");
-            setResolution({ ...resolution, ballId: "", correctOutcome: "" });
-        } catch (err) { toast.error("Resolution failed"); }
-    };
-
-    const handleProcessWithdrawal = async (id, status) => {
-        try {
-            await processWithdrawal({ requestId: id, status });
-            toast.success(`Payout ${status}! 🏦`);
-            fetchWithdrawals();
-        } catch (err) { toast.error("Processing failed"); }
-    };
-
-    const fetchReleases = async () => {
-        setIsApkLoading(true);
-        try {
-            const data = await getAllReleases();
-            setReleases(data || []);
-        } catch (err) {
-            toast.error("Failed to load releases");
-        } finally {
-            setIsApkLoading(false);
-        }
-    };
-
-    const handleApkUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 100 * 1024 * 1024) return toast.error("File size exceeds 100MB limit");
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            setApkForm(prev => ({ ...prev, apkFile: reader.result }));
-            toast.success("File ready for upload");
-        };
-    };
-
-    const handleCreateRelease = async () => {
-        if (!apkForm.versionCode || !apkForm.versionName || !apkForm.apkFile) {
-            return toast.error("Please fill all required fields and upload an APK file");
-        }
-
-        setIsApkUploading(true);
-        try {
-            await createRelease({
-                ...apkForm,
-                versionCode: Number(apkForm.versionCode)
-            });
-            toast.success("Release created successfully!");
-            setShowApkModal(false);
-            setApkForm({
-                versionCode: "",
-                versionName: "",
-                releaseNotes: "",
-                isUpdateRequired: false,
-                apkFile: null
-            });
-            fetchReleases();
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Failed to create release");
-        } finally {
-            setIsApkUploading(false);
-        }
-    };
-
-    const handleDeleteRelease = async (id) => {
-        if (!window.confirm("Delete this release forever?")) return;
-        try {
-            await deleteRelease(id);
-            toast.success("Release deleted");
-            fetchReleases();
-        } catch (err) {
-            toast.error("Failed to delete release");
-        }
-    };
-
-    const handleToggleApkActive = async (release) => {
-        try {
-            await updateRelease(release._id, { isActive: !release.isActive });
-            toast.success(`Release marked as ${!release.isActive ? 'active' : 'inactive'}`);
-            fetchReleases();
-        } catch (err) {
-            toast.error("Failed to update status");
-        }
-    };
-
-    const handleBroadcast = async () => {
-        if (!broadcastMsg.trim()) return toast.error("Empty message");
-        setIsBroadcasting(true);
-        try {
-            await broadcastNotification(broadcastMsg);
-            toast.success("Broadcast sent to all users!");
-            setBroadcastMsg("");
-        } catch (err) {
-            toast.error("Broadcast failed");
-        } finally {
-            setIsBroadcasting(false);
-        }
-    };
-
-    const handleEmailBroadcast = async () => {
-        if (!emailSubject.trim() || !emailBody.trim()) return toast.error("Subject and message are required");
-        if (!window.confirm(`Send this email to all registered users? This cannot be undone.`)) return;
-
-        setIsEmailSending(true);
-        try {
-            const res = await broadcastEmail(emailSubject, emailBody);
-            toast.success(res.message);
-            setEmailSubject("");
-            setEmailBody("");
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Email broadcast failed");
-        } finally {
-            setIsEmailSending(false);
+            setTargetedUser(user);
+            setTargetedType(type === 'email' ? 'email' : 'notification');
+            setTargetedSubject("");
+            setTargetedBody("");
         }
     };
 
     const handleSendTargeted = async () => {
-        if (!targetedUser || !targetedBody.trim()) return toast.error("Message is required");
-        if (targetedType === 'email' && !targetedSubject.trim()) return toast.error("Subject is required");
-
+        if (!targetedBody.trim()) return toast.error("Message content required");
         setIsTargetedSending(true);
         try {
             if (targetedType === 'email') {
-                await sendEmailToUser(targetedUser._id, targetedSubject, targetedBody);
-                toast.success(`Email sent to ${targetedUser.fullName}`);
+                await sendEmailToUser({
+                    userId: targetedUser._id,
+                    subject: targetedSubject || "Application Update",
+                    body: targetedBody
+                });
             } else {
-                await sendNotificationToUser(targetedUser._id, targetedSubject || "Zyro Update", targetedBody);
-                toast.success(`Notification sent to ${targetedUser.fullName}`);
+                await sendNotificationToUser({
+                    userId: targetedUser._id,
+                    title: targetedSubject || "New Notification",
+                    body: targetedBody
+                });
             }
+            toast.success("Message sent successfully");
             setTargetedUser(null);
-            setTargetedType(null);
-            setTargetedSubject("");
-            setTargetedBody("");
         } catch (err) {
-            toast.error(err.response?.data?.message || "Action failed");
+            toast.error("Transmission failed");
         } finally {
             setIsTargetedSending(false);
         }
     };
 
-    const handleClearInbox = async () => {
-        if (!window.confirm("This will hide all individual chats from your admin inbox to clean up after the broadcast. History is not deleted. Proceed?")) return;
-        setIsCleaning(true);
+    const handleBroadcast = async () => {
+        if (!broadcastMsg.trim()) return toast.error("Announcement cannot be empty");
+        setIsBroadcasting(true);
         try {
-            const res = await clearAdminInbox();
-            toast.success(res.message);
+            await broadcastNotification({
+                title: "Platform Announcement",
+                message: broadcastMsg,
+                link: "/"
+            });
+            toast.success("Broadcast sent to all users");
+            setBroadcastMsg("");
         } catch (err) {
-            toast.error("Cleanup failed");
+            toast.error("Global announcement failed");
         } finally {
-            setIsCleaning(false);
-        }
-    };
-
-    const handleSweepPending = async () => {
-        if (!window.confirm("This will search for all users who have BOTH pending friend requests and unread messages, and send them a catch-up email. Proceed?")) return;
-        setIsSweeping(true);
-        try {
-            const res = await sweepPendingActions();
-            toast.success(res.message);
-        } catch (err) {
-            toast.error(err.response?.data?.message || "Sweep failed");
-        } finally {
-            setIsSweeping(false);
-        }
-    };
-
-    const handleToggleRole = async (userId) => {
-        try {
-            const res = await toggleUserRole(userId);
-            toast.success(`User role updated to ${res.role}`);
-            if (activeTab === "users") fetchUsers(searchQuery);
-        } catch (err) {
-            toast.error("Failed to update role");
-        }
-    };
-
-    const handleDeleteUser = async (userId) => {
-        if (!window.confirm("Permanently delete this user and all their content?")) return;
-        try {
-            await deleteUserAdmin(userId);
-            toast.success("User deleted");
-            fetchUsers(searchQuery);
-        } catch (err) {
-            toast.error("Deletion failed");
-        }
-    };
-
-    const handleDeletePost = async (postId) => {
-        if (!window.confirm("Delete this post?")) return;
-        try {
-            await deletePost(postId);
-            toast.success("Post deleted");
-            fetchPosts();
-        } catch (err) {
-            toast.error("Deletion failed");
+            setIsBroadcasting(false);
         }
     };
 
     return (
-        <div className="p-4 sm:p-8 max-w-7xl mx-auto min-h-screen font-outfit">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
-                <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative flex items-center gap-4 bg-base-100 rounded-2xl p-4 ring-1 ring-base-content/5">
-                        <div className="p-3 bg-primary/10 rounded-xl text-primary animate-pulse-slow">
-                            <ShieldAlert className="size-8" />
+        <div className="min-h-screen bg-slate-50 selection:bg-indigo-100 selection:text-indigo-900 antialiased">
+            {/* Navigation Header */}
+            <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex h-16 items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="size-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                                <Shield size={18} fill="currentColor" />
+                            </div>
+                            <h1 className="text-lg font-bold text-slate-900 tracking-tight">Admin Console</h1>
                         </div>
-                        <div>
-                            <h1 className="text-3xl font-black tracking-tight uppercase italic leading-none">
-                                Admin <span className="text-primary">Command</span>
-                            </h1>
-                            <p className="text-[10px] font-bold text-base-content/40 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-2">
-                                <span className="size-1.5 rounded-full bg-success"></span>
-                                Secure System Access
-                            </p>
+                        
+                        <div className="flex items-center gap-4">
+                            <button 
+                                onClick={() => activeTab === 'stats' ? fetchStats() : fetchUsers()}
+                                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-all"
+                            >
+                                <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
+                            </button>
+                            <div className="h-4 w-px bg-slate-200" />
+                            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+                                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Live</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </header>
 
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => {
-                            if (activeTab === 'stats') fetchStats();
-                            else if (activeTab === 'users') fetchUsers(searchQuery);
-                            else if (activeTab === 'posts') fetchPosts();
-                            else if (activeTab === 'support') fetchSupportMessages();
-                            else if (activeTab === 'invite') fetchFirebaseUsers();
-                        }}
-                        className="btn btn-primary btn-md rounded-2xl gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95 px-6"
-                    >
-                        <RefreshCcw className={`size-4 ${loading || isSupportLoading || inviteLoading ? 'animate-spin' : ''}`} />
-                        <span className="font-bold uppercase tracking-tight text-xs">Refresh Core</span>
-                    </button>
-                </div>
-            </div>
+            <main className="max-w-7xl mx-auto px-6 py-10">
+                <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-10">
+                    
+                    {/* Sidebar Nav */}
+                    <aside className="space-y-1">
+                        <p className="px-3 mb-4 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Platform Control</p>
+                        {[
+                            { id: "stats", label: "Dashboard", icon: BarChart3 },
+                            { id: "users", label: "Accounts", icon: Users },
+                            { id: "broadcast", label: "Announcements", icon: Megaphone },
+                            { id: "support", label: "Settings", icon: LifeBuoy },
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`w-full flex items-center gap-3 px-3 h-10 rounded-lg text-sm font-semibold transition-all ${
+                                    activeTab === tab.id 
+                                    ? 'bg-indigo-50 text-indigo-700 shadow-sm' 
+                                    : 'text-slate-500 hover:bg-white hover:text-slate-900'
+                                }`}
+                            >
+                                <tab.icon size={18} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </aside>
 
-            {/* Premium Tabs */}
-            <div className="flex gap-1.5 mb-12 p-1.5 bg-base-200 rounded-[2rem] border border-base-content/5 overflow-x-auto no-scrollbar max-w-fit mx-auto lg:mx-0 shadow-inner">
-                {[
-                    { id: "stats", label: "Overview", icon: BarChart3 },
-                    { id: "users", label: "Users", icon: Users },
-                    { id: "posts", label: "Posts", icon: FileText },
-                    { id: "support", label: "Support", icon: LifeBuoy },
-                    { id: "broadcast", label: "Mass Broadcast", icon: Megaphone },
-                    { id: "bondMatches", label: "Bond Control", icon: ShieldCheck },
-                    { id: "bondWithdrawals", label: "Payouts", icon: ArrowDownToLine },
-                    { id: "bondStats", label: "Revenue & Pulse", icon: Sparkles },
-                    { id: "invite", label: "Invite System", icon: UserPlus },
-                    { id: "apk", label: "APK Manager", icon: Smartphone },
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`btn btn-sm rounded-[1.5rem] gap-2 border-none px-6 h-10 transition-all duration-300 ${activeTab === tab.id
-                            ? "bg-primary text-primary-content shadow-md shadow-primary/25 scale-105"
-                            : "bg-transparent text-base-content/50 hover:text-base-content hover:bg-base-300/50"
-                            }`}
-                    >
-                        <tab.icon className={`size-4 ${activeTab === tab.id ? 'animate-bounce-short' : ''}`} />
-                        <span className="font-black uppercase tracking-tight text-[10px]">{tab.label}</span>
-                    </button>
-                ))}
-            </div>
+                    {/* Content Area */}
+                    <div className="space-y-10">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {activeTab === "stats" && stats && (
+                                    <div className="space-y-8">
+                                        <div className="flex flex-col gap-2">
+                                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">System Overview</h2>
+                                            <p className="text-sm text-slate-500 font-medium">Global analytics and performance indicators for the current period.</p>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+                                            <StatCard label="Total Users" value={stats.totalUsers} icon={Users} trend={12} />
+                                            <StatCard label="Daily Active" value={stats.dailyActiveUsers} icon={TrendingUp} trend={8} />
+                                            <StatCard label="Verified" value={stats.onboardedUsers} icon={CheckCircle2} />
+                                            <StatCard label="Downloads" value={stats.totalAppDownloads} icon={ArrowDownToLine} />
+                                        </div>
+                                    </div>
+                                )}
 
-            {loading && !stats && !users.length && !posts.length ? (
-                <div className="flex flex-col items-center justify-center py-32 gap-4">
-                    <Loader2 className="size-10 animate-spin text-primary" />
-                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Accessing mainframes...</p>
-                </div>
-            ) : (
-                <AnimatePresence mode="wait">
-                    {activeTab === "stats" && stats && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                        >
-                            {[
-                                { label: "Total Users", val: stats.totalUsers, icon: Users, color: "from-blue-500 to-indigo-600", light: "bg-blue-500/10 text-blue-600" },
-                                { label: "Onboarded", val: stats.onboardedUsers, icon: CheckCircle2, color: "from-emerald-500 to-teal-600", light: "bg-emerald-500/10 text-emerald-600" },
-                                { label: "Members", val: stats.memberUsers, icon: Star, color: "from-amber-400 to-orange-500", light: "bg-amber-500/10 text-amber-600" },
-                                { label: "Total Posts", val: stats.totalPosts, icon: FileText, color: "from-purple-500 to-fuchsia-600", light: "bg-purple-500/10 text-purple-600" },
-                                { label: "App Downloads", val: stats.totalAppDownloads || 0, icon: Smartphone, color: "from-indigo-500 to-blue-600", light: "bg-indigo-500/10 text-indigo-600" },
-                                { label: "Active Users (24h)", val: stats.dailyActiveUsers || 0, icon: UserCheck, color: "from-orange-500 to-red-600", light: "bg-orange-500/10 text-orange-600" },
-                                { label: "New Users (24h)", val: `+${stats.newUsers}`, icon: UserPlus, color: "from-rose-500 to-pink-600", light: "bg-rose-500/10 text-rose-600" },
-                            ].map((s, i) => (
-                                <div key={i} className="relative group perspective-1000">
-                                    <div className={`absolute -inset-0.5 bg-gradient-to-br ${s.color} rounded-[2.5rem] opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition duration-500`}></div>
-                                    <div className="relative card bg-base-100/50 backdrop-blur-xl shadow-sm border border-base-content/5 p-8 rounded-[2.5rem] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-primary/5">
-                                        <div className="flex flex-col gap-6">
-                                            <div className={`size-14 rounded-2xl ${s.light} flex items-center justify-center transition-transform duration-500 group-hover:rotate-12`}>
-                                                <s.icon className="size-7" />
-                                            </div>
+                                {activeTab === "users" && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 mb-1.5">{s.label}</p>
-                                                <div className="flex items-baseline gap-2">
-                                                    <h4 className="text-4xl font-black tracking-tight">{s.val}</h4>
-                                                    {s.label.includes('24h') && <span className="text-[10px] font-bold text-success uppercase">Growth</span>}
-                                                </div>
+                                                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">User Management</h2>
+                                                <p className="text-sm text-slate-500 font-medium">Search, moderate, and contact registered users.</p>
+                                            </div>
+                                            <div className="relative w-64">
+                                                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                                <input 
+                                                    className="w-full h-10 pl-10 pr-4 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                                                    placeholder="Search users..."
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && fetchUsers()}
+                                                />
                                             </div>
                                         </div>
-                                        <div className="absolute top-6 right-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                                            <s.icon className="size-16" />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </motion.div>
-                    )}
-
-                    {activeTab === "users" && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="space-y-6"
-                        >
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
-                                <input
-                                    type="text"
-                                    placeholder="Search users by name or email..."
-                                    className="input input-bordered w-full pl-12 rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && fetchUsers(searchQuery)}
-                                />
-                            </div>
-
-                            <div className="overflow-x-auto rounded-3xl bg-base-200 p-2 border border-base-content/5">
-                                <table className="table">
-                                    <thead className="text-[10px] uppercase font-black tracking-widest opacity-40">
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Status</th>
-                                            <th>Role</th>
-                                            <th>Gems</th>
-                                            <th className="text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {users.map(u => (
-                                            <tr key={u._id} className="hover:bg-base-300/50 transition-colors">
-                                                <td>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="avatar">
-                                                            <div className="w-10 h-10 rounded-full">
-                                                                <img src={u.profilePic || "/avatar.png"} alt="" />
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-bold text-sm tracking-tight flex items-center gap-1">
-                                                                {u.fullName}
-                                                                {(u.isVerified || u.role === "admin") && (
-                                                                    <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
-                                                                )}
-                                                            </div>
-                                                            <div className="text-[10px] opacity-40 italic">{u.email}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    {u.isMember ? (
-                                                        <span className="badge badge-primary badge-xs py-2 font-bold uppercase tracking-widest text-[8px]">PRO</span>
-                                                    ) : (
-                                                        <span className="badge badge-outline badge-xs py-2 font-bold uppercase tracking-widest text-[8px] opacity-40">FREE</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <span className={`text-[10px] font-black uppercase tracking-tighter ${u.role === 'admin' ? 'text-primary' : 'opacity-40'}`}>
-                                                        {u.role}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span className="font-mono text-xs font-bold">{u.gems || 0}</span>
-                                                </td>
-                                                <td className="text-right space-x-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            setTargetedUser(u);
-                                                            setTargetedType('notification');
-                                                            setTargetedSubject("Important Update 🚀");
-                                                        }}
-                                                        className="btn btn-ghost btn-xs btn-circle text-primary"
-                                                        title="Send Direct Push Notification"
-                                                    >
-                                                        <Megaphone className="size-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            setTargetedUser(u);
-                                                            setTargetedType('email');
-                                                            setTargetedSubject("Message from Zyro Admin");
-                                                        }}
-                                                        className="btn btn-ghost btn-xs btn-circle text-secondary"
-                                                        title="Send Direct Email"
-                                                    >
-                                                        <Mail className="size-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleToggleRole(u._id)}
-                                                        className="btn btn-ghost btn-xs btn-circle text-info"
-                                                        title="Toggle Admin Role"
-                                                    >
-                                                        {u.role === 'admin' ? <ShieldCheck className="size-4" /> : <ShieldAlert className="size-4" />}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteUser(u._id)}
-                                                        className="btn btn-ghost btn-xs btn-circle text-error"
-                                                        title="Delete User"
-                                                    >
-                                                        <UserX className="size-4" />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === "posts" && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                        >
-                            {posts.map(post => (
-                                <div key={post._id} className="card bg-base-200 p-5 rounded-3xl border border-base-content/5 flex flex-col gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <img src={post.userId?.profilePic || "/avatar.png"} alt="" className="size-8 rounded-full" />
-                                                <div>
-                                                    <p className="text-xs font-bold tracking-tight flex items-center gap-1">
-                                                        {post.userId?.fullName}
-                                                        {(post.userId?.isVerified || post.userId?.role === "admin") && (
-                                                            <BadgeCheck className="size-3 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
-                                                        )}
-                                                    </p>
-                                                    <p className="text-[9px] opacity-40 font-mono italic">{new Date(post.createdAt).toLocaleString()}</p>
-                                                </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeletePost(post._id)}
-                                            className="btn btn-ghost btn-xs btn-circle text-error"
-                                        >
-                                            <Trash2 className="size-4" />
-                                        </button>
-                                    </div>
-
-                                    {post.content && <p className="text-sm border-l-2 border-primary/20 pl-3 leading-snug">{post.content}</p>}
-
-                                    {post.mediaUrl && (
-                                        <div className="rounded-2xl overflow-hidden h-40">
-                                            {post.mediaType === 'image' ? (
-                                                <img src={post.mediaUrl} className="w-full h-full object-cover" />
+                                        
+                                        <div className="space-y-3">
+                                            {loading ? (
+                                                [1,2,3,4].map(i => <div key={i} className="h-20 bg-white rounded-xl animate-pulse border border-slate-100" />)
+                                            ) : users.length > 0 ? (
+                                                users.map(u => <UserItem key={u._id} user={u} onAction={handleAction} />)
                                             ) : (
-                                                <video src={post.mediaUrl} className="w-full h-full object-cover" />
+                                                <div className="py-20 bg-white rounded-xl border border-dashed border-slate-200 text-center space-y-3">
+                                                    <div className="size-12 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto">
+                                                        <Search size={22} />
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-slate-400">No users found matching your search</p>
+                                                </div>
                                             )}
                                         </div>
-                                    )}
-
-                                    <div className="flex items-center gap-4 text-[10px] font-black uppercase opacity-20">
-                                        <span>{post.likes?.length || 0} Likes</span>
-                                        <span>{post.comments?.length || 0} Comments</span>
                                     </div>
-                                </div>
-                            ))}
-                        </motion.div>
-                    )}
+                                )}
 
-                    {activeTab === "broadcast" && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="max-w-2xl mx-auto"
-                        >
-                            <div className="card bg-base-200 p-8 rounded-[40px] border-2 border-primary/10 shadow-xl shadow-primary/5">
-                                <div className="text-center mb-8">
-                                    <div className="size-20 bg-primary/10 text-primary rounded-[28px] flex items-center justify-center mx-auto mb-4 border-2 border-primary/5">
-                                        <Megaphone className="size-10" />
-                                    </div>
-                                    <h2 className="text-3xl font-black italic tracking-tighter uppercase">Mass Announcement</h2>
-                                    <p className="text-xs font-bold opacity-40 mt-1 uppercase tracking-widest">Transmit signal to all receivers</p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="bg-base-100 p-4 rounded-3xl ring-1 ring-base-content/5">
-                                        <textarea
-                                            className="textarea textarea-ghost w-full bg-transparent resize-none text-base font-medium placeholder:italic p-0 min-h-[120px] focus:ring-0"
-                                            placeholder="Type your official system message here..."
-                                            value={broadcastMsg}
-                                            onChange={(e) => setBroadcastMsg(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div className="p-4 bg-primary/5 rounded-2xl flex items-start gap-3">
-                                        <ShieldAlert className="size-5 text-primary flex-shrink-0 mt-0.5" />
-                                        <p className="text-[10px] font-bold text-primary italic leading-relaxed uppercase">
-                                            Warning: This action will send an immediate push notification and chat message to every single user on the platform. Use with discretion.
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        onClick={handleBroadcast}
-                                        disabled={isBroadcasting || !broadcastMsg.trim()}
-                                        className="btn btn-primary btn-lg w-full rounded-[24px] shadow-lg shadow-primary/20 gap-3 group active:scale-95 transition-all"
-                                    >
-                                        {isBroadcasting ? (
-                                            <Loader2 className="size-6 animate-spin" />
-                                        ) : (
-                                            <>
-                                                <span className="font-black italic uppercase tracking-tighter text-lg">Transmit signal</span>
-                                                <Send className="size-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Mass Email Section */}
-                            <div className="card bg-base-200 p-8 rounded-[40px] border-2 border-primary/10 shadow-xl shadow-primary/5 mt-8">
-                                <div className="text-center mb-8">
-                                    <div className="size-20 bg-primary/10 text-primary rounded-[28px] flex items-center justify-center mx-auto mb-4 border-2 border-primary/5">
-                                        <Mail className="size-10" />
-                                    </div>
-                                    <h2 className="text-3xl font-black italic tracking-tighter uppercase">Mass Email</h2>
-                                    <p className="text-xs font-bold opacity-40 mt-1 uppercase tracking-widest">Send specialized HTML mail to all registers</p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <input
-                                        type="text"
-                                        placeholder="Email Subject..."
-                                        className="input input-bordered w-full rounded-2xl bg-base-100 ring-1 ring-base-content/5"
-                                        value={emailSubject}
-                                        onChange={(e) => setEmailSubject(e.target.value)}
-                                    />
-
-                                    <div className="bg-base-100 p-4 rounded-3xl ring-1 ring-base-content/5">
-                                        <textarea
-                                            className="textarea textarea-ghost w-full bg-transparent resize-none text-base font-medium placeholder:italic p-0 min-h-[120px] focus:ring-0"
-                                            placeholder="Type your official email body here..."
-                                            value={emailBody}
-                                            onChange={(e) => setEmailBody(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div className="p-4 bg-primary/5 rounded-2xl flex items-start gap-3">
-                                        <Mail className="size-5 text-primary flex-shrink-0 mt-0.5" />
-                                        <p className="text-[10px] font-bold text-primary italic leading-relaxed uppercase">
-                                            Warning: This sends an email directly to every user's inbox. Ensure the content is accurate and professional.
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        onClick={handleEmailBroadcast}
-                                        disabled={isEmailSending || !emailSubject.trim() || !emailBody.trim()}
-                                        className="btn btn-primary btn-lg w-full rounded-[24px] shadow-lg shadow-primary/20 gap-3 group active:scale-95 transition-all"
-                                    >
-                                        {isEmailSending ? (
-                                            <Loader2 className="size-6 animate-spin" />
-                                        ) : (
-                                            <>
-                                                <span className="font-black italic uppercase tracking-tighter text-lg">Send Mass Email</span>
-                                                <Send className="size-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Catch-up Sweep Section */}
-                            <div className="card bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-8 rounded-[40px] border-2 border-amber-500/10 shadow-xl shadow-amber-500/5 mt-8">
-                                <div className="text-center mb-6">
-                                    <div className="size-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-amber-500/5">
-                                        <RefreshCcw className="size-8" />
-                                    </div>
-                                    <h2 className="text-2xl font-black italic tracking-tighter uppercase">Activity Catch-up</h2>
-                                    <p className="text-[10px] font-bold opacity-40 mt-1 uppercase tracking-widest">WAKE UP INACTIVE USERS</p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="p-4 bg-white/5 rounded-2xl border border-dashed border-amber-500/20">
-                                        <p className="text-xs font-medium opacity-70 leading-relaxed text-center">
-                                            This tool identifies users who have <strong>unread messages</strong> AND <strong>pending requests</strong> but haven't logged in recently. It sends them a personalized "Rocket" email to bring them back.
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        onClick={handleSweepPending}
-                                        disabled={isSweeping}
-                                        className="btn btn-warning btn-md w-full rounded-2xl gap-2 font-black uppercase text-xs tracking-widest active:scale-95 transition-all shadow-lg shadow-amber-500/20"
-                                    >
-                                        {isSweeping ? (
-                                            <Loader2 className="size-4 animate-spin" />
-                                        ) : (
-                                            <>
-                                                <Sparkles className="size-4" />
-                                                Run Activity Sweep
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Clean Inbox Helper */}
-                            <div className="mt-8 bg-base-200/50 p-6 rounded-[32px] border border-dashed border-base-content/10 text-center">
-                                <p className="text-[10px] uppercase font-black tracking-widest opacity-40 mb-4">Inbox flooded after broadcast?</p>
-                                <button
-                                    onClick={handleClearInbox}
-                                    disabled={isCleaning}
-                                    className="btn btn-outline btn-sm rounded-xl gap-2 hover:bg-primary hover:border-primary transition-all active:scale-95"
-                                >
-                                    {isCleaning ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-                                    <span className="font-bold uppercase tracking-tight text-[10px]">Clean My Admin Inbox</span>
-                                </button>
-                                <p className="text-[9px] opacity-30 mt-3 italic">This hides empty/old 1-on-1 threads. It won't delete messages.</p>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === "invite" && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="max-w-4xl mx-auto space-y-6"
-                        >
-                            {/* Header Card */}
-                            <div className="card bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/20 p-8 rounded-[40px] shadow-xl text-center">
-                                <div className="size-20 bg-violet-500/20 text-violet-500 rounded-[28px] flex items-center justify-center mx-auto mb-4 border-2 border-violet-500/10">
-                                    <UserPlus className="size-10" />
-                                </div>
-                                <h2 className="text-3xl font-black italic tracking-tighter uppercase">Invite Firebase Users</h2>
-                                <p className="text-xs font-bold opacity-40 mt-1 uppercase tracking-widest">Send personalized invitations to people who haven't joined yet</p>
-
-                                {/* Stats Row */}
-                                <div className="flex justify-center gap-6 mt-6">
-                                    <div className="text-center">
-                                        <p className="text-2xl font-black">{firebaseStats.total}</p>
-                                        <p className="text-[9px] font-bold uppercase opacity-40 tracking-widest">Firebase Users</p>
-                                    </div>
-                                    <div className="w-px bg-base-content/10" />
-                                    <div className="text-center">
-                                        <p className="text-2xl font-black text-success">{firebaseStats.registered}</p>
-                                        <p className="text-[9px] font-bold uppercase opacity-40 tracking-widest">Already Joined</p>
-                                    </div>
-                                    <div className="w-px bg-base-content/10" />
-                                    <div className="text-center">
-                                        <p className="text-2xl font-black text-violet-500">{firebaseUsers.length}</p>
-                                        <p className="text-[9px] font-bold uppercase opacity-40 tracking-widest">To Invite</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {inviteLoading ? (
-                                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                                    <Loader2 className="size-10 animate-spin text-violet-500" />
-                                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Fetching Firebase users...</p>
-                                </div>
-                            ) : firebaseUsers.length === 0 ? (
-                                <div className="card bg-base-200 p-12 rounded-3xl text-center border border-base-content/5">
-                                    <UserCheck className="size-12 text-success mx-auto mb-4 opacity-50" />
-                                    <h3 className="text-xl font-black uppercase italic tracking-tight">All Caught Up!</h3>
-                                    <p className="text-sm opacity-50 mt-2">Every Firebase user has already joined Zyro. 🎉</p>
-                                </div>
-                            ) : (
-                                <>
-                                    {/* Search + Actions Bar */}
-                                    <div className="flex flex-col sm:flex-row gap-3">
-                                        <div className="relative flex-1">
-                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
-                                            <input
-                                                type="text"
-                                                placeholder="Search by name or email..."
-                                                className="input input-bordered w-full pl-12 rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5"
-                                                value={inviteSearch}
-                                                onChange={(e) => setInviteSearch(e.target.value)}
-                                            />
+                                {activeTab === "broadcast" && (
+                                    <div className="max-w-xl space-y-8">
+                                        <div className="space-y-2">
+                                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Global Announcements</h2>
+                                            <p className="text-sm text-slate-500 font-medium">Dispatch a push notification to every registered device instantly.</p>
                                         </div>
-                                        <button
-                                            onClick={toggleSelectAll}
-                                            className="btn btn-outline btn-sm rounded-xl gap-2 px-6"
-                                        >
-                                            {selectedEmails.size === filteredFirebaseUsers.length && filteredFirebaseUsers.length > 0
-                                                ? <CheckSquare className="size-4" />
-                                                : <Square className="size-4" />
-                                            }
-                                            <span className="font-bold uppercase text-[10px] tracking-tight">
-                                                {selectedEmails.size === filteredFirebaseUsers.length && filteredFirebaseUsers.length > 0 ? "Deselect All" : "Select All"}
-                                            </span>
-                                        </button>
-                                    </div>
-
-                                    {/* Email Composer */}
-                                    {selectedEmails.size > 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: "auto" }}
-                                            className="card bg-base-100 border-2 border-violet-500/20 shadow-xl p-6 mt-4"
-                                        >
-                                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                                                <Mail className="size-5 text-violet-500" />
-                                                Compose Custom Invitation
-                                            </h3>
-                                            <div className="space-y-4">
-                                                <input
-                                                    type="text"
-                                                    placeholder="Subject (Leave empty for default)"
-                                                    className="input input-bordered w-full rounded-xl bg-base-200"
-                                                    value={inviteSubject}
-                                                    onChange={(e) => setInviteSubject(e.target.value)}
-                                                />
-                                                <textarea
-                                                    className="textarea textarea-bordered w-full bg-base-200 min-h-[120px] rounded-xl text-base"
-                                                    placeholder="Write your custom message here (Leave empty for default)..."
-                                                    value={inviteMessage}
-                                                    onChange={(e) => setInviteMessage(e.target.value)}
+                                        
+                                        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Announcement Content</label>
+                                                <textarea 
+                                                    className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none"
+                                                    placeholder="What would you like to announce to the community?"
+                                                    value={broadcastMsg}
+                                                    onChange={(e) => setBroadcastMsg(e.target.value)}
                                                 />
                                             </div>
-                                        </motion.div>
-                                    )}
 
-                                    {/* Selected Count + Send Button */}
-                                    {selectedEmails.size > 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="sticky top-4 z-10 card bg-violet-500 text-white p-4 rounded-2xl flex flex-row items-center justify-between shadow-xl shadow-violet-500/30 mt-4"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="size-10 bg-white/20 rounded-xl flex items-center justify-center">
-                                                    <Mail className="size-5" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-black uppercase tracking-tight">{selectedEmails.size} Selected</p>
-                                                    <p className="text-[10px] opacity-70 font-bold">Ready to send invite emails</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={handleSendInvites}
-                                                disabled={isSendingInvites}
-                                                className="btn btn-sm bg-white text-violet-600 border-none rounded-xl font-black uppercase gap-2 hover:bg-white/90 active:scale-95 transition-all"
-                                            >
-                                                {isSendingInvites ? (
-                                                    <Loader2 className="size-4 animate-spin" />
-                                                ) : (
-                                                    <>
-                                                        <Send className="size-4" />
-                                                        Send Invites
-                                                    </>
-                                                )}
-                                            </button>
-                                        </motion.div>
-                                    )}
-
-                                    {/* User Cards Grid */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto no-scrollbar">
-                                        {filteredFirebaseUsers.map((u) => (
-                                            <motion.div
-                                                key={u.uid}
-                                                whileTap={{ scale: 0.98 }}
-                                                onClick={() => toggleEmailSelection(u.email)}
-                                                className={`card p-4 rounded-2xl cursor-pointer transition-all border-2 flex flex-row items-center gap-4 ${selectedEmails.has(u.email)
-                                                    ? "bg-violet-500/10 border-violet-500/40 shadow-lg shadow-violet-500/10"
-                                                    : "bg-base-200 border-transparent hover:border-base-content/10 hover:bg-base-300/50"
-                                                    }`}
-                                            >
-                                                <div className={`size-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${selectedEmails.has(u.email)
-                                                    ? "bg-violet-500 text-white"
-                                                    : "bg-base-300 text-base-content/30"
-                                                    }`}>
-                                                    {selectedEmails.has(u.email)
-                                                        ? <CheckSquare className="size-5" />
-                                                        : <Square className="size-5" />
-                                                    }
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-bold text-sm tracking-tight truncate">
-                                                        {u.displayName || "Unknown User"}
-                                                    </p>
-                                                    <p className="text-[10px] opacity-40 italic truncate">{u.email}</p>
-                                                </div>
-                                                {u.photoURL && (
-                                                    <img
-                                                        src={u.photoURL}
-                                                        alt=""
-                                                        className="size-9 rounded-full ring-2 ring-base-content/10 flex-shrink-0"
-                                                        onError={(e) => e.target.style.display = 'none'}
-                                                    />
-                                                )}
-                                            </motion.div>
-                                        ))}
-                                    </div>
-
-                                    {filteredFirebaseUsers.length === 0 && inviteSearch && (
-                                        <div className="text-center py-12 opacity-40 font-bold uppercase italic tracking-widest">
-                                            No matching users found
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </motion.div>
-                    )}
-                    {activeTab === "support" && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="space-y-6"
-                        >
-                            {isSupportLoading ? (
-                                <div className="flex flex-col items-center justify-center py-32 gap-4">
-                                    <Loader2 className="size-10 animate-spin text-primary" />
-                                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Loading support tickets...</p>
-                                </div>
-                            ) : supportMessages.length === 0 ? (
-                                <div className="card bg-base-200 p-12 rounded-[2.5rem] border border-base-content/5 text-center">
-                                    <CheckCircle2 className="size-16 text-success mx-auto mb-4 opacity-30" />
-                                    <h3 className="text-2xl font-black uppercase italic tracking-tight">Zero Tickets</h3>
-                                    <p className="text-sm opacity-40 mt-2">All users seem happy! No support messages found.</p>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {supportMessages.map((msg) => (
-                                        <motion.div
-                                            key={msg._id}
-                                            layout
-                                            className="card bg-base-100 border border-base-content/5 rounded-[2.5rem] p-6 group hover:shadow-xl transition-all duration-300"
-                                        >
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black">
-                                                        {msg.fullName?.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-sm tracking-tight">{msg.fullName}</h4>
-                                                        <p className="text-[10px] opacity-40 font-mono italic">{msg.email}</p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleDeleteSupport(msg._id)}
-                                                    className="btn btn-ghost btn-xs btn-circle text-error group-hover:bg-error/10 transition-colors"
-                                                >
-                                                    <Trash2 className="size-4" />
-                                                </button>
-                                            </div>
-                                            <div className="bg-base-200/50 p-4 rounded-2xl border border-base-content/5 flex-1 shadow-inner">
-                                                <p className="text-sm leading-relaxed">{msg.message}</p>
-                                            </div>
-                                            <div className="mt-4 flex items-center justify-between text-[9px] font-bold uppercase tracking-widest opacity-30">
-                                                <span>Ticket #{msg._id.slice(-6).toUpperCase()}</span>
-                                                <span>{new Date(msg.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
-                    {activeTab === "bondMatches" && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="space-y-8"
-                        >
-                            {/* Create Match Section */}
-                            <div className="card bg-base-200 p-8 rounded-[2.5rem] border border-base-content/5 shadow-inner">
-                                <div className="flex items-center justify-between mb-8">
-                                    <div className="flex items-center gap-4">
-                                        <div className="size-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center border-2 border-primary/5">
-                                            <Calendar className="size-7" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-2xl font-black uppercase italic tracking-tighter">Schedule New Arena</h3>
-                                            <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Initialize a match for live predictions</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-base-100 rounded-xl border border-base-content/5">
-                                        <div className="size-2 rounded-full bg-success animate-pulse"></div>
-                                        <span className="text-[10px] font-black uppercase tracking-tight opacity-60">System Ready</span>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Event Name</label>
-                                        <input
-                                            type="text"
-                                            placeholder="e.g. CSK vs MI"
-                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
-                                            value={newMatch.matchName}
-                                            onChange={(e) => setNewMatch({ ...newMatch, matchName: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Home Team</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Team 1 Name"
-                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
-                                            value={newMatch.team1.name}
-                                            onChange={(e) => setNewMatch({ ...newMatch, team1: { ...newMatch.team1, name: e.target.value } })}
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Away Team</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Team 2 Name"
-                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
-                                            value={newMatch.team2.name}
-                                            onChange={(e) => setNewMatch({ ...newMatch, team2: { ...newMatch.team2, name: e.target.value } })}
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">Kickoff Time</label>
-                                        <input
-                                            type="datetime-local"
-                                            className="input input-bordered w-full rounded-2xl bg-base-100 border-none ring-1 ring-base-content/5 focus:ring-primary/40 font-bold"
-                                            value={newMatch.startTime}
-                                            onChange={(e) => setNewMatch({ ...newMatch, startTime: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 flex justify-end">
-                                    <button 
-                                        onClick={handleCreateMatch}
-                                        disabled={!newMatch.matchName || !newMatch.startTime}
-                                        className="btn btn-primary btn-lg rounded-2xl gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all px-12 group"
-                                    >
-                                        <span className="font-black italic uppercase tracking-tighter text-lg">Initialize Arena</span>
-                                        <ShieldCheck className="size-6 group-hover:rotate-12 transition-transform" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Ongoing Matches */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {matches.map(m => (
-                                    <div key={m._id} className="card bg-base-100 border-2 border-base-content/5 p-6 rounded-[2rem] hover:border-primary/20 transition-all">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h4 className="font-black text-lg italic uppercase">{m.matchName}</h4>
-                                                <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{new Date(m.startTime).toLocaleString()}</p>
-                                            </div>
-                                            <div className={`badge ${m.status === 'live' ? 'badge-error' : 'badge-ghost'} font-black uppercase text-[10px]`}>{m.status}</div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between p-4 bg-base-200 rounded-2xl mb-4">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className="font-black text-sm">{m.team1?.name || "TBA"}</span>
-                                            </div>
-                                            <span className="font-black italic opacity-20 text-xl">VS</span>
-                                            <div className="flex flex-col items-center gap-1">
-                                                <span className="font-black text-sm">{m.team2?.name || "TBA"}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleTogglePrediction(m._id, m.isPredictionsEnabled)}
-                                                className={`btn btn-sm flex-1 rounded-xl font-black uppercase text-[10px] ${m.isPredictionsEnabled ? 'btn-success text-white' : 'btn-outline border-base-content/10'}`}
-                                            >
-                                                {m.isPredictionsEnabled ? 'Predictions Live 🟢' : 'Enable Predictions 🔒'}
-                                            </button>
-                                            <button
-                                                onClick={() => setResolution({ ...resolution, matchId: m._id })}
-                                                className="btn btn-sm btn-primary rounded-xl font-black uppercase text-[10px]"
-                                            >
-                                                Resolve Ball
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Resolution Engine Console */}
-                            {resolution.matchId && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="card bg-primary/5 border-2 border-primary/20 p-8 rounded-[3rem] shadow-2xl shadow-primary/10"
-                                >
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="size-12 bg-primary text-primary-content rounded-2xl flex items-center justify-center font-black">AI</div>
-                                        <div>
-                                            <h3 className="font-black text-xl italic uppercase tracking-tighter">Reward Distribution Engine</h3>
-                                            <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Manual Decision Override</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                        <select
-                                            className="select select-bordered rounded-2xl bg-base-100"
-                                            value={resolution.correctOutcome}
-                                            onChange={(e) => setResolution({ ...resolution, correctOutcome: e.target.value })}
-                                        >
-                                            <option value="">Select Outcome</option>
-                                            <option value="DOT">Dot Ball</option>
-                                            <option value="1">1 Run</option>
-                                            <option value="2">2 Runs</option>
-                                            <option value="3">3 Runs</option>
-                                            <option value="4">FOUR! 🎬</option>
-                                            <option value="6">SIX! 🚀</option>
-                                            <option value="WICKET">WICKET! ☝️</option>
-                                        </select>
-                                        <input
-                                            type="text"
-                                            placeholder="Ball ID (e.g. 15.4)"
-                                            className="input input-bordered rounded-2xl bg-base-100 font-bold"
-                                            value={resolution.ballId}
-                                            onChange={(e) => setResolution({ ...resolution, ballId: e.target.value })}
-                                        />
-                                        <button onClick={handleResolveBall} className="btn btn-primary rounded-2xl font-black uppercase col-span-2">Distribute Payouts</button>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </motion.div>
-                    )}
-
-                    {activeTab === "bondWithdrawals" && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="space-y-6"
-                        >
-                            <div className="overflow-x-auto rounded-[2rem] bg-base-200 p-4 border border-base-content/5">
-                                <table className="table">
-                                    <thead className="text-[10px] uppercase font-black tracking-widest opacity-40">
-                                        <tr>
-                                            <th>User / Intel</th>
-                                            <th>Amount (BC)</th>
-                                            <th>UPI Address</th>
-                                            <th>Status</th>
-                                            <th className="text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {withdrawals.map(w => (
-                                            <tr key={w._id} className="hover:bg-base-300/50 transition-colors border-b border-base-content/5">
-                                                <td>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-sm">{w.userId?.fullName}</span>
-                                                        <span className="text-[10px] opacity-40">{w.ipAddress}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-black text-primary">{w.amount} BC</span>
-                                                        <span className="text-[10px] font-bold text-success">₹{w.amount / 10}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="font-mono text-xs font-bold">{w.upiId}</td>
-                                                <td>
-                                                    <span className={`badge badge-xs font-black uppercase text-[8px] p-2 ${w.status === 'completed' ? 'badge-success text-white' : w.status === 'pending' ? 'badge-warning' : 'badge-error text-white'}`}>
-                                                        {w.status}
-                                                    </span>
-                                                </td>
-                                                <td className="text-right space-x-2">
-                                                    {w.status === "pending" && (
-                                                        <>
-                                                            <button onClick={() => handleProcessWithdrawal(w._id, "approved")} className="btn btn-success btn-xs rounded-lg text-white font-black uppercase">Verify</button>
-                                                            <button onClick={() => handleProcessWithdrawal(w._id, "rejected")} className="btn btn-error btn-xs rounded-lg text-white font-black uppercase">Flag</button>
-                                                        </>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === "bondStats" && bondStats && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-                        >
-                            <div className="card bg-base-100 p-8 rounded-[3rem] border border-base-content/5 shadow-xl relative overflow-hidden group">
-                                <div className="size-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center mb-6">
-                                    <Users className="size-8" />
-                                </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Arena Active Pulse</p>
-                                <h4 className="text-5xl font-black tracking-tighter">{bondStats.activeUsers}</h4>
-                                <p className="text-[10px] font-bold text-success uppercase mt-2">Live WebSockets 📡</p>
-                            </div>
-
-                            <div className="card bg-base-100 p-8 rounded-[3rem] border border-base-content/5 shadow-xl relative overflow-hidden group">
-                                <div className="size-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-6">
-                                    <ShieldCheck className="size-8" />
-                                </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Total Economy Circulating</p>
-                                <h4 className="text-5xl font-black tracking-tighter">{bondStats.totalWinnings}</h4>
-                                <p className="text-[10px] font-bold text-primary uppercase mt-2">Bond Coins (Winnings) 🪙</p>
-                            </div>
-
-                            <div className="card bg-base-100 p-8 rounded-[3rem] border border-base-content/5 shadow-xl relative overflow-hidden group">
-                                <div className="size-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center mb-6">
-                                    <Sparkles className="size-8" />
-                                </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">Platform Revenue</p>
-                                <h4 className="text-5xl font-black tracking-tighter">₹{bondStats.revenue}</h4>
-                                <p className="text-[10px] font-bold text-warning uppercase mt-2">Match Pass Sales 🎫</p>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {activeTab === "apk" && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="space-y-8"
-                        >
-                            {/* Header Section */}
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 bg-base-200 p-8 rounded-[2.5rem] border border-base-content/5 shadow-inner">
-                                <div className="flex items-center gap-5">
-                                    <div className="size-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center border-2 border-primary/5">
-                                        <Package className="size-8" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-2xl font-black italic tracking-tighter uppercase">Release Registry</h2>
-                                        <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Manage Zyro Build Artifacts</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => setShowApkModal(true)}
-                                    className="btn btn-primary btn-md rounded-2xl gap-2 font-black uppercase text-xs tracking-tight shadow-xl shadow-primary/20 hover:scale-105 transition-all"
-                                >
-                                    <Plus className="size-4" />
-                                    New Build Command
-                                </button>
-                            </div>
-
-                            {isApkLoading ? (
-                                <div className="flex flex-col items-center justify-center py-32 gap-4">
-                                    <Loader2 className="size-10 animate-spin text-primary" />
-                                    <p className="font-black uppercase tracking-widest text-xs opacity-40">Scanning archives...</p>
-                                </div>
-                            ) : releases.length === 0 ? (
-                                <div className="card bg-base-200 p-16 rounded-[2.5rem] border-2 border-dashed border-base-content/5 text-center">
-                                    <Package className="size-16 text-primary mx-auto mb-4 opacity-20" />
-                                    <h3 className="text-xl font-black uppercase italic tracking-tight opacity-40">No Releases Logged</h3>
-                                    <p className="text-sm opacity-30 mt-2">Deploy your first APK version to get started.</p>
-                                    <button onClick={() => setShowApkModal(true)} className="btn btn-link btn-xs mt-4 text-primary no-underline font-black uppercase tracking-widest">Create Release v1.0.0</button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {releases.map((release) => (
-                                        <motion.div
-                                            key={release._id}
-                                            layout
-                                            className={`card bg-base-100 border-2 rounded-[2.5rem] p-6 group transition-all duration-500 overflow-hidden relative ${release.isActive ? 'border-primary/20 shadow-xl shadow-primary/5' : 'border-base-content/5 opacity-70'}`}
-                                        >
-                                            {release.isUpdateRequired && (
-                                                <div className="absolute top-0 right-10 px-4 py-1.5 bg-error text-error-content text-[8px] font-black uppercase tracking-[0.2em] rounded-b-xl z-10 shadow-lg">
-                                                    Critical Update
-                                                </div>
-                                            )}
-
-                                            <div className="flex items-center justify-between mb-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`size-12 rounded-xl flex items-center justify-center font-black ${release.isActive ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content/40'}`}>
-                                                        {release.versionName?.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-lg font-black tracking-tight">{release.versionName}</h4>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest">Build {release.versionCode}</span>
-                                                            <div className="size-1 rounded-full bg-base-content/20" />
-                                                            <span className="text-[10px] font-bold opacity-40">{new Date(release.createdAt).toLocaleDateString()}</span>
-                                                            <div className="size-1 rounded-full bg-base-content/20" />
-                                                            <span className="text-[10px] font-bold text-primary">{release.downloadCount || 0} Downloads</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => handleDeleteRelease(release._id)} className="btn btn-ghost btn-sm btn-circle text-error">
-                                                        <Trash2 className="size-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-base-200/50 p-5 rounded-2xl border border-base-content/5 mb-6 shadow-inner min-h-[80px]">
-                                                <p className="text-[11px] leading-relaxed font-medium italic opacity-70">
-                                                    {release.releaseNotes || "No transmission logs provided for this build."}
+                                            <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-start gap-3">
+                                                <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                                                <p className="text-xs text-amber-800 font-medium leading-relaxed italic">
+                                                    Dispatching an announcement is an irreversible operation. Please verify the content for professional standards.
                                                 </p>
                                             </div>
 
-                                            <div className="flex items-center justify-between gap-4">
-                                                <button
-                                                    onClick={() => handleToggleApkActive(release)}
-                                                    className={`btn btn-sm flex-1 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 transition-all ${release.isActive ? 'btn-success text-white' : 'btn-outline border-base-content/10'}`}
-                                                >
-                                                    {release.isActive ? <CheckCircle className="size-3.5" /> : <Smartphone className="size-3.5" />}
-                                                    {release.isActive ? 'Active Node' : 'Initialize Node'}
-                                                </button>
-                                                <a
-                                                    href={`${APK_DOWNLOAD_URL}/${release._id}`}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        downloadFile(`${APK_DOWNLOAD_URL}/${release._id}`, `Zyro_v${(release.versionName || "1_0_0").replace(/\./g, "_")}.apk`);
-                                                    }}
-                                                    className="btn btn-sm btn-circle bg-base-200 hover:bg-primary hover:text-white transition-all border-none"
-                                                    title="Download Artifact"
-                                                >
-                                                    <ArrowDownToLine className="size-4" />
-                                                </a>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Release Upload Modal */}
-                            {showApkModal && (
-                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        className="bg-base-100 rounded-[3rem] w-full max-w-xl overflow-hidden shadow-2xl ring-1 ring-base-content/5"
-                                    >
-                                        <div className="p-8 bg-gradient-to-br from-primary/10 to-transparent flex items-center justify-between border-b border-base-content/5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="size-12 bg-primary text-primary-content rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-                                                    <Plus className="size-6" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="text-xl font-black uppercase tracking-tight italic">Direct <span className="text-primary">Build Upload</span></h3>
-                                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Upload APK Artifact to Server</p>
-                                                </div>
-                                            </div>
-                                            <button onClick={() => setShowApkModal(false)} className="btn btn-ghost btn-sm btn-circle opacity-50 hover:opacity-100">
-                                                <X className="size-5" />
-                                            </button>
-                                        </div>
-
-                                        <div className="p-8 space-y-6">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Version Code (Number)</label>
-                                                    <input
-                                                        type="number"
-                                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-bold"
-                                                        placeholder="e.g. 1"
-                                                        value={apkForm.versionCode}
-                                                        onChange={(e) => setApkForm({ ...apkForm, versionCode: e.target.value })}
-                                                    />
-                                                </div>
-                                                <div className="space-y-1.5">
-                                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Version Name (String)</label>
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-bold"
-                                                        placeholder="e.g. 1.0.0"
-                                                        value={apkForm.versionName}
-                                                        onChange={(e) => setApkForm({ ...apkForm, versionName: e.target.value })}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1 text-primary">APK Artifact (Direct Upload)</label>
-                                                <div className="flex flex-col gap-3">
-                                                    <div
-                                                        className={`flex flex-col items-center justify-center border-2 border-dashed rounded-3xl p-8 transition-all cursor-pointer ${apkForm.apkFile ? 'border-success/50 bg-success/5' : 'border-primary/20 bg-primary/5 hover:border-primary/40'}`}
-                                                        onClick={() => document.getElementById('apk-file-input').click()}
-                                                    >
-                                                        <Plus className={`size-10 mb-2 ${apkForm.apkFile ? 'text-success' : 'text-primary opacity-40'}`} />
-                                                        <span className={`text-xs font-black uppercase tracking-widest ${apkForm.apkFile ? 'text-success' : 'opacity-40'}`}>
-                                                            {apkForm.apkFile ? "Build Ready for Transmission" : "Click to select .apk file"}
-                                                        </span>
-                                                        <input
-                                                            id="apk-file-input"
-                                                            type="file"
-                                                            accept=".apk"
-                                                            className="hidden"
-                                                            onChange={handleApkUpload}
-                                                        />
-                                                    </div>
-                                                    {apkForm.apkFile && (
-                                                        <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase text-success">
-                                                            <CheckCircle className="size-3" />
-                                                            Upload Verified
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Release Intel</label>
-                                                <textarea
-                                                    className="textarea textarea-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 min-h-[80px] font-medium text-sm leading-relaxed"
-                                                    placeholder="Document build changes or transmission logs..."
-                                                    value={apkForm.releaseNotes}
-                                                    onChange={(e) => setApkForm({ ...apkForm, releaseNotes: e.target.value })}
-                                                />
-                                            </div>
-
-                                            <div className="flex items-center gap-3 p-4 bg-base-200 rounded-2xl border border-base-content/5">
-                                                <input
-                                                    type="checkbox"
-                                                    className="checkbox checkbox-primary checkbox-sm"
-                                                    checked={apkForm.isUpdateRequired}
-                                                    onChange={(e) => setApkForm({ ...apkForm, isUpdateRequired: e.target.checked })}
-                                                />
-                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Mandatory System Update Required</p>
-                                            </div>
-
-                                            <button
-                                                onClick={handleCreateRelease}
-                                                disabled={isApkUploading}
-                                                className="btn btn-primary btn-lg w-full rounded-3xl gap-3 shadow-xl shadow-primary/20 transition-all active:scale-95 group overflow-hidden relative"
+                                            <button 
+                                                onClick={handleBroadcast}
+                                                disabled={isBroadcasting || !broadcastMsg.trim()}
+                                                className="w-full h-12 bg-slate-900 text-white rounded-xl font-bold text-sm tracking-tight hover:bg-slate-800 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                                             >
-                                                {isApkUploading ? (
-                                                    <Loader2 className="size-6 animate-spin" />
-                                                ) : (
-                                                    <>
-                                                        <span className="font-black italic uppercase tracking-tighter text-lg relative z-10">Broadcast Registry</span>
-                                                        <Send className="size-5 relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
-                                                    </>
-                                                )}
+                                                {isBroadcasting ? <Loader2 size={18} className="animate-spin" /> : <>Send Announcement <Send size={16} /></>}
                                             </button>
                                         </div>
-                                    </motion.div>
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            )}
+                                    </div>
+                                )}
 
-            {/* Targeted Communication Modal */}
-            {targetedUser && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="bg-base-100 rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl ring-1 ring-base-content/5"
-                    >
-                        <div className={`p-6 bg-gradient-to-r ${targetedType === 'email' ? 'from-secondary/20 to-primary/20' : 'from-primary/20 to-secondary/20'} flex items-center justify-between`}>
-                            <div className="flex items-center gap-4">
-                                <div className={`size-12 rounded-2xl flex items-center justify-center ${targetedType === 'email' ? 'bg-secondary text-secondary-content' : 'bg-primary text-primary-content'}`}>
-                                    {targetedType === 'email' ? <Mail className="size-6" /> : <Megaphone className="size-6" />}
+                                {activeTab === "support" && (
+                                    <div className="py-20 text-center space-y-4 opacity-40">
+                                        <LifeBuoy size={48} className="mx-auto" />
+                                        <p className="text-sm font-bold uppercase tracking-[0.2em]">Maintenance Mode Active</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </main>
+
+            {/* Direct Message Overlay */}
+            <AnimatePresence>
+                {targetedUser && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setTargetedUser(null)}
+                            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-[101]"
+                        >
+                            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                                        {targetedType === 'email' ? <Mail size={20} /> : <Megaphone size={20} />}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-slate-900">Contact User</h3>
+                                        <p className="text-xs text-slate-400 font-medium">Message for {targetedUser.fullName}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-black uppercase tracking-tight italic">
-                                        Direct <span className={targetedType === 'email' ? 'text-secondary' : 'text-primary'}>{targetedType}</span>
-                                    </h3>
-                                    <p className="text-[10px] font-bold opacity-50 uppercase tracking-widest">Targeting: {targetedUser.fullName}</p>
-                                </div>
+                                <button onClick={() => setTargetedUser(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <button onClick={() => setTargetedUser(null)} className="btn btn-ghost btn-sm btn-circle opacity-50 hover:opacity-100">
-                                <X className="size-5" />
-                            </button>
-                        </div>
 
-                        <div className="p-8 space-y-6">
-                            <div className="space-y-4">
+                            <div className="p-8 space-y-6">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">{targetedType === 'email' ? 'Email Subject' : 'Notification Title'}</label>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 font-bold"
-                                        placeholder={targetedType === 'email' ? "Enter subject..." : "Enter short title..."}
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Subject</label>
+                                    <input 
+                                        type="text" 
+                                        className="w-full h-11 border border-slate-200 rounded-xl px-4 text-sm font-semibold focus:ring-2 focus:ring-indigo-100 outline-none transition-all" 
+                                        placeholder="Enter subject line..."
                                         value={targetedSubject}
                                         onChange={(e) => setTargetedSubject(e.target.value)}
                                     />
                                 </div>
-
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Message Body</label>
-                                    <textarea
-                                        className="textarea textarea-bordered w-full rounded-2xl bg-base-200 border-none ring-1 ring-base-content/5 min-h-[150px] font-medium leading-relaxed"
-                                        placeholder={`Write your ${targetedType} message here...`}
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Message Body</label>
+                                    <textarea 
+                                        className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:bg-white focus:ring-2 focus:ring-indigo-100 transition-all resize-none" 
+                                        placeholder="Type your message here..."
                                         value={targetedBody}
                                         onChange={(e) => setTargetedBody(e.target.value)}
                                     />
                                 </div>
-                            </div>
 
-                            <button
-                                onClick={handleSendTargeted}
-                                disabled={isTargetedSending || !targetedBody.trim()}
-                                className={`btn btn-lg w-full rounded-[2rem] gap-3 shadow-xl ${targetedType === 'email' ? 'btn-secondary shadow-secondary/20' : 'btn-primary shadow-primary/20'} transition-all active:scale-95`}
-                            >
-                                {isTargetedSending ? (
-                                    <Loader2 className="size-6 animate-spin" />
-                                ) : (
-                                    <>
-                                        <span className="font-black italic uppercase tracking-tighter">Release Command</span>
-                                        <Send className="size-5" />
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                                <button 
+                                    onClick={handleSendTargeted}
+                                    disabled={isTargetedSending}
+                                    className="w-full h-12 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
+                                >
+                                    {isTargetedSending ? <Loader2 size={18} className="animate-spin" /> : <>Send Message <Send size={16} /></>}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
 
 export default AdminDashboard;
-

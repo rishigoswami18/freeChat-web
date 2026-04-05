@@ -124,18 +124,7 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
   // Monetization fields
-  gems: {
-    type: Number,
-    default: 0,
-  },
-  earnings: {
-    type: Number,
-    default: 0,
-  },
-  isVerified: {
-    type: Boolean,
-    default: false,
-  },
+  isVerified: { type: Boolean, default: false },
   boostUntil: {
     type: Date,
     default: null,
@@ -155,10 +144,6 @@ const userSchema = new mongoose.Schema({
     default: 0,
   },
   lastCoupleStreakDate: {
-    type: Date,
-    default: null,
-  },
-  lastRewardClaimDate: {
     type: Date,
     default: null,
   },
@@ -213,10 +198,6 @@ const userSchema = new mongoose.Schema({
   },
   state: { type: String, default: "" },
   city: { type: String, default: "" },
-  bondCoins: { 
-    type: Number, 
-    default: 500 // Onboarding starting reward
-  },
   rank: { 
     type: String, 
     enum: ['Rookie', 'All-Star', 'Legend'],
@@ -232,6 +213,61 @@ const userSchema = new mongoose.Schema({
   },
   registrationIP: { type: String, index: true },
   isBanned: { type: Boolean, default: false },
+  accountStatus: {
+    type: String,
+    enum: ["active", "limited", "suspended", "banned", "payout_hold", "under_review"],
+    default: "active",
+    index: true,
+  },
+  banReason: {
+    type: String,
+    default: "",
+  },
+  restrictedFeatures: {
+    type: [String],
+    default: [],
+  },
+  riskScore: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100,
+    index: true,
+  },
+  verificationStatus: {
+    type: String,
+    enum: ["unverified", "pending", "verified", "rejected"],
+    default: "unverified",
+    index: true,
+  },
+  verificationLevel: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 3,
+  },
+  phone: {
+    type: String,
+    default: "",
+  },
+  phoneVerified: {
+    type: Boolean,
+    default: false,
+  },
+  lastSeenAt: {
+    type: Date,
+    default: null,
+  },
+  // FreeChat: Paid Chat logic
+  chatPrice: {
+    type: Number,
+    default: 0, // 0 means free chat
+    min: 0
+  },
+  unlockedChats: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   wallet: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserWallet'
@@ -242,10 +278,19 @@ const userSchema = new mongoose.Schema({
   },
   linkedin: {
     type: String,
-    default: "",
-  }
-}
-  , {
+    default: ""
+  },
+  // Social Graph (Hardened)
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  followersCount: { type: Number, default: 0 },
+  
+  // Engagement Automation
+  isAutoReplyEnabled: { type: Boolean, default: false },
+  autoReplyMessage: { type: String, default: "Hey! Thanks for following me. 🚀 Check out my latest premium content below!" },
+  contentNiche: { type: String, default: "Lifestyle" },
+  }, {
+
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }

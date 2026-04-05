@@ -1,30 +1,34 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
-import { broadcastSystemNotification, clearAdminChats, notifyPendingActions } from "../controllers/notification.controller.js";
+import Notification from "../models/Notification.js";
 
 const router = express.Router();
 
-/**
- * @route POST /api/notifications/broadcast
- * @desc  Send a system-wide notification to all users
- * @access Private (Admin only)
- */
-router.post("/broadcast", protectRoute, broadcastSystemNotification);
+// GET /api/notifications
+router.get("/", protectRoute, async (req, res) => {
+    try {
+        const notifications = await Notification.find({ recipient: req.user._id })
+            .populate("sender", "fullName username profilePic isVerified")
+            .sort({ createdAt: -1 })
+            .limit(50);
+        
+        res.status(200).json(notifications);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
-/**
- * @route POST /api/notifications/clear-chats
- * @desc  Hide all admin chats to clear clutter
- * @access Private (Admin only)
- */
-router.post("/clear-chats", protectRoute, clearAdminChats);
-
-/**
- * @route POST /api/notifications/sweep-pending
- * @desc  Notify users with unread messages AND pending friend requests
- * @access Private (Admin only)
- */
-router.post("/sweep-pending", protectRoute, notifyPendingActions);
-
-
+// PUT /api/notifications/read
+router.put("/read", protectRoute, async (req, res) => {
+    try {
+        await Notification.updateMany(
+            { recipient: req.user._id, isRead: false },
+            { $set: { isRead: true } }
+        );
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 export default router;

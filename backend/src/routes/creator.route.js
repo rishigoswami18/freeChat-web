@@ -2,16 +2,18 @@ import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { 
     getCreatorStats, 
-    getCreatorBonds, 
-    getEliteFans,
-    createBond
+    getEliteFans, 
+    getCreatorActivities, 
+    getCreatorAnalytics 
 } from "../controllers/creator.controller.js";
 
 const router = express.Router();
 
-router.get("/stats", protectRoute, getCreatorStats);
-router.get("/bonds", protectRoute, getCreatorBonds);
-router.get("/elite-fans", protectRoute, getEliteFans);
-router.post("/bonds", protectRoute, createBond);
+router.use(protectRoute);
+
+router.get("/stats", getCreatorStats);
+router.get("/elite-fans", getEliteFans);
+router.get("/activities", getCreatorActivities);
+router.get("/analytics", getCreatorAnalytics);
 
 export default router;

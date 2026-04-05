@@ -507,3 +507,84 @@ export async function claimDailyReward(req, res) {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+/**
+ * GET /api/users/trending
+ * Creators of the Moment (Trending Section)
+ */
+export const getTrendingCreators = async (req, res) => {
+    try {
+        const userId = req.user?._id;
+        
+        // Multi-weighted sort: Followers + Verification Status
+        const trending = await User.find({
+            _id: { $ne: userId }
+        })
+        .select("fullName profilePic username chatPrice isVerified bio followersCount")
+        .sort({ followersCount: -1, isVerified: -1 }) 
+        .limit(10);
+
+        res.status(200).json(trending);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+import { createNotification } from "../services/notification.service.js";
+
+/**
+ * POST /api/users/follow/:id
+ * Toggle Follow/Unfollow
+ */
+export const toggleFollow = async (req, res) => {
+    try {
+        const myId = req.user._id;
+        const { id: targetId } = req.params;
+
+        const me = await User.findById(myId);
+        if (myId.toString() === targetId) {
+            return res.status(400).json({ message: "You can't follow yourself" });
+        }
+
+        const isFollowing = me.following.includes(targetId);
+
+        if (isFollowing) {
+            // Unfollow
+            await User.findByIdAndUpdate(myId, { $pull: { following: targetId } });
+            await User.findByIdAndUpdate(targetId, { 
+                $pull: { followers: myId },
+                $inc: { followersCount: -1 } 
+            });
+            res.status(200).json({ message: "Unfollowed", isFollowing: false });
+        } else {
+            // Follow
+            await User.findByIdAndUpdate(myId, { $addToSet: { following: targetId } });
+            await User.findByIdAndUpdate(targetId, { 
+                $addToSet: { followers: myId },
+                $inc: { followersCount: 1 } 
+            });
+            
+            // 🚀 Notify the Creator
+            await createNotification({
+                recipient: targetId,
+                sender: myId,
+                type: "FOLLOW",
+                content: `${me.fullName} is now following you ✨`
+            });
+
+            // 🤖 AI/Auto-Reply Check
+            const targetCreator = await User.findById(targetId);
+            if (targetCreator?.isAutoReplyEnabled && targetCreator?.autoReplyMessage) {
+                const { sendAutomatedMessage } = await import("../lib/stream.js");
+                await sendAutomatedMessage(targetId, myId, targetCreator.autoReplyMessage);
+            }
+
+            res.status(200).json({ message: "Followed", isFollowing: true });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+

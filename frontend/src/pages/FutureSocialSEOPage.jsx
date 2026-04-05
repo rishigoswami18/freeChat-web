@@ -1,67 +1,100 @@
 import React from "react";
 import DynamicSEO from "../components/DynamicSEO";
 import { Link } from "react-router-dom";
-import { Zap, ShieldCheck, Globe, Cpu, Users, EyeOff, Bot } from "lucide-react";
+import { Zap, ShieldCheck, Globe, Cpu, Users, EyeOff, Bot, Store, DollarSign, Rocket } from "lucide-react";
+import { motion } from "framer-motion";
 
 const FutureSocialSEOPage = () => {
     return (
-        <div className="min-h-screen bg-base-100 flex flex-col items-center">
+        <div className="min-h-screen bg-[#020617] text-white flex flex-col items-center selection:bg-indigo-500/30">
             <DynamicSEO 
-                title="The Future of Social Media | Next-Gen AI Social Platform 2026"
-                description="What is the future of social media? Discover Zyro, the next generation platform by developer Hrishikesh Giri that merges AI with human connection."
-                keywords="future of social media, next gen social platform, AI social network, new social media apps 2026, Zyro social media"
+                title="The Future of Social Business | Next-Gen Professional Platform 2026"
+                description="What is the future of social media? Discover FreeChat, the premier Indian platform for creators and businesses that merges community with economy."
+                keywords="future of social business, next gen social platform India, professional social network, creator economy 2026, FreeChat social"
             />
 
-            <section className="py-28 text-center px-4 max-w-5xl">
-                <div className="flex justify-center mb-8">
-                    <div className="bg-primary/10 p-4 rounded-[2rem] border border-primary/20">
-                        <Cpu className="size-12 text-primary animate-pulse" />
+            <section className="py-32 text-center px-6 max-w-5xl relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex justify-center mb-10"
+                >
+                    <div className="bg-indigo-500/10 p-5 rounded-[2.5rem] border border-indigo-500/20 shadow-2xl">
+                        <Rocket className="size-14 text-indigo-400" />
                     </div>
-                </div>
-                <h1 className="text-5xl md:text-8xl font-black mb-8 tracking-tighter uppercase italic leading-none">
-                    The Next <span className="text-primary italic">Generation</span> of Social.
-                </h1>
-                <p className="text-xl opacity-60 max-w-2xl mx-auto mb-12">
-                    Traditional social media is broken. Zyro, founded by Hrishikesh Giri, 
-                    is the world's first platform architected for AI-Human synergy.
-                </p>
+                </motion.div>
+                <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-6xl md:text-8xl font-bold mb-8 tracking-tight leading-[1.05]"
+                >
+                    The Evolution of <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-indigo-500">Social Commerce.</span>
+                </motion.h1>
+                <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-xl text-white/40 max-w-2xl mx-auto mb-14 font-medium leading-relaxed"
+                >
+                    Traditional social platforms are built for consumption. FreeChat is architected for **Contribution** and **Commerce**. We are rebuilding the digital town square as a thriving professional ecosystem.
+                </motion.p>
             </section>
 
-            <div className="container px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
+            <div className="container px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-40">
                 {[
-                    { icon: ShieldCheck, title: "Privacy 2.0", desc: "Decentralized data storage and stealth chat modes as standard." },
-                    { icon: Bot, title: "AI-Augmented", desc: "Every user gets a personalized AI coach to handle digital burnout." },
-                    { icon: EyeOff, title: "Zero Tracking", desc: "No invasive algorithms. Your data belongs to you, not advertisers." },
-                    { icon: Zap, title: "Emotion Sync", desc: "Real-time AI tone analysis for safer and deeper conversations." },
-                    { icon: Globe, title: "Global Bonds", desc: "Instantly connect across borders with real-time AI translation." },
-                    { icon: Bot, label: "AI Virtual Partners", desc: "Meaningful relationships with virtual companions available 24/7." }
+                    { icon: Store, title: "Business Hub", desc: "Launch your brand instantly with specialized tools for service listings and digital showrooms." },
+                    { icon: ShieldCheck, title: "Verified Trust", desc: "A network of verified professionals. No bots, no scams—just authentic business connections." },
+                    { icon: DollarSign, title: "Creator Economy", desc: "Direct monetization through rewards and the FreeChat coin ecosystem. Your influence is your asset." },
+                    { icon: Zap, title: "Local Reach", desc: "Hyperlocal discovery that connects you with customers and collaborators in your immediate vicinity." },
+                    { icon: Globe, title: "Global Scaling", desc: "Communicate across borders with real-time AI translation and professional networking tools." },
+                    { icon: Users, title: "Community First", desc: "Niche communities that foster deep engagement rather than superficial visibility." }
                 ].map((item, i) => (
-                    <div key={i} className="bg-base-200 p-10 rounded-[2.5rem] border border-base-content/5 hover:bg-base-300 transition-all">
-                        <div className="bg-base-100 size-12 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                            <item.icon className="size-6 text-primary" />
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 }}
+                        key={i} 
+                        className="bg-white/[0.02] p-12 rounded-[3.5rem] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 group"
+                    >
+                        <div className="size-16 rounded-2xl flex items-center justify-center mb-8 bg-indigo-500/10 text-indigo-400 group-hover:scale-110 transition-transform duration-500">
+                            <item.icon className="size-8" />
                         </div>
-                        <h3 className="text-2xl font-black italic uppercase mb-4">{item.title}</h3>
-                        <p className="opacity-60 leading-relaxed">{item.desc}</p>
-                    </div>
+                        <h3 className="text-2xl font-bold mb-4 tracking-tight">{item.title}</h3>
+                        <p className="text-white/30 leading-relaxed font-medium">{item.desc}</p>
+                    </motion.div>
                 ))}
             </div>
 
-            <section className="py-24 bg-base-200 w-full">
-                <div className="container px-4 max-w-4xl mx-auto text-center">
-                    <h2 className="text-3xl font-bold mb-10 italic uppercase">A Message from the Creator</h2>
-                    <blockquote className="text-2xl italic opacity-80 leading-relaxed mb-10">
-                        "The next phase of the internet isn't just about sharing content; it's about sharing humanity. 
-                        With Zyro, we've built the tools to help you do just that."
+            <section className="py-24 bg-white/[0.02] border-y border-white/5 w-full relative">
+                <div className="container px-6 max-w-4xl mx-auto text-center space-y-12">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-bold text-indigo-400 uppercase tracking-widest">A Message from the Architect</div>
+                    <blockquote className="text-3xl md:text-4xl font-bold leading-tight tracking-tight text-white/80">
+                        "The next decade belongs to the creators who treat their passion as a business. FreeChat is the OS for that future."
                     </blockquote>
-                    <p className="font-bold tracking-widest uppercase text-sm">— Hrishikesh Giri, Founder</p>
+                    <div className="space-y-1">
+                        <p className="font-bold tracking-[0.2em] uppercase text-xs text-white">Hrishikesh Giri</p>
+                        <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">Founder & Lead Developer</p>
+                    </div>
                 </div>
             </section>
 
-            <section className="py-28 text-center container px-4">
-                <h2 className="text-4xl font-black mb-8 uppercase italic">Ready for what's next?</h2>
-                <Link to="/signup" className="btn btn-primary btn-lg rounded-2xl px-12 group">
-                    Join the Evolution <Zap className="size-5 ml-2 group-hover:scale-125 transition-all" />
-                </Link>
+            <section className="py-40 text-center container px-6">
+                <div className="space-y-12">
+                    <div className="space-y-4">
+                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Ready to build your <span className="text-indigo-500">legacy?</span></h2>
+                        <p className="text-white/30 max-w-md mx-auto font-medium">Join 10,000+ creators and business owners building the future of India's professional network.</p>
+                    </div>
+                    <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <Link to="/signup" className="h-16 px-14 inline-flex items-center bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl font-bold shadow-2xl shadow-indigo-500/20 transition-all gap-3">
+                            Launch Your Business <Zap size={20} />
+                        </Link>
+                    </motion.div>
+                </div>
             </section>
         </div>
     );

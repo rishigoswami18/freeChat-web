@@ -336,4 +336,75 @@ router.post("/voice-generate", protectRoute, async (req, res) => {
   }
 });
 
+// 💎 Unlock paid chat
+router.post("/unlock/:recipientId", protectRoute, async (req, res) => {
+  try {
+    const { recipientId } = req.params;
+    const userId = req.user._id;
+
+    if (recipientId === userId.toString()) {
+      return res.status(400).json({ message: "Apne niche ke channel ko unlock nahi kar sakte!" });
+    }
+
+    const recipient = await User.findById(recipientId);
+    if (!recipient) return res.status(404).json({ message: "User not found" });
+
+    if (recipient.chatPrice <= 0) {
+      return res.status(400).json({ message: "This chat is already free" });
+    }
+
+    if (req.user.unlockedChats && req.user.unlockedChats.some(id => id.toString() === recipientId)) {
+        return res.status(400).json({ message: "Chat already unlocked" });
+    }
+
+    const { default: UserWallet } = await import("../models/UserWallet.js");
+    const wallet = await UserWallet.findOneAndUpdate(
+      { userId, bonusBalance: { $gte: recipient.chatPrice } },
+      { $inc: { bonusBalance: -recipient.chatPrice } },
+      { new: true }
+    );
+
+    if (!wallet) return res.status(400).json({ message: "Insufficient coins to unlock chat" });
+
+    // Update User access
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { unlockedChats: recipientId }
+    });
+
+    // 📜 Audit Trail: Log the unlock
+    const { default: TransactionHistory } = await import("../models/TransactionHistory.js");
+    await TransactionHistory.create({
+        userId,
+        recipientId,
+        amount: -recipient.chatPrice,
+        type: "CHAT_UNLOCK",
+        description: `Unlocked chat access for creator ${recipientId}`,
+        status: "completed"
+    });
+
+    // Reward the recipient (70% split)
+    const earnings = Math.floor(recipient.chatPrice * 0.7);
+    await UserWallet.findOneAndUpdate(
+        { userId: recipientId },
+        { $inc: { winnings: earnings } },
+        { upsert: true }
+    );
+
+    // 🚀 Notify the Creator
+    const { createNotification } = await import("../services/notification.service.js");
+    await createNotification({
+        recipient: recipientId,
+        sender: userId,
+        type: "CHAT_UNLOCK",
+        content: `${req.user.fullName} unlocked your private chat 💬`
+    });
+
+    res.json({ success: true, message: "Chat unlocked!" });
+
+  } catch (err) {
+    console.error("Chat Unlock error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 export default router;

@@ -32,6 +32,19 @@ const postSchema = new mongoose.Schema(
     adLink: { type: String, default: "" },
     adCta: { type: String, default: "Learn More" },
     communityId: { type: mongoose.Schema.Types.ObjectId, ref: "Community", default: null },
+    moderationStatus: {
+      type: String,
+      enum: ["visible", "under_review", "flagged", "removed"],
+      default: "visible",
+      index: true,
+    },
+    reportCount: { type: Number, default: 0, min: 0 },
+    lastReportedAt: { type: Date, default: null },
+    moderationFlags: { type: [String], default: [] },
+    // Paid Content logic
+    isPaid: { type: Boolean, default: false },
+    price: { type: Number, default: 0, min: 0 },
+    unlockedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

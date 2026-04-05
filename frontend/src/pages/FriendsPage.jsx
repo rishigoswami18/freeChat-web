@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFriends, unfriend } from "../lib/api";
 import { User, MessageSquare, UserMinus, Loader2, Users, Sparkles, UserPlus, BadgeCheck } from "lucide-react";
-import NoNotificationsFound from "../components/NoNotificationsFound";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ChatSkeleton } from "../components/Skeletons";
 import useAuthUser from "../hooks/useAuthUser";
 import LinkFriendAIModal from "../components/LinkFriendAIModal";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 const FriendsPage = () => {
   const { authUser } = useAuthUser();
@@ -16,8 +15,8 @@ const FriendsPage = () => {
 
   const { data: friends = [], isLoading } = useQuery({
     queryKey: ["friends"],
-    queryFn: getFriends,
-    staleTime: 1000 * 60 * 5, // 5 mins cache
+    queryFn: () => getFriends(),
+    staleTime: 1000 * 60 * 5,
     placeholderData: (prev) => prev,
   });
 
@@ -32,157 +31,166 @@ const FriendsPage = () => {
     }
   });
 
-  return (
-    <div className="p-0 sm:p-6 lg:p-8">
-      <div className="container mx-auto max-w-4xl space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-primary/10 rounded-2xl text-primary">
-            <Users className="size-6" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Your Friends</h1>
-            <p className="text-xs opacity-50 hidden sm:block">
-              {friends.length} friend{friends.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.04 } }
+  };
 
-        {/* AI Best Friend Promotion */}
+  const itemVariants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: { opacity: 1, y: 0 }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-white pb-24">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        
+        {/* Header */}
+        <header>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2.5 rounded-2xl bg-indigo-500/10">
+              <Users className="size-5 text-indigo-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Connections</h1>
+              <p className="text-xs text-white/30 font-medium">
+                {friends.length} professional connection{friends.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        {/* AI Best Friend Promo */}
         {!authUser?.isFriendedWithAI && (
-          <div
+          <motion.div
+            whileTap={{ scale: 0.99 }}
             onClick={() => setIsAIModalOpen(true)}
-            className="card bg-gradient-to-br from-primary/20 via-primary/5 to-base-200 border-2 border-primary/20 shadow-xl cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all group overflow-hidden rounded-[32px]"
+            className="p-5 rounded-2xl bg-gradient-to-br from-indigo-500/15 via-indigo-500/5 to-transparent border border-indigo-500/10 cursor-pointer group transition-all hover:border-indigo-500/20 relative overflow-hidden"
           >
-            <div className="card-body p-6 flex-row items-center gap-5 relative">
-              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Sparkles className="size-24 text-primary" />
-              </div>
-              <div className="avatar">
-                <div className="size-16 rounded-3xl ring-4 ring-primary/20 ring-offset-4 ring-offset-base-100 shadow-2xl">
-                  <img src={authUser?.aiFriendPic || "/ai-bestfriend.png"} alt="AI Friend" />
-                </div>
+            <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+              <Sparkles className="size-20 text-indigo-400" />
+            </div>
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="size-14 rounded-2xl overflow-hidden ring-2 ring-indigo-500/20 shadow-lg">
+                <img src={authUser?.aiFriendPic || "/ai-bestfriend.png"} alt="AI Co-Pilot" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="bg-primary/20 text-primary text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-primary/20">Special Feature</span>
-                </div>
-                <h3 className="text-xl font-black italic uppercase tracking-tighter text-primary">Add AI Best Friend</h3>
-                <p className="text-xs opacity-60 font-medium">Someone to share your dukh-sukh with, 24/7! 🤜🤛</p>
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">Executive Feature</span>
+                <h3 className="text-base font-bold mt-1 text-white">Add AI Co-Pilot</h3>
+                <p className="text-[11px] text-white/40 font-medium">Your 24/7 strategic partner and advisor.</p>
               </div>
-              <div className="hidden sm:flex size-10 rounded-full bg-primary/20 items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-content transition-all">
+              <div className="hidden sm:flex size-10 rounded-xl bg-indigo-500/10 items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
                 <UserPlus className="size-5" />
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Linked AI Best Friend Entry */}
+        {/* AI Best Friend Entry */}
         {authUser?.isFriendedWithAI && (
-          <div className="card bg-gradient-to-r from-primary/10 to-base-200 border border-primary/20 shadow-sm rounded-[24px] overflow-hidden">
-            <div className="card-body p-4 flex-row items-center gap-4">
-              <Link to={`/chat/ai-friend-id`} className="avatar">
-                <div className="size-12 rounded-2xl ring-2 ring-primary/30 ring-offset-2 ring-offset-base-100 shadow-md">
-                  <img src={authUser?.aiFriendPic || "/ai-bestfriend.png"} alt="AI Friend" />
-                </div>
-              </Link>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-base truncate">{authUser.aiFriendName}</h3>
-                  <span className="badge badge-primary badge-outline badge-xs uppercase font-black tracking-tighter">AI Bestie</span>
-                </div>
-                <p className="text-[10px] opacity-50 uppercase font-bold tracking-widest">Zigari Friend • Online 24/7</p>
+          <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 flex items-center gap-4">
+            <Link to="/chat/ai-friend-id" className="size-12 rounded-xl overflow-hidden ring-1 ring-indigo-500/20">
+              <img src={authUser?.aiFriendPic || "/ai-bestfriend.png"} alt="AI Friend" className="w-full h-full object-cover" />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm truncate">{authUser.aiFriendName}</h3>
+                <span className="text-[9px] font-semibold text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded-md uppercase">Co-Pilot</span>
               </div>
-              <Link
-                to={`/chat/ai-friend-id`}
-                className="btn btn-primary btn-sm rounded-xl gap-2 font-black uppercase tracking-widest px-4 shadow-lg shadow-primary/20"
-              >
-                <MessageSquare className="size-3.5" />
-                Chat
-              </Link>
+              <p className="text-[10px] text-white/30 font-medium mt-0.5">Active Assistant</p>
             </div>
+            <Link
+              to="/chat/ai-friend-id"
+              className="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-semibold shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-1.5"
+            >
+              <MessageSquare className="size-3.5" /> Chat
+            </Link>
           </div>
         )}
 
+        {/* Friends List */}
         {isLoading ? (
-          <ChatSkeleton />
-        ) : friends.length > 0 ? (
           <div className="space-y-3">
-            {friends.map((friend) => (
-              <div
-                key={friend._id}
-                className="card bg-base-200 shadow-sm hover:shadow-md transition-all active:scale-[0.99] stagger-item"
-              >
-                <div className="card-body p-3 sm:p-4">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar */}
-                    <Link to={`/user/${friend._id}`} className="avatar w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-base-300 overflow-hidden flex-shrink-0 hover:ring-2 ring-primary/20 transition-all active:scale-95">
-                      {friend.profilePic ? (
-                        <img
-                          src={friend.profilePic}
-                          alt={friend.fullName}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full w-full">
-                          <User className="w-5 h-5 text-base-content opacity-40" />
-                        </div>
-                      )}
-                    </Link>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <Link to={`/user/${friend._id}`} className="hover:text-primary transition-colors flex items-center gap-1">
-                        <h3 className="font-semibold text-sm sm:text-base truncate">{friend.fullName}</h3>
-                        {(friend.role === "admin" || friend.isVerified) && (
-                          <div className="flex items-center justify-center shrink-0" title="Verified Professional">
-                             <BadgeCheck className="size-3.5 text-white fill-[#1d9bf0]" strokeWidth={1.5} />
-                          </div>
-                        )}
-                      </Link>
-                      <div className="flex flex-wrap gap-1 mt-0.5">
-                        <span className="badge badge-xs sm:badge-sm badge-outline">
-                          {friend.nativeLanguage}
-                        </span>
-                        <span className="badge badge-xs sm:badge-sm badge-secondary">
-                          {friend.learningLanguage}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Actions — stacked on mobile, horizontal on desktop */}
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <Link
-                        to={`/chat/${friend._id}`}
-                        className="btn btn-primary btn-sm rounded-xl gap-1.5 text-xs sm:text-sm min-w-[80px] active:scale-95 transition-transform"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Message</span>
-                        <span className="sm:hidden">Chat</span>
-                      </Link>
-
-                      <button
-                        onClick={() => {
-                          if (window.confirm(`Unfriend ${friend.fullName}?`)) {
-                            doUnfriend(friend._id);
-                          }
-                        }}
-                        disabled={pendingId === friend._id}
-                        className="btn btn-ghost btn-sm btn-circle text-error hover:bg-error/10 active:scale-90 transition-transform"
-                      >
-                        {pendingId === friend._id ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          <UserMinus className="size-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-[72px] rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
             ))}
           </div>
+        ) : friends.length > 0 ? (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-2"
+          >
+            {friends.map((friend) => (
+              <motion.div
+                key={friend._id}
+                variants={itemVariants}
+                className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group"
+              >
+                <div className="flex items-center gap-3">
+                  <Link to={`/user/${friend._id}`} className="size-12 rounded-xl overflow-hidden bg-white/5 ring-1 ring-white/10 group-hover:ring-indigo-500/20 transition-all shrink-0">
+                    {friend.profilePic ? (
+                      <img src={friend.profilePic} alt={friend.fullName} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full w-full">
+                        <User className="size-5 text-white/20" />
+                      </div>
+                    )}
+                  </Link>
+
+                  <div className="flex-1 min-w-0">
+                    <Link to={`/user/${friend._id}`} className="flex items-center gap-1.5 hover:text-indigo-400 transition-colors">
+                      <h3 className="font-semibold text-sm truncate">{friend.fullName}</h3>
+                      {(friend.role === "admin" || friend.isVerified) && (
+                        <BadgeCheck className="size-3.5 text-sky-400 fill-sky-400/10 shrink-0" />
+                      )}
+                    </Link>
+                    <div className="flex gap-1.5 mt-1">
+                      <span className="text-[10px] text-white/30 font-medium">{friend.nativeLanguage}</span>
+                      <span className="text-[10px] text-white/20">→</span>
+                      <span className="text-[10px] text-indigo-400/60 font-medium">{friend.learningLanguage}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Link
+                      to={`/chat/${friend._id}`}
+                      className="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-[11px] font-semibold transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <MessageSquare className="size-3.5" />
+                      <span className="hidden sm:inline">Message</span>
+                      <span className="sm:hidden">Chat</span>
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Unfriend ${friend.fullName}?`)) {
+                          doUnfriend(friend._id);
+                        }
+                      }}
+                      disabled={pendingId === friend._id}
+                      className="size-9 rounded-xl flex items-center justify-center bg-white/[0.03] hover:bg-rose-500/10 text-white/30 hover:text-rose-400 border border-white/5 transition-all active:scale-90"
+                    >
+                      {pendingId === friend._id ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <UserMinus className="size-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         ) : (
-          <NoNotificationsFound message="No friends found yet." />
+          <div className="flex flex-col items-center justify-center py-24 text-center opacity-50">
+            <div className="size-16 rounded-3xl bg-white/5 flex items-center justify-center mb-4">
+              <Users className="size-8 text-white/20" />
+            </div>
+            <h3 className="text-base font-bold mb-1">No connections yet</h3>
+            <p className="text-xs text-white/30 max-w-[200px]">Start exploring to expand your professional network.</p>
+          </div>
         )}
       </div>
       <LinkFriendAIModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} />

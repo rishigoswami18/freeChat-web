@@ -1,6 +1,6 @@
 /**
- * Zyro — All Rights Reserved © 2026
- * The High-Status Social Platform
+ * FreeChat — All Rights Reserved © 2026
+ * India's Premier Professional Social Platform
  */
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -9,6 +9,7 @@ import React, { useEffect, Suspense } from "react";
 // Only eagerly load pages visible on first paint
 import PostsPage from "./pages/PostsPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
+import GoalsPage from "./pages/GoalsPage.jsx";
 
 // Lazy load everything else — downloaded only when navigated to
 const SignUpPage = React.lazy(() => import("./pages/SignUpPage.jsx"));
@@ -43,10 +44,12 @@ const CommunityDetailsPage = React.lazy(() => import("./pages/CommunityDetailsPa
 const CreatorCenterPage = React.lazy(() => import("./pages/CreatorCenterPage.jsx"));
 const HomePage = React.lazy(() => import("./pages/HomePage.jsx"));
 const EarningsWallet = React.lazy(() => import("./pages/EarningsWallet.jsx"));
-const CareerAssistant = React.lazy(() => import("./pages/CareerAssistant.jsx"));
+const ProfessionalHub = React.lazy(() => import("./pages/ProfessionalHub.jsx"));
 const KYCVerification = React.lazy(() => import("./pages/KYCVerification.jsx"));
-const AntigravityEnginePage = React.lazy(() => import("./pages/AntigravityEnginePage.jsx"));
+const BusinessInsightsPage = React.lazy(() => import("./pages/AntigravityEnginePage.jsx"));
 const AIFaceCallPage = React.lazy(() => import("./pages/AIFaceCallPage.jsx"));
+const MiniGamesPage = React.lazy(() => import("./pages/MiniGamesPage.jsx"));
+const SettingsPage = React.lazy(() => import("./pages/SettingsPage.jsx"));
 
 // SEO Domination Pages
 const FounderPage = React.lazy(() => import("./pages/FounderPage.jsx"));
@@ -300,6 +303,30 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/settings"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true}>
+                          <SettingsPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
+                    path="/creator-center"
+                    element={
+                      isAuthenticated && isOnboarded ? (
+                        <Layout showSidebar={true} isFluid={true}>
+                          <CreatorCenterPage />
+                        </Layout>
+                      ) : (
+                        <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
+                      )
+                    }
+                  />
+                  <Route
                     path="/posts"
                     element={
                       isAuthenticated && isOnboarded ? (
@@ -448,7 +475,7 @@ const App = () => {
                     path="/profile"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true}>
+                        <Layout showSidebar={true} showRightSidebar={false}>
                           <ProfilePage />
                         </Layout>
                       ) : (
@@ -461,7 +488,7 @@ const App = () => {
                     path="/user/:userId"
                     element={
                       isAuthenticated && isOnboarded ? (
-                        <Layout showSidebar={true}>
+                        <Layout showSidebar={true} showRightSidebar={false}>
                           <UserProfilePage />
                         </Layout>
                       ) : (
@@ -550,11 +577,13 @@ const App = () => {
 
                   <Route path="/about" element={<Layout showSidebar={false}><AboutPage /></Layout>} />
                   <Route path="/contact" element={<Layout showSidebar={false}><ContactPage /></Layout>} />
+                  <Route path="/goals" element={authUser ? <GoalsPage /> : <Navigate to="/login" />} />
                   <Route path="/privacy-policy" element={<Layout showSidebar={false}><PrivacyPolicyPage /></Layout>} />
                   <Route path="/terms" element={<Layout showSidebar={false}><TermsPage /></Layout>} />
                   <Route path="/refund-policy" element={<Layout showSidebar={false}><RefundPolicyPage /></Layout>} />
                   <Route path="/prize-vault" element={<Layout showSidebar={true} isFluid={true}><PrizeVaultPage /></Layout>} />
                   <Route path="/redeem-cash" element={<Layout showSidebar={true} isFluid={true}><RedeemCashPage /></Layout>} />
+                  <Route path="/mini-games" element={<Layout showSidebar={true} isFluid={true}><MiniGamesPage /></Layout>} />
 
                   {/* SEO SEO DOMINATION ROUTES */}
                   <Route path="/founder" element={<Layout showSidebar={false}><FounderPage /></Layout>} />
@@ -588,17 +617,19 @@ const App = () => {
                   />
 
                   <Route
-                    path="/career-assistant"
+                    path="/professional-hub"
                     element={
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={true} isFluid={true}>
-                          <CareerAssistant />
+                          <ProfessionalHub />
                         </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />
                       )
                     }
                   />
+                  <Route path="/business-hub" element={<Navigate to="/professional-hub" replace />} />
+                  <Route path="/career-assistant" element={<Navigate to="/professional-hub" replace />} />
 
                   <Route
                     path="/kyc"
@@ -614,11 +645,11 @@ const App = () => {
                   />
 
                   <Route
-                    path="/antigravity-engine"
+                    path="/business-insights"
                     element={
                       isAuthenticated && isOnboarded ? (
                         <Layout showSidebar={true} isFluid={true}>
-                          <AntigravityEnginePage />
+                          <BusinessInsightsPage />
                         </Layout>
                       ) : (
                         <Navigate to={!isAuthenticated ? "/login" : "/onboarding"} />

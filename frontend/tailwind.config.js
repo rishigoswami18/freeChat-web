@@ -9,7 +9,26 @@ export default {
     extend: {
       colors: {
         primary: "var(--primary-color, #6366f1)",
-      }
+      },
+      animation: {
+        "shimmer": "shimmer 2s linear infinite",
+        "fade-in": "fade-in 0.5s ease-out forwards",
+        "slide-in-bottom": "slide-in-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+      },
+      keyframes: {
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "slide-in-bottom": {
+          "0%": { transform: "translateY(1rem)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+      },
     },
   },
   plugins: [daisyui],
@@ -17,40 +36,40 @@ export default {
     themes: [
       {
         zyro: {
-          /* Zyro Light Theme: Neon Orange & Clean White */
-          "primary": "oklch(65% 0.2 45)", /* Neon Orange */
-          "secondary": "oklch(15% 0.04 250)", /* Deep Black */
-          "accent": "oklch(70% 0.15 160)", 
-          "neutral": "oklch(25% 0.02 250)", 
-          "base-100": "oklch(100% 0 0)",
-          "base-200": "oklch(97% 0.01 250)",
-          "base-300": "oklch(94% 0.02 250)",
-          "base-content": "oklch(15% 0.04 250)",
-          "info": "oklch(60% 0.2 45)",
-          "success": "oklch(70% 0.15 160)",
-          "warning": "oklch(80% 0.15 70)",
-          "error": "oklch(60% 0.2 25)",
-          "--rounded-box": "0.75rem",
-          "--rounded-btn": "0.5rem",
-          "--rounded-badge": "1rem",
+          /* Premium Light: Minimalist & Clean */
+          "primary": "#6366f1", /* Indigo */
+          "secondary": "#0f172a", /* Slate 900 */
+          "accent": "#f43f5e", /* Rose 500 */
+          "neutral": "#64748b", /* Slate 500 */
+          "base-100": "#ffffff",
+          "base-200": "#f8fafc", /* Slate 50 */
+          "base-300": "#f1f5f9", /* Slate 100 */
+          "base-content": "#0f172a",
+          "info": "#3b82f6",
+          "success": "#10b981",
+          "warning": "#f59e0b",
+          "error": "#ef4444",
+          "--rounded-box": "1rem",
+          "--rounded-btn": "0.75rem",
+          "--rounded-badge": "1.5rem",
         },
         zyrodark: {
-          /* Zyro Dark Theme: Deep Black & Neon Orange */
-          "primary": "oklch(65% 0.2 45)", /* Neon Orange */
-          "secondary": "oklch(90% 0.02 250)", /* Off-white for accents */
-          "accent": "oklch(75% 0.15 160)", 
-          "neutral": "oklch(18% 0.03 250)", 
-          "base-100": "oklch(15% 0.04 250)", /* Deep Black Slate */
-          "base-200": "oklch(12% 0.03 250)",
-          "base-300": "oklch(10% 0.02 250)",
-          "base-content": "oklch(95% 0.01 250)",
-          "info": "oklch(70% 0.2 45)",
-          "success": "oklch(75% 0.15 160)",
-          "warning": "oklch(85% 0.15 70)",
-          "error": "oklch(65% 0.2 25)",
-          "--rounded-box": "0.75rem",
-          "--rounded-btn": "0.5rem",
-          "--rounded-badge": "1rem",
+          /* Premium Deep Space: Sophisticated & High-Contrast */
+          "primary": "#818cf8", /* Indigo 400 */
+          "secondary": "#f8fafc", /* Slate 50 */
+          "accent": "#fb7185", /* Rose 400 */
+          "neutral": "#94a3b8", /* Slate 400 */
+          "base-100": "#020617", /* Slate 950 */
+          "base-200": "#0f172a", /* Slate 900 */
+          "base-300": "#1e293b", /* Slate 800 */
+          "base-content": "#f8fafc",
+          "info": "#60a5fa",
+          "success": "#34d399",
+          "warning": "#fbbf24",
+          "error": "#f87171",
+          "--rounded-box": "1rem",
+          "--rounded-btn": "0.75rem",
+          "--rounded-badge": "1.5rem",
         },
       },
       "light",

@@ -16,12 +16,18 @@ import {
   getUserFriends,
   changePassword,
   deleteAccount,
-  claimDailyReward,
+  getTrendingCreators,
+  toggleFollow,
+  claimDailyReward
 } from "../controllers/user.controller.js";
 import { migrateUsernames } from "../controllers/migration.controller.js";
 
 const router = express.Router();
+
+router.get("/trending", protectRoute, getTrendingCreators);
+router.post("/follow/:id", protectRoute, toggleFollow);
 router.get("/all", getAllUsers);
+
 
 // apply auth middleware to all routes
 router.use(protectRoute);
@@ -115,7 +121,70 @@ router.put("/update-ai-companion", async (req, res) => {
   }
 });
 
-// Wildcard routes MUST be last to avoid catching specific routes like /friends, /friend-requests
+// 🤖 AI Strategy & Automation
+router.get("/ai/content-strategy", protectRoute, async (req, res) => {
+    try {
+        const { getAIContentSuggestions } = await import("../services/aiContent.service.js");
+        const suggestions = await getAIContentSuggestions(req.user.contentNiche || "Lifestyle", req.user.fullName);
+        res.json(suggestions);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.put("/settings/automation", protectRoute, async (req, res) => {
+    try {
+        const { isAutoReplyEnabled, autoReplyMessage, contentNiche } = req.body;
+        const user = await User.findById(req.user._id);
+        
+        if (isAutoReplyEnabled !== undefined) user.isAutoReplyEnabled = isAutoReplyEnabled;
+        if (autoReplyMessage !== undefined) user.autoReplyMessage = autoReplyMessage;
+        if (contentNiche !== undefined) user.contentNiche = contentNiche;
+        
+        await user.save();
+        res.json({ success: true, message: "Automation settings updated!", user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.post("/creator/airdrop", protectRoute, async (req, res) => {
+    try {
+        const { fanIds, amountPerFan } = req.body;
+        if (!fanIds || !Array.isArray(fanIds) || !amountPerFan) {
+            return res.status(400).json({ message: "Invalid airdrop data. Need fanIds (array) and amountPerFan" });
+        }
+        
+        const { creatorAirdrop } = await import("../services/airdrop.service.js");
+        const result = await creatorAirdrop(req.user._id, fanIds, amountPerFan);
+        
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get("/creator/leaderboard", protectRoute, async (req, res) => {
+    try {
+        const { default: UserWallet } = await import("../models/UserWallet.js");
+        const topWallets = await UserWallet.find({ winnings: { $gt: 0 } })
+            .sort({ winnings: -1 })
+            .limit(10)
+            .populate({
+                path: "userId",
+                select: "fullName username profilePic isVerified followersCount"
+            });
+            
+        res.json(topWallets);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Wildcard routes MUST be last
+
+
+
 router.get("/:id", getUserProfile);
 router.get("/:id/friends", getUserFriends);
 

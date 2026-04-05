@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import UserWallet from "../models/UserWallet.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
@@ -26,6 +27,7 @@ export const createGemOrder = async (req, res) => {
             notes: {
                 userId: req.user._id.toString(),
                 packId: packId || "custom_pack",
+                gemAmount: amount, // Crucial: Store the amount in notes to verify later
                 purpose: "Skill Analysis & Community Access"
             },
         };
@@ -44,49 +46,64 @@ export const createGemOrder = async (req, res) => {
 
 /**
  * verifyGemPayment - Verifies signature and credits Bond Coins + Referral Bonus
+ * Uses Razorpay Order Fetch to prevent amount tampering.
  */
 export const verifyGemPayment = async (req, res) => {
     try {
         const {
             razorpay_order_id,
             razorpay_payment_id,
-            razorpay_signature,
-            gemAmount // These are actually Bond Coins
+            razorpay_signature
         } = req.body;
 
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-            .update(body)
-            .digest("hex");
+        // 1. Verify Signature (Standard)
+        const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id).digest("hex");
 
-        if (expectedSignature !== razorpay_signature) {
-            return res.status(400).json({ message: "Fraud detected or invalid signature!" });
+        if (expectedSignature !== razorpay_signature) return res.status(400).json({ message: "Fraud detected!" });
+
+        // 2. 🛡️ THE SHIELD: Fetch order from Razorpay to get the REAL amount from notes
+        const order = await razorpay.orders.fetch(razorpay_order_id);
+        const gemAmount = parseInt(order.notes.gemAmount || 0);
+
+        if (gemAmount <= 0) {
+            return res.status(400).json({ message: "Invalid order amount detected." });
         }
 
-        // 1. Credit the User
-        const user = await User.findById(req.user._id);
-        if (!user) return res.status(404).json({ message: "User not found" });
+        // 3. Credit the User Wallet (Atomic)
+        const wallet = await UserWallet.findOneAndUpdate(
+            { userId: req.user._id },
+            { $inc: { bonusBalance: gemAmount } },
+            { new: true, upsert: true }
+        );
 
-        user.bondCoins = (user.bondCoins || 0) + gemAmount;
-        await user.save();
+        // 4. Log Transaction (Audit-ready)
+        const { default: TransactionHistory } = await import("../models/TransactionHistory.js");
+        await TransactionHistory.create({
+            userId: req.user._id,
+            amount: gemAmount,
+            type: "DEPOSIT",
+            description: `Recharge for ₹${gemAmount} completed.`,
+            status: "completed"
+        });
+
 
         // 2. Referral Logic (Billionaire Edge)
-        // If this user was referred by someone, give the referrer 20% bonus
-        if (user.referredBy) {
-            const referrer = await User.findById(user.referredBy);
-            if (referrer) {
-                const bonus = Math.floor(gemAmount * 0.20);
-                referrer.bondCoins = (referrer.bondCoins || 0) + bonus;
-                await referrer.save();
-                console.log(`✅ Referral Bonus: ${bonus} coins credited to ${referrer.fullName}`);
-            }
+        const user = await User.findById(req.user._id);
+        if (user && user.referredBy) {
+            const bonus = Math.floor(gemAmount * 0.20);
+            await UserWallet.findOneAndUpdate(
+                { userId: user.referredBy },
+                { $inc: { bonusBalance: bonus } },
+                { upsert: true }
+            );
+            console.log(`✅ Referral Bonus: ${bonus} coins credited to referrer.`);
         }
 
         res.status(200).json({
             success: true,
             message: `Swagat hai Arena mein! ${gemAmount} Coins credited.`,
-            coins: user.bondCoins
+            coins: wallet.totalBalance
         });
     } catch (error) {
         console.error("Payment Verification Error:", error);
@@ -106,35 +123,52 @@ export const sendGift = async (req, res) => {
             return res.status(400).json({ message: "Apne aap ko gift nahi de sakte bhai!" });
         }
 
-        const sender = await User.findById(senderId);
-        const creator = await User.findById(creatorId);
+        // Atomic transaction: Deduct from sender, add to creator
+        const senderWallet = await UserWallet.findOneAndUpdate(
+            { userId: senderId, bonusBalance: { $gte: giftAmount } },
+            { $inc: { bonusBalance: -giftAmount } },
+            { new: true }
+        );
 
-        if (!sender || !creator) return res.status(404).json({ message: "User gayab hai!" });
-
-        if (sender.bondCoins < giftAmount) {
-            return res.status(400).json({ message: "Coins khatam! Recharge kar lo fast." });
-        }
-
-        sender.bondCoins -= giftAmount;
-        creator.earnings = (creator.earnings || 0) + (giftAmount * 0.7); // 70-30 split
-
-        await sender.save();
-        await creator.save();
-
-        res.status(200).json({
-            success: true,
-            message: `Sent ${giftName} to ${creator.fullName}`,
-            remainingCoins: sender.bondCoins
-        });
-    } catch (error) {
-        res.status(500).json({ message: "Gift failed!" });
+    if (!senderWallet) {
+      return res.status(400).json({ message: "Coins khatam! Recharge kar lo fast." });
     }
+
+    const creatorEarnings = Math.floor(giftAmount * 0.7); // 70-30 split
+    await UserWallet.findOneAndUpdate(
+        { userId: creatorId },
+        { $inc: { winnings: creatorEarnings } },
+        { upsert: true }
+    );
+
+    // 📜 Audit Trail: Log the gift transaction
+    const { default: TransactionHistory } = await import("../models/TransactionHistory.js");
+    await TransactionHistory.create({
+        userId: senderId,
+        recipientId: creatorId,
+        amount: -giftAmount,
+        type: "GIFT",
+        description: `Sent ${giftName} gift of ₹${giftAmount} to creator.`,
+        status: "completed"
+    });
+
+    res.status(200).json({
+        success: true,
+        message: `Sent ${giftName} to creator`,
+        remainingCoins: senderWallet.totalBalance
+    });
+  } catch (error) {
+    console.error("Gift error:", error);
+    res.status(500).json({ message: "Gift failed!" });
+  }
 };
+
 
 export const getWalletBalance = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id).select("bondCoins earnings gems");
-        res.status(200).json(user);
+        const wallet = await UserWallet.findOne({ userId: req.user._id });
+        if (!wallet) return res.status(200).json({ totalBalance: 0, winnings: 0, bonusBalance: 0 });
+        res.status(200).json(wallet);
     } catch (error) {
         res.status(500).json({ message: "Error fetching balance" });
     }
@@ -142,18 +176,23 @@ export const getWalletBalance = async (req, res) => {
 
 export const boostProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
-        const BOOST_COST = 500; // Increased for premium feel
+        const BOOST_COST = 500;
+        
+        const wallet = await UserWallet.findOneAndUpdate(
+            { userId: req.user._id, bonusBalance: { $gte: BOOST_COST } },
+            { $inc: { bonusBalance: -BOOST_COST } },
+            { new: true }
+        );
 
-        if (user.bondCoins < BOOST_COST) {
+        if (!wallet) {
             return res.status(400).json({ message: "Coins kam hain boost ke liye!" });
         }
 
-        user.bondCoins -= BOOST_COST;
-        user.boostUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await user.save();
+        await User.findByIdAndUpdate(req.user._id, {
+            boostUntil: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        });
 
-        res.status(200).json({ success: true, message: "Profile Boosted! 🚀", coins: user.bondCoins });
+        res.status(200).json({ success: true, message: "Profile Boosted! 🚀", coins: wallet.totalBalance });
     } catch (error) {
         res.status(500).json({ message: "Boost failed!" });
     }

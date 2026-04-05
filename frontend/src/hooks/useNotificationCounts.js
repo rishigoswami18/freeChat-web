@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useChatClient } from "../components/ChatProvider";
 import { useQuery } from "@tanstack/react-query";
-import { getFriendRequests } from "../lib/api";
+import { getFriendRequests, getNotifications } from "../lib/api";
 import useAuthUser from "./useAuthUser";
 
 const useNotificationCounts = () => {
@@ -9,15 +9,27 @@ const useNotificationCounts = () => {
     const { authUser } = useAuthUser();
     const [unreadMessages, setUnreadMessages] = useState(0);
 
-    // Fetch friend requests for notification count
+    // 1. Fetch Friend Requests
     const { data: friendRequests } = useQuery({
         queryKey: ["friendRequests"],
         queryFn: getFriendRequests,
         enabled: !!authUser,
-        refetchInterval: 30000, // Poll every 30s for friend requests
+        refetchInterval: 60000, 
     });
 
-    const notificationCount = friendRequests?.incomingReqs?.length || 0;
+    // 2. Fetch Social Notifications
+    const { data: notifications = [] } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: getNotifications,
+        enabled: !!authUser,
+        refetchInterval: 30000, 
+    });
+
+    const unreadPulseCount = useMemo(() => 
+        notifications.filter(n => !n.isRead).length
+    , [notifications]);
+
+    const notificationCount = (friendRequests?.incomingReqs?.length || 0) + unreadPulseCount;
 
     useEffect(() => {
         if (!chatClient) return;
@@ -27,17 +39,13 @@ const useNotificationCounts = () => {
             setUnreadMessages(count);
         };
 
-        // Initial check
         updateCount();
 
-        // Specific events that always affect unread counts
         const events = [
             'message.new',
             'notification.message_new',
             'notification.mark_read',
-            'message.read',
-            'connection.changed',
-            'user.updated'
+            'message.read'
         ];
 
         const handleChatEvent = (event) => {
@@ -48,24 +56,19 @@ const useNotificationCounts = () => {
             }
         };
 
-        events.forEach(eventName => {
-            chatClient.on(eventName, handleChatEvent);
-        });
-
-        // Failsafe: Sync every 60 seconds in case events are missed
+        events.forEach(eventName => chatClient.on(eventName, handleChatEvent));
         const interval = setInterval(updateCount, 60000);
 
         return () => {
-            events.forEach(eventName => {
-                chatClient.off(eventName, handleChatEvent);
-            });
+            events.forEach(eventName => chatClient.off(eventName, handleChatEvent));
             clearInterval(interval);
         };
     }, [chatClient]);
 
     return {
         unreadMessages,
-        notificationCount
+        notificationCount,
+        unreadPulseCount
     };
 };
 

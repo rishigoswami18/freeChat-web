@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import Sidebar from "../Sidebar";
+import PremiumSidebar from "./PremiumSidebar";
+import PremiumNavbar from "./PremiumNavbar";
 import MobileDrawer from "../MobileDrawer";
 import BackgroundEffects from "./BackgroundEffects";
 import FeedLayout from "./FeedLayout";
@@ -47,19 +48,17 @@ const AppLayout = ({
             {/* 3. Global Sidebar (Fixed on Desktop) */}
             {config.showSidebar && (
                 <div className="relative z-30">
-                    <Sidebar />
+                    <PremiumSidebar />
                 </div>
             )}
 
             {/* 4. Adaptive Content Container */}
-            <div className={`relative z-10 flex min-h-screen flex-col transition-[padding] duration-300 ${
-                config.showSidebar ? "md:pl-[var(--zyro-sidebar-offset,116px)]" : ""
+            <div className={`relative z-10 flex min-h-screen flex-col transition-[padding] duration-500 ease-in-out ${
+                config.showSidebar ? "md:pl-[var(--zyro-sidebar-width,280px)]" : ""
             }`}>
                 <CurrentLayout config={config} sideNav={sideNav}>
                     {children}
                 </CurrentLayout>
-
-                {/* 5. Global Wide Footer */}
                 {config.showFooter && <Footer />}
             </div>
         </div>

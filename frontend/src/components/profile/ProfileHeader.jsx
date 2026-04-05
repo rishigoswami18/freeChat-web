@@ -6,7 +6,20 @@ import { Camera, Globe, MapPin, BadgeCheck, LogOut, Instagram, Linkedin } from "
  * Memoized to prevent re-renders when a user switches tabs (Grid/Feed)
  * or when they click on unrelated buttons.
  */
-const ProfileHeader = memo(({ authUser, postsCount, onEditClick, onShareClick, onFriendsClick, onLogout, isLoggingOut }) => {
+const ProfileHeader = memo(({ 
+    authUser, 
+    postsCount, 
+    onEditClick, 
+    onShareClick, 
+    onFriendsClick, 
+    onLogout, 
+    isLoggingOut,
+    isOwnProfile = true,
+    isFollowing = false,
+    onFollowClick,
+    onMessageClick
+}) => {
+
     return (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10 mb-10 pb-6 border-b border-base-300">
             <div
@@ -53,16 +66,36 @@ const ProfileHeader = memo(({ authUser, postsCount, onEditClick, onShareClick, o
                         </span>
                         <span className="text-sm opacity-60">posts</span>
                     </div>
-                    <div
-                        className="flex flex-col items-center sm:items-start cursor-pointer hover:text-primary transition-colors active:scale-95"
-                        onClick={onFriendsClick}
-                    >
-                        <span className="font-bold text-lg leading-none">
-                            {authUser?.friendCount ?? authUser?.friends?.length ?? 0}
-                        </span>
-                        <span className="text-sm opacity-60">friends</span>
+                    <div className="flex flex-col items-center sm:items-start group cursor-pointer transition-all">
+                        <span className="font-bold text-lg leading-none group-hover:text-primary">{authUser?.followersCount || 0}</span>
+                        <span className="text-[10px] font-black uppercase text-white/30 tracking-widest leading-none mt-1">followers</span>
                     </div>
+                    <div className="flex flex-col items-center sm:items-start group cursor-pointer transition-all">
+                        <span className="font-bold text-lg leading-none group-hover:text-primary">{authUser?.followingCount || 0}</span>
+                        <span className="text-[10px] font-black uppercase text-white/30 tracking-widest leading-none mt-1">following</span>
+                    </div>
+
                 </div>
+
+                {/* 💰 Wallet Snapshot (Owner Only) */}
+                {isOwnProfile && (
+                    <div className="grid grid-cols-2 gap-3 max-w-sm">
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-3 flex flex-col">
+                            <div className="flex items-center gap-1 mb-1">
+                                <span className="text-[7px] font-black uppercase text-emerald-500 tracking-widest">Winnings</span>
+                            </div>
+                            <span className="font-black text-sm text-emerald-400">🪙 {(authUser?.wallet?.winnings || 0).toLocaleString()}</span>
+                        </div>
+                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 flex flex-col text-left">
+                            <div className="flex items-center gap-1 mb-1">
+                                <span className="text-[7px] font-black uppercase text-amber-500 tracking-widest">Bond Coins</span>
+                            </div>
+                            <span className="font-black text-sm text-amber-500">🪙 {(authUser?.wallet?.bonusBalance || 0).toLocaleString()}</span>
+                        </div>
+                    </div>
+                )}
+
+
 
                 <div className="space-y-1">
                     <p className="font-bold text-sm tracking-tight">{authUser?.fullName}</p>
@@ -103,32 +136,49 @@ const ProfileHeader = memo(({ authUser, postsCount, onEditClick, onShareClick, o
 
                 {/* Action Buttons at the bottom of header */}
                 <div className="flex items-center justify-center sm:justify-start gap-2 w-full">
-                    <button
-                        onClick={onEditClick}
-                        className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case"
-                    >
-                        Edit Profile
-                    </button>
-                    <button
-                        onClick={onShareClick}
-                        className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case"
-                    >
-                        Share Profile
-                    </button>
+                    {isOwnProfile ? (
+                        <>
+                            <button onClick={onEditClick} className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case">
+                                Edit Profile
+                            </button>
+                            <button onClick={onShareClick} className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case">
+                                Share Profile
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button 
+                                onClick={onFollowClick} 
+                                className={`btn btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case ${isFollowing ? 'btn-base-200' : 'btn-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                            >
+                                {isFollowing ? 'Unfollow' : 'Follow'}
+                            </button>
+                            <button 
+                                onClick={onMessageClick}
+                                className="btn btn-base-200 btn-sm flex-1 sm:flex-none rounded-lg font-bold px-8 normal-case"
+                            >
+                                Message
+                            </button>
+                        </>
+                    )}
+                    
                     {/* Logout Button (Primarily for Mobile Accessibility) */}
-                    <button
-                        onClick={onLogout}
-                        disabled={isLoggingOut}
-                        className="btn btn-error btn-outline btn-sm sm:hidden flex-1 rounded-lg font-bold px-8 normal-case gap-2"
-                    >
-                        {isLoggingOut ? (
-                            <span className="loading loading-spinner loading-xs" />
-                        ) : (
-                            <LogOut className="size-4" />
-                        )}
-                        Logout
-                    </button>
+                    {isOwnProfile && (
+                        <button
+                            onClick={onLogout}
+                            disabled={isLoggingOut}
+                            className="btn btn-error btn-outline btn-sm sm:hidden flex-1 rounded-lg font-bold px-8 normal-case gap-2"
+                        >
+                            {isLoggingOut ? (
+                                <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                                <LogOut className="size-4" />
+                            )}
+                            Logout
+                        </button>
+                    )}
                 </div>
+
             </div>
         </div>
     );

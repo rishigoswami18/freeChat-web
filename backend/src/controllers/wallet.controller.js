@@ -43,16 +43,20 @@ export const requestWithdrawal = async (req, res) => {
             return res.status(400).json({ message: "Minimum withdrawal is 500 Bond Coins. 🪙" });
         }
 
-        const wallet = await UserWallet.findOne({ userId });
-        if (!wallet || wallet.winnings < amount) {
-            return res.status(400).json({ message: "Insufficient 'Winnings' for this withdrawal. 📉" });
+        // 1. Atomic logical deduction with balance check
+        const wallet = await UserWallet.findOneAndUpdate(
+            { userId, winnings: { $gte: amount } },
+            { 
+                $inc: { winnings: -amount, frozenBalance: amount },
+                $set: { lastUpdated: new Date() }
+            },
+            { new: true }
+        );
+
+        if (!wallet) {
+            return res.status(400).json({ message: "Insufficient 'Winnings' or withdrawal already in progress. 📉" });
         }
 
-        // 1. Freeze the winnings
-        wallet.winnings -= amount;
-        wallet.frozenBalance += amount;
-        wallet.totalBalance = (wallet.winnings + wallet.bonusBalance + wallet.frozenBalance);
-        await wallet.save();
 
         // 2. Create Request
         const request = await WithdrawalRequest.create({

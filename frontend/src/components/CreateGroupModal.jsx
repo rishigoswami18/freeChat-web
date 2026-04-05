@@ -16,7 +16,7 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
 
     const { data: friends, isLoading } = useQuery({
         queryKey: ["friends"],
-        queryFn: getUserFriends,
+        queryFn: () => getUserFriends(),
         enabled: isOpen,
     });
 

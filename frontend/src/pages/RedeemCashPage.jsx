@@ -53,15 +53,15 @@ const RedeemCashPage = () => {
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-end gap-10 mb-16 border-b border-white/5 pb-10">
-                    <div>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-emerald-500/20 rounded-xl">
-                                <Wallet className="size-5 text-emerald-500" />
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-indigo-500/20 rounded-xl">
+                                    <Wallet className="size-5 text-indigo-400" />
+                                </div>
+                                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-400">Rewards Redemption</span>
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">Coins to Cash Engine</span>
+                            <h1 className="text-5xl font-bold tracking-tight">Redeem Rewards</h1>
                         </div>
-                        <h1 className="text-6xl font-black italic tracking-tighter">Redeem Rewards</h1>
-                    </div>
                     <div className="bg-white/5 p-6 rounded-[32px] border border-white/10 flex items-center gap-6">
                         <div className="size-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <Coins className="size-6 text-black fill-current" />
@@ -126,10 +126,10 @@ const RedeemCashPage = () => {
                             </button>
                         </form>
 
-                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-[32px] p-6 flex items-start gap-4">
-                            <AlertTriangle className="size-5 text-amber-500 mt-1 shrink-0" />
-                            <p className="text-xs font-medium text-amber-500/80 leading-relaxed">
-                                Ensure your UPI ID is correct. Zyro is not responsible for transfers to incorrect VPAs. Only "Winnings" (earned from predictions) are withdrawable. Bonus coins are for play only.
+                        <div className="bg-amber-500/5 border border-amber-500/10 rounded-[32px] p-6 flex items-start gap-4">
+                            <AlertTriangle className="size-5 text-amber-500/60 mt-1 shrink-0" />
+                            <p className="text-xs font-medium text-amber-500/60 leading-relaxed">
+                                Ensure your UPI ID is correct. FreeChat is not responsible for transfers to incorrect VPAs. Only "Winnings" (earned from contributions & rewards) are withdrawable. Bonus coins are for platform use only.
                             </p>
                         </div>
                     </div>
@@ -210,13 +210,15 @@ const RedeemCashPage = () => {
                                 <span className="text-white font-mono font-black italic text-lg mt-2 inline-block">{upiId}</span>
                             </p>
 
-                            <button 
-                                onClick={confirmWithdrawal}
-                                disabled={isProcessing}
-                                className="w-full h-16 bg-emerald-500 text-black rounded-3xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                            >
-                                {isProcessing ? "Auric Engine Syncing..." : "Finalize Payout"}
-                            </button>
+                                <motion.button 
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={confirmWithdrawal}
+                                    disabled={isProcessing}
+                                    className="w-full h-14 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl font-semibold uppercase tracking-wider text-xs flex items-center justify-center gap-3 transition-all disabled:opacity-50 shadow-lg shadow-indigo-500/20"
+                                >
+                                    {isProcessing ? "Processing..." : "Confirm Withdrawal"}
+                                </motion.button>
                         </motion.div>
                     </motion.div>
                 )}

@@ -5,6 +5,8 @@ import { Globe } from "lucide-react";
 const languages = [
     { code: "en", label: "English", flag: "🇬🇧" },
     { code: "hi", label: "हिंदी", flag: "🇮🇳" },
+    { code: "pa", label: "ਪੰਜਾਬੀ", flag: "🇮🇳" },
+    { code: "bho", label: "भोजपुरी", flag: "🇮🇳" },
     { code: "es", label: "Español", flag: "🇪🇸" },
     { code: "fr", label: "Français", flag: "🇫🇷" },
 ];
@@ -34,14 +36,15 @@ const LanguageSelector = ({ align = "end", size = "btn-sm" }) => {
                                 localStorage.setItem("i18nextLng", lang.code);
                                 document.activeElement.blur(); // Close dropdown
                             }}
-                            className={`flex items-center gap-3 py-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-200 ${i18n.language === lang.code ? "bg-primary/20 text-primary font-bold shadow-inner" : ""
+                            className={`flex items-center gap-3 py-2.5 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-200 ${(i18n.resolvedLanguage === lang.code || i18n.language === lang.code) ? "bg-primary/20 text-primary font-bold shadow-inner" : ""
                                 }`}
                         >
                             <span className="text-lg leading-none">{lang.flag}</span>
                             <span className="text-sm tracking-tight">{lang.label}</span>
-                            {i18n.language === lang.code && (
+                            {(i18n.resolvedLanguage === lang.code || i18n.language === lang.code) && (
                                 <div className="ml-auto size-1.5 rounded-full bg-primary" />
                             )}
+
                         </button>
                     </li>
                 ))}

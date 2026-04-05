@@ -19,6 +19,7 @@ import storyRoutes from "./routes/story.route.js";
 import translationRoutes from "./routes/translation.route.js";
 import supportRoutes from "./routes/support.route.js";
 import gemRoutes from "./routes/gem.route.js";
+import goalRoutes from "./routes/goal.route.js";
 import bondRoutes from "./routes/bond.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import adminRoutes from "./routes/admin.route.js";
@@ -112,12 +113,16 @@ app.use("/api/bond", bondRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/apk", apkRoutes);
+app.use("/api/goals", goalRoutes);
 app.use("/api/communities", communityRoutes);
 app.use("/api/radar", radarRoutes);
 app.use("/api/focus", focusRoutes);
 app.use("/api/creator", creatorRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/wallet", walletRoutes);
+
+import minigameRoutes from "./routes/minigame.route.js";
+app.use("/api/minigame", minigameRoutes);
 
 /**
  * FRONTEND HOSTING (Production)

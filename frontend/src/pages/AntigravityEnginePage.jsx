@@ -1,61 +1,115 @@
 import React from 'react';
-import AntigravityPrediction from '../components/AntigravityPrediction';
 import { motion } from 'framer-motion';
-import { Box, Globe, Shield, Sparkles } from 'lucide-react';
+import { BarChart3, Globe, Shield, Sparkles, TrendingUp, Users, DollarSign, PieChart } from 'lucide-react';
 
-const AntigravityEnginePage = () => {
+const BusinessInsightsPage = () => {
     return (
-        <div className="min-h-screen bg-[#050505] text-white p-6 lg:p-20 font-outfit overflow-hidden">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+        <div className="min-h-screen bg-[#020617] text-white p-6 lg:p-20 overflow-hidden font-medium">
+            <div className="max-w-7xl mx-auto space-y-24">
                 
-                {/* Visual Section */}
-                <div className="lg:col-span-12 text-center space-y-6 mb-20">
+                {/* Header Section */}
+                <div className="text-center space-y-8 relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
                     <motion.div 
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-3 px-6 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 font-black text-xs uppercase tracking-[0.4em]"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-3 px-6 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 font-bold text-[10px] uppercase tracking-[0.4em] relative z-10"
                     >
-                        <Globe className="size-4 animate-spin-slow" /> System Status: Weightless
+                        <BarChart3 className="size-4" /> Professional Analytics Suite
                     </motion.div>
-                    <h1 className="text-8xl font-black tracking-tighter leading-[0.85] bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
-                        Antigravity<br/>Engine
-                    </h1>
-                </div>
-
-                <div className="lg:col-span-7 space-y-12">
-                     <div className="space-y-4">
-                        <h2 className="text-4xl font-black tracking-tight flex items-center gap-4">
-                            Smart Defaulting <Sparkles className="size-8 text-indigo-500" />
-                        </h2>
-                        <p className="text-xl text-white/40 font-medium leading-relaxed">
-                            Our Gemini-driven predictive layer calculates your next intent before your thumb moves. 
-                            Favorite team: <span className="text-white">CSK</span>. Current context: <span className="text-white">Death Overs</span>. 
-                            Result: Immediate access to high-stakes predictions.
+                    <div className="space-y-4 relative z-10">
+                        <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-none">
+                            Business <br/><span className="text-indigo-500">Insights</span>
+                        </h1>
+                        <p className="max-w-2xl mx-auto text-white/40 text-lg font-medium leading-relaxed">
+                            Unlock the data behind your digital brand. Track engagement, optimize reach, and manage your business revenue with precision.
                         </p>
-                     </div>
-
-                     <div className="grid grid-cols-2 gap-8">
-                        <div className="p-8 bg-white/5 rounded-[3rem] border border-white/5 space-y-4">
-                            <Box className="size-8 text-indigo-500" />
-                            <h4 className="font-black text-2xl tracking-tighter">100ms API</h4>
-                            <p className="text-sm font-bold text-white/30">Redis Pub/Sub architecture ensures score updates faster than the broadcast.</p>
-                        </div>
-                        <div className="p-8 bg-white/5 rounded-[3rem] border border-white/5 space-y-4">
-                            <Shield className="size-8 text-green-500" />
-                            <h4 className="font-black text-2xl tracking-tighter">Ghost Mode</h4>
-                            <p className="text-sm font-bold text-white/30">Predictions are anchored to the blockchain in the background, zero lag.</p>
-                        </div>
-                     </div>
+                    </div>
                 </div>
 
-                <div className="lg:col-span-5 relative">
-                    <div className="absolute -inset-10 bg-indigo-500/20 blur-[120px] rounded-full animate-pulse" />
-                    <AntigravityPrediction />
-                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    
+                    <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <StatCard icon={Users} label="Daily Reach" value="1.2K+" color="text-indigo-400" />
+                        <StatCard icon={TrendingUp} label="Growth Rate" value="+14.5%" color="text-emerald-400" />
+                        <StatCard icon={DollarSign} label="Total Earnings" value="₹12,450" color="text-amber-400" />
+                        <StatCard icon={PieChart} label="Conversion" value="4.2%" color="text-violet-400" />
+                    </div>
 
+                    <div className="lg:col-span-8 space-y-8">
+                         <div className="bg-white/[0.02] border border-white/5 rounded-[3.5rem] p-10 md:p-14 space-y-10 relative overflow-hidden backdrop-blur-xl">
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-3">
+                                    <h2 className="text-3xl font-bold tracking-tight flex items-center gap-4">
+                                        Audience Intelligence <Sparkles className="size-6 text-indigo-500" />
+                                    </h2>
+                                    <p className="text-white/40 font-medium leading-relaxed max-w-lg">
+                                        Our AI-driven analytics layer identifies peak activity times for your specific audience hubs. 
+                                        Most active location: <span className="text-white font-bold">Bangalore</span>. Peak Engagement: <span className="text-white font-bold">8 PM - 10 PM</span>.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="h-64 flex items-end gap-3 px-4">
+                                {[40, 70, 45, 90, 65, 80, 55, 95, 75, 85, 60, 40].map((h, i) => (
+                                    <motion.div 
+                                        key={i}
+                                        initial={{ height: 0 }}
+                                        animate={{ height: `${h}%` }}
+                                        transition={{ delay: i * 0.05, duration: 0.8, ease: 'easeOut' }}
+                                        className="flex-1 bg-gradient-to-t from-indigo-600/20 to-indigo-500/80 rounded-t-xl"
+                                    />
+                                ))}
+                            </div>
+                         </div>
+                    </div>
+
+                    <div className="lg:col-span-4 space-y-6">
+                        <div className="p-10 bg-white/[0.02] rounded-[3.5rem] border border-white/5 space-y-6 flex flex-col items-center text-center">
+                            <div className="size-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400">
+                                <Shield className="size-8" />
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="font-bold text-2xl tracking-tight">Verified Trust</h4>
+                                <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed">Identity anchored to secure professional protocols.</p>
+                            </div>
+                            <button className="w-full py-4 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-500/20 transition-all">
+                                UPDATE BADGE
+                            </button>
+                        </div>
+
+                        <div className="p-10 bg-gradient-to-br from-[#0c1020] to-[#050505] rounded-[3.5rem] border border-white/5 space-y-10 relative overflow-hidden group">
+                           <Globe className="absolute -bottom-10 -right-10 size-40 text-white/5 group-hover:rotate-12 transition-transform duration-1000" />
+                           <div className="space-y-4">
+                               <h4 className="text-xl font-bold tracking-tight">Expand Your Reach</h4>
+                               <p className="text-sm text-white/40 leading-relaxed">Unlock hyperlocal discovery tools to connect with businesses across India.</p>
+                           </div>
+                           <motion.button 
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="inline-flex h-12 items-center px-10 border border-white/10 rounded-2xl font-bold text-xs tracking-widest uppercase hover:bg-white/5 transition-all"
+                           >
+                            UPGRADE NOW
+                           </motion.button>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     );
 };
 
-export default AntigravityEnginePage;
+const StatCard = ({ icon: Icon, label, value, color }) => (
+    <div className="bg-white/[0.02] border border-white/5 p-8 rounded-[2.5rem] group hover:bg-white/[0.04] transition-all">
+        <div className={`size-12 rounded-xl mb-6 bg-white/5 flex items-center justify-center ${color} group-hover:scale-110 transition-transform`}>
+            <Icon className="size-5" />
+        </div>
+        <div className="space-y-1">
+            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{label}</p>
+            <p className="text-3xl font-bold text-white tracking-tight">{value}</p>
+        </div>
+    </div>
+);
+
+export default BusinessInsightsPage;

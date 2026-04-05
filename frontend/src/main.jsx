@@ -44,7 +44,7 @@ window.addEventListener('unhandledrejection', (event) => {
   console.error('🔴 UNHANDLED PROMISE:', event.reason);
 });
 
-console.log("🚀 Initializing Zyro App...");
+console.log("🚀 Initializing FreeChat App...");
 
 import App from "./App.jsx";
 

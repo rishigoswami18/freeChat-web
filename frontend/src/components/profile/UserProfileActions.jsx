@@ -1,46 +1,26 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { sendFriendRequest, unfriend } from "../../lib/api";
-import { MessageCircle, UserX, UserPlus } from "lucide-react";
+import { toggleFollow } from "../../lib/api";
+import { MessageCircle, Heart, UserPlus, UserCheck } from "lucide-react";
+
 import toast from "react-hot-toast";
 
 const UserProfileActions = memo(({ userId, authUser, user }) => {
     const queryClient = useQueryClient();
 
-    const { mutate: addFriendMutation, isPending: isAddingFriend } = useMutation({
-        mutationFn: () => sendFriendRequest(userId),
-        onMutate: async () => {
-            await queryClient.cancelQueries({ queryKey: ["userProfile", userId] });
-            const previousUser = queryClient.getQueryData(["userProfile", userId]);
-            queryClient.setQueryData(["userProfile", userId], (old) => {
-                if (old) return { ...old, friendRequestSent: true };
-                return old;
-            });
-            return { previousUser };
-        },
-        onError: (err, _, context) => {
-            if (context?.previousUser) {
-                queryClient.setQueryData(["userProfile", userId], context.previousUser);
-            }
-            toast.error(err.response?.data?.message || "Failed to send request");
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
-        }
-    });
-
-    const { mutate: unfriendMutation, isPending: isUnfriending } = useMutation({
-        mutationFn: () => unfriend(userId),
+    const { mutate: followMutation, isPending: isFollowingPending } = useMutation({
+        mutationFn: () => toggleFollow(userId),
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey: ["userProfile", userId] });
             const previousUser = queryClient.getQueryData(["userProfile", userId]);
             queryClient.setQueryData(["userProfile", userId], (old) => {
                 if (old) {
+                    const willFollow = !old.isFollowing;
                     return { 
                         ...old, 
-                        isFriend: false, 
-                        friendCount: Math.max(0, (old.friendCount || 0) - 1)
+                        isFollowing: willFollow,
+                        followersCount: Math.max(0, (old.followersCount || 0) + (willFollow ? 1 : -1))
                     };
                 }
                 return old;
@@ -51,13 +31,16 @@ const UserProfileActions = memo(({ userId, authUser, user }) => {
             if (context?.previousUser) {
                 queryClient.setQueryData(["userProfile", userId], context.previousUser);
             }
-            toast.error(err.response?.data?.message || "Failed to unfriend");
+            toast.error(err.response?.data?.message || "Failed to update follow status");
         },
         onSettled: () => {
-             queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
-             queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            queryClient.invalidateQueries({ queryKey: ["userProfile", userId] });
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
         }
     });
+
+    const isFollowing = user?.isFollowing;
+
 
     // Determine current friendship status efficiently
     const isSelf = authUser?._id === userId;
@@ -93,32 +76,21 @@ const UserProfileActions = memo(({ userId, authUser, user }) => {
                 <MessageCircle className="size-4" aria-hidden="true" /> Message
             </Link>
             
-            {isFriend ? (
-                <button
-                    onClick={() => unfriendMutation()}
-                    disabled={isUnfriending}
-                    aria-label={`Unfriend ${user?.fullName}`}
-                    className="btn btn-error btn-outline btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case gap-2 disabled:opacity-50"
-                >
-                    <UserX className="size-4" aria-hidden="true" /> {isUnfriending ? "Processing..." : "Unfriend"}
-                </button>
-            ) : (
-                <button
-                    onClick={() => addFriendMutation()}
-                    disabled={isAddingFriend || hasSentRequest}
-                    aria-label={hasSentRequest ? "Friend request sent" : `Send friend request to ${user?.fullName}`}
-                    className={`btn btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case gap-2 ${
-                        hasSentRequest 
-                            ? "btn-disabled bg-base-300 text-base-content/40 cursor-not-allowed" 
-                            : "btn-base-200 hover:btn-primary"
-                    }`}
-                >
-                    <UserPlus className="size-4" aria-hidden="true" /> 
-                    {isAddingFriend ? "Sending..." : hasSentRequest ? "Sent" : "Add Friend"}
-                </button>
-            )}
+            <button
+                onClick={() => followMutation()}
+                disabled={isFollowingPending}
+                className={`btn btn-sm w-full sm:w-auto rounded-lg font-bold px-8 normal-case gap-2 ${
+                    isFollowing 
+                        ? "btn-base-200 border-base-300" 
+                        : "btn-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700"
+                }`}
+            >
+                {isFollowing ? <UserCheck className="size-4" /> : <UserPlus className="size-4" />}
+                {isFollowing ? "Following" : "Follow"}
+            </button>
         </div>
     );
+
 });
 
 UserProfileActions.displayName = "UserProfileActions";

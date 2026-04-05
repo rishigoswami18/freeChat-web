@@ -62,7 +62,7 @@ const CoupleProfilePage = () => {
     // ================== REACT QUERY DATA FETCHING ==================
     const { data: insightData } = useQuery({
         queryKey: ["dailyInsight"],
-        queryFn: getDailyInsight,
+        queryFn: () => getDailyInsight(),
         staleTime: 1000 * 60 * 5, // 5 min cache
         cacheTime: 1000 * 60 * 30, // 30 min gc
         refetchOnWindowFocus: false, // Prevent lag on alt+tab
@@ -70,7 +70,7 @@ const CoupleProfilePage = () => {
 
     const { data: coupleData, isLoading: coupleLoading } = useQuery({
         queryKey: ["coupleStatus"],
-        queryFn: getCoupleStatus,
+        queryFn: () => getCoupleStatus(),
         staleTime: 1000 * 60 * 5,
         cacheTime: 1000 * 60 * 30,
         refetchOnWindowFocus: false,
@@ -78,14 +78,14 @@ const CoupleProfilePage = () => {
 
     const { data: friends = [] } = useQuery({
         queryKey: ["friends"],
-        queryFn: getFriends,
+        queryFn: () => getFriends(),
         staleTime: 1000 * 60 * 5, // Don't refetch friend lists constantly
         refetchOnWindowFocus: false,
     });
 
     const { data: memberData, isLoading: memberLoading } = useQuery({
         queryKey: ["membershipStatus"],
-        queryFn: getMembershipStatus,
+        queryFn: () => getMembershipStatus(),
         staleTime: 1000 * 60 * 15, // Membership rarely updates
         refetchOnWindowFocus: false,
     });

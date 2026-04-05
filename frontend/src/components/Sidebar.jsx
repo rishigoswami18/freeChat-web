@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   Smartphone,
   Sparkles,
+  Target,
   Users,
   Zap,
 } from "lucide-react";
@@ -39,21 +40,24 @@ import Logo from "./Logo";
 import ProfilePhotoViewer from "./ProfilePhotoViewer";
 
 const primaryNavItems = [
-  { to: "/", icon: Home, labelKey: "Home" },
-  { to: "/search", icon: Search, labelKey: "Search" },
-  { to: "/friends", icon: Compass, labelKey: "Explore" },
-  { to: "/communities", icon: Users, labelKey: "Communities" },
-  { to: "/reels", icon: Film, labelKey: "Reels" },
+  { to: "/", icon: Home, labelKey: "home" },
+  { to: "/search", icon: Search, labelKey: "search" },
+  { to: "/friends", icon: Compass, labelKey: "explore" },
+  { to: "/communities", icon: Users, labelKey: "communities" },
+  { to: "/reels", icon: Film, labelKey: "reels" },
   { to: "/inbox", icon: MessageSquare, labelKey: "inbox" },
+  { to: "/professional-hub", icon: Zap, labelKey: "desi_arena" },
   { to: "/notifications", icon: Heart, labelKey: "notifications" },
-  { to: "/games", icon: Gamepad2, labelKey: "Games" },
-  { to: "/gem-shop", icon: Crown, labelKey: "Premium" },
-  { to: "/prize-vault", icon: Gift, label: "Prize Vault" },
+  { to: "/games", icon: Gamepad2, labelKey: "games" },
+  { to: "/mini-games", icon: Sparkles, labelKey: "mini_games" },
+  { to: "/gem-shop", icon: Crown, labelKey: "premium" },
+  { to: "/prize-vault", icon: Gift, labelKey: "rewards" },
 ];
 
 const mobileNavItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/search", icon: Search, label: "Search" },
+  { to: "/mini-games", icon: Zap, label: "Play" },
   { to: "/reels", icon: Film, label: "Reels" },
 ];
 
@@ -66,7 +70,7 @@ const NavBadge = memo(({ count }) => {
   if (!count || count < 1) return null;
 
   return (
-    <span className="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full border border-slate-900 bg-orange-500 px-1 text-[10px] font-bold leading-none text-white">
+    <span className="absolute -right-1 -top-1 inline-flex min-w-[18px] items-center justify-center rounded-full border border-slate-900 bg-rose-500 px-1 text-[10px] font-bold leading-none text-white">
       {count > 9 ? "9+" : count}
     </span>
   );
@@ -76,7 +80,6 @@ NavBadge.displayName = "NavBadge";
 
 const triggerHaptic = () => {
   if (typeof window === "undefined") return;
-
   window.navigator?.vibrate?.(14);
   window.AndroidBridge?.vibrate?.(14);
 };
@@ -97,17 +100,14 @@ const Sidebar = memo(() => {
   const [viewingDP, setViewingDP] = useState(null);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
-
     const stored = window.localStorage.getItem("zyro-sidebar-collapsed");
     if (stored !== null) return stored === "true";
-
     return window.innerWidth < 1440;
   });
 
   useEffect(() => {
     const sidebarWidth = isCollapsed ? "92px" : "264px";
     const sidebarOffset = isCollapsed ? "116px" : "288px";
-
     document.documentElement.style.setProperty("--zyro-sidebar-width", sidebarWidth);
     document.documentElement.style.setProperty("--zyro-sidebar-offset", sidebarOffset);
     window.localStorage.setItem("zyro-sidebar-collapsed", String(isCollapsed));
@@ -115,15 +115,14 @@ const Sidebar = memo(() => {
 
   useEffect(() => {
     if (!authUser?._id) return;
-
-    const initialTitle = "Zyro | Professional Social Platform";
+    const initialTitle = "FreeChat — Connect, Create, Grow";
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         const hooks = [
-          "Zyro | Your feed is moving",
-          "Zyro | New creator updates waiting",
-          "Zyro | Claim your daily reward",
+          "FreeChat — Your feed is waiting",
+          "FreeChat — New updates from friends",
+          "FreeChat — Claim your daily reward",
         ];
         document.title = hooks[Math.floor(Math.random() * hooks.length)];
       } else {
@@ -133,14 +132,13 @@ const Sidebar = memo(() => {
 
     document.title = initialTitle;
     document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [authUser?._id]);
 
   const handleDownload = useCallback((event) => {
     event.preventDefault();
     triggerHaptic();
-    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "Zyro_app.apk");
+    downloadFile(`${APK_DOWNLOAD_URL}/latest`, "FreeChat_app.apk");
   }, []);
 
   const handleCreatePost = useCallback(() => {
@@ -195,31 +193,31 @@ const Sidebar = memo(() => {
     () =>
       primaryNavItems.map((item) => ({
         ...item,
-        id: `zyro-nav-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, "-")}`,
+        id: `nav-${item.labelKey?.toLowerCase() || item.label?.toLowerCase().replace(/\s+/g, "-")}`,
       })),
     []
   );
 
   const renderLabel = (item) => item.label || t(item.labelKey) || item.labelKey;
 
-  const actionButtonClass = (active = false, collapsed = false) =>
+  const navLinkClass = (active = false, collapsed = false) =>
     [
-      "group relative flex w-full items-center rounded-2xl border px-3 text-sm font-medium transition-colors",
+      "group relative flex w-full items-center rounded-2xl px-3 text-sm font-medium transition-all duration-200",
       "zyro-touch-target min-h-[48px]",
       collapsed ? "justify-center" : "gap-3",
       active
-        ? "border-orange-500/30 bg-orange-500/10 text-orange-300"
-        : "border-transparent text-slate-400 hover:border-slate-800 hover:bg-slate-900/80 hover:text-slate-100",
+        ? "text-white bg-white/[0.06]"
+        : "text-white/40 hover:bg-white/[0.03] hover:text-white/70",
     ].join(" ");
 
   return (
     <>
       <aside
-        className="zyro-shell-panel fixed inset-y-4 left-4 z-50 hidden md:flex flex-col rounded-[28px] px-3 py-4 text-slate-100"
+        className="nexus-surface fixed inset-y-3 left-3 z-50 hidden md:flex flex-col rounded-3xl px-3 py-5"
         style={{ width: "var(--zyro-sidebar-width)" }}
       >
-        <div className={`flex ${isCollapsed ? "flex-col items-center gap-3" : "items-center justify-between gap-3"} border-b border-slate-800 px-2 pb-4`}>
-          <div className={`${isCollapsed ? "" : "min-w-0 flex-1"}`}>
+        <div className={`flex ${isCollapsed ? "flex-col items-center gap-4" : "items-center justify-between gap-3"} border-b border-white/5 px-2 pb-5 mb-2`}>
+          <div className={`${isCollapsed ? "" : "min-w-0 flex-1 ml-1"}`}>
             <Logo showText={!isCollapsed} fontSize="text-xl" />
           </div>
 
@@ -227,15 +225,15 @@ const Sidebar = memo(() => {
             type="button"
             {...buttonMotion}
             onClick={() => setIsCollapsed((current) => !current)}
-            className="zyro-touch-target inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/70 text-slate-300 hover:border-slate-700 hover:text-white"
+            className="zyro-touch-target inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-xl bg-white/[0.03] text-white/30 hover:bg-white/[0.06] hover:text-white/60 transition-all"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {isCollapsed ? <ChevronRight className="size-4" strokeWidth={2} /> : <ChevronLeft className="size-4" strokeWidth={2} />}
+            {isCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
           </motion.button>
         </div>
 
-        <nav className="custom-scrollbar flex-1 space-y-1 overflow-y-auto px-1 py-4">
-          <div className="space-y-1">
+        <nav className="custom-scrollbar flex-1 space-y-0.5 overflow-y-auto px-1 py-3">
+          <div className="space-y-0.5">
             {desktopNavItems.map((item) => {
               const Icon = item.icon;
               const active = isActivePath(location.pathname, item.to);
@@ -243,16 +241,16 @@ const Sidebar = memo(() => {
 
               return (
                 <motion.div key={item.to} {...buttonMotion}>
-                  <Link id={item.id} to={item.to} className={actionButtonClass(active, isCollapsed)} title={label}>
-                    {active ? (
+                  <Link id={item.id} to={item.to} className={navLinkClass(active, isCollapsed)} title={label}>
+                    {active && (
                       <motion.span
-                        layoutId="zyro-sidebar-active-pill"
-                        className="absolute left-1 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-orange-500"
+                        layoutId="sidebar-active-pill"
+                        className="absolute left-1 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-indigo-500"
                       />
-                    ) : null}
+                    )}
 
-                    <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
-                      <Icon className="size-[18px]" strokeWidth={2} />
+                    <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors">
+                      <Icon className={`size-[19px] transition-all duration-300 ${active ? 'text-indigo-400' : ''}`} strokeWidth={active ? 2.2 : 1.8} />
                       {item.to === "/inbox" ? <NavBadge count={unreadMessages} /> : null}
                       {item.to === "/notifications" ? <NavBadge count={notificationCount} /> : null}
                     </div>
@@ -280,15 +278,17 @@ const Sidebar = memo(() => {
               type="button"
               {...buttonMotion}
               onClick={handleCreatePost}
-              className={`${actionButtonClass(false, isCollapsed)} border-orange-500/35 bg-orange-500 text-white hover:bg-orange-600`}
+              className="w-full h-[52px] rounded-2xl bg-indigo-500 hover:bg-indigo-400 text-white flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98]"
             >
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
-                <PlusCircle className="size-[18px]" strokeWidth={2} />
-              </div>
-
+              <PlusCircle className="size-[20px]" />
               <AnimatePresence initial={false}>
                 {!isCollapsed ? (
-                  <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
+                  <motion.span 
+                    initial={{ opacity: 0, x: -6 }} 
+                    animate={{ opacity: 1, x: 0 }} 
+                    exit={{ opacity: 0, x: -6 }}
+                    className="font-semibold text-sm"
+                  >
                     Create Post
                   </motion.span>
                 ) : null}
@@ -297,16 +297,16 @@ const Sidebar = memo(() => {
           </div>
         </nav>
 
-        <div className="space-y-2 border-t border-slate-800 px-1 pt-4">
+        <div className="space-y-1 border-t border-white/5 px-1 pt-3">
           {authUser ? (
             <motion.button
               type="button"
               {...buttonMotion}
               onClick={claimReward}
-              className={actionButtonClass(false, isCollapsed)}
+              className={navLinkClass(false, isCollapsed)}
             >
-              <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-300">
-                <Gem className="size-[18px]" strokeWidth={2} />
+              <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+                <Gem className="size-[17px]" />
               </div>
               <AnimatePresence initial={false}>
                 {!isCollapsed ? (
@@ -325,11 +325,11 @@ const Sidebar = memo(() => {
               triggerHaptic();
               setIsFocusModalOpen(true);
             }}
-            className={actionButtonClass(false, isCollapsed)}
+            className={navLinkClass(false, isCollapsed)}
             title="Focus Mode"
           >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
-              <Zap className="size-[18px]" strokeWidth={2} />
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+              <Zap className="size-[17px]" />
             </div>
             <AnimatePresence initial={false}>
               {!isCollapsed ? (
@@ -344,16 +344,16 @@ const Sidebar = memo(() => {
             href={`${APK_DOWNLOAD_URL}/latest`}
             {...buttonMotion}
             onClick={handleDownload}
-            className={actionButtonClass(false, isCollapsed)}
+            className={navLinkClass(false, isCollapsed)}
             title="Download App"
           >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
-              <Smartphone className="size-[18px]" strokeWidth={2} />
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+              <Smartphone className="size-[17px]" />
             </div>
             <AnimatePresence initial={false}>
               {!isCollapsed ? (
                 <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }}>
-                  Download App
+                  Get the App
                 </motion.span>
               ) : null}
             </AnimatePresence>
@@ -364,10 +364,10 @@ const Sidebar = memo(() => {
               type="button"
               {...buttonMotion}
               tabIndex={0}
-              className={actionButtonClass(false, isCollapsed)}
+              className={navLinkClass(false, isCollapsed)}
             >
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
-                <Menu className="size-[18px]" strokeWidth={2} />
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.04]">
+                <Menu className="size-[17px]" />
               </div>
               <AnimatePresence initial={false}>
                 {!isCollapsed ? (
@@ -378,39 +378,39 @@ const Sidebar = memo(() => {
               </AnimatePresence>
             </motion.button>
 
-            <ul className="dropdown-content zyro-shell-panel z-[70] mb-3 w-64 space-y-1 rounded-[24px] p-2 text-sm">
-              <li className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Creator Ops</li>
+            <ul className="dropdown-content z-[70] mb-3 w-60 space-y-0.5 rounded-2xl p-2 text-sm bg-[#0c1020]/95 backdrop-blur-xl border border-white/5 shadow-2xl">
+              <li className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-white/30">Professional Tools</li>
 
               <li>
-                <Link to="/creator-center" className="flex min-h-[44px] items-center gap-3 rounded-2xl px-3 py-2 text-slate-200 transition-colors hover:bg-slate-900/80 hover:text-white">
-                  <DollarSign className="size-4 text-orange-400" strokeWidth={2} />
-                  Creator Monetization
+                <Link to="/creator-center" className="flex min-h-[42px] items-center gap-3 rounded-xl px-3 py-2 text-white/60 transition-colors hover:bg-white/[0.04] hover:text-white">
+                  <DollarSign className="size-4 text-emerald-400" />
+                  Monetization
                 </Link>
               </li>
 
               <li>
-                <Link to="/antigravity-engine" className="flex min-h-[44px] items-center gap-3 rounded-2xl px-3 py-2 text-slate-200 transition-colors hover:bg-slate-900/80 hover:text-white">
-                  <Globe className="size-4 text-orange-400" strokeWidth={2} />
-                  Antigravity Engine
+                <Link to="/business-insights" className="flex min-h-[42px] items-center gap-3 rounded-xl px-3 py-2 text-white/60 transition-colors hover:bg-white/[0.04] hover:text-white">
+                  <Globe className="size-4 text-indigo-400" />
+                  Business Insights
                 </Link>
               </li>
 
               {authUser?.role === "admin" ? (
                 <li>
-                  <Link to="/admin" className="flex min-h-[44px] items-center gap-3 rounded-2xl px-3 py-2 text-slate-200 transition-colors hover:bg-slate-900/80 hover:text-white">
-                    <ShieldAlert className="size-4 text-orange-400" strokeWidth={2} />
+                  <Link to="/admin" className="flex min-h-[42px] items-center gap-3 rounded-xl px-3 py-2 text-white/60 transition-colors hover:bg-white/[0.04] hover:text-white">
+                    <ShieldAlert className="size-4 text-amber-400" />
                     Admin Console
                   </Link>
                 </li>
               ) : null}
 
-              <li>
+              <li className="pt-1 border-t border-white/5">
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex min-h-[44px] w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200"
+                  className="flex min-h-[42px] w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-rose-400 transition-colors hover:bg-rose-500/10"
                 >
-                  <PanelTopOpen className="size-4" strokeWidth={2} />
+                  <PanelTopOpen className="size-4" />
                   Logout
                 </button>
               </li>
@@ -420,27 +420,27 @@ const Sidebar = memo(() => {
           <motion.div {...buttonMotion}>
             <Link
               to="/profile"
-              className={`${actionButtonClass(isActivePath(location.pathname, "/profile"), isCollapsed)} overflow-hidden`}
+              className={`${navLinkClass(isActivePath(location.pathname, "/profile"), isCollapsed)} overflow-hidden`}
               title="Profile"
             >
-              {isActivePath(location.pathname, "/profile") ? (
+              {isActivePath(location.pathname, "/profile") && (
                 <motion.span
-                  layoutId="zyro-sidebar-active-pill"
-                  className="absolute left-1 top-1/2 h-7 w-1 -translate-y-1/2 rounded-full bg-orange-500"
+                  layoutId="sidebar-active-pill"
+                  className="absolute left-1 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-indigo-500"
                 />
-              ) : null}
+              )}
 
-              <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-900/80">
+              <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl">
                 <img
                   src={authUser?.profilePic || "/avatar.png"}
                   alt="Profile"
-                  className="size-8 rounded-full object-cover"
+                  className="size-8 rounded-full object-cover ring-1 ring-white/10"
                   loading="lazy"
                   decoding="async"
                 />
                 {authUser?.isVerified || authUser?.role === "admin" ? (
-                  <div className="absolute -bottom-1 -right-1 rounded-full bg-slate-950 p-[2px]">
-                    <BadgeCheck className="size-3.5 fill-sky-500 text-white" strokeWidth={2} />
+                  <div className="absolute -bottom-0.5 -right-0.5 rounded-full bg-[#020617] p-[2px]">
+                    <BadgeCheck className="size-3 fill-sky-400 text-white" />
                   </div>
                 ) : null}
               </div>
@@ -453,8 +453,8 @@ const Sidebar = memo(() => {
                     exit={{ opacity: 0, x: -6 }}
                     className="min-w-0"
                   >
-                    <p className="truncate text-sm font-medium text-slate-100">{authUser?.fullName || "Profile"}</p>
-                    <p className="truncate text-xs text-slate-500">@{authUser?.username || "zyro-user"}</p>
+                    <p className="truncate text-sm font-medium text-white/80">{authUser?.fullName || "Profile"}</p>
+                    <p className="truncate text-[11px] text-white/30">@{authUser?.username || "user"}</p>
                   </motion.div>
                 ) : null}
               </AnimatePresence>
@@ -466,7 +466,7 @@ const Sidebar = memo(() => {
       <motion.nav
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="zyro-shell-panel fixed inset-x-3 bottom-3 z-[100] flex items-center justify-between rounded-[24px] px-2 py-2 md:hidden"
+        className="fixed inset-x-3 bottom-3 z-[100] flex items-center justify-between rounded-2xl px-2 py-2 md:hidden bg-[#0c1020]/90 backdrop-blur-xl border border-white/5 shadow-2xl"
       >
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
@@ -477,12 +477,12 @@ const Sidebar = memo(() => {
               <Link
                 to={item.to}
                 onClick={triggerHaptic}
-                className={`relative flex min-h-[48px] flex-col items-center justify-center rounded-2xl px-3 py-2 text-[11px] font-medium ${
-                  active ? "bg-orange-500/10 text-orange-300" : "text-slate-400"
+                className={`relative flex min-h-[48px] flex-col items-center justify-center rounded-xl px-3 py-2 text-[10px] font-medium ${
+                  active ? "text-indigo-400" : "text-white/40"
                 }`}
               >
-                {active ? <span className="absolute left-1/2 top-1 h-1 w-7 -translate-x-1/2 rounded-full bg-orange-500" /> : null}
-                <Icon className="size-[18px]" strokeWidth={2} />
+                {active && <span className="absolute left-1/2 top-1 h-0.5 w-6 -translate-x-1/2 rounded-full bg-indigo-500" />}
+                <Icon className="size-[18px]" strokeWidth={active ? 2.2 : 1.8} />
                 <span className="mt-1">{item.label}</span>
                 {item.to === "/inbox" ? <NavBadge count={unreadMessages} /> : null}
               </Link>
@@ -494,9 +494,9 @@ const Sidebar = memo(() => {
           <button
             type="button"
             onClick={handleCreatePost}
-            className="mx-auto flex min-h-[52px] min-w-[52px] items-center justify-center rounded-2xl bg-orange-500 text-white zyro-soft-shadow"
+            className="mx-auto flex min-h-[48px] min-w-[48px] items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/25"
           >
-            <PlusCircle className="size-[20px]" strokeWidth={2} />
+            <PlusCircle className="size-[20px]" />
           </button>
         </motion.div>
 
@@ -504,13 +504,13 @@ const Sidebar = memo(() => {
           <Link
             to="/profile"
             onClick={triggerHaptic}
-            className={`relative flex min-h-[48px] flex-col items-center justify-center rounded-2xl px-3 py-2 text-[11px] font-medium ${
-              isActivePath(location.pathname, "/profile") ? "bg-orange-500/10 text-orange-300" : "text-slate-400"
+            className={`relative flex min-h-[48px] flex-col items-center justify-center rounded-xl px-3 py-2 text-[10px] font-medium ${
+              isActivePath(location.pathname, "/profile") ? "text-indigo-400" : "text-white/40"
             }`}
           >
-            {isActivePath(location.pathname, "/profile") ? (
-              <span className="absolute left-1/2 top-1 h-1 w-7 -translate-x-1/2 rounded-full bg-orange-500" />
-            ) : null}
+            {isActivePath(location.pathname, "/profile") && (
+              <span className="absolute left-1/2 top-1 h-0.5 w-6 -translate-x-1/2 rounded-full bg-indigo-500" />
+            )}
             <img src={authUser?.profilePic || "/avatar.png"} alt="Profile" className="size-5 rounded-full object-cover" />
             <span className="mt-1">Profile</span>
           </Link>
@@ -537,7 +537,7 @@ const Sidebar = memo(() => {
               <button
                 type="button"
                 onClick={() => setIsFocusModalOpen(false)}
-                className="absolute -top-12 right-0 inline-flex min-h-[44px] items-center rounded-full border border-slate-700 bg-slate-950/90 px-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200"
+                className="absolute -top-12 right-0 inline-flex min-h-[40px] items-center rounded-full bg-white/10 backdrop-blur-xl px-4 text-xs font-medium text-white/60 hover:text-white transition-colors"
               >
                 Close
               </button>

@@ -5,17 +5,17 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: #F97316;
-  --zyro-bg: #0B0E14;
-  --zyro-surface: #111827;
-  --zyro-surface-soft: #1E293B;
-  --zyro-primary: #F97316;
-  --zyro-primary-soft: rgba(249, 115, 22, 0.14);
-  --zyro-border: rgba(51, 65, 85, 0.9);
-  --zyro-text: #E2E8F0;
-  --zyro-text-muted: #94A3B8;
-  --zyro-sidebar-width: 92px;
-  --zyro-sidebar-offset: 116px;
+  --primary-color: oklch(var(--p));
+  --fc-bg: oklch(var(--b1));
+  --fc-surface: oklch(var(--b2));
+  --fc-surface-soft: oklch(var(--b3));
+  --fc-primary: oklch(var(--p));
+  --fc-primary-soft: oklch(var(--p) / 0.14);
+  --fc-border: oklch(var(--bc) / 0.05);
+  --fc-text: oklch(var(--bc));
+  --fc-text-muted: oklch(var(--bc) / 0.6);
+  --fc-sidebar-width: 280px;
+  --fc-sidebar-offset: 304px;
   font-size: 16px;
 }
 
@@ -27,7 +27,7 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   line-height: 1.5;
-  background-color: var(--zyro-bg);
+  background-color: var(--fc-bg);
 }
 
 body {
@@ -37,8 +37,8 @@ body {
   padding: 0;
   overflow-y: auto;
   overflow-x: clip;
-  background-color: var(--zyro-bg);
-  color: var(--zyro-text);
+  background-color: var(--fc-bg);
+  color: var(--fc-text);
   font-family: 'Geist', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1rem;
   line-height: 1.5;
@@ -73,8 +73,8 @@ h6 {
 }
 
 ::selection {
-  background: rgba(249, 115, 22, 0.24);
-  color: #fff7ed;
+  background: rgba(99, 102, 241, 0.24);
+  color: #eef2ff;
 }
 
 /* ===== Premium Thin Scrollbar ===== */
@@ -100,54 +100,52 @@ h6 {
 
 /* ===== Focus-Visible Accessibility Ring ===== */
 :focus-visible {
-  outline: 2px solid rgba(249, 115, 22, 0.45);
+  outline: 2px solid rgba(99, 102, 241, 0.45);
   outline-offset: 2px;
   border-radius: 12px;
 }
 
-.zyro-shell-bg {
+.fc-shell-bg {
   background:
-    radial-gradient(circle at top, rgba(249, 115, 22, 0.08), transparent 26%),
-    linear-gradient(180deg, #0b0e14 0%, #0f172a 100%);
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 40%),
+    radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.05), transparent 40%),
+    #020617;
 }
 
-.zyro-shell-panel {
-  background: rgba(11, 14, 20, 0.9);
-  border: 1px solid var(--zyro-border);
-  box-shadow: 0 22px 70px rgba(2, 6, 23, 0.4);
+.fc-pro-glass {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-.zyro-glass-card {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.74) 0%, rgba(11, 14, 20, 0.84) 100%);
-  border: 1px solid rgba(51, 65, 85, 0.9);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 16px 45px rgba(2, 6, 23, 0.22);
+.fc-business-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #10b981 100%);
 }
 
-.zyro-soft-shadow {
-  box-shadow: 0 16px 45px rgba(2, 6, 23, 0.22);
+.fc-trust-glow {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
 }
 
-.zyro-touch-target {
+.fc-touch-target {
   min-height: 44px;
 }
 
-.zyro-shimmer {
+.fc-shimmer {
   position: relative;
   overflow: hidden;
 }
 
-.zyro-shimmer::after {
+.fc-shimmer::after {
   content: '';
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.12), transparent);
-  animation: zyro-shimmer 1.6s ease-in-out infinite;
+  animation: fc-shimmer 1.6s ease-in-out infinite;
 }
 
-@keyframes zyro-shimmer {
+@keyframes fc-shimmer {
   100% {
     transform: translateX(100%);
   }
@@ -1841,3 +1839,63 @@ a[href*="getstream.com"] {
 }
 
 
+
+/* ===== Noise Utility for Premium Aesthetics ===== */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  filter: contrast(120%) brightness(1000%);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: -1;
+}
+
+/* ===== Nexus Design System Utilities ===== */
+.nexus-surface {
+  background-color: oklch(var(--b1) / 0.8);
+  backdrop-filter: blur(24px);
+  border: 1px solid oklch(var(--bc) / 0.05);
+}
+
+.nexus-card {
+  background-color: oklch(var(--b2) / 0.4);
+  border: 1px solid oklch(var(--bc) / 0.08);
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nexus-card:hover {
+  background-color: oklch(var(--b2) / 0.6);
+  border-color: oklch(var(--p) / 0.3);
+  transform: translateY(-2px);
+}
+
+.nexus-button-primary {
+  background-color: oklch(var(--p));
+  color: oklch(var(--pc));
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+}
+
+.nexus-button-primary:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+.nexus-input {
+  background-color: oklch(var(--bc) / 0.03);
+  border: 1px solid oklch(var(--bc) / 0.1);
+  border-radius: 1rem;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.nexus-input:focus {
+  border-color: oklch(var(--p) / 0.5);
+  background-color: oklch(var(--b1));
+  outline: none;
+}

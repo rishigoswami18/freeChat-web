@@ -81,7 +81,11 @@ router.post("/", async (req, res) => {
       songId: songId || null,
       songName: songName || "Original Audio",
       audioUrl: audioUrl || "",
+      // FreeChat: Support paid content
+      isPaid: req.body.isPaid === true,
+      price: parseInt(req.body.price) || 0
     });
+
 
     // Track usage if a formal song was used
     if (songId) {
@@ -159,15 +163,29 @@ router.get("/", async (req, res) => {
       lastId
     });
 
-    // Ensure userId is present for every post (redundant check but safe for the UI)
+    // 🛡️ THE GATE: Mask paid content for non-paying users
     if (result.posts) {
-        result.posts = result.posts.map(p => ({
-            ...p,
-            userId: p.userId || p._id // Fallback to _id if userId is missing for some reason
-        }));
+        result.posts = result.posts.map(p => {
+            const isOwner = (p.userId || p._id)?.toString() === req.user._id.toString();
+            // Note: Since we use FeedService, ensure unlockedBy is selected in the service or select it here
+            const isUnlocked = p.unlockedBy?.some(id => id.toString() === req.user._id.toString());
+            
+            if (p.isPaid && !isOwner && !isUnlocked) {
+                return {
+                    ...p,
+                    userId: p.userId || p._id,
+                    mediaUrl: "LOCKED", 
+                    content: "Unlock to see this exclusive post! 💎",
+                    isLocked: true 
+                };
+            }
+            return { ...p, userId: p.userId || p._id, isLocked: false };
+        });
     }
 
     res.json(result);
+
+
   } catch (err) {
     console.error("🌊 Feed: Route Error:", err.message);
     res.status(500).json({ message: "Feed temporarily unavailable" });
@@ -327,7 +345,11 @@ router.get("/user/:userId", async (req, res) => {
           role: 1,
           isVerified: 1,
           fullName: 1,
-          profilePic: 1
+          profilePic: { $ifNull: ["$authorInfo.profilePic", "$profilePic"] },
+          // FreeChat fields
+          isPaid: 1,
+          price: 1,
+          unlockedBy: 1
         } 
       }
     ]);
@@ -336,7 +358,25 @@ router.get("/user/:userId", async (req, res) => {
     const paginatedPosts = hasMore ? posts.slice(0, limitNum) : posts;
     const nextCursor = hasMore ? paginatedPosts[paginatedPosts.length - 1]._id : null;
 
-    res.json({ posts: paginatedPosts, nextCursor, hasMore });
+    // 🛡️ THE GATE: Mask paid content in Profile
+    const transformedPosts = paginatedPosts.map(p => {
+        const isOwner = p.userId?.toString() === req.user._id.toString();
+        const isUnlocked = p.unlockedBy?.some(id => id.toString() === req.user._id.toString());
+        
+        if (p.isPaid && !isOwner && !isUnlocked) {
+            return {
+                ...p,
+                mediaUrl: "LOCKED",
+                content: "Unlock to see this exclusive post! 💎",
+                isLocked: true
+            };
+        }
+        return { ...p, isLocked: false };
+    });
+
+    res.json({ posts: transformedPosts, nextCursor, hasMore });
+
+
   } catch (err) {
     console.error("❌ Post Fetch Error:", err.message);
     try {
@@ -357,8 +397,9 @@ router.delete("/:id", async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // Check ownership
-    if (post.userId.toString() !== req.user._id.toString()) {
+    // Check ownership or Admin permission
+    const isAdmin = req.user.role === "admin";
+    if (post.userId.toString() !== req.user._id.toString() && !isAdmin) {
       return res.status(401).json({ message: "Unauthorized to delete this post" });
     }
 
@@ -378,6 +419,74 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Post deleted successfully" });
   } catch (err) {
     console.error("Error deleting post:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// 💎 Unlock paid post
+router.post("/:id/unlock", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post.isPaid) return res.status(400).json({ message: "Post is already free" });
+
+    const userId = req.user._id;
+    if (post.userId.toString() === userId.toString()) {
+      return res.status(400).json({ message: "You already own this post" });
+    }
+
+    if (post.unlockedBy.includes(userId)) {
+      return res.status(400).json({ message: "Post already unlocked" });
+    }
+
+    // 📜 Log Transaction (Audit-ready)
+    const { default: TransactionHistory } = await import("../models/TransactionHistory.js");
+    await TransactionHistory.create({
+      userId,
+      recipientId: post.creator,
+      amount: -post.price,
+      type: "POST_UNLOCK",
+      description: `Unlocked premium post ${post._id} by creator ${post.creator}`,
+      status: "completed"
+    });
+
+    // Atomic Balance Check & Deduction
+    const { default: UserWallet } = await import("../models/UserWallet.js");
+    const wallet = await UserWallet.findOneAndUpdate(
+      { userId, bonusBalance: { $gte: post.price } },
+      { $inc: { bonusBalance: -post.price } },
+      { new: true }
+    );
+
+    if (!wallet) return res.status(400).json({ message: "Insufficient coins to unlock" });
+
+    // Update Post access
+    post.unlockedBy.push(userId);
+    await post.save();
+
+    // Reward the creator (70% split)
+    const earnings = Math.floor(post.price * 0.7);
+    await UserWallet.findOneAndUpdate(
+      { userId: post.userId },
+      { $inc: { winnings: earnings } },
+      { upsert: true }
+    );
+
+
+    // 🚀 Notify the Creator
+    const { createNotification } = await import("../services/notification.service.js");
+    await createNotification({
+        recipient: post.userId,
+        sender: userId,
+        type: "POST_UNLOCK",
+        relatedId: post._id,
+        content: `${req.user.fullName} unlocked your premium post 💰`
+    });
+
+    res.json({ success: true, message: "Post unlocked!", mediaUrl: post.mediaUrl });
+
+  } catch (err) {
+    console.error("Unlock error:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

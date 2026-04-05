@@ -9,6 +9,38 @@ const WithdrawalRequestSchema = new mongoose.Schema({
         enum: ["pending", "approved", "rejected", "completed"], 
         default: "pending" 
     },
+    reviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    riskScore: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100
+    },
+    paymentRail: {
+        type: String,
+        enum: ["upi", "bank", "wallet", ""],
+        default: "upi"
+    },
+    payoutProviderRef: {
+        type: String,
+        default: ""
+    },
+    ledgerEntryId: {
+        type: String,
+        default: ""
+    },
+    rejectionCode: {
+        type: String,
+        default: ""
+    },
+    reviewTimeline: {
+        type: [mongoose.Schema.Types.Mixed],
+        default: []
+    },
     adminNotes: { type: String },
     ipAddress: { type: String },
     deviceFingerprint: { type: String },

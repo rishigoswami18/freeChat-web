@@ -40,7 +40,7 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
   }
 
   return (
-    <div className="flex-shrink-0 z-50 bg-base-100 pb-safe">
+    <div className="flex-shrink-0 z-50 bg-[#020617] pb-safe">
       <div className="flex flex-col gap-2 p-2 sm:p-4 max-w-4xl mx-auto w-full">
         {showShoutSlider && (
           <div className="flex items-center gap-4 bg-base-200/90 backdrop-blur-md px-4 py-3 rounded-2xl shadow-lg mb-1 border border-base-content/10 transition-all animate-in fade-in slide-in-from-bottom-2">
@@ -59,16 +59,16 @@ const ChatInputArea = memo(({ targetUserId, fontSize, setFontSize, showShoutSlid
           {/* Instagram-style outside camera button */}
           <button 
             onClick={handleSnapClick} 
-            className="p-[10px] mb-0.5 bg-info text-info-content rounded-full hover:bg-info/90 transition-all active:scale-95 shrink-0 shadow-sm group-has-[textarea:not(:placeholder-shown)]/input:hidden" 
+            className="p-3 mb-0.5 bg-primary text-white rounded-2xl hover:scale-105 transition-all active:scale-95 shrink-0 shadow-lg shadow-primary/20 group-has-[textarea:not(:placeholder-shown)]/input:hidden" 
             title="Camera"
           >
-            <Camera className="size-[22px]" strokeWidth={2.5} />
+            <Camera className="size-[20px]" strokeWidth={2.5} />
           </button>
           
           {/* Main Input Pill */}
-          <div className="flex-1 flex items-end bg-base-200 border border-base-content/5 rounded-3xl min-h-[44px] transition-all has-[:focus]:bg-base-100 has-[:focus]:border-base-content/20 shadow-sm px-1 py-1">
+          <div className="flex-1 flex items-end bg-white/5 border border-white/5 rounded-[28px] min-h-[52px] transition-all has-[:focus]:bg-white/[0.08] has-[:focus]:border-primary/40 shadow-sm px-2 py-1.5 backdrop-blur-3xl">
             
-            <div className="flex-1 min-w-0 pl-3 py-1 flex items-center w-full max-w-full overflow-hidden">
+            <div className="flex-1 min-w-0 pl-3 py-1 flex items-center w-full max-w-full overflow-hidden text-white">
                <MessageInput 
                  focus 
                  grow 
@@ -120,10 +120,10 @@ const AiThinkingIndicator = memo(({ targetUserId, authUser }) => {
       <div className="size-8 rounded-full overflow-hidden shrink-0">
         <img src={avatarSrc} alt="AI" className="size-full object-cover" />
       </div>
-      <div className="bg-base-200 px-4 py-3 rounded-[22px] rounded-tl-none flex items-center gap-1 border border-base-content/10">
-        <div className="size-1 bg-base-content/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
-        <div className="size-1 bg-base-content/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
-        <div className="size-1 bg-base-content/40 rounded-full animate-bounce" />
+      <div className="bg-white/5 px-5 py-3.5 rounded-[24px] rounded-tl-none flex items-center gap-1.5 border border-white/10 backdrop-blur-md">
+        <div className="size-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
+        <div className="size-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
+        <div className="size-1.5 bg-primary rounded-full animate-bounce" />
       </div>
     </div>
   );
@@ -426,18 +426,18 @@ const ChatPage = () => {
 
   return (
     <div
-      className="absolute inset-0 flex bg-base-100 text-base-content font-outfit overflow-hidden w-full lg:max-w-none sm:border-x border-base-content/10"
+      className="absolute inset-0 flex bg-[#020617] text-white font-outfit overflow-hidden w-full lg:max-w-none sm:border-x border-white/5"
       style={{
         height: `${viewportHeight}px`,
         top: window.visualViewport?.offsetTop || 0,
         contain: 'layout size style'
       }}
     >
-      <div className="hidden lg:block shrink-0 h-full border-r border-base-content/10 w-[350px]">
+      <div className="hidden lg:block shrink-0 h-full border-r border-white/5 w-[380px] bg-[#020617]/50">
          <InboxPage isSideNav={true} />
       </div>
 
-      <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-base-100">
+      <div className="flex-1 flex flex-col relative w-full h-full min-w-0 bg-[#020617]">
         {chatUI}
       </div>
     </div>

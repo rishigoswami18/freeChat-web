@@ -7,6 +7,7 @@ import { Camera, MapPin, Globe, User, Languages, Calendar, Save, Loader2, Shield
  */
 const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcut, isPending, onSubmit }) => {
     const [selectedImg, setSelectedImg] = useState(null);
+    const [selectedCover, setSelectedCover] = useState(null);
     const [formData, setFormData] = useState({
         fullName: "",
         bio: "",
@@ -42,13 +43,20 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // [OPTIMIZATION]: Prepared for direct Cloudinary/S3 upload flow.
-            // In a production direct-upload scenario:
-            // 1. Upload file directly to S3/Cloudinary using signed URL
-            // 2. Pass resulting URL down instead of base64
             const reader = new FileReader();
             reader.onloadend = () => {
                 setSelectedImg(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCoverChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedCover(reader.result);
             };
             reader.readAsDataURL(file);
         }
@@ -66,6 +74,7 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
         e.preventDefault();
         const payload = { ...formData };
         if (selectedImg) payload.profilePic = selectedImg;
+        if (selectedCover) payload.coverPhoto = selectedCover;
 
         if (isPremium) {
             payload.isStealthMode = isStealthMode;
@@ -77,29 +86,52 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
 
     return (
         <form onSubmit={handleFormSubmit} className="space-y-6">
-            <div className="flex flex-col items-center gap-4 mb-8 profile-cover-gradient rounded-2xl py-10 px-4 relative">
-                <div className="relative group">
-                    <div className="avatar">
-                        <div
-                            className="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden bg-base-300 cursor-pointer active:scale-95 transition-transform relative"
-                            onClick={() => document.getElementById("profile-upload").click()}
-                        >
-                            <img
-                                src={selectedImg || authUser?.profilePic || "/avatar.png"}
-                                alt="Profile"
-                                className="object-cover w-full h-full"
-                            />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1">
-                                <Camera className="size-6" />
-                                <span>CHANGE</span>
+            <div className="relative mb-12">
+                {/* Cover Photo Upload */}
+                <div 
+                    className="h-44 sm:h-56 w-full rounded-[2.5rem] bg-base-300 relative overflow-hidden group cursor-pointer border border-base-content/5"
+                    onClick={() => document.getElementById("cover-upload").click()}
+                >
+                    <img 
+                        src={selectedCover || authUser?.coverPhoto || "/cover-placeholder.png"} 
+                        alt="Cover" 
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-2">
+                        <Camera size={24} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">Change Cover Photo</span>
+                    </div>
+                    <input
+                        id="cover-upload"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleCoverChange}
+                    />
+                </div>
+
+                {/* Profile Photo Upload - Overlaid */}
+                <div className="absolute left-8 -bottom-10 flex items-end gap-4">
+                    <div className="relative group">
+                        <div className="avatar">
+                            <div
+                                className="w-28 h-28 sm:w-36 sm:h-36 rounded-[2.5rem] ring-8 ring-[#020617] overflow-hidden bg-base-300 cursor-pointer active:scale-95 transition-transform relative"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    document.getElementById("profile-upload").click();
+                                }}
+                            >
+                                <img
+                                    src={selectedImg || authUser?.profilePic || "/avatar.png"}
+                                    alt="Profile"
+                                    className="object-cover w-full h-full"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-bold gap-1">
+                                    <Camera className="size-6" />
+                                    <span>CHANGE</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <label
-                        htmlFor="profile-upload"
-                        className="absolute bottom-1 right-1 bg-white text-black p-2 rounded-full cursor-pointer hover:scale-110 transition-transform shadow-xl border border-black/5 z-20"
-                    >
-                        <Camera className="size-5" />
                         <input
                             id="profile-upload"
                             type="file"
@@ -107,11 +139,8 @@ const EditProfileForm = memo(({ authUser, isPremium, isStealthMode, panicShortcu
                             accept="image/*"
                             onChange={handleImageChange}
                         />
-                    </label>
+                    </div>
                 </div>
-                <p className="text-xs font-bold opacity-60 uppercase tracking-widest bg-base-200 px-4 py-1.5 rounded-full border border-base-300">
-                    Tap Photo to Upload
-                </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

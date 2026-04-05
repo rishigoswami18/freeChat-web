@@ -138,7 +138,7 @@ const GemShopPage = () => {
                 key,
                 amount: order.amount,
                 currency: order.currency,
-                name: "Zyro Gems",
+                name: "FreeChat Coins",
                 description: `${pack.amount} Gems + ${pack.bonus} Bonus`,
                 order_id: order.id,
                 handler: async (response) => {
@@ -162,7 +162,7 @@ const GemShopPage = () => {
                     name: authUser?.fullName || "",
                     email: authUser?.email || "",
                 },
-                theme: { color: "#8b5cf6" },
+                theme: { color: "#6366f1" },
                 modal: {
                     ondismiss: () => {
                         setPurchasing(null);
@@ -218,13 +218,12 @@ const GemShopPage = () => {
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wOCkiLz48L2c+PC9zdmc+')] opacity-50" />
 
                 <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
-                    <div className="text-center sm:text-left space-y-3">
-                        <h1 className="text-3xl sm:text-4xl font-black tracking-tight flex items-center gap-3 justify-center sm:justify-start">
-                            <Gem className="size-9 drop-shadow-lg" />
-                            Gem Shop
+                    <div className="text-center sm:text-left space-y-4">
+                        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+                            FreeChat Store
                         </h1>
-                        <p className="text-sm sm:text-base font-medium text-white/70 max-w-md">
-                            Buy gems to unlock premium features, send gifts, and stand out from the crowd.
+                        <p className="text-sm sm:text-base font-medium text-white/70 max-w-md leading-relaxed">
+                            Upgrade your experience with FreeChat coins. Send gifts to friends, verify your profile, and stand out in the community.
                         </p>
                     </div>
 
@@ -257,10 +256,10 @@ const GemShopPage = () => {
 
             {/* Gem Packs */}
             <div>
-                <h2 className="text-xl sm:text-2xl font-black mb-6 flex items-center gap-3 tracking-tight uppercase italic">
-                    <Gem className="text-primary size-6" />
-                    Buy Gems
-                </h2>
+                <div className="flex items-center gap-3 mb-8">
+                    <Gem className="text-indigo-500 size-6" />
+                    <h2 className="text-2xl font-bold tracking-tight">Get Coins</h2>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
                     {gemPacks.map((pack, idx) => (
                         <motion.div
@@ -312,10 +311,10 @@ const GemShopPage = () => {
 
             {/* Spend Gems */}
             <div>
-                <h2 className="text-xl sm:text-2xl font-black mb-6 flex items-center gap-3 tracking-tight uppercase italic">
-                    <ShieldCheck className="text-primary size-6" />
-                    Spend Gems
-                </h2>
+                <div className="flex items-center gap-3 mb-8">
+                    <ShieldCheck className="text-indigo-500 size-6" />
+                    <h2 className="text-2xl font-bold tracking-tight">Unlock Features</h2>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
                     {shopItems.map((item, idx) => {
                         const canAfford = currentGems >= item.cost;

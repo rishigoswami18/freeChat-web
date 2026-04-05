@@ -79,7 +79,11 @@ export const FeedService = {
                     comments: 1,
                     createdAt: 1,
                     isFriend: 1,
-                    engagementScore: 1
+                    engagementScore: 1,
+                    // FreeChat: Add paid content fields
+                    isPaid: 1,
+                    price: 1,
+                    unlockedBy: 1
                 }
             }
         ];

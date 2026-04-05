@@ -193,6 +193,26 @@ export const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "Content is required" });
     }
 
+    // --- 🛡️ THE GATE: Paid Chat Check (Human-to-Human) ---
+    const User = (await import("../models/User.js")).default;
+    if (recipientId && !recipientId.includes("ai-")) {
+      const recipient = await User.findById(recipientId).select("chatPrice");
+      if (recipient && recipient.chatPrice > 0) {
+        // Is it unlocked?
+        const isUnlocked = req.user.unlockedChats?.some(id => id.toString() === recipientId);
+        const isOwner = req.user._id.toString() === recipientId;
+        
+        if (!isUnlocked && !isOwner) {
+          return res.status(402).json({ 
+            message: "Chat Locked! Buy a message pack or unlock this creator. 💎", 
+            price: recipient.chatPrice,
+            isLocked: true 
+          });
+        }
+      }
+    }
+
+
     let mediaParts = [];
 
     // Process attachments
