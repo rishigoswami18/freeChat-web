@@ -71,16 +71,25 @@ const globalLimiter = rateLimit({
 });
 app.use("/api/", globalLimiter);
 
+const allowedOrigins = [
+    "http://localhost:5173", 
+    "http://localhost:5174", 
+    "http://127.0.0.1:5173", 
+    "http://127.0.0.1:5174", 
+    "https://www.freechatweb.in", 
+    "https://freechatweb.in"
+];
+
 app.use(
     cors({
-        origin: [
-            "http://localhost:5173", 
-            "http://localhost:5174", 
-            "http://127.0.0.1:5173", 
-            "http://127.0.0.1:5174", 
-            "https://www.freechatweb.in", 
-            "https://freechatweb.in"
-        ],
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl)
+            if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
         credentials: true,
     })
 );
@@ -123,6 +132,18 @@ app.use("/api/wallet", walletRoutes);
 
 import minigameRoutes from "./routes/minigame.route.js";
 app.use("/api/minigame", minigameRoutes);
+
+/**
+ * API ROUTE CATCH-ALL (JSON 404)
+ * Ensures that undefined /api/* routes return JSON, not HTML.
+ * This prevents Android app crashes when hitting an invalid endpoint.
+ */
+app.use("/api/*", (req, res) => {
+    res.status(404).json({ 
+        success: false, 
+        message: `API Route ${req.originalUrl} not found. Ensure the endpoint is correct and uses the correct HTTP method.` 
+    });
+});
 
 /**
  * FRONTEND HOSTING (Production)

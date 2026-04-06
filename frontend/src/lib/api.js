@@ -243,7 +243,7 @@ export const getPostLikes = async (postId) => {
     return response.data;
 };
 export const getVideoPosts = async (params) => {
-    const response = await axiosInstance.get("/posts/reels", { params });
+    const response = await axiosInstance.get("/posts/videos", { params });
     return response.data;
 };
 export const getSongs = async () => {

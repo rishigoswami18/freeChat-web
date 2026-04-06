@@ -29,7 +29,7 @@ const ReelsPage = () => {
     } = useInfiniteQuery({
         // Stable key for specific feed type
         queryKey: ["reels", authUser?._id],
-        queryFn: ({ pageParam }) => getVideoPosts(pageParam, 10),
+        queryFn: ({ pageParam }) => getVideoPosts({ lastId: pageParam, limit: 10 }),
         initialPageParam: null,
         getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
         staleTime: 1000 * 60 * 5, // 5 min cache
